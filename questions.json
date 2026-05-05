@@ -1,0 +1,1242 @@
+{
+  "prophetes": {
+    "title": "Les Prophètes",
+    "icon": "🌙",
+    "color": "#c8a727",
+    "free": true,
+    "questions": [
+      {
+        "id": 1,
+        "level": "debutant",
+        "q": "Quel est le premier prophète envoyé par Allah ?",
+        "choices": ["Ibrahim (عليه السلام)", "Nuh (عليه السلام)", "Adam (عليه السلام)", "Idris (عليه السلام)"],
+        "correct": 2,
+        "explication": "Adam (عليه السلام) est le premier homme et le premier prophète. Allah lui a enseigné les noms de toutes choses (Coran 2:31)."
+      },
+      {
+        "id": 2,
+        "level": "debutant",
+        "q": "Combien de prophètes sont mentionnés nommément dans le Coran ?",
+        "choices": ["20", "25", "30", "35"],
+        "correct": 1,
+        "explication": "25 prophètes sont cités par leurs noms dans le Coran, de Adam à Muhammad ﷺ."
+      },
+      {
+        "id": 3,
+        "level": "debutant",
+        "q": "Quel prophète fut jeté dans le feu mais Allah ordonna au feu d'être « fraîcheur et paix » pour lui ?",
+        "choices": ["Moussa (عليه السلام)", "Issa (عليه السلام)", "Ibrahim (عليه السلام)", "Yusuf (عليه السلام)"],
+        "correct": 2,
+        "explication": "Ibrahim (عليه السلام) fut jeté dans le feu par le roi Nimrod. Allah dit : \"Ô feu, sois fraîcheur et paix pour Ibrahim\" (Coran 21:69)."
+      },
+      {
+        "id": 4,
+        "level": "debutant",
+        "q": "Dans quel pays Moussa (Moïse) est-il né ?",
+        "choices": ["Canaan", "Babylone", "Médine", "Égypte"],
+        "correct": 3,
+        "explication": "Moussa (عليه السلام) est né en Égypte, au temps du Pharaon qui avait ordonné de tuer les nouveau-nés mâles des Enfants d'Israël."
+      },
+      {
+        "id": 5,
+        "level": "debutant",
+        "q": "Quel prophète fut avalé par une grande baleine après avoir quitté son peuple sans permission divine ?",
+        "choices": ["Idris (عليه السلام)", "Ayyub (عليه السلام)", "Yunus (عليه السلام)", "Ilyas (عليه السلام)"],
+        "correct": 2,
+        "explication": "Yunus (Jonas) (عليه السلام) fut avalé par un grand poisson. Il supplia Allah depuis les ténèbres : \"Il n'y a de dieu que Toi, gloire à Toi\" (Coran 21:87)."
+      },
+      {
+        "id": 6,
+        "level": "avance",
+        "q": "Quel est le surnom (laqab) du prophète Ibrahim (عليه السلام) ?",
+        "choices": ["Kalimullah (Celui à qui Allah a parlé)", "Ruhullah (L'esprit d'Allah)", "Khalilullah (L'ami intime d'Allah)", "Safiyullah (L'élu d'Allah)"],
+        "correct": 2,
+        "explication": "Ibrahim est appelé Khalilullah (خليل الله), l'ami intime d'Allah, comme mentionné dans le Coran 4:125 et confirmé dans les hadiths authentiques."
+      },
+      {
+        "id": 7,
+        "level": "avance",
+        "q": "Combien d'années Nuh (Noé) a-t-il prêché à son peuple avant le déluge ?",
+        "choices": ["500 ans", "950 ans", "200 ans", "100 ans"],
+        "correct": 1,
+        "explication": "Le Coran précise que Nuh a passé 950 ans parmi son peuple à les appeler vers Allah avant que le déluge ne survienne (Coran 29:14)."
+      },
+      {
+        "id": 8,
+        "level": "amateur",
+        "q": "Quel prophète est le symbole de la patience pour avoir traversé une longue maladie sans se plaindre ?",
+        "choices": ["Yunus (عليه السلام)", "Zakaria (عليه السلام)", "Ayyub (عليه السلام)", "Suleiman (عليه السلام)"],
+        "correct": 2,
+        "explication": "Ayyub (Job) (عليه السلام) est le symbole de la patience. Il fut éprouvé longuement par la maladie et la perte de ses biens, mais resta reconnaissant envers Allah."
+      },
+      {
+        "id": 9,
+        "level": "amateur",
+        "q": "Quel prophète fut doté de la capacité de parler aux animaux et de commander les djinns ?",
+        "choices": ["Dawud (عليه السلام)", "Ibrahim (عليه السلام)", "Moussa (عليه السلام)", "Suleiman (عليه السلام)"],
+        "correct": 3,
+        "explication": "Suleiman (Salomon) (عليه السلام) reçut d'Allah le don de comprendre le langage des animaux et oiseaux, et les djinns et vents lui étaient soumis (Coran 27:16-17)."
+      },
+      {
+        "id": 10,
+        "level": "debutant",
+        "q": "Dans quelle ville le prophète Muhammad ﷺ est-il né ?",
+        "choices": ["Médine", "Taïf", "La Mecque", "Jérusalem"],
+        "correct": 2,
+        "explication": "Le Prophète Muhammad ﷺ est né à La Mecque, en l'an de l'Éléphant (570 apr. J.-C. selon l'opinion majoritaire des savants)."
+      },
+      {
+        "id": 11,
+        "level": "debutant",
+        "q": "Quel prophète est le père d'Ismaïl (Ismaël) et d'Ishaq (Isaac) ?",
+        "choices": ["Nuh (عليه السلام)", "Yaqub (عليه السلام)", "Ibrahim (عليه السلام)", "Idris (عليه السلام)"],
+        "correct": 2,
+        "explication": "Ibrahim (عليه السلام) est le père d'Ismaïl (avec Hajar) et d'Ishaq (avec Sara). Muhammad ﷺ est un descendant de la lignée d'Ismaïl."
+      },
+      {
+        "id": 12,
+        "level": "avance",
+        "q": "Quel prophète ne mourut pas mais fut élevé vivant vers Allah et reviendra à la fin des temps ?",
+        "choices": ["Ibrahim (عليه السلام)", "Khidr", "Issa (عليه السلام)", "Idris (عليه السلام)"],
+        "correct": 2,
+        "explication": "Selon l'islam, Issa (عليه السلام) n'a pas été crucifié mais fut élevé vers Allah (Coran 4:157-158). Il reviendra avant la fin des temps pour tuer le Dajjal."
+      },
+      {
+        "id": 13,
+        "level": "amateur",
+        "q": "Comment s'appelait la mère du prophète Muhammad ﷺ ?",
+        "choices": ["Khadija", "Fatima", "Amina", "Halima"],
+        "correct": 2,
+        "explication": "La mère du Prophète ﷺ était Amina bint Wahb. Elle décéda alors que Muhammad ﷺ avait environ 6 ans, lors d'un voyage de retour d'Yathrib."
+      },
+      {
+        "id": 14,
+        "level": "debutant",
+        "q": "Qui a construit (ou reconstruit) la Kaaba à La Mecque ?",
+        "choices": ["Nuh et Sem", "Adam et Hawa", "Ibrahim et Ismaïl", "Dawud et Suleiman"],
+        "correct": 2,
+        "explication": "Ibrahim et son fils Ismaïl (عليهما السلام) ont élevé les fondations de la Kaaba sur ordre d'Allah, comme mentionné dans le Coran (2:127)."
+      },
+      {
+        "id": 15,
+        "level": "amateur",
+        "q": "Quel surnom les Mecquois donnèrent-ils au Prophète Muhammad ﷺ avant la révélation ?",
+        "choices": ["As-Sadiq (Le Véridique)", "Al-Karim (Le Noble)", "Al-Amin (Le Digne de Confiance)", "Al-Hanif (Le Monothéiste)"],
+        "correct": 2,
+        "explication": "Avant la révélation, les habitants de La Mecque appelaient Muhammad ﷺ 'Al-Amin' (الأمين), le digne de confiance, en raison de son honnêteté et de son intégrité reconnues de tous."
+      },
+      {
+        "id": 16,
+        "level": "debutant",
+        "q": "Quel prophète est connu pour avoir construit une grande arche (bateau) par ordre d'Allah ?",
+        "choices": ["Ibrahim (عليه السلام)", "Nuh (عليه السلام)", "Moussa (عليه السلام)", "Dawud (عليه السلام)"],
+        "correct": 1,
+        "explication": "Nuh (Noé) (عليه السلام) construisit l'arche sur ordre d'Allah pour sauver les croyants et les animaux du déluge universel envoyé en punition d'un peuple rebelle."
+      },
+      {
+        "id": 17,
+        "level": "debutant",
+        "q": "Quel prophète est connu pour avoir été vendu comme esclave par ses frères jaloux ?",
+        "choices": ["Yaqub (عليه السلام)", "Ishaq (عليه السلام)", "Yusuf (عليه السلام)", "Lut (عليه السلام)"],
+        "correct": 2,
+        "explication": "Yusuf (Joseph) (عليه السلام) fut jeté dans un puits par ses frères jaloux, puis vendu comme esclave en Égypte. Grâce à Allah, il devint ministre du Pharaon."
+      },
+      {
+        "id": 18,
+        "level": "debutant",
+        "q": "Quel prophète reçut le Livre de la Torah (Tawrat) d'Allah ?",
+        "choices": ["Ibrahim (عليه السلام)", "Dawud (عليه السلام)", "Issa (عليه السلام)", "Moussa (عليه السلام)"],
+        "correct": 3,
+        "explication": "Moussa (عليه السلام) reçut la Torah (Tawrat) d'Allah sur le mont Sinaï. C'est l'un des livres révélés mentionnés dans le Coran."
+      },
+      {
+        "id": 19,
+        "level": "debutant",
+        "q": "Quel prophète est né d'une vierge sans père, selon la croyance islamique ?",
+        "choices": ["Yahya (عليه السلام)", "Idris (عليه السلام)", "Issa (عليه السلام)", "Ilyas (عليه السلام)"],
+        "correct": 2,
+        "explication": "Issa (عليه السلام) est né de Maryam (Marie) sans père, par la volonté d'Allah. Le Coran compare sa création à celle d'Adam : Allah dit \"Sois\" et il fut (Coran 3:59)."
+      },
+      {
+        "id": 20,
+        "level": "debutant",
+        "q": "Quel est le dernier prophète et messager envoyé par Allah ?",
+        "choices": ["Issa (عليه السلام)", "Ibrahim (عليه السلام)", "Muhammad ﷺ", "Moussa (عليه السلام)"],
+        "correct": 2,
+        "explication": "Muhammad ﷺ est le dernier des prophètes et messagers. Le Coran affirme : \"Muhammad n'est pas le père de l'un de vos hommes, mais le messager d'Allah et le sceau des prophètes\" (33:40)."
+      },
+      {
+        "id": 21,
+        "level": "amateur",
+        "q": "Quel prophète fut sauvé miraculeusement de la noyade en fendant la mer avec son bâton ?",
+        "choices": ["Ibrahim (عليه السلام)", "Hud (عليه السلام)", "Moussa (عليه السلام)", "Shu'ayb (عليه السلام)"],
+        "correct": 2,
+        "explication": "Moussa (عليه السلام) frappa la mer de son bâton sur ordre d'Allah, et la mer se fendit en douze chemins secs, permettant aux Enfants d'Israël de fuir le Pharaon (Coran 26:63)."
+      },
+      {
+        "id": 22,
+        "level": "amateur",
+        "q": "À quel peuple le prophète Hud (عليه السلام) fut-il envoyé ?",
+        "choices": ["Le peuple de Thamud", "Le peuple de 'Ad", "Le peuple de Madyan", "Le peuple de Babylone"],
+        "correct": 1,
+        "explication": "Hud (عليه السلام) fut envoyé au peuple de 'Ad, qui vivait dans la péninsule arabique. Ce peuple orgueilleux fut détruit par un vent violent après avoir refusé le message divin (Coran 41:16)."
+      },
+      {
+        "id": 23,
+        "level": "amateur",
+        "q": "Quel prophète reçut le livre des Psaumes (Zabur) ?",
+        "choices": ["Suleiman (عليه السلام)", "Dawud (عليه السلام)", "Ibrahim (عليه السلام)", "Zakaria (عليه السلام)"],
+        "correct": 1,
+        "explication": "Dawud (David) (عليه السلام) reçut le Zabur (les Psaumes) d'Allah. Le Coran mentionne : \"Et Nous avons donné à Dawud les Psaumes\" (4:163)."
+      },
+      {
+        "id": 24,
+        "level": "amateur",
+        "q": "Quel âge avait le Prophète Muhammad ﷺ lors de la première révélation dans la grotte de Hira ?",
+        "choices": ["30 ans", "35 ans", "40 ans", "45 ans"],
+        "correct": 2,
+        "explication": "Le Prophète ﷺ avait 40 ans lors de la première révélation en l'an 610 apr. J.-C. L'ange Jibril lui apporta le premier commandement : \"Iqra\" (Lis !) (Coran 96:1)."
+      },
+      {
+        "id": 25,
+        "level": "amateur",
+        "q": "Comment s'appelait l'épouse du Prophète ﷺ qui fut la première à le soutenir lors de la première révélation ?",
+        "choices": ["Aïsha (رضي الله عنها)", "Khadija (رضي الله عنها)", "Hafsa (رضي الله عنها)", "Fatima (رضي الله عنها)"],
+        "correct": 1,
+        "explication": "Khadija (رضي الله عنها) fut la première épouse du Prophète ﷺ et la première croyante. Lorsqu'il revint tremblant de la grotte, elle le réconforta et alla consulter son cousin Waraqa ibn Nawfal."
+      },
+      {
+        "id": 26,
+        "level": "avance",
+        "q": "Quel est le surnom (laqab) du prophète Moussa (عليه السلام) indiquant la faveur divine qu'il reçut ?",
+        "choices": ["Khalilullah (L'ami d'Allah)", "Kalimullah (Celui à qui Allah a parlé directement)", "Ruhullah (L'esprit d'Allah)", "Nabiyyullah (Le Prophète d'Allah)"],
+        "correct": 1,
+        "explication": "Moussa (عليه السلام) est surnommé Kalimullah (كليم الله), car Allah lui parla directement sans intermédiaire angélique, notamment au mont Sinaï (Coran 4:164 ; 7:143)."
+      },
+      {
+        "id": 27,
+        "level": "avance",
+        "q": "Selon les savants de l'Islam, combien y a-t-il eu de prophètes (anbiya) au total envoyés par Allah ?",
+        "choices": ["25", "124 000", "5 000", "313"],
+        "correct": 1,
+        "explication": "Selon un hadith rapporté par Ahmad et Ibn Hibban, il y aurait eu 124 000 prophètes (anbiya) et 315 messagers (rusul) envoyés par Allah aux différentes nations de la terre."
+      },
+      {
+        "id": 28,
+        "level": "avance",
+        "q": "Quelle est la différence entre un « Nabi » (prophète) et un « Rasul » (messager) selon la terminologie islamique ?",
+        "choices": ["Il n'y a aucune différence, ce sont des synonymes", "Un Nabi reçoit une révélation personnelle ; un Rasul est envoyé avec un nouveau message et une nouvelle loi", "Un Nabi est supérieur à un Rasul", "Un Rasul reçoit uniquement la Sunna, sans Coran"],
+        "correct": 1,
+        "explication": "Selon la majorité des savants, tout Rasul (messager) est Nabi (prophète), mais tout Nabi n'est pas nécessairement Rasul. Le Rasul est envoyé avec un nouveau Livre ou une nouvelle loi vers un peuple précis."
+      },
+      {
+        "id": 29,
+        "level": "avance",
+        "q": "Quelle est la sourate du Coran qui porte le nom d'un prophète et raconte son histoire de manière la plus détaillée ?",
+        "choices": ["Sourate Ibrahim (14)", "Sourate Yusuf (12)", "Sourate Nuh (71)", "Sourate Moussa (28)"],
+        "correct": 1,
+        "explication": "La sourate Yusuf (12) est considérée comme « la meilleure des histoires » (ahsan al-qasas) selon le Coran (12:3). Elle retrace de manière continue et détaillée l'intégralité de la vie de Yusuf (عليه السلام)."
+      },
+      {
+        "id": 30,
+        "level": "avance",
+        "q": "Quel prophète est associé à l'Ul al-'Azm (les prophètes de la ferme résolution) parmi les cinq les plus importants ?",
+        "choices": ["Yusuf, Dawud, Suleiman, Ilyas, Idris", "Muhammad, Ibrahim, Moussa, Issa, Nuh", "Adam, Idris, Nuh, Hud, Salih", "Ibrahim, Ismaïl, Ishaq, Yaqub, Yusuf"],
+        "correct": 1,
+        "explication": "Les cinq Ul al-'Azm (أولو العزم) — les prophètes dotés de la ferme résolution — sont : Muhammad ﷺ, Ibrahim, Moussa, Issa et Nuh (عليهم السلام), mentionnés dans le Coran (46:35 ; 33:7)."
+      }
+    ]
+  },
+  "compagnons": {
+    "title": "Les Compagnons",
+    "icon": "⚔️",
+    "color": "#60a5fa",
+    "free": false,
+    "questions": [
+      {
+        "id": 1,
+        "level": "debutant",
+        "q": "Qui fut la toute première personne à embrasser l'islam ?",
+        "choices": ["Abu Bakr As-Siddiq", "Ali ibn Abi Talib", "Khadija bint Khuwaylid", "Omar ibn al-Khattab"],
+        "correct": 2,
+        "explication": "Khadija (رضي الله عنها), épouse du Prophète ﷺ, fut la première à croire en sa mission prophétique, avant même Abu Bakr et Ali (رضي الله عنهما)."
+      },
+      {
+        "id": 2,
+        "level": "debutant",
+        "q": "Quel compagnon est surnommé \"Sayfullah\" (l'Épée d'Allah) ?",
+        "choices": ["Ali ibn Abi Talib", "Khalid ibn al-Walid", "Abu Ubayda ibn al-Jarrah", "Sa'd ibn Abi Waqqas"],
+        "correct": 1,
+        "explication": "Khalid ibn al-Walid (رضي الله عنه) reçut le titre de \"Sayfullah\" du Prophète ﷺ lui-même en raison de ses victoires militaires remarquables. Il ne perdit aucune bataille de sa vie."
+      },
+      {
+        "id": 3,
+        "level": "debutant",
+        "q": "Quel compagnon fut élu premier calife après le décès du Prophète ﷺ ?",
+        "choices": ["Omar ibn al-Khattab", "Ali ibn Abi Talib", "Abu Bakr As-Siddiq", "Uthman ibn Affan"],
+        "correct": 2,
+        "explication": "Abu Bakr As-Siddiq (رضي الله عنه) fut choisi comme premier calife lors de la réunion de Saqifat Bani Saïda, immédiatement après le décès du Prophète ﷺ en l'an 11 H."
+      },
+      {
+        "id": 4,
+        "level": "debutant",
+        "q": "Sous quel calife le Coran fut-il standardisé en un Mushaf officiel envoyé aux provinces ?",
+        "choices": ["Abu Bakr As-Siddiq", "Omar ibn al-Khattab", "Uthman ibn Affan", "Ali ibn Abi Talib"],
+        "correct": 2,
+        "explication": "C'est sous le califat d'Uthman (رضي الله عنه) que le Coran fut standardisé et diffusé sous forme de copies officielles pour unifier la lecture dans tout le monde islamique."
+      },
+      {
+        "id": 5,
+        "level": "debutant",
+        "q": "Combien de compagnons le Prophète ﷺ a-t-il désignés comme assurés d'entrer au Paradis (Al-Ashara Al-Mubashsharun) ?",
+        "choices": ["5", "8", "10", "12"],
+        "correct": 2,
+        "explication": "Le Prophète ﷺ a mentionné 10 compagnons promis au Paradis : Abu Bakr, Omar, Uthman, Ali, Talha, Az-Zubayr, Abd ar-Rahman ibn Awf, Sa'd ibn Abi Waqqas, Sa'id ibn Zayd, et Abu Ubayda ibn al-Jarrah."
+      },
+      {
+        "id": 6,
+        "level": "amateur",
+        "q": "Quel compagnon a transmis le plus grand nombre de hadiths du Prophète ﷺ ?",
+        "choices": ["Abu Bakr", "Aïsha (رضي الله عنها)", "Abu Hurayra", "Ibn Abbas"],
+        "correct": 2,
+        "explication": "Abu Hurayra (رضي الله عنه) a transmis plus de 5 000 hadiths, ce qui en fait le compagnon ayant le plus grand nombre de narrations dans les livres de hadith."
+      },
+      {
+        "id": 7,
+        "level": "amateur",
+        "q": "Quel compagnon dirigea la prière à la place du Prophète ﷺ lors de sa dernière maladie ?",
+        "choices": ["Ali ibn Abi Talib", "Omar ibn al-Khattab", "Abu Bakr As-Siddiq", "Bilal ibn Rabah"],
+        "correct": 2,
+        "explication": "Lors de sa dernière maladie, le Prophète ﷺ demanda spécifiquement à Abu Bakr de diriger les prières, ce qui fut interprété par les compagnons comme une désignation implicite."
+      },
+      {
+        "id": 8,
+        "level": "amateur",
+        "q": "Quel compagnon fut le premier muezzin de l'islam, choisi par le Prophète ﷺ ?",
+        "choices": ["Abu Dharr Al-Ghifari", "Salman Al-Farisi", "Bilal ibn Rabah", "Ammar ibn Yasir"],
+        "correct": 2,
+        "explication": "Bilal ibn Rabah (رضي الله عنه), ancien esclave éthiopien torturé pour sa foi, fut choisi comme premier muezzin grâce à sa voix puissante et sa foi exemplaire."
+      },
+      {
+        "id": 9,
+        "level": "amateur",
+        "q": "Quel compagnon persan proposa de creuser un fossé (khandaq) pour défendre Médine ?",
+        "choices": ["Abu Sufyan", "Salman Al-Farisi", "Al-Miqdad ibn Amr", "Hudhaifa ibn al-Yaman"],
+        "correct": 1,
+        "explication": "Salman Al-Farisi (رضي الله عنه), originaire de Perse, proposa la stratégie du fossé, inconnue des Arabes mais courante en Perse, lors de la bataille de Khandaq (an 5 H)."
+      },
+      {
+        "id": 10,
+        "level": "amateur",
+        "q": "Combien d'années environ Omar ibn al-Khattab fut-il calife ?",
+        "choices": ["2 ans", "5 ans", "10 ans", "15 ans"],
+        "correct": 2,
+        "explication": "Omar ibn al-Khattab (رضي الله عنه) fut calife pendant 10 ans (13-23 H / 634-644), période durant laquelle l'empire islamique s'étendit en Perse, Égypte, Syrie et Irak."
+      },
+      {
+        "id": 11,
+        "level": "avance",
+        "q": "Quel est le surnom d'Abu Bakr, donné par le Prophète ﷺ après le voyage nocturne (Isra) ?",
+        "choices": ["Al-Faruq (Celui qui distingue)", "Al-Amin (Le Digne de confiance)", "As-Siddiq (Le Véridique)", "Al-Hayy (Le Pudique)"],
+        "correct": 2,
+        "explication": "Abu Bakr reçut le titre \"As-Siddiq\" (الصديق) du Prophète ﷺ, notamment pour avoir immédiatement cru au voyage nocturne sans la moindre hésitation."
+      },
+      {
+        "id": 12,
+        "level": "avance",
+        "q": "Quel compagnon dépensa une grande part de sa fortune pour racheter la liberté d'esclaves torturés, dont Bilal ?",
+        "choices": ["Omar ibn al-Khattab", "Ali ibn Abi Talib", "Abu Bakr As-Siddiq", "Abd ar-Rahman ibn Awf"],
+        "correct": 2,
+        "explication": "Abu Bakr (رضي الله عنه) dépensa généreusement pour libérer des esclaves persécutés pour leur foi, dont Bilal ibn Rabah, acheté à son maître Umayya ibn Khalaf."
+      },
+      {
+        "id": 13,
+        "level": "avance",
+        "q": "Quelle est la relation familiale d'Ali ibn Abi Talib avec le Prophète ﷺ ?",
+        "choices": ["Son oncle", "Son frère de lait", "Son cousin et gendre", "Son beau-frère"],
+        "correct": 2,
+        "explication": "Ali (رضي الله عنه) est le cousin du Prophète ﷺ (fils d'Abu Talib) et son gendre, ayant épousé Fatima Az-Zahra (رضي الله عنها), la fille bien-aimée du Prophète."
+      },
+      {
+        "id": 14,
+        "level": "avance",
+        "q": "Quel compagnon fut surnommé \"Al-Faruq\" (Celui qui distingue le vrai du faux) ?",
+        "choices": ["Abu Bakr", "Ali ibn Abi Talib", "Omar ibn al-Khattab", "Uthman ibn Affan"],
+        "correct": 2,
+        "explication": "Omar ibn al-Khattab reçut le titre \"Al-Faruq\" (الفاروق) du Prophète ﷺ, en raison de sa fermeté dans la vérité et sa capacité à distinguer clairement le juste de l'injuste."
+      },
+      {
+        "id": 15,
+        "level": "avance",
+        "q": "Quel compagnon fut envoyé par Omar à Koufa (Irak) pour enseigner l'islam aux habitants ?",
+        "choices": ["Abu Musa Al-Ash'ari", "Abdullah ibn Masoud", "Hudhaifa ibn al-Yaman", "Ammar ibn Yasir"],
+        "correct": 1,
+        "explication": "Omar (رضي الله عنه) envoya Abdullah ibn Masoud (رضي الله عنه) à Koufa, disant aux habitants : \"Je vous ai préféré à moi-même en vous envoyant Ibn Masoud.\""
+      },
+      {
+        "id": 16,
+        "level": "debutant",
+        "q": "Comment s'appelait l'épouse du Prophète ﷺ surnommée \"Mère des croyants\" et connue pour sa grande science ?",
+        "choices": ["Khadija bint Khuwaylid", "Aïsha bint Abi Bakr", "Hafsa bint Omar", "Umm Salama"],
+        "correct": 1,
+        "explication": "Aïsha (رضي الله عنها) est parmi les épouses du Prophète ﷺ la plus connue pour sa transmission de hadiths et sa science. Les compagnons venaient la consulter après le décès du Prophète."
+      },
+      {
+        "id": 17,
+        "level": "debutant",
+        "q": "Quel compagnon accompagna le Prophète ﷺ lors de la migration (Hégire) de La Mecque vers Médine ?",
+        "choices": ["Ali ibn Abi Talib", "Omar ibn al-Khattab", "Abu Bakr As-Siddiq", "Uthman ibn Affan"],
+        "correct": 2,
+        "explication": "Abu Bakr As-Siddiq (رضي الله عنه) fut le seul compagnon à accompagner le Prophète ﷺ lors de l'Hégire. Le Coran y fait allusion : \"quand ils étaient deux dans la caverne\" (9:40)."
+      },
+      {
+        "id": 18,
+        "level": "debutant",
+        "q": "Quel compagnon était connu pour sa grande générosité et fut surnommé \"Dhul-Nurayn\" (Celui aux deux lumières) ?",
+        "choices": ["Abu Bakr As-Siddiq", "Omar ibn al-Khattab", "Uthman ibn Affan", "Ali ibn Abi Talib"],
+        "correct": 2,
+        "explication": "Uthman ibn Affan (رضي الله عنه) fut surnommé Dhul-Nurayn (ذو النورين) car il épousa successivement deux filles du Prophète ﷺ : Ruqayya puis Umm Kulthum."
+      },
+      {
+        "id": 19,
+        "level": "debutant",
+        "q": "Qui était Bilal ibn Rabah avant de devenir musulman ?",
+        "choices": ["Un marchand riche de La Mecque", "Un soldat de l'armée du Pharaon", "Un esclave appartenant à un idolâtre mecquois", "Un chef de tribu berbère"],
+        "correct": 2,
+        "explication": "Bilal (رضي الله عنه) était un esclave éthiopien appartenant à Umayya ibn Khalaf. Il fut torturé pour sa foi en étant allongé sur le sable brûlant sous des pierres, répétant « Ahad, Ahad » (Un seul, Un seul)."
+      },
+      {
+        "id": 20,
+        "level": "debutant",
+        "q": "Quel compagnon participa à toutes les grandes batailles avec le Prophète ﷺ et fut le premier à frapper l'ennemi à Badr ?",
+        "choices": ["Sa'd ibn Abi Waqqas", "Ali ibn Abi Talib", "Talha ibn Ubaydallah", "Az-Zubayr ibn al-Awwam"],
+        "correct": 0,
+        "explication": "Sa'd ibn Abi Waqqas (رضي الله عنه) fut le premier à tirer une flèche dans la voie d'Allah lors de la bataille de Badr. Le Prophète ﷺ lui dit : « Tire, que mon père et ma mère soient ton sacrifice ! »"
+      },
+      {
+        "id": 21,
+        "level": "amateur",
+        "q": "Quel compagnon fut désigné par Omar ibn al-Khattab comme membre du conseil consultatif (Shura) pour choisir son successeur ?",
+        "choices": ["Abu Hurayra, Ibn Abbas, Bilal", "Uthman, Ali, Abd ar-Rahman ibn Awf, Sa'd, Talha, Az-Zubayr", "Abu Bakr, Khalid, Ammar", "Salman, Hudhaifa, Mu'adh"],
+        "correct": 1,
+        "explication": "Omar (رضي الله عنه) désigna six compagnons pour élire son successeur : Uthman ibn Affan, Ali ibn Abi Talib, Abd ar-Rahman ibn Awf, Sa'd ibn Abi Waqqas, Talha et Az-Zubayr."
+      },
+      {
+        "id": 22,
+        "level": "amateur",
+        "q": "Quel compagnon collecta et mit par écrit le Coran pour la première fois sous forme de Mushaf sous Abu Bakr ?",
+        "choices": ["Bilal ibn Rabah", "Omar ibn al-Khattab", "Zayd ibn Thabit", "Abdullah ibn Masoud"],
+        "correct": 2,
+        "explication": "Zayd ibn Thabit (رضي الله عنه), ancien secrétaire de la révélation, fut chargé par Abu Bakr de compiler le Coran après la bataille d'Al-Yamama où moururent de nombreux hafidhs."
+      },
+      {
+        "id": 23,
+        "level": "amateur",
+        "q": "Quel compagnon était surnommé \"Amin al-Umma\" (Le Digne de confiance de la communauté) par le Prophète ﷺ ?",
+        "choices": ["Omar ibn al-Khattab", "Ali ibn Abi Talib", "Abu Ubayda ibn al-Jarrah", "Mu'adh ibn Jabal"],
+        "correct": 2,
+        "explication": "Abu Ubayda ibn al-Jarrah (رضي الله عنه) reçut le titre d'Amin al-Umma (أمين الأمة) du Prophète ﷺ. Il fut aussi commandant des armées musulmanes en Syrie et mourut de la peste d'Amwas."
+      },
+      {
+        "id": 24,
+        "level": "amateur",
+        "q": "Quelle compagne du Prophète ﷺ transmit le plus grand nombre de hadiths parmi les femmes ?",
+        "choices": ["Khadija bint Khuwaylid", "Fatima Az-Zahra", "Umm Salama", "Aïsha bint Abi Bakr"],
+        "correct": 3,
+        "explication": "Aïsha (رضي الله عنها) transmit plus de 2 200 hadiths et fut une autorité de référence en jurisprudence islamique, en exégèse coranique et en médecine prophétique pour les compagnons."
+      },
+      {
+        "id": 25,
+        "level": "amateur",
+        "q": "Quel compagnon fut envoyé comme premier ambassadeur de l'islam vers l'Éthiopie (Abyssinie) ?",
+        "choices": ["Abu Bakr As-Siddiq", "Omar ibn al-Khattab", "Ja'far ibn Abi Talib", "Amr ibn al-As"],
+        "correct": 2,
+        "explication": "Ja'far ibn Abi Talib (رضي الله عنه), cousin du Prophète ﷺ, dirigea le groupe de migrants en Éthiopie et défendit l'islam devant le Négus (roi chrétien) en récitant la sourate Maryam."
+      },
+      {
+        "id": 26,
+        "level": "avance",
+        "q": "Selon la classification des savants du hadith, quel terme désigne un compagnon (sahabi) de manière précise ?",
+        "choices": ["Toute personne qui a vu le Prophète ﷺ, qu'elle soit musulmane ou non", "Toute personne qui a rencontré le Prophète ﷺ en étant croyante et est morte dans l'islam", "Tout musulman de la première génération", "Tout musulman ayant mémorisé le Coran à l'époque du Prophète ﷺ"],
+        "correct": 1,
+        "explication": "Selon la définition de l'imam Al-Bukhari et d'Ibn Hajar, un Sahabi est celui qui a rencontré le Prophète ﷺ en état de foi (iman), l'a accompagné et est décédé musulman, même s'il a rencontré le Prophète brièvement."
+      },
+      {
+        "id": 27,
+        "level": "avance",
+        "q": "Quel compagnon est connu pour avoir mémorisé les secrets des hypocrites (munafiqun) de Médine, confié par le Prophète ﷺ ?",
+        "choices": ["Abu Hurayra", "Abdullah ibn Masoud", "Hudhaifa ibn al-Yaman", "Salman Al-Farisi"],
+        "correct": 2,
+        "explication": "Hudhaifa ibn al-Yaman (رضي الله عنه) fut le « gardien du secret » (Sahib as-Sirr) du Prophète ﷺ : il connaissait la liste des hypocrites de Médine. Omar le consultait pour savoir si certains étaient présents aux funérailles."
+      },
+      {
+        "id": 28,
+        "level": "avance",
+        "q": "Lors de quelle bataille le compagnon Mus'ab ibn Umayr (رضي الله عنه) fut-il martyrisé en portant l'étendard des musulmans ?",
+        "choices": ["La bataille de Badr (an 2 H)", "La bataille d'Uhud (an 3 H)", "La bataille de Khandaq (an 5 H)", "La bataille de Khaybar (an 7 H)"],
+        "correct": 1,
+        "explication": "Mus'ab ibn Umayr (رضي الله عنه) fut martyrisé à Uhud (an 3 H) en tenant l'étendard. Quand sa main droite fut coupée, il le tint de la gauche, puis de ses bras jusqu'à tomber en martyr."
+      },
+      {
+        "id": 29,
+        "level": "avance",
+        "q": "Quel compagnon fut le premier gouverneur (wali) nommé par le Prophète ﷺ sur Médine lors de la bataille de Badr ?",
+        "choices": ["Uthman ibn Affan", "Ali ibn Abi Talib", "Abu Lubaba ibn Abd al-Mundhir", "Sa'd ibn Mu'adh"],
+        "correct": 2,
+        "explication": "Abu Lubaba ibn Abd al-Mundhir (رضي الله عنه) fut nommé gouverneur de Médine par le Prophète ﷺ lors de son départ pour Badr. Il est aussi connu pour sa repentance sincère qui est évoquée dans le Coran (9:102)."
+      },
+      {
+        "id": 30,
+        "level": "avance",
+        "q": "Combien y a-t-il eu de califes rachidun (califes bien guidés) selon la tradition sunnite ?",
+        "choices": ["2", "3", "4", "5"],
+        "correct": 2,
+        "explication": "Les quatre califes rachidun (الخلفاء الراشدون) sont : Abu Bakr As-Siddiq, Omar ibn al-Khattab, Uthman ibn Affan et Ali ibn Abi Talib. Le Prophète ﷺ a dit : « Suivez ma Sunna et celle des califes bien guidés après moi » (Abu Dawud, Tirmidhi)."
+      }
+    ]
+  },
+  "histoire": {
+    "title": "Histoire islamique",
+    "icon": "📜",
+    "color": "#a78bfa",
+    "free": false,
+    "questions": [
+      {
+        "id": 1,
+        "level": "debutant",
+        "q": "En quelle année eut lieu l'Hégire (migration du Prophète ﷺ vers Médine) ?",
+        "choices": ["610 apr. J.-C.", "622 apr. J.-C.", "630 apr. J.-C.", "615 apr. J.-C."],
+        "correct": 1,
+        "explication": "L'Hégire eut lieu en 622 apr. J.-C. Elle constitue le point de départ du calendrier islamique lunaire (calendrier hégirien)."
+      },
+      {
+        "id": 2,
+        "level": "debutant",
+        "q": "Comment s'appelait la première grande bataille de l'islam (an 2 H) ?",
+        "choices": ["Uhud", "Khandaq", "Badr", "Hunayn"],
+        "correct": 2,
+        "explication": "La bataille de Badr (17 Ramadan, an 2 H) fut la première grande victoire de l'islam. Les 313 musulmans vainquirent plus de 1 000 Mecquois. Le Coran y fait abondamment référence."
+      },
+      {
+        "id": 3,
+        "level": "debutant",
+        "q": "Lors de quelle bataille le Prophète ﷺ fut-il blessé au visage et la rumeur de sa mort se répandit-elle ?",
+        "choices": ["Badr", "Khandaq", "Uhud", "Khaybar"],
+        "correct": 2,
+        "explication": "À la bataille d'Uhud (an 3 H), des archers ayant abandonné leur poste permit aux Mecquois de contourner les rangs. Le Prophète ﷺ fut blessé mais survécut."
+      },
+      {
+        "id": 4,
+        "level": "debutant",
+        "q": "Comment est appelée l'année (an 10 de la prophétie) où moururent Khadija et Abu Talib ?",
+        "choices": ["L'année du Fossé", "L'année de la Tristesse (Am al-Huzn)", "L'année de l'Éléphant", "L'année de la Victoire"],
+        "correct": 1,
+        "explication": "L'an 619 fut nommé \"Am al-Huzn\" (عام الحزن), car le Prophète ﷺ perdit en quelques semaines sa femme Khadija et son oncle protecteur Abu Talib."
+      },
+      {
+        "id": 5,
+        "level": "debutant",
+        "q": "Quelle ville fut conquise sans combat majeur lors de la grande conquête en l'an 8 H ?",
+        "choices": ["Médine", "Taïf", "La Mecque", "Jérusalem"],
+        "correct": 2,
+        "explication": "La conquête de La Mecque (Fath Makkah) en l'an 8 H fut quasi pacifique. Le Prophète ﷺ entra avec 10 000 musulmans et accorda un pardon général aux Mecquois."
+      },
+      {
+        "id": 6,
+        "level": "amateur",
+        "q": "Quelle est la première mosquée construite par le Prophète ﷺ lors de son arrivée à Médine ?",
+        "choices": ["La mosquée Al-Haram", "La mosquée Al-Aqsa", "La mosquée de Quba", "Masjid An-Nabawi"],
+        "correct": 2,
+        "explication": "En s'arrêtant à Quba lors de l'Hégire, le Prophète ﷺ construisit la mosquée de Quba, première mosquée de l'islam. Le Coran la décrit comme fondée sur la piété (9:108)."
+      },
+      {
+        "id": 7,
+        "level": "amateur",
+        "q": "Quel calife omeyyade fit construire le Dôme du Rocher à Jérusalem (vers 691 apr. J.-C.) ?",
+        "choices": ["Muawiya ibn Abi Sufyan", "Abd al-Malik ibn Marwan", "Al-Walid ibn Abd al-Malik", "Umar ibn Abd al-Aziz"],
+        "correct": 1,
+        "explication": "Le Dôme du Rocher (Qubbat As-Sakhra) fut érigé par le calife Abd al-Malik ibn Marwan sur le mont du Temple à Jérusalem, vers 691 apr. J.-C."
+      },
+      {
+        "id": 8,
+        "level": "amateur",
+        "q": "Quelle dynastie islamique, régnant depuis Bagdad, est associée à \"l'Âge d'Or de l'Islam\" ?",
+        "choices": ["Les Omeyyades", "Les Abbassides", "Les Fatimides", "Les Ottomans"],
+        "correct": 1,
+        "explication": "La dynastie abbasside (750-1258 apr. J.-C.) vit l'apogée scientifique et culturelle islamique. Bagdad, sous Haroun ar-Rachid et Al-Mamun, fut la capitale mondiale du savoir."
+      },
+      {
+        "id": 9,
+        "level": "amateur",
+        "q": "En quelle année Saladin (Salah ad-Din al-Ayyubi) reconquit-il Jérusalem aux croisés ?",
+        "choices": ["1099", "1147", "1187", "1212"],
+        "correct": 2,
+        "explication": "Saladin reprit Jérusalem le 2 octobre 1187, après la victoire décisive à la bataille de Hattin. Il se montra exemplaire dans sa clémence envers les habitants vaincus."
+      },
+      {
+        "id": 10,
+        "level": "amateur",
+        "q": "Quel général musulman conquit l'Égypte entre 639 et 642 apr. J.-C. sous le califat d'Omar ?",
+        "choices": ["Khalid ibn al-Walid", "Sa'd ibn Abi Waqqas", "Amr ibn al-As", "Shurahbil ibn Hasana"],
+        "correct": 2,
+        "explication": "Amr ibn al-As (رضي الله عنه) conquit l'Égypte entre 639 et 642 apr. J.-C. Alexandrie tomba en 642, mettant fin à des siècles de domination byzantine."
+      },
+      {
+        "id": 11,
+        "level": "avance",
+        "q": "Comment s'appelle le traité de paix signé entre le Prophète ﷺ et les Mecquois en l'an 6 H ?",
+        "choices": ["Traité de Badr", "Traité de Médine", "Traité de Hudaybiyya", "Traité de Taïf"],
+        "correct": 2,
+        "explication": "Le traité de Hudaybiyya fut signé en l'an 6 H. Malgré ses apparentes concessions, le Coran le qualifie de \"victoire manifeste\" (Fath Mubin) — Coran 48:1."
+      },
+      {
+        "id": 12,
+        "level": "avance",
+        "q": "Que désigne le terme \"Isra et Mi'raj\" ?",
+        "choices": ["La révélation du Coran et la descente des anges", "La migration vers l'Éthiopie et le retour", "Le voyage nocturne de La Mecque à Jérusalem et l'ascension céleste", "La conquête de La Mecque et la purification de la Kaaba"],
+        "correct": 2,
+        "explication": "L'Isra est le voyage nocturne du Prophète ﷺ de La Mecque à Jérusalem. Le Mi'raj est son ascension céleste où les 5 prières quotidiennes furent prescrites."
+      },
+      {
+        "id": 13,
+        "level": "avance",
+        "q": "Quel empire fut définitivement vaincu par les musulmans lors de la bataille de Qadisiyya (636 apr. J.-C.) ?",
+        "choices": ["L'Empire byzantin", "L'Empire sassanide (perse)", "L'Empire romain d'Occident", "L'Empire abyssin"],
+        "correct": 1,
+        "explication": "La bataille de Qadisiyya (636) vit la victoire de Sa'd ibn Abi Waqqas sur l'Empire sassanide, ouvrant la voie à la conquête de la Perse et la diffusion de l'islam en Asie centrale."
+      },
+      {
+        "id": 14,
+        "level": "avance",
+        "q": "Comment s'appelait la pratique de retraite spirituelle du Prophète ﷺ dans la grotte de Hira avant la révélation ?",
+        "choices": ["Tawaf", "I'tikaf", "Tahannuth", "Muraqaba"],
+        "correct": 2,
+        "explication": "Avant la révélation, le Prophète ﷺ pratiquait le tahannuth dans la grotte de Hira (mont An-Nur). C'est là que l'ange Jibril lui apporta le premier verset \"Iqra\" (Lis !)."
+      },
+      {
+        "id": 15,
+        "level": "avance",
+        "q": "En quelle année et dans quelle ville le Prophète Muhammad ﷺ est-il décédé ?",
+        "choices": ["630 apr. J.-C., La Mecque", "632 apr. J.-C., Médine", "625 apr. J.-C., Médine", "640 apr. J.-C., Jérusalem"],
+        "correct": 1,
+        "explication": "Le Prophète Muhammad ﷺ est décédé le 12 Rabi' al-Awwal, an 11 H (8 juin 632 apr. J.-C.) à Médine, à l'âge d'environ 63 ans. Il fut enterré dans sa chambre (aujourd'hui dans Masjid An-Nabawi)."
+      },
+      {
+        "id": 16,
+        "level": "debutant",
+        "q": "Quel événement marque le début du calendrier islamique (calendrier hégirien) ?",
+        "choices": ["La naissance du Prophète ﷺ", "La première révélation du Coran", "La migration du Prophète ﷺ de La Mecque vers Médine", "La conquête de La Mecque"],
+        "correct": 2,
+        "explication": "Le calendrier hégirien commence avec l'Hégire (migration) du Prophète ﷺ vers Médine en 622 apr. J.-C. Ce calendrier fut formellement établi sous le califat d'Omar ibn al-Khattab."
+      },
+      {
+        "id": 17,
+        "level": "debutant",
+        "q": "Comment s'appelait le premier État islamique fondé par le Prophète ﷺ à Médine ?",
+        "choices": ["Le Califat de La Mecque", "La Cité-État de Médine (Al-Umma)", "L'Empire islamique", "Le Royaume d'Arabie"],
+        "correct": 1,
+        "explication": "À Médine, le Prophète ﷺ établit la première communauté islamique organisée. Il scella la Charte de Médine (Sahifat al-Madina), premier document constitutionnel reconnaissant les droits des différentes communautés."
+      },
+      {
+        "id": 18,
+        "level": "debutant",
+        "q": "Quel roi chrétien d'Éthiopie accueillit favorablement les premiers musulmans qui fuyaient les persécutions mecquoises ?",
+        "choices": ["Héraclius (Byzance)", "Le Négus (Ashama ibn Abjar)", "Chosroès II (Perse)", "Al-Muqawqis (Égypte)"],
+        "correct": 1,
+        "explication": "Le Négus Ashama ibn Abjar, roi d'Éthiopie, protégea les premiers musulmans après avoir entendu Ja'far ibn Abi Talib réciter des versets du Coran sur Maryam (Marie)."
+      },
+      {
+        "id": 19,
+        "level": "debutant",
+        "q": "Quelle fut la durée totale de la mission prophétique de Muhammad ﷺ ?",
+        "choices": ["10 ans", "13 ans", "23 ans", "30 ans"],
+        "correct": 2,
+        "explication": "La mission prophétique dura 23 ans : 13 ans à La Mecque (avant l'Hégire) et 10 ans à Médine. La première révélation fut en 610 et le Prophète ﷺ décéda en 632 apr. J.-C."
+      },
+      {
+        "id": 20,
+        "level": "debutant",
+        "q": "Quel événement historique est désigné par l'expression « Am al-Fil » (L'année de l'Éléphant) ?",
+        "choices": ["L'année de naissance du Prophète ﷺ, où Abraha tenta de détruire la Kaaba avec des éléphants", "L'année de la conquête de La Mecque où les musulmans entrèrent en force", "L'année du premier hajj du Prophète ﷺ", "L'année de la mort d'Abu Talib"],
+        "correct": 0,
+        "explication": "En l'an de l'Éléphant (570 apr. J.-C.), Abraha, gouverneur yéménite, marcha sur La Mecque avec des éléphants pour détruire la Kaaba. Allah envoya des oiseaux (ababils) qui les détruisirent (Coran, sourate 105)."
+      },
+      {
+        "id": 21,
+        "level": "amateur",
+        "q": "Lors de quelle bataille les Mongols détruisirent-ils Bagdad, capitale du califat abbasside, en 1258 ?",
+        "choices": ["La bataille d'Aïn Jalout", "La chute de Bagdad sous Hulagu Khan", "La bataille de Manzikert", "La bataille de Hattin"],
+        "correct": 1,
+        "explication": "En 1258, Hulagu Khan, petit-fils de Gengis Khan, détruisit Bagdad et exécuta le dernier calife abbasside Al-Musta'sim. Cette catastrophe mit fin à cinq siècles de califat abbasside."
+      },
+      {
+        "id": 22,
+        "level": "amateur",
+        "q": "Quelle armée musulmane arrêta l'expansion mongole en Syrie lors de la bataille d'Aïn Jalout en 1260 ?",
+        "choices": ["Les Abbassides de Bagdad", "Les croisés de Jérusalem", "Les Mamelouks d'Égypte sous Qutuz et Baybars", "Les Ottomans d'Anatolie"],
+        "correct": 2,
+        "explication": "La bataille d'Aïn Jalout (1260) fut la première grande défaite des Mongols. L'armée mamelouke d'Égypte, sous le sultan Qutuz et le général Baybars, arrêta l'avancée mongole en Syrie."
+      },
+      {
+        "id": 23,
+        "level": "amateur",
+        "q": "En quelle année le sultan ottoman Mehmed II conquit-il Constantinople, mettant fin à l'Empire byzantin ?",
+        "choices": ["1389", "1453", "1517", "1571"],
+        "correct": 1,
+        "explication": "Le sultan Mehmed II Al-Fatih (le Conquérant) prit Constantinople le 29 mai 1453, réalisant ainsi la prédiction du Prophète ﷺ : « Constantinople sera conquise. Quel excellent émir sera son émir ! » (Ahmad)."
+      },
+      {
+        "id": 24,
+        "level": "amateur",
+        "q": "Quel calife omeyyade est considéré comme le « cinquième calife bien guidé » en raison de sa justice exemplaire ?",
+        "choices": ["Muawiya ibn Abi Sufyan", "Yazid ibn Muawiya", "Umar ibn Abd al-Aziz (Omar II)", "Abd al-Malik ibn Marwan"],
+        "correct": 2,
+        "explication": "Umar ibn Abd al-Aziz (717-720 apr. J.-C.) réforma l'État omeyyade, réduisit les inégalités et restaura la justice. Certains savants le qualifient de « cinquième calife bien guidé » (al-Khalifa ar-Rashid al-khamis)."
+      },
+      {
+        "id": 25,
+        "level": "amateur",
+        "q": "Quelle est la première université islamique (jamia) fondée dans le monde ?",
+        "choices": ["Al-Azhar du Caire (970 apr. J.-C.)", "La Nizamiyya de Bagdad (1065 apr. J.-C.)", "La Qarawiyyin de Fès (859 apr. J.-C.)", "La Grande Mosquée de Cordoue (785 apr. J.-C.)"],
+        "correct": 2,
+        "explication": "L'université Al-Qarawiyyin de Fès (Maroc) fut fondée en 859 apr. J.-C. par Fatima al-Fihri. Elle est reconnue par l'UNESCO et le Livre Guinness des Records comme la plus ancienne université du monde encore en activité."
+      },
+      {
+        "id": 26,
+        "level": "avance",
+        "q": "Quel était le nom exact du document politique signé par le Prophète ﷺ à Médine régissant les relations entre les tribus ?",
+        "choices": ["Al-Mithaq al-Madani", "Sahifat al-Madina (La Charte de Médine)", "Sulh al-Ansar", "Kitab al-Umma"],
+        "correct": 1,
+        "explication": "La Sahifat al-Madina (صحيفة المدينة) est considérée comme la première constitution écrite de l'histoire. Elle définissait les droits et devoirs des communautés musulmanes, juives et arabes de Médine."
+      },
+      {
+        "id": 27,
+        "level": "avance",
+        "q": "Lors de quel événement le Prophète ﷺ prononça-t-il son célèbre Discours d'Adieu (Khutbat al-Wada') ?",
+        "choices": ["La conquête de La Mecque (an 8 H)", "La bataille de Tabuk (an 9 H)", "Le Hajj al-Wada' au mont Arafat (an 10 H)", "Le traité de Hudaybiyya (an 6 H)"],
+        "correct": 2,
+        "explication": "Le Discours d'Adieu (Khutbat al-Wada') fut prononcé le 9 Dhu al-Hijja de l'an 10 H au mont Arafat lors du pèlerinage d'Adieu (Hajj al-Wada'). Le Prophète ﷺ y déclara l'achèvement de la religion (Coran 5:3)."
+      },
+      {
+        "id": 28,
+        "level": "avance",
+        "q": "Quel fut le premier pays hors de la péninsule arabique à être conquis par les armées musulmanes ?",
+        "choices": ["L'Irak (Mésopotamie)", "La Syrie (Bilad ash-Sham)", "L'Égypte", "La Perse"],
+        "correct": 1,
+        "explication": "La Syrie (Bilad ash-Sham) fut la première grande conquête hors d'Arabie. Khalid ibn al-Walid et Abu Ubayda ibn al-Jarrah vainquirent les Byzantins à Ajnadayn (634) et Yarmouk (636), ouvrant la voie à Damas et Jérusalem."
+      },
+      {
+        "id": 29,
+        "level": "avance",
+        "q": "Quelle fut la durée totale du califat omeyyade, de sa fondation à sa chute ?",
+        "choices": ["50 ans (661-711)", "90 ans (661-750)", "120 ans (620-740)", "200 ans (600-800)"],
+        "correct": 1,
+        "explication": "Le califat omeyyade dura de 661 à 750 apr. J.-C., soit environ 90 ans, avec Muawiya ibn Abi Sufyan comme fondateur et Marwan II comme dernier calife. Il fut renversé par la révolution abbasside."
+      },
+      {
+        "id": 30,
+        "level": "avance",
+        "q": "Quel savant musulman est l'auteur du « Muqaddima », œuvre fondatrice de la sociologie et de la philosophie de l'histoire ?",
+        "choices": ["Ibn Rushd (Averroès)", "Al-Ghazali", "Ibn Khaldun", "Ibn Sina (Avicenne)"],
+        "correct": 2,
+        "explication": "Ibn Khaldun (1332-1406) rédigea la Muqaddima (المقدمة), introduction à son œuvre historique universelle. Il y développa les concepts de 'asabiyya (cohésion sociale) et les cycles de montée et chute des civilisations."
+      }
+    ]
+  },
+  "piliers": {
+    "title": "Les 5 Piliers",
+    "icon": "🕌",
+    "color": "#34d399",
+    "free": false,
+    "questions": [
+      {
+        "id": 1,
+        "level": "debutant",
+        "q": "Combien de piliers compte l'islam ?",
+        "choices": ["4", "5", "6", "7"],
+        "correct": 1,
+        "explication": "Les 5 piliers de l'islam sont : la Shahada (témoignage), la Salat (prière), la Zakat (aumône), le Sawm (jeûne du Ramadan) et le Hajj (pèlerinage)."
+      },
+      {
+        "id": 2,
+        "level": "debutant",
+        "q": "Combien de piliers (arkane) compte la foi islamique (iman) ?",
+        "choices": ["4", "5", "6", "7"],
+        "correct": 2,
+        "explication": "Les 6 piliers de la foi sont : croire en Allah, en Ses anges, en Ses Livres, en Ses Messagers, au Jour du Jugement, et au destin (qadar — bien et mal)."
+      },
+      {
+        "id": 3,
+        "level": "debutant",
+        "q": "Quel est le 4e pilier de l'islam dans l'ordre traditionnel ?",
+        "choices": ["Le Hajj", "Le Sawm (jeûne)", "La Zakat", "La Salat"],
+        "correct": 1,
+        "explication": "Dans l'ordre traditionnel : 1) Shahada, 2) Salat, 3) Zakat, 4) Sawm (jeûne du Ramadan), 5) Hajj. Allah dit : \"le mois de Ramadan est celui où le Coran a été révélé\" (2:185)."
+      },
+      {
+        "id": 4,
+        "level": "avance",
+        "q": "Quel est le seuil (nissab) de la Zakat pour l'or, à partir duquel elle devient obligatoire ?",
+        "choices": ["50 grammes", "65 grammes", "85 grammes", "100 grammes"],
+        "correct": 2,
+        "explication": "Le nissab de la Zakat pour l'or est de 85 grammes (ou équivalent en argent : 595 g). La Zakat est de 2,5% sur la richesse possédée pendant une année lunaire complète."
+      },
+      {
+        "id": 5,
+        "level": "debutant",
+        "q": "Combien de fois par jour un musulman doit-il accomplir la prière obligatoire (fard) ?",
+        "choices": ["3 fois", "4 fois", "5 fois", "7 fois"],
+        "correct": 2,
+        "explication": "La prière (Salat) est obligatoire 5 fois par jour : Fajr (aube), Dhuhr (midi), Asr (après-midi), Maghrib (coucher du soleil) et Isha (nuit)."
+      },
+      {
+        "id": 6,
+        "level": "amateur",
+        "q": "Combien de fois le Hajj est-il obligatoire dans la vie d'un musulman capable ?",
+        "choices": ["Chaque année", "Deux fois", "Trois fois", "Une seule fois"],
+        "correct": 3,
+        "explication": "Le Hajj est obligatoire une seule fois dans la vie pour tout musulman physiquement et financièrement capable. Le Prophète ﷺ a dit : \"Il est une fois\" (Muslim)."
+      },
+      {
+        "id": 7,
+        "level": "debutant",
+        "q": "Combien de rakats (unités) contient la prière de Fajr (l'aube) ?",
+        "choices": ["1", "2", "3", "4"],
+        "correct": 1,
+        "explication": "La prière de Fajr est composée de 2 rakats obligatoires. C'est la prière ayant le moins de rakats, mais le Coran lui accorde une importance particulière (Coran 17:78)."
+      },
+      {
+        "id": 8,
+        "level": "debutant",
+        "q": "Vers quelle direction les musulmans se tournent-ils lors de la prière (la Qibla) ?",
+        "choices": ["Vers Médine", "Vers Jérusalem", "Vers La Mecque (la Kaaba)", "Vers le ciel"],
+        "correct": 2,
+        "explication": "La Qibla est la direction de la Kaaba à La Mecque. Elle fut changée de Jérusalem vers La Mecque en l'an 2 H par ordre divin révélé dans le Coran (2:144)."
+      },
+      {
+        "id": 9,
+        "level": "debutant",
+        "q": "Quel est le terme arabe pour l'appel à la prière lancé par le muezzin ?",
+        "choices": ["Iqama", "Adhan", "Takbir", "Dhikr"],
+        "correct": 1,
+        "explication": "L'Adhan (أذان) est l'appel à la prière proclamé 5 fois par jour. Il commence par \"Allahu Akbar\" (Allah est le plus Grand) et témoigne de l'unicité d'Allah."
+      },
+      {
+        "id": 10,
+        "level": "amateur",
+        "q": "Qu'est-ce que le Wudu (ablutions) et à quoi sert-il ?",
+        "choices": ["Une prière de supplication", "Une purification spirituelle par invocations", "Une purification rituelle du corps requise avant la prière", "Un jeûne volontaire de 3 jours"],
+        "correct": 2,
+        "explication": "Le Wudu (وضوء) est la purification rituelle (visage, mains, tête, pieds) requise avant la prière, le toucher du Mushaf et le Tawaf autour de la Kaaba."
+      },
+      {
+        "id": 11,
+        "level": "amateur",
+        "q": "Quelle sourate est obligatoirement récitée à chaque rakat de la prière ?",
+        "choices": ["Al-Ikhlas", "Al-Baqara", "Al-Fatiha", "Al-Kahf"],
+        "correct": 2,
+        "explication": "Al-Fatiha est récitée à chaque rakat. Le Prophète ﷺ a dit : \"Il n'y a pas de prière valide sans Al-Fatiha\" (Bukhari et Muslim)."
+      },
+      {
+        "id": 12,
+        "level": "amateur",
+        "q": "Qu'est-ce que la \"Niyya\" en islam ?",
+        "choices": ["La lecture du Coran avant la prière", "La louange d'Allah entre les prières", "L'intention dans le cœur précédant tout acte d'adoration", "La formule de salutation finale de la prière"],
+        "correct": 2,
+        "explication": "La Niyya (نية) est l'intention intérieure. Le Prophète ﷺ a dit : \"Les actes ne valent que par les intentions\" (Bukhari et Muslim). Elle conditionne la validité de tout acte d'adoration."
+      },
+      {
+        "id": 13,
+        "level": "debutant",
+        "q": "Quel est l'acte qui constitue la porte d'entrée dans l'islam (le premier pilier) ?",
+        "choices": ["La prière", "Le jeûne", "La Shahada (témoignage de foi)", "La Zakat"],
+        "correct": 2,
+        "explication": "La Shahada est : \"Ash-hadu an la ilaha illallah wa ash-hadu anna Muhammadan Rasulullah\" (Je témoigne qu'il n'y a de dieu qu'Allah et que Muhammad est Son messager)."
+      },
+      {
+        "id": 14,
+        "level": "amateur",
+        "q": "Quel mois est celui du jeûne obligatoire en islam ?",
+        "choices": ["Rajab", "Sha'ban", "Ramadan", "Muharram"],
+        "correct": 2,
+        "explication": "Le jeûne du Ramadan (9e mois lunaire) est obligatoire pour tout musulman adulte et capable. Allah dit : \"le mois de Ramadan est celui où le Coran a été révélé\" (Coran 2:185)."
+      },
+      {
+        "id": 15,
+        "level": "avance",
+        "q": "Combien de fois la prière de Dhuhr (midi) est-elle composée en rakats obligatoires ?",
+        "choices": ["2", "3", "4", "6"],
+        "correct": 2,
+        "explication": "La prière de Dhuhr (midi) est composée de 4 rakats obligatoires (fard). De même pour la prière de Asr (après-midi) et Isha (nuit)."
+      },
+      {
+        "id": 16,
+        "level": "debutant",
+        "q": "Qu'est-ce que la Zakat en islam ?",
+        "choices": ["Le pèlerinage annuel à La Mecque", "L'aumône légale obligatoire pour les musulmans riches au profit des nécessiteux", "Le jeûne du mois de Ramadan", "La prière du vendredi"],
+        "correct": 1,
+        "explication": "La Zakat (زكاة) est le 3e pilier de l'islam. C'est une aumône obligatoire de 2,5% sur la richesse accumulée depuis un an au-dessus du nissab, destinée aux huit catégories bénéficiaires mentionnées dans le Coran (9:60)."
+      },
+      {
+        "id": 17,
+        "level": "debutant",
+        "q": "Qu'est-ce que le Hajj en islam ?",
+        "choices": ["Le jeûne du mois de Ramadan", "La prière du vendredi", "Le pèlerinage à La Mecque, obligatoire une fois dans la vie", "L'aumône annuelle"],
+        "correct": 2,
+        "explication": "Le Hajj est le pèlerinage à La Mecque, 5e pilier de l'islam, obligatoire une fois dans la vie pour tout musulman adulte, sain d'esprit et capable financièrement et physiquement."
+      },
+      {
+        "id": 18,
+        "level": "amateur",
+        "q": "Combien de rakats (unités) contient la prière de Maghrib (coucher du soleil) ?",
+        "choices": ["2", "3", "4", "5"],
+        "correct": 1,
+        "explication": "La prière de Maghrib (coucher du soleil) est composée de 3 rakats obligatoires. C'est la seule prière obligatoire qui comporte un nombre impair de rakats."
+      },
+      {
+        "id": 19,
+        "level": "amateur",
+        "q": "Quel est le terme arabe pour la prière surérogatoire accomplie avant ou après les prières obligatoires ?",
+        "choices": ["Fard", "Wajib", "Sunna (Rawatib)", "Nafl"],
+        "correct": 2,
+        "explication": "Les Sunna Rawatib (سنة رواتب) sont les prières volontaires associées aux prières obligatoires. Le Prophète ﷺ a dit : « Quiconque accomplit 12 rakats sunna par jour, Allah lui construira une maison au Paradis » (Muslim)."
+      },
+      {
+        "id": 20,
+        "level": "amateur",
+        "q": "Quelles sont les huit catégories de personnes pouvant bénéficier de la Zakat selon le Coran (9:60) ?",
+        "choices": ["Les pauvres et les voyageurs uniquement", "Les mosquées, les étudiants en sciences islamiques, les orphelins", "Les pauvres, les nécessiteux, les agents de collecte, ceux dont les cœurs sont à rallier, les esclaves, les endettés, dans la voie d'Allah, et les voyageurs", "Tous les musulmans sans distinction"],
+        "correct": 2,
+        "explication": "Le Coran (9:60) liste 8 catégories : Al-Fuqara (pauvres), Al-Masakin (nécessiteux), Al-Amilin (agents), Al-Mu'allafa (cœurs à gagner), Ar-Riqab (esclaves), Al-Gharimin (endettés), Fi Sabilillah (voie d'Allah), Ibn as-Sabil (voyageurs)."
+      },
+      {
+        "id": 21,
+        "level": "avance",
+        "q": "Quel est le terme technique désignant la purification totale du corps (bain rituel) requise après certains états d'impureté majeure ?",
+        "choices": ["Wudu (ablutions)", "Tayammum (ablutions sèches)", "Ghusl (grand bain rituel)", "Istinja (purification intime)"],
+        "correct": 2,
+        "explication": "Le Ghusl (غسل) est le bain rituel complet obligatoire notamment après la relation conjugale, les règles féminines ou les lochies. Le Coran dit : \"Et si vous êtes en état de janaba, purifiez-vous\" (5:6)."
+      },
+      {
+        "id": 22,
+        "level": "avance",
+        "q": "Lors du Hajj, quel est le rituel consistant à tourner sept fois autour de la Kaaba dans le sens antihoraire ?",
+        "choices": ["Le Sa'y", "Le Tawaf", "Le Ramy al-Jamarat", "Le Wuquf"],
+        "correct": 1,
+        "explication": "Le Tawaf (طواف) consiste à tourner sept fois autour de la Kaaba dans le sens antihoraire. Il commence et se termine à la Pierre Noire (Al-Hajar al-Aswad). Il est effectué en état de purification rituelle."
+      },
+      {
+        "id": 23,
+        "level": "avance",
+        "q": "Quel est le terme désignant la prière du vendredi (Jumu'a), obligatoire pour qui selon la jurisprudence islamique ?",
+        "choices": ["Obligatoire pour tout musulman, homme ou femme", "Obligatoire pour les hommes musulmans adultes, libres, résidents et sains", "Recommandée pour tout le monde mais non obligatoire", "Obligatoire uniquement pour le gouverneur et l'imam"],
+        "correct": 1,
+        "explication": "Selon la majorité des savants, la prière du vendredi (Salat al-Jumu'a) est une obligation individuelle (fard 'ayn) pour les hommes musulmans adultes, libres, sains et résidents. Le Coran dit : « Ô croyants ! Quand on appelle à la prière du vendredi, hâtez-vous » (62:9)."
+      },
+      {
+        "id": 24,
+        "level": "avance",
+        "q": "Quelle est la durée de validité de l'état de pureté rituelle (Wudu) selon la jurisprudence islamique ?",
+        "choices": ["Une heure après sa réalisation", "Jusqu'à la prière suivante uniquement", "Il reste valide jusqu'à ce qu'il soit rompu par un acte annulant la pureté", "Jusqu'au coucher du soleil"],
+        "correct": 2,
+        "explication": "Le Wudu reste valide jusqu'à ce qu'il soit rompu par un hadath (acte annulateur) tel que l'émission de gaz, l'urine, les selles, le sommeil profond ou la perte de conscience. Il n'a pas de limite de temps fixe."
+      },
+      {
+        "id": 25,
+        "level": "avance",
+        "q": "Quelle est la différence entre « Zakat al-Fitr » (Sadaqat al-Fitr) et la « Zakat al-Mal » ?",
+        "choices": ["Elles sont identiques, juste deux noms différents", "La Zakat al-Fitr est une aumône de fin de Ramadan versée en nourriture ou son équivalent ; la Zakat al-Mal est la zakat annuelle sur la richesse", "La Zakat al-Fitr est volontaire, la Zakat al-Mal est obligatoire", "La Zakat al-Fitr est versée en début de Ramadan, la Zakat al-Mal à n'importe quel moment"],
+        "correct": 1,
+        "explication": "La Zakat al-Fitr (زكاة الفطر) est une aumône obligatoire versée avant la prière de l'Aïd al-Fitr (fin du Ramadan), équivalant à un Sa' (environ 2,5 kg) de nourriture de base. La Zakat al-Mal est l'aumône annuelle de 2,5% sur la richesse accumulée."
+      },
+      {
+        "id": 26,
+        "level": "debutant",
+        "q": "Quel est l'objectif spirituel principal du jeûne du Ramadan selon le Coran ?",
+        "choices": ["Perdre du poids et se purifier physiquement", "Acquérir la piété (taqwa) et la crainte révérencielle d'Allah", "Commémorer la naissance du Prophète ﷺ", "Expier les péchés de l'année passée"],
+        "correct": 1,
+        "explication": "Allah dit dans le Coran : « Ô vous qui avez cru ! On vous a prescrit le jeûne comme on l'a prescrit à ceux qui vous ont précédés, afin que vous acquériez la piété (taqwa) » (Coran 2:183)."
+      },
+      {
+        "id": 27,
+        "level": "debutant",
+        "q": "Qu'est-ce que la Nuit du Destin (Laylat al-Qadr) ?",
+        "choices": ["La nuit du Mi'raj (ascension céleste)", "La nuit de naissance du Prophète ﷺ", "La nuit bénie de la fin du Ramadan, meilleure que mille mois, où le Coran fut révélé", "La nuit du premier jour de l'Aïd al-Fitr"],
+        "correct": 2,
+        "explication": "Laylat al-Qadr est la nuit où le Coran fut révélé pour la première fois. Allah dit : \"La nuit du Destin est meilleure que mille mois\" (Coran 97:3). Elle se situe dans les dix dernières nuits impaires du Ramadan."
+      },
+      {
+        "id": 28,
+        "level": "debutant",
+        "q": "Quel est le terme désignant la rupture du jeûne quotidien au coucher du soleil pendant le Ramadan ?",
+        "choices": ["Suhur", "Iftar", "Tarawih", "I'tikaf"],
+        "correct": 1,
+        "explication": "L'Iftar (إفطار) est la rupture du jeûne au coucher du soleil. Le Prophète ﷺ recommandait de le faire avec des dattes et de l'eau. Le Suhur est le repas avant l'aube avant de commencer le jeûne."
+      },
+      {
+        "id": 29,
+        "level": "avance",
+        "q": "Selon les quatre grandes écoles juridiques (madhahib), le Hajj est-il obligatoire immédiatement dès que les conditions sont remplies ?",
+        "choices": ["Oui, selon toutes les quatre écoles", "Non, selon aucune école", "Selon les Hanafites et Malikites, il peut être différé ; selon les Shafi'ites et Hanbalites, il est obligatoire immédiatement", "Il est seulement recommandé selon toutes les écoles"],
+        "correct": 2,
+        "explication": "Il y a un désaccord entre les écoles : les Shafi'ites et Hanbalites considèrent que le Hajj doit être accompli dès que les conditions sont remplies (al-fawriyya) ; les Hanafites et Malikites autorisent le report (at-tarakhi) tant qu'on est encore en capacité."
+      },
+      {
+        "id": 30,
+        "level": "avance",
+        "q": "Quel est le terme technique désignant la prière surérogatoire accomplie la nuit pendant le Ramadan en congrégation ?",
+        "choices": ["Qiyam al-Layl uniquement", "Tahajjud", "Salat at-Tarawih", "Salat ad-Duha"],
+        "correct": 2,
+        "explication": "La Salat at-Tarawih (صلاة التراويح) est la prière nocturne surérogatoire accomplie en congrégation pendant le Ramadan. Elle fut instituée en congrégation par Omar ibn al-Khattab (رضي الله عنه) et est habituellement de 8 ou 20 rakats selon les écoles."
+      }
+    ]
+  },
+  "jugement": {
+    "title": "Jour du Jugement",
+    "icon": "⚖️",
+    "color": "#f87171",
+    "free": false,
+    "questions": [
+      {
+        "id": 1,
+        "level": "debutant",
+        "q": "Quel est le nom arabe du Jour du Jugement le plus fréquemment utilisé dans le Coran ?",
+        "choices": ["Yawm al-Jumu'a", "Yawm al-Ashura", "Yawm al-Qiyama", "Yawm al-Arafat"],
+        "correct": 2,
+        "explication": "Yawm al-Qiyama (يوم القيامة) signifie \"le Jour de la Résurrection\". Il est aussi appelé Yawm ad-Din (jour de la rétribution), Yawm al-Hashr (rassemblement) et As-Sa'a (l'Heure)."
+      },
+      {
+        "id": 2,
+        "level": "debutant",
+        "q": "Quel est le nom de l'ange chargé de souffler dans la Corne (As-Sur) pour annoncer la Résurrection ?",
+        "choices": ["Jibril (عليه السلام)", "Mikail (عليه السلام)", "Israfil (عليه السلام)", "Azrail (عليه السلام)"],
+        "correct": 2,
+        "explication": "Israfil (عليه السلام) soufflera dans la Corne (As-Sur) à deux reprises : au premier souffle, tout mourra ; au second, tous ressusciteront pour comparaître devant Allah."
+      },
+      {
+        "id": 3,
+        "level": "debutant",
+        "q": "Qu'est-ce que le \"Sirat\" (As-Sirat al-Mustaqim du Jugement) ?",
+        "choices": ["La voie droite de l'islam dans ce monde", "Un fleuve de miel au Paradis", "Le pont tendu au-dessus de l'Enfer que traverseront tous les humains", "Le livre des actes remis à chaque personne"],
+        "correct": 2,
+        "explication": "As-Sirat est un pont fin comme un cheveu tendu au-dessus de l'Enfer. Les croyants le traverseront à des vitesses variables selon leurs actes ; certains comme l'éclair, d'autres lentement."
+      },
+      {
+        "id": 4,
+        "level": "debutant",
+        "q": "Lequel de ces événements est un grand signe (signe majeur) précédant la fin des temps ?",
+        "choices": ["La fin du mois de Ramadan", "La construction de hauts buildings", "La descente de Issa (عليه السلام) sur Terre", "Un séisme en Arabie"],
+        "correct": 2,
+        "explication": "La descente de Issa (عليه السلام) est l'un des 10 grands signes (ashrat as-sa'a al-kubra) de la fin des temps, rapporté dans de nombreux hadiths authentiques chez Bukhari et Muslim."
+      },
+      {
+        "id": 5,
+        "level": "debutant",
+        "q": "Qu'est-ce que le \"Hawdh\" du Prophète Muhammad ﷺ ?",
+        "choices": ["Son tombeau béni à Médine", "Son minbar (chaire) au Paradis", "Un immense bassin dont boiront ses croyants fidèles le Jour du Jugement", "Sa intercession (shafaa) pour sa communauté"],
+        "correct": 2,
+        "explication": "Le Hawdh de Muhammad ﷺ est un bassin immense, plus blanc que le lait et plus doux que le miel. Celui qui en boit n'aura plus jamais soif par la suite (Bukhari et Muslim)."
+      },
+      {
+        "id": 6,
+        "level": "amateur",
+        "q": "Combien de portes compte le Paradis selon le hadith du Prophète ﷺ ?",
+        "choices": ["5", "6", "7", "8"],
+        "correct": 3,
+        "explication": "Le Paradis compte 8 portes selon le hadith (Bukhari) : parmi elles Bab As-Salat (prière), Bab Ar-Rayyan (jeûne), Bab As-Sadaqa (aumône), Bab Al-Jihad. Chaque porte correspondant à une vertu."
+      },
+      {
+        "id": 7,
+        "level": "amateur",
+        "q": "Quel est le nom de la porte du Paradis réservée aux grands jeûneurs ?",
+        "choices": ["Bab As-Salat", "Bab Ar-Rayyan", "Bab Al-Jihad", "Bab As-Sadaqa"],
+        "correct": 1,
+        "explication": "Ar-Rayyan (الريّان) est la porte du Paradis spécialement réservée à ceux qui jeûnaient beaucoup. Après leur entrée, cette porte sera fermée pour toujours (Bukhari et Muslim)."
+      },
+      {
+        "id": 8,
+        "level": "amateur",
+        "q": "Combien de niveaux compte l'Enfer (Jahannam) selon les textes islamiques ?",
+        "choices": ["5", "6", "7", "9"],
+        "correct": 2,
+        "explication": "L'Enfer compte 7 niveaux : Jahannam, Laza, Al-Hutama, As-Sair, Saqar, Al-Jahim et Al-Hawiya. Le plus profond (Al-Hawiya) est réservé aux hypocrites (Coran 4:145)."
+      },
+      {
+        "id": 9,
+        "level": "amateur",
+        "q": "Qu'est-ce que le \"Mizan\" le Jour du Jugement ?",
+        "choices": ["Le livre des actes remis à chaque personne", "La balance divine qui pèsera les actes de chaque être humain", "La lumière accordée aux croyants sur le Sirat", "Le Trône d'Allah"],
+        "correct": 1,
+        "explication": "Le Mizan (الميزان) est la balance divine de justice. Les bonnes actions seront dans un plateau, les mauvaises dans l'autre. Allah dit : \"Nous poserons les balances exactes\" (Coran 21:47)."
+      },
+      {
+        "id": 10,
+        "level": "amateur",
+        "q": "Selon le hadith, quelle est la première chose dont l'homme sera jugé parmi ses actes ?",
+        "choices": ["Son jeûne", "Sa Zakat", "Sa prière (Salat)", "Sa Shahada"],
+        "correct": 2,
+        "explication": "Le Prophète ﷺ a dit : \"La première chose dont l'homme sera jugé le Jour du Jugement sera la prière. Si elle est bonne, tout le reste sera bon\" (At-Tabarani, validé par Al-Albani)."
+      },
+      {
+        "id": 11,
+        "level": "avance",
+        "q": "Quel est le nom du fleuve du Paradis donné spécifiquement au Prophète Muhammad ﷺ ?",
+        "choices": ["Salsabil", "Tasnim", "Al-Kawthar", "Zanjabil"],
+        "correct": 2,
+        "explication": "Al-Kawthar (الكوثر) est le fleuve du Paradis offert spécialement au Prophète ﷺ. Allah dit : \"Nous t'avons accordé Al-Kawthar\" (Coran 108:1)."
+      },
+      {
+        "id": 12,
+        "level": "avance",
+        "q": "Selon les textes islamiques, quelle durée représente ce Jour pour les non-croyants ?",
+        "choices": ["100 ans", "1 000 ans", "50 000 ans", "Un jour ordinaire"],
+        "correct": 2,
+        "explication": "Ce Jour durera 50 000 ans selon le hadith. Mais pour le croyant sincère, Allah le facilitera jusqu'à ce qu'il soit comme l'équivalent d'une prière obligatoire (Ibn Hibban)."
+      },
+      {
+        "id": 13,
+        "level": "avance",
+        "q": "Qu'est-ce que le \"Dajjal\" dans la théologie islamique ?",
+        "choices": ["Un ange chargé de l'Enfer", "Un prophète annoncé pour la fin des temps", "L'Antéchrist, un grand imposteur borgne qui se présentera comme dieu", "Un roi injuste qui persécutera les croyants"],
+        "correct": 2,
+        "explication": "Al-Masih ad-Dajjal est l'Antéchrist islamique, un imposteur borgne (œil droit aveugle ou gauche) qui prétendra être Dieu. C'est l'une des plus grandes épreuves. Issa (عليه السلام) le tuera."
+      },
+      {
+        "id": 14,
+        "level": "avance",
+        "q": "Quelle sourate est recommandée par le Prophète ﷺ pour se protéger du Dajjal ?",
+        "choices": ["Al-Baqara", "Al-Fatiha", "Al-Kahf", "Ya-Sin"],
+        "correct": 2,
+        "explication": "Le Prophète ﷺ recommanda de mémoriser les 10 premiers (ou derniers) versets de la sourate Al-Kahf (La Caverne) comme protection contre le Dajjal (Muslim)."
+      },
+      {
+        "id": 15,
+        "level": "avance",
+        "q": "Quel est Al-Firdaws dans la description islamique du Paradis ?",
+        "choices": ["Le premier niveau d'entrée du Paradis", "Un niveau intermédiaire du Paradis", "Le niveau le plus élevé du Paradis, sous le Trône d'Allah", "Un jardin réservé aux prophètes uniquement"],
+        "correct": 2,
+        "explication": "Al-Firdaws (الفردوس) est le plus haut degré du Paradis, situé directement sous le Trône d'Allah (Al-Arsh). Le Prophète ﷺ a dit : \"Quand vous demandez à Allah, demandez Al-Firdaws\" (Bukhari)."
+      },
+      {
+        "id": 16,
+        "level": "debutant",
+        "q": "Quel ange est chargé de prendre les âmes des humains au moment de la mort ?",
+        "choices": ["Jibril (عليه السلام)", "Israfil (عليه السلام)", "Mikail (عليه السلام)", "Malak al-Mawt (عليه السلام)"],
+        "correct": 3,
+        "explication": "Malak al-Mawt (ملك الموت), l'Ange de la Mort, est chargé de prélever les âmes. Le Coran dit : \"Dis : L'ange de la mort qui vous est chargé vous fera mourir\" (Coran 32:11). Il est parfois appelé Azrail dans la tradition."
+      },
+      {
+        "id": 17,
+        "level": "debutant",
+        "q": "Comment s'appelle la vie dans la tombe entre la mort et la Résurrection ?",
+        "choices": ["Al-Janna (le Paradis)", "Al-Barzakh (le monde intermédiaire)", "Al-Qiyama (la Résurrection)", "Ad-Dunya (ce monde)"],
+        "correct": 1,
+        "explication": "Al-Barzakh (البرزخ) désigne la vie dans la tombe, état intermédiaire entre la mort et la Résurrection. Le Coran dit : \"Derrière eux se trouve une barrière (barzakh) jusqu'au jour où ils ressusciteront\" (Coran 23:100)."
+      },
+      {
+        "id": 18,
+        "level": "debutant",
+        "q": "Quels sont les deux anges qui interrogent le défunt dans sa tombe ?",
+        "choices": ["Jibril et Mikail", "Israfil et Azrail", "Munkar et Nakir", "Ridwan et Malik"],
+        "correct": 2,
+        "explication": "Munkar et Nakir sont les deux anges qui interrogent le défunt dans sa tombe sur son Seigneur, sa religion et son prophète. C'est une vérité établie par de nombreux hadiths authentiques."
+      },
+      {
+        "id": 19,
+        "level": "debutant",
+        "q": "Quel est le nom du gardien du Paradis selon les hadiths du Prophète ﷺ ?",
+        "choices": ["Malik", "Ridwan", "Israfil", "Munkar"],
+        "correct": 1,
+        "explication": "Ridwan (رضوان) est le nom de l'ange gardien du Paradis, mentionné dans les hadiths. Malik (مالك) est le gardien de l'Enfer, mentionné dans le Coran (43:77)."
+      },
+      {
+        "id": 20,
+        "level": "debutant",
+        "q": "Qu'est-ce que la Shafa'a (intercession) du Prophète ﷺ le Jour du Jugement ?",
+        "choices": ["Une prière que les croyants font pour lui", "L'intercession du Prophète ﷺ auprès d'Allah en faveur des croyants de sa communauté pour qu'ils entrent au Paradis", "Le livre des actes du Prophète ﷺ", "Son témoignage contre les idolâtres"],
+        "correct": 1,
+        "explication": "La Shafa'a Al-Uzma (الشفاعة العظمى) est la grande intercession du Prophète ﷺ. C'est lui qui sera autorisé par Allah à intercéder pour que le Jugement commence et pour que des croyants soient admis au Paradis."
+      },
+      {
+        "id": 21,
+        "level": "amateur",
+        "q": "Selon les textes islamiques, combien de niveaux (degrés) compte le Paradis ?",
+        "choices": ["3 niveaux", "7 niveaux", "100 degrés", "1000 degrés"],
+        "correct": 2,
+        "explication": "Le Prophète ﷺ a dit : « Le Paradis a 100 degrés qu'Allah a préparés pour ceux qui combattent dans Sa voie. La distance entre deux degrés est comme la distance entre le ciel et la terre » (Bukhari)."
+      },
+      {
+        "id": 22,
+        "level": "amateur",
+        "q": "Qu'est-ce que le Kitab (livre des actes) que chaque personne recevra le Jour du Jugement ?",
+        "choices": ["Le Coran qu'il a mémorisé", "Le registre de toutes ses actions enregistrées par les anges Kiraman Katibin", "La liste de ses dons charitables", "Le livre que le Prophète ﷺ lui remettra"],
+        "correct": 1,
+        "explication": "Chaque être humain recevra son Kitab (livre des actes) soit dans la main droite (croyants) soit dans la main gauche ou derrière le dos (mécréants). Ce livre aura été tenu par les anges Kiraman Katibin (Coran 82:10-12 ; 69:19-25)."
+      },
+      {
+        "id": 23,
+        "level": "amateur",
+        "q": "Qu'est-ce que Yajuj et Majuj (Gog et Magog) dans l'eschatologie islamique ?",
+        "choices": ["Deux anges chargés du Paradis", "Deux peuples dévastateurs qui se répandront sur la terre à la fin des temps", "Deux djinns qui aideront le Dajjal", "Deux signes mineurs de la fin des temps"],
+        "correct": 1,
+        "explication": "Yajuj et Majuj (يأجوج ومأجوج) sont deux peuples destructeurs dont la libération est l'un des grands signes de la fin des temps. Ils sont actuellement retenus derrière un barrage construit par Dhul-Qarnayn (Coran 18:94-99)."
+      },
+      {
+        "id": 24,
+        "level": "amateur",
+        "q": "Quel est le premier animal qui sera ressuscité selon les hadiths du Prophète ﷺ ?",
+        "choices": ["Le cheval du Prophète ﷺ", "La chamelle de Salih (عليه السلام)", "La vache d'Ibrahim (عليه السلام)", "Le bélier sacrifié à la place d'Ismaïl (عليه السلام)"],
+        "correct": 1,
+        "explication": "Le bélier qui fut sacrifié à la place d'Ismaïl (عليه السلام) lors de l'épreuve d'Ibrahim sera parmi les premiers animaux ressuscités selon certains textes. Allah ressuscitera même les animaux pour que justice soit rendue entre eux."
+      },
+      {
+        "id": 25,
+        "level": "amateur",
+        "q": "Selon le Coran et la Sunna, quel sera l'état du soleil le Jour du Jugement ?",
+        "choices": ["Il brillera encore plus fort qu'aujourd'hui", "Il sera rapproché de la création jusqu'à n'être qu'à une distance d'un mille", "Il s'éteindra complètement dès la fin du monde", "Il sera transformé en lune"],
+        "correct": 1,
+        "explication": "Le Prophète ﷺ a décrit le soleil qui sera rapproché des créatures à une distance d'un mille (environ 1,6 km) le Jour du Jugement, causant une sueur abondante selon les actes de chacun (Muslim, n°2864)."
+      },
+      {
+        "id": 26,
+        "level": "avance",
+        "q": "Selon le hadith d'Abu Hurayra, quelles sont les sept catégories de personnes qui seront à l'ombre du Trône d'Allah le Jour du Jugement ?",
+        "choices": ["Les prophètes, les califes, les savants, les martyrs, les pauvres, les veuves, les orphelins", "Un imam juste, un jeune qui a grandi dans l'adoration d'Allah, un homme attaché à la mosquée, deux qui s'aiment pour Allah, un homme appelé par une belle femme qui refuse, un qui donne en secret, un qui pleure en se souvenant d'Allah en solitude", "Les hajj, les jeûneurs, les donateurs, les récitants du Coran, les savants, les mères, les martyrs", "Les prophètes, les martyrs, les savants, les pauvres, les orphelins, les veuves, les pèlerins"],
+        "correct": 1,
+        "explication": "Le hadith (Bukhari et Muslim) mentionne sept personnes à l'ombre du Trône : un imam juste, un jeune qui grandit dans l'adoration d'Allah, un attaché à la mosquée, deux qui s'aiment pour Allah, un homme qui refuse une séduction, un qui donne en secret, et un qui pleure seul en se souvenant d'Allah."
+      },
+      {
+        "id": 27,
+        "level": "avance",
+        "q": "Qu'est-ce que l'A'raf (الأعراف) mentionné dans le Coran, qui donne son nom à la sourate 7 ?",
+        "choices": ["Le plus bas niveau de l'Enfer", "Un niveau du Paradis réservé aux savants", "Un lieu intermédiaire entre le Paradis et l'Enfer où se trouveront des gens dont les actes sont en équilibre exact", "Le nom du pont As-Sirat"],
+        "correct": 2,
+        "explication": "L'A'raf (les hauteurs) est un lieu évoqué dans le Coran (7:46-49) où se trouveront des personnes dont les bonnes et mauvaises actions s'équivalent exactement. Ils seront finalement admis au Paradis par la miséricorde d'Allah."
+      },
+      {
+        "id": 28,
+        "level": "avance",
+        "q": "Selon les hadiths, quelle sera la forme initiale de l'apparition d'Allah devant les croyants pour le Jugement (la ru'ya) ?",
+        "choices": ["Allah n'apparaîtra pas car Il est inconnaissable", "Les croyants verront Allah comme on voit la pleine lune, sans se bousculer, clairement", "Allah apparaîtra dans une lumière aveuglante indescriptible", "Allah se manifestera sous forme d'une voix uniquement"],
+        "correct": 1,
+        "explication": "Le Prophète ﷺ a dit : « Vous verrez votre Seigneur comme vous voyez la pleine lune, sans vous bousculer pour Le voir » (Bukhari et Muslim). La vision d'Allah (Ru'yat Allah) est la plus grande récompense pour les croyants au Paradis."
+      },
+      {
+        "id": 29,
+        "level": "avance",
+        "q": "Combien de grands signes précurseurs de la Fin des Temps (Ashrat as-Sa'a al-Kubra) les savants dénombrent-ils généralement ?",
+        "choices": ["5 signes", "7 signes", "10 signes", "15 signes"],
+        "correct": 2,
+        "explication": "Les savants dénombrent généralement 10 grands signes (ashrat as-sa'a al-kubra) : la fumée (Ad-Dukhan), le Dajjal, la Bête (Ad-Dabba), le lever du soleil à l'ouest, la descente d'Issa, Yajuj et Majuj, 3 effondrements de terre, et un feu qui rassemblera les humains."
+      },
+      {
+        "id": 30,
+        "level": "avance",
+        "q": "Quel terme désigne la grande intercession spécifique du Prophète ﷺ par laquelle il sera autorisé à commencer le Jugement alors que les autres prophètes auront décliné ?",
+        "choices": ["Ash-Shafa'a al-Ula (la première intercession)", "Al-Maqam al-Mahmud (la station louable)", "Al-Wasila (le degré suprême au Paradis)", "Al-Qawl as-Sadid"],
+        "correct": 1,
+        "explication": "Al-Maqam al-Mahmud (المقام المحمود) est la « station louable » promise au Prophète ﷺ dans le Coran (17:79). Il s'agit de la grande intercession (Ash-Shafa'a al-Uzma) pour laquelle tous les humains iront vers lui après avoir été refusés par les autres prophètes."
+      }
+    ]
+  }
+}
