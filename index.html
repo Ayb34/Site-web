@@ -836,37 +836,106 @@ function AuthModal({ onClose }) {
 /* --- Subscription Page --- */
 function SubscriptionPage({ navigate }) {
   const { user } = useAuth();
+  const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
+  const features = [
+    { icon: '🕌', title: 'Quiz islamiques', desc: '200+ questions sur les piliers, prophètes, histoire' },
+    { icon: '🎵', title: 'Blind Test Coran', desc: 'Reconnais les sourates à l\'écoute' },
+    { icon: '🎬', title: 'Studio Vidéo', desc: 'Crée des clips avec des rappels audio' },
+    { icon: '📅', title: 'Nouveau contenu', desc: 'Ajouts chaque semaine incha\'Allah' },
+  ];
   return (
     <div className="fade-up" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', padding: '40px 20px', textAlign: 'center' }}>
-      <div style={{ width: 72, height: 72, borderRadius: '50%',
-        background: 'rgba(34,197,94,0.12)', border: '2px solid rgba(34,197,94,0.35)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, marginBottom: 20 }}>✓</div>
-      <h1 style={{ fontSize: 30, fontWeight: 900, color: '#fff', marginBottom: 10 }}>Compte créé avec succès !</h1>
-      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 40, maxWidth: 380 }}>
-        Bienvenue{user && user.displayName ? ' ' + user.displayName : ''} 👋<br/>
-        Abonne-toi pour accéder à tout le contenu islamique.
-      </p>
-      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.25)',
-        borderRadius: 22, padding: '32px 28px', maxWidth: 380, width: '100%', marginBottom: 24 }}>
-        <div style={{ marginBottom: 6 }}>
-          <span style={{ fontSize: 44, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 16 }}>/mois</span>
-        </div>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginBottom: 24 }}>Accès illimité à tout le contenu</p>
-        <ul style={{ listStyle: 'none', textAlign: 'left', marginBottom: 28, padding: 0 }}>
-          {['🕌 Tous les quiz islamiques','🎵 Blind test Coran','🎬 Studio vidéo','📅 Nouveaux contenus chaque semaine'].map(item => (
-            <li key={item} style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, marginBottom: 11 }}>{item}</li>
-          ))}
-        </ul>
-        <button style={{ width: '100%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
-          border: 'none', color: '#1c1200', padding: '15px', borderRadius: 11,
-          fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif'
-        }}>Abonnement — paiement bientôt disponible</button>
+      alignItems: 'center', justifyContent: 'center', padding: '60px 20px 40px', textAlign: 'center',
+      background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,167,39,0.08) 0%, transparent 70%)' }}>
+
+      {/* Success badge */}
+      <div style={{ position: 'relative', marginBottom: 28 }}>
+        <div style={{ width: 80, height: 80, borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05))',
+          border: '2px solid rgba(34,197,94,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, margin: '0 auto' }}>✓</div>
+        <div style={{ position: 'absolute', top: -6, right: -6, width: 24, height: 24, borderRadius: '50%',
+          background: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 12 }}>🌙</div>
       </div>
+
+      {/* Title */}
+      <h1 style={{ fontSize: 32, fontWeight: 900, color: '#fff', marginBottom: 8, letterSpacing: '-0.5px' }}>
+        Compte créé avec succès !
+      </h1>
+      <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, marginBottom: 10, maxWidth: 420 }}>
+        Bienvenue{firstName ? <strong style={{ color: '#c8a727' }}> {firstName}</strong> : ''} 👋 — ton voyage commence ici.
+      </p>
+      <p style={{ color: 'rgba(200,167,39,0.7)', fontSize: 13, marginBottom: 44, fontStyle: 'italic' }}>
+        « Celui qui suit un chemin pour acquérir une connaissance, Allah lui facilite le chemin vers le Paradis. »
+      </p>
+
+      {/* Card */}
+      <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+        border: '1px solid rgba(200,167,39,0.3)', borderRadius: 24, padding: '36px 28px',
+        maxWidth: 420, width: '100%', marginBottom: 20, backdropFilter: 'blur(10px)',
+        boxShadow: '0 0 60px rgba(200,167,39,0.06)' }}>
+
+        {/* Badge */}
+        <div style={{ display: 'inline-block', background: 'rgba(200,167,39,0.12)',
+          border: '1px solid rgba(200,167,39,0.3)', borderRadius: 30, padding: '4px 14px',
+          fontSize: 12, color: '#c8a727', fontWeight: 700, marginBottom: 20, letterSpacing: 0.5 }}>
+          ✦ ACCÈS COMPLET
+        </div>
+
+        {/* Price */}
+        <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
+          <span style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/mois</span>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 28 }}>
+          Sans engagement · Résiliable à tout moment
+        </p>
+
+        {/* Features */}
+        <div style={{ marginBottom: 28 }}>
+          {features.map(f => (
+            <div key={f.icon} style={{ display: 'flex', alignItems: 'flex-start', gap: 12,
+              marginBottom: 14, textAlign: 'left' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10,
+                background: 'rgba(200,167,39,0.1)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>{f.icon}</div>
+              <div>
+                <div style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>{f.title}</div>
+                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{f.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={() => window.open(window.STRIPE_LINK, '_blank')}
+          style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)',
+            border: 'none', color: '#0a1a08', padding: '16px', borderRadius: 12,
+            fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+            letterSpacing: 0.3, boxShadow: '0 4px 24px rgba(200,167,39,0.25)',
+            transition: 'transform 0.15s, box-shadow 0.15s'
+          }}
+          onMouseOver={e => { e.target.style.transform='translateY(-2px)'; e.target.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}
+          onMouseOut={e => { e.target.style.transform=''; e.target.style.boxShadow='0 4px 24px rgba(200,167,39,0.25)'; }}
+        >
+          🔓 Débloquer l'accès — 7,99€/mois
+        </button>
+
+        {/* Trust */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
+          {['🔒 Paiement sécurisé', '📵 Sans pub', '✦ Halal'].map(t => (
+            <span key={t} style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>{t}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Skip */}
       <button onClick={() => navigate('home')} style={{
-        background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
-        fontSize: 14, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif'
+        background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)',
+        fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+        textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.1)'
       }}>Continuer sans abonnement →</button>
     </div>
   );
