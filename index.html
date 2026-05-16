@@ -5146,12 +5146,11 @@ function VideoCreatorPage({ navigate }) {
                   <button onClick={() => setAyahNum(a => Math.min(maxAyah, a + 1))} style={smallBtn}>+</button>
                 </div>
                 <label style={fieldLabel}>Nombre de versets (1–{maxVerseCount})</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {[1,2,3,5,7,10,15,20,30,50].filter(n => n <= maxVerseCount).concat(maxVerseCount > 50 ? [maxVerseCount] : []).map(n => (
-                    <button key={n} onClick={() => setVerseCount(n)} style={{ background: verseCount === n ? 'rgba(200,167,39,0.18)' : 'rgba(255,255,255,0.04)', border: verseCount === n ? '1.5px solid rgba(200,167,39,0.55)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '5px 13px', cursor: 'pointer', color: verseCount === n ? '#c8a727' : 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: verseCount === n ? 700 : 500, transition: 'all 0.15s', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
-                      {n === maxVerseCount && n > 50 ? `Tout (${n})` : n}
-                    </button>
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button onClick={() => setVerseCount(v => Math.max(1, v - 1))} style={smallBtn}>−</button>
+                  <input type="number" min={1} max={maxVerseCount} value={verseCount} onChange={e => setVerseCount(Math.min(maxVerseCount, Math.max(1, Number(e.target.value) || 1)))} style={{ ...selStyle, width: 80, textAlign: 'center' }} />
+                  <button onClick={() => setVerseCount(v => Math.min(maxVerseCount, v + 1))} style={smallBtn}>+</button>
+                  <button onClick={() => setVerseCount(maxVerseCount)} style={{ ...smallBtn, fontSize: 12, padding: '9px 10px', color: 'rgba(200,167,39,0.7)', borderColor: 'rgba(200,167,39,0.2)' }}>Tout</button>
                 </div>
                 {verseCount > 1 && <p style={{ color: 'rgba(200,167,39,0.6)', fontSize: 12, margin: '10px 0 0' }}>Versets {ayahNum} → {Math.min(ayahNum + verseCount - 1, maxAyah)} · {surah.fr}</p>}
               </div>
