@@ -42,6 +42,8 @@
 <!-- ── Fonts (DM Serif Display supprimé — 0 usage) ── -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel:wght@400;600;700&family=Fraunces:ital,opsz,wght@1,144,200;1,144,300&display=swap" rel="stylesheet"/>
 
+<!-- ── Stripe.js ── -->
+<script src="https://js.stripe.com/v3/" async></script>
 <!-- ── React 18 production builds (~800KB vs ~8MB dev) ── -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
@@ -846,6 +848,40 @@ function AuthModal({ onClose }) {
 function SubscriptionPage({ navigate }) {
   const { user } = useAuth();
   const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
+  const [showCheckout, setShowCheckout] = React.useState(false);
+  const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+  const [checkoutError, setCheckoutError] = React.useState(null);
+  const checkoutRef = React.useRef(null);
+  const containerRef = React.useRef(null);
+
+  const openCheckout = async function() {
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    setShowCheckout(true);
+    try {
+      var stripe = window.Stripe('pk_test_51TVoHZFwa5FfBGZ3BDufPM2mEhdsc892qlxTbwGgne3XuQCudYNSIX2r7GiGCwC3oPnxRZFVUnqyVxRYzJgdaVWt00VoftFlcA');
+      var res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      var data = await res.json();
+      if (data.error) throw new Error(data.error);
+      var checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+      checkoutRef.current = checkout;
+      setCheckoutLoading(false);
+      // Wait for container to render
+      setTimeout(function() {
+        if (containerRef.current) checkout.mount(containerRef.current);
+      }, 80);
+    } catch(err) {
+      setCheckoutError(err.message);
+      setCheckoutLoading(false);
+    }
+  };
+
+  const closeCheckout = function() {
+    if (checkoutRef.current) { checkoutRef.current.destroy(); checkoutRef.current = null; }
+    setShowCheckout(false);
+    setCheckoutLoading(false);
+    setCheckoutError(null);
+  };
   const features = [
     { icon: '🕌', title: 'Quiz islamiques', desc: '200+ questions sur les piliers, prophètes, histoire' },
     { icon: '🎵', title: 'Blind Test Coran', desc: 'Reconnais les sourates à l\'écoute' },
@@ -919,7 +955,7 @@ function SubscriptionPage({ navigate }) {
 
         {/* CTA */}
         <button
-          onClick={() => window.open(window.STRIPE_LINK, '_blank')}
+          onClick={openCheckout}
           className="sub-cta-btn"
           style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)',
             border: 'none', color: '#0a1a08', padding: '16px', borderRadius: 12,
@@ -927,8 +963,8 @@ function SubscriptionPage({ navigate }) {
             letterSpacing: 0.3, boxShadow: '0 4px 24px rgba(200,167,39,0.25)',
             transition: 'transform 0.15s, box-shadow 0.15s'
           }}
-          onMouseOver={e => { e.target.style.transform='translateY(-2px)'; e.target.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}
-          onMouseOut={e => { e.target.style.transform=''; e.target.style.boxShadow='0 4px 24px rgba(200,167,39,0.25)'; }}
+          onMouseOver={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}
+          onMouseOut={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 24px rgba(200,167,39,0.25)'; }}
         >
           🔓 Débloquer l'accès — 7,99€/mois
         </button>
@@ -947,6 +983,36 @@ function SubscriptionPage({ navigate }) {
         fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
         textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.1)'
       }}>Continuer sans abonnement →</button>
+
+      {/* ── Embedded Checkout Modal ── */}
+      {showCheckout && (
+        <div onClick={function(e){ if(e.target===e.currentTarget) closeCheckout(); }} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', backdropFilter:'blur(12px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+          <div style={{ background:'#fff', borderRadius:20, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', position:'relative', boxShadow:'0 40px 80px rgba(0,0,0,0.6)' }}>
+            {/* Close */}
+            <button onClick={closeCheckout} style={{ position:'absolute', top:14, right:14, zIndex:10, background:'rgba(0,0,0,0.07)', border:'none', borderRadius:'50%', width:32, height:32, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif' }}>✕</button>
+
+            {/* Loading */}
+            {checkoutLoading && (
+              <div style={{ padding:60, textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+                <div style={{ width:40, height:40, border:'3px solid #f0e8d0', borderTopColor:'#c8a727', borderRadius:'50%', margin:'0 auto 16px', animation:'spin 0.8s linear infinite' }} />
+                <p style={{ color:'#555', fontSize:14 }}>Chargement du paiement sécurisé…</p>
+              </div>
+            )}
+
+            {/* Error */}
+            {checkoutError && (
+              <div style={{ padding:40, textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+                <div style={{ fontSize:32, marginBottom:12 }}>⚠️</div>
+                <p style={{ color:'#dc2626', fontSize:14, marginBottom:20 }}>{checkoutError}</p>
+                <button onClick={openCheckout} style={{ background:'#c8a727', border:'none', color:'#1c1200', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:700, cursor:'pointer' }}>Réessayer</button>
+              </div>
+            )}
+
+            {/* Checkout container */}
+            {!checkoutLoading && !checkoutError && <div ref={containerRef} style={{ minHeight:200 }} />}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
