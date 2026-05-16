@@ -5549,6 +5549,92 @@ function LegalLayout({ navigate, title, children }) {
   );
 }
 
+/* ─── Payment Success Page ─── */
+function PaymentSuccessPage({ navigate }) {
+  const { user } = useAuth();
+  const [tick, setTick] = React.useState(0);
+
+  // Pulse animation tick
+  React.useEffect(function () {
+    var t = setInterval(function () { setTick(function (n) { return n + 1; }); }, 40);
+    return function () { clearInterval(t); };
+  }, []);
+
+  var ring = 'conic-gradient(#c8a727 ' + Math.min(360, tick * 6) + 'deg, rgba(255,255,255,0.06) 0deg)';
+
+  var perks = [
+    { icon: '🎵', label: 'Blind Test — tous les niveaux' },
+    { icon: '🧠', label: 'Quiz — Amateur & Avancé débloqués' },
+    { icon: '🎬', label: 'Studio Vidéo — export HD illimité' },
+    { icon: '⚡', label: 'Nouvelles fonctionnalités en avant-première' },
+  ];
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg,#050e08 0%,#040a06 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: 'Plus Jakarta Sans, sans-serif', position: 'relative', overflow: 'hidden' }}>
+
+      {/* Background glow */}
+      <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,167,39,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-10%', left: '-10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(74,222,128,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+      {/* Spinning ring + check */}
+      <div style={{ position: 'relative', marginBottom: 36 }}>
+        <div style={{ width: 120, height: 120, borderRadius: '50%', background: ring, padding: 4, boxSizing: 'border-box' }}>
+          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#050e08', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+              <circle cx="26" cy="26" r="25" stroke="rgba(200,167,39,0.3)" strokeWidth="1.5" fill="rgba(200,167,39,0.08)" />
+              <path d="M14 27L22 35L38 18" stroke="#c8a727" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
+                strokeDasharray="38" strokeDashoffset={Math.max(0, 38 - tick * 1.2)} />
+            </svg>
+          </div>
+        </div>
+        {/* Stars */}
+        {[[-44,-18],[44,-10],[-28,52],[38,48],[0,-50]].map(function([x,y],i){
+          return <div key={i} style={{ position:'absolute', top:'50%', left:'50%', transform:`translate(${x}px,${y}px)`, fontSize: 14 + (i%2)*4, opacity: tick > 20 ? 1 : 0, transition: 'opacity 0.4s', animationDelay: i*0.1+'s' }}>✦</div>;
+        })}
+      </div>
+
+      {/* Title */}
+      <div style={{ textAlign: 'center', marginBottom: 12 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 3, color: '#c8a727', textTransform: 'uppercase', marginBottom: 12 }}>Paiement confirmé</div>
+        <h1 style={{ fontSize: 'clamp(28px,6vw,42px)', fontWeight: 900, color: '#fff', margin: '0 0 14px', lineHeight: 1.15 }}>
+          Bienvenue dans<br /><span style={{ background: 'linear-gradient(90deg,#c8a727,#f0d060)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Héritage Pro 🌙</span>
+        </h1>
+        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.45)', maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+          {user ? `${user.displayName || user.email}, ton` : 'Ton'} abonnement Pro est actif. Toutes les fonctionnalités sont maintenant disponibles.
+        </p>
+      </div>
+
+      {/* Perks */}
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.18)', borderRadius: 20, padding: '24px 28px', maxWidth: 380, width: '100%', marginTop: 28, marginBottom: 32 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(200,167,39,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Accès débloqué</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {perks.map(function(p, i) {
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>{p.icon}</div>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.82)' }}>{p.label}</span>
+                <span style={{ marginLeft: 'auto', fontSize: 13, color: '#4ade80' }}>✓</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* CTA */}
+      <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s', letterSpacing: 0.3 }}
+        onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(200,167,39,0.5)'; }}
+        onMouseLeave={function(e){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}>
+        Découvrir mes fonctionnalités →
+      </button>
+
+      {/* Receipt note */}
+      <p style={{ marginTop: 20, fontSize: 12, color: 'rgba(255,255,255,0.22)', textAlign: 'center', maxWidth: 320 }}>
+        Un reçu a été envoyé par Stripe à ton adresse e-mail. Pour gérer ton abonnement, rends-toi dans ton profil.
+      </p>
+    </div>
+  );
+}
+
 /* ─── Mentions légales ─── */
 function MentionsLegalesPage({ navigate }) {
   return (
@@ -5849,6 +5935,11 @@ function NotFoundPage({ navigate }) {
 /* ─── App ─── */
 function App() {
   const [page, setPage] = React.useState(function () {
+    // Stripe redirect with ?payment=success
+    if (new URLSearchParams(window.location.search).get('payment') === 'success') {
+      window.history.replaceState(null, '', window.location.pathname);
+      return 'payment-success';
+    }
     const h = window.location.hash.slice(1);
     return h || 'home';
   });
@@ -5973,6 +6064,7 @@ function App() {
   if (page === 'studio') return wrap(<VideoCreatorPage navigate={setPage} />);
   if (page === 'start') return wrap(<StartPage navigate={setPage} />);
   if (page === 'subscription') return wrap(<><Navbar navigate={setPage} /><SubscriptionPage navigate={setPage} /></>);
+  if (page === 'payment-success') return wrap(<PaymentSuccessPage navigate={setPage} />);
   if (page === 'profile') return wrap(<><Navbar navigate={setPage} /><ProfilePage navigate={setPage} /></>);
   if (page === 'mentions-legales') return wrap(<MentionsLegalesPage navigate={setPage} />);
   if (page === 'cgu') return wrap(<CguPage navigate={setPage} />);
