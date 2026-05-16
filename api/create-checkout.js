@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const origin = req.headers.origin || 'https://heritage-musulman.vercel.app';
+    const origin = req.headers.origin || 'https://heritage-musulman.com';
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
