@@ -4652,26 +4652,57 @@ function VideoCreatorPage({ navigate }) {
         }
         const fa = fadeRef.current.alpha;
 
-        const arSz = Math.round(W * 0.044); // reduced from 0.054
+        const arSz = Math.round(W * 0.044);
         const arFont = 'bold ' + arSz + 'px "' + fontId + '", "Amiri", serif';
-        ctx.save();
-        ctx.globalAlpha = fa;
-        ctx.direction = 'rtl';ctx.textAlign = 'center';ctx.textBaseline = 'alphabetic';
-        ctx.shadowColor = 'rgba(0,0,0,0.95)';ctx.shadowBlur = 14;ctx.fillStyle = '#fff';
         const arLines = wrapCanvasText(ctx, verse.ar, W - 60, arFont);
-        const arLH = arSz * 1.6,arTH = arLines.length * arLH;
-        let y = H / 2 - arTH / 2;
-        arLines.forEach(function (line) {ctx.font = arFont;ctx.fillText(line, W / 2, y + arSz);y += arLH;});
-        ctx.restore();
+        const arLH = arSz * 1.6, arTH = arLines.length * arLH;
+
         const frSz = Math.round(W * 0.035);
         const frFont = frSz + 'px "' + fontId + '", sans-serif';
+        const frLines = wrapCanvasText(ctx, verse.fr, W - 80, frFont);
+        const frTH = frLines.length * frSz * 1.55;
+
+        const pad = 18, gap = frSz * 2.2;
+        const blockTop = H / 2 - arTH / 2 - pad;
+        const blockH = arTH + gap + frTH + pad * 2;
+
+        // ── Semi-transparent backdrop ──
+        ctx.save();
+        ctx.globalAlpha = fa * 0.72;
+        const rx = 16;
+        const bx = pad * 1.5, bw = W - pad * 3;
+        ctx.beginPath();
+        ctx.moveTo(bx + rx, blockTop);
+        ctx.lineTo(bx + bw - rx, blockTop);
+        ctx.quadraticCurveTo(bx + bw, blockTop, bx + bw, blockTop + rx);
+        ctx.lineTo(bx + bw, blockTop + blockH - rx);
+        ctx.quadraticCurveTo(bx + bw, blockTop + blockH, bx + bw - rx, blockTop + blockH);
+        ctx.lineTo(bx + rx, blockTop + blockH);
+        ctx.quadraticCurveTo(bx, blockTop + blockH, bx, blockTop + blockH - rx);
+        ctx.lineTo(bx, blockTop + rx);
+        ctx.quadraticCurveTo(bx, blockTop, bx + rx, blockTop);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fill();
+        ctx.restore();
+
+        // ── Arabic text ──
         ctx.save();
         ctx.globalAlpha = fa;
-        ctx.textAlign = 'center';ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = 'rgba(255,255,255,0.68)';ctx.shadowColor = 'rgba(0,0,0,0.95)';ctx.shadowBlur = 10;
-        const frLines = wrapCanvasText(ctx, verse.fr, W - 80, frFont);
-        let fy = H / 2 + arTH / 2 + frSz * 2.2;
-        frLines.forEach(function (line) {ctx.font = frFont;ctx.fillText(line, W / 2, fy);fy += frSz * 1.55;});
+        ctx.direction = 'rtl'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff';
+        let y = H / 2 - arTH / 2;
+        arLines.forEach(function(line) { ctx.font = arFont; ctx.fillText(line, W / 2, y + arSz); y += arLH; });
+        ctx.restore();
+
+        // ── French translation ──
+        ctx.save();
+        ctx.globalAlpha = fa;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 6;
+        ctx.fillStyle = 'rgba(255,255,255,0.82)';
+        let fy = H / 2 + arTH / 2 + gap;
+        frLines.forEach(function(line) { ctx.font = frFont; ctx.fillText(line, W / 2, fy); fy += frSz * 1.55; });
         ctx.restore();
       } else {
         ctx.fillStyle = 'rgba(255,255,255,0.2)';ctx.textAlign = 'center';ctx.textBaseline = 'middle';
