@@ -4591,7 +4591,7 @@ function VideoCreatorPage({ navigate }) {
 
   const surah = SURAHS.find((s) => s.n === surahNum) || SURAHS[0];
   const maxAyah = surah.a;
-  const maxVerseCount = Math.min(20, maxAyah - ayahNum + 1);
+  const maxVerseCount = maxAyah - ayahNum + 1;
 
   // Load Arabic fonts once
   React.useEffect(() => {
@@ -5147,8 +5147,10 @@ function VideoCreatorPage({ navigate }) {
                 </div>
                 <label style={fieldLabel}>Nombre de versets (1–{maxVerseCount})</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {[1,2,3,4,5,6,7,10,15,20].filter(n => n <= maxVerseCount).map(n => (
-                    <button key={n} onClick={() => setVerseCount(n)} style={{ background: verseCount === n ? 'rgba(200,167,39,0.18)' : 'rgba(255,255,255,0.04)', border: verseCount === n ? '1.5px solid rgba(200,167,39,0.55)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '5px 13px', cursor: 'pointer', color: verseCount === n ? '#c8a727' : 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: verseCount === n ? 700 : 500, transition: 'all 0.15s', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{n}</button>
+                  {[1,2,3,5,7,10,15,20,30,50].filter(n => n <= maxVerseCount).concat(maxVerseCount > 50 ? [maxVerseCount] : []).map(n => (
+                    <button key={n} onClick={() => setVerseCount(n)} style={{ background: verseCount === n ? 'rgba(200,167,39,0.18)' : 'rgba(255,255,255,0.04)', border: verseCount === n ? '1.5px solid rgba(200,167,39,0.55)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '5px 13px', cursor: 'pointer', color: verseCount === n ? '#c8a727' : 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: verseCount === n ? 700 : 500, transition: 'all 0.15s', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+                      {n === maxVerseCount && n > 50 ? `Tout (${n})` : n}
+                    </button>
                   ))}
                 </div>
                 {verseCount > 1 && <p style={{ color: 'rgba(200,167,39,0.6)', fontSize: 12, margin: '10px 0 0' }}>Versets {ayahNum} → {Math.min(ayahNum + verseCount - 1, maxAyah)} · {surah.fr}</p>}
