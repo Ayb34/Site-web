@@ -15,6 +15,7 @@ module.exports = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: 'price_1TVoPhFwa5FfBGZ3xEDszJ8d', quantity: 1 }],
+      payment_method_types: ['card', 'paypal'],
       ui_mode: 'embedded',
       return_url: `${origin}/#payment-success`,
       locale: 'fr',
