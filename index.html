@@ -859,7 +859,7 @@ function SubscriptionPage({ navigate }) {
     setCheckoutError(null);
     setShowCheckout(true);
     try {
-      var stripe = window.Stripe('pk_test_51TVoHZFwa5FfBGZ3BDufPM2mEhdsc892qlxTbwGgne3XuQCudYNSIX2r7GiGCwC3oPnxRZFVUnqyVxRYzJgdaVWt00VoftFlcA');
+      var stripe = window.Stripe('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
       var res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
