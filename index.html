@@ -6117,32 +6117,37 @@ function App() {
 
   useEffect(() => {
     const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line';
+    const seen = new WeakSet(); // track already-observed elements — never re-observe
 
-    function observeAll(obs) {
-      document.querySelectorAll(CLASSES).forEach((el) => obs.observe(el));
+    function observeNew(obs) {
+      document.querySelectorAll(CLASSES).forEach((el) => {
+        if (!seen.has(el)) { seen.add(el); obs.observe(el); }
+      });
     }
 
     const revealObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          revealObs.unobserve(e.target); // once visible, stop watching — never hidden again
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => { e.target.classList.add('visible'); });
+          });
+          revealObs.unobserve(e.target); // once shown, done
         }
       });
-    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
-    observeAll(revealObs);
+    observeNew(revealObs);
 
-    // MutationObserver: observe elements added after initial mount (async renders)
-    const mutObs = new MutationObserver(() => { observeAll(revealObs); });
+    // MutationObserver: picks up elements added by async React renders — WeakSet prevents double-observe
+    const mutObs = new MutationObserver(() => { observeNew(revealObs); });
     mutObs.observe(document.body, { childList: true, subtree: true });
 
-    // Fallback: after 2s force-reveal anything still hidden (safety net)
+    // Fallback: after 3s force-reveal anything still invisible (safety net for edge cases)
     const fallback = setTimeout(() => {
       document.querySelectorAll(CLASSES).forEach((el) => {
         if (!el.classList.contains('visible')) el.classList.add('visible');
       });
-    }, 2000);
+    }, 3000);
 
     // Counter observer
     const counterObs = new IntersectionObserver((entries) => {
