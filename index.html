@@ -1367,26 +1367,30 @@ function Navbar({ navigate }) {
         <div className="hide-mobile" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {user ? (
             <>
-              {isPro ? (
-                <div className="nav-pro-wrap">
-                  <button onClick={() => navigate('profile')} className="nav-pro-btn" title="Compte Pro — voir mon profil">
-                    <span className="nav-crown">👑</span>
-                    <span className="nav-avatar">{(user.displayName || user.email || '?')[0]}</span>
-                    <span style={{ overflow:'hidden', textOverflow:'ellipsis', maxWidth:100 }}>
-                      {user.displayName || user.email.split('@')[0]}
-                    </span>
-                    <span style={{ fontSize:10, background:'rgba(200,167,39,0.15)', borderRadius:4, padding:'1px 6px', flexShrink:0, color:'rgba(200,167,39,0.85)', fontWeight:700, letterSpacing:'0.05em' }}>PRO</span>
-                  </button>
+              <button onClick={() => navigate('profile')} title={isPro ? 'Compte Pro' : 'Mon compte'} style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative'
+              }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: '50%',
+                  background: 'linear-gradient(135deg,#c8a727,#e6c84a)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 16, fontWeight: 800, color: '#1c1200',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  boxShadow: isPro ? '0 0 0 2px rgba(200,167,39,0.5)' : 'none',
+                  transition: 'box-shadow 0.2s'
+                }}>
+                  {(user.displayName || user.email || '?')[0].toUpperCase()}
                 </div>
-              ) : (
-                <button onClick={() => navigate('profile')} className="nav-free-btn" title="Compte gratuit — passer à Pro">
-                  <span className="nav-free-avatar">{(user.displayName || user.email || '?')[0]}</span>
-                  <span style={{ overflow:'hidden', textOverflow:'ellipsis', maxWidth:90 }}>
-                    {user.displayName || user.email.split('@')[0]}
-                  </span>
-                  <span style={{ fontSize:10, background:'rgba(200,167,39,0.12)', border:'1px solid rgba(200,167,39,0.25)', borderRadius:4, padding:'1px 5px', flexShrink:0, color:'rgba(200,167,39,0.7)' }}>✦ Pro</span>
-                </button>
-              )}
+                {isPro && (
+                  <div style={{
+                    position: 'absolute', bottom: -2, right: -2,
+                    width: 14, height: 14, borderRadius: '50%',
+                    background: '#c8a727', border: '2px solid #050e08',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 7, lineHeight: 1
+                  }}>✦</div>
+                )}
+              </button>
               <button onClick={logout} style={{
                 background: 'transparent', border: '1px solid rgba(255,255,255,0.12)',
                 color: 'rgba(255,255,255,0.4)', padding: '7px 12px', borderRadius: 8,
