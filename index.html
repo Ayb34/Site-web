@@ -296,6 +296,9 @@
     from { transform: rotate(-5deg); }
     to { transform: rotate(5deg); }
   }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
   @keyframes goldShimmer {
     0%   { background-position: -400% center; }
     100% { background-position:  400% center; }
@@ -5669,14 +5672,46 @@ function LegalLayout({ navigate, title, children }) {
 
 /* ─── Payment Success Page ─── */
 function PaymentSuccessPage({ navigate }) {
-  const { user } = useAuth();
+  const { user, isPro } = useAuth();
   const [tick, setTick] = React.useState(0);
+  const [proConfirmed, setProConfirmed] = React.useState(false);
+  const [checkDot, setCheckDot] = React.useState(0);
 
   // Pulse animation tick
   React.useEffect(function () {
     var t = setInterval(function () { setTick(function (n) { return n + 1; }); }, 40);
     return function () { clearInterval(t); };
   }, []);
+
+  // Confirm Pro from Firestore — poll until isPro true (max 30s)
+  React.useEffect(function () {
+    if (isPro) { setProConfirmed(true); return; }
+    if (!user || !window._db) return;
+    var attempts = 0;
+    var maxAttempts = 15;
+    var interval = setInterval(function () {
+      attempts++;
+      window._db.collection('users').doc(user.uid).get().then(function (doc) {
+        if (doc.exists && doc.data().isPro === true) {
+          setProConfirmed(true);
+          clearInterval(interval);
+        } else if (attempts >= maxAttempts) {
+          setProConfirmed(true); // let user through anyway after 30s
+          clearInterval(interval);
+        }
+      }).catch(function () {
+        if (attempts >= maxAttempts) { setProConfirmed(true); clearInterval(interval); }
+      });
+    }, 2000);
+    return function () { clearInterval(interval); };
+  }, [user, isPro]);
+
+  // Animated dots while waiting
+  React.useEffect(function () {
+    if (proConfirmed) return;
+    var t = setInterval(function () { setCheckDot(function (n) { return (n + 1) % 4; }); }, 500);
+    return function () { clearInterval(t); };
+  }, [proConfirmed]);
 
   var ring = 'conic-gradient(#c8a727 ' + Math.min(360, tick * 6) + 'deg, rgba(255,255,255,0.06) 0deg)';
 
@@ -5739,11 +5774,20 @@ function PaymentSuccessPage({ navigate }) {
       </div>
 
       {/* CTA */}
-      <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s', letterSpacing: 0.3 }}
-        onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(200,167,39,0.5)'; }}
-        onMouseLeave={function(e){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}>
-        Découvrir mes fonctionnalités →
-      </button>
+      {!proConfirmed ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 44, height: 44, border: '3px solid rgba(200,167,39,0.25)', borderTopColor: '#c8a727', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            {'Activation en cours' + '.'.repeat(checkDot)}
+          </p>
+        </div>
+      ) : (
+        <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s', letterSpacing: 0.3 }}
+          onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(200,167,39,0.5)'; }}
+          onMouseLeave={function(e){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}>
+          Découvrir mes fonctionnalités →
+        </button>
+      )}
 
       {/* Receipt note */}
       <p style={{ marginTop: 20, fontSize: 12, color: 'rgba(255,255,255,0.22)', textAlign: 'center', maxWidth: 320 }}>
