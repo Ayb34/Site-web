@@ -357,57 +357,22 @@
     100% { transform: rotate(360deg); }
   }
   .nav-pro-wrap {
-    position: relative; border-radius: 12px; padding: 2px;
-    background: linear-gradient(90deg, #ffd700, #fff5a0, #c8a727, #ffe566, #ffd700);
-    background-size: 300% auto;
-    animation: goldShimmer 1.8s linear infinite;
-    box-shadow: 0 0 16px 4px rgba(255,215,0,0.45), 0 0 40px 8px rgba(200,167,39,0.28);
-    border-radius: 12px;
+    position: relative; border-radius: 10px;
+    border: 1px solid rgba(200,167,39,0.45);
+    background: rgba(200,167,39,0.06);
   }
   .nav-pro-btn {
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg,
-      #1a0e00 0%,
-      #2d1f00 20%,
-      #3d2a00 40%,
-      #2d1f00 60%,
-      #1a0e00 100%
-    );
+    background: transparent;
     border: none; border-radius: 10px;
-    color: #ffe566; font-weight: 800; font-size: 13px;
-    padding: 8px 15px; cursor: pointer;
+    color: rgba(200,167,39,0.9); font-weight: 700; font-size: 13px;
+    padding: 7px 13px; cursor: pointer;
     font-family: 'Plus Jakarta Sans', sans-serif;
     display: flex; align-items: center; gap: 7px;
     white-space: nowrap;
-    transition: transform 0.15s;
-    text-shadow: 0 0 8px rgba(255,230,80,0.7), 0 1px 0 rgba(0,0,0,0.5);
-    letter-spacing: 0.02em;
+    transition: background 0.2s;
   }
-  .nav-pro-btn::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255,240,100,0.08) 30%,
-      rgba(255,255,180,0.22) 50%,
-      rgba(255,240,100,0.08) 70%,
-      transparent 100%
-    );
-    background-size: 400% auto;
-    animation: goldShimmer 1.8s linear infinite;
-    border-radius: 10px;
-    pointer-events: none;
-  }
-  .nav-pro-btn::after {
-    content: '';
-    position: absolute; top: -10%; left: -80%;
-    width: 40%; height: 120%;
-    background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.75) 50%, transparent 100%);
-    animation: sweepLight 1.8s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .nav-pro-btn:hover { transform: scale(1.06); filter: brightness(1.15); }
-  .nav-pro-wrap:hover { box-shadow: 0 0 24px 8px rgba(255,215,0,0.7), 0 0 60px 14px rgba(200,167,39,0.45); }
+  .nav-pro-btn:hover { background: rgba(200,167,39,0.1); }
+  .nav-pro-wrap:hover { border-color: rgba(200,167,39,0.7); }
   .nav-free-btn {
     position: relative;
     background: rgba(200,167,39,0.07);
@@ -421,7 +386,7 @@
     transition: all 0.2s;
   }
   .nav-free-btn:hover { background: rgba(200,167,39,0.13); border-color: rgba(200,167,39,0.7); }
-  .nav-crown { animation: crownBob 1.8s ease-in-out infinite; display: inline-block; font-size: 14px; }
+  .nav-crown { display: inline-block; font-size: 13px; }
   .nav-avatar {
     width: 24px; height: 24px; border-radius: 50%;
     background: rgba(26,14,0,0.35);
@@ -1410,7 +1375,7 @@ function Navbar({ navigate }) {
                     <span style={{ overflow:'hidden', textOverflow:'ellipsis', maxWidth:100 }}>
                       {user.displayName || user.email.split('@')[0]}
                     </span>
-                    <span style={{ fontSize:10, background:'rgba(255,230,80,0.18)', border:'1px solid rgba(255,220,50,0.4)', borderRadius:4, padding:'1px 6px', flexShrink:0, color:'#ffe566', fontWeight:900, letterSpacing:'0.05em' }}>PRO</span>
+                    <span style={{ fontSize:10, background:'rgba(200,167,39,0.15)', borderRadius:4, padding:'1px 6px', flexShrink:0, color:'rgba(200,167,39,0.85)', fontWeight:700, letterSpacing:'0.05em' }}>PRO</span>
                   </button>
                 </div>
               ) : (
