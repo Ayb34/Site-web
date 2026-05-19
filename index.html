@@ -1364,11 +1364,12 @@ function Navbar({ navigate }) {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      background: 'rgba(2,10,5,0.96)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(200,167,39,0.2)',
-      boxShadow: '0 1px 0 rgba(200,167,39,0.06), 0 4px 32px rgba(0,0,0,0.5)',
+      background: scrolled ? 'rgba(3,14,8,0.82)' : 'rgba(3,14,8,0.55)',
+      backdropFilter: 'blur(6px)',
+      WebkitBackdropFilter: 'blur(6px)',
+      borderBottom: scrolled ? '1px solid rgba(200,167,39,0.13)' : '1px solid transparent',
+      boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.45)' : 'none',
+      transition: 'all 0.3s ease',
       padding: '0 32px'
     }}>
       <div className="navbar-inner" style={{
@@ -1387,9 +1388,9 @@ function Navbar({ navigate }) {
             const isActive = (link === 'Accueil' && window.location.hash === '') ||
               (pageMap[link] && window.location.hash === '#' + pageMap[link]);
             return (
-              <a key={link} href="#" onClick={(e) => {e.preventDefault();if (pageMap[link]) navigate(pageMap[link]);else navigate('home');}}
+              <a key={link} href="#" onClick={(e) => { e.preventDefault(); if (pageMap[link]) navigate(pageMap[link]); else navigate('home'); window.scrollTo({ top: 0, behavior: 'instant' }); }}
                 style={{
-                  color: isActive ? '#c8a727' : 'rgba(255,255,255,0.65)',
+                  color: isActive ? '#c8a727' : 'rgba(255,255,255,0.82)',
                   textDecoration: 'none',
                   fontSize: 14,
                   fontWeight: 500,
@@ -1399,10 +1400,9 @@ function Navbar({ navigate }) {
                   textTransform: 'uppercase',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
                   transition: 'color 0.15s',
-                  borderBottom: isActive ? '2px solid #c8a727' : '2px solid transparent',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = isActive ? '#c8a727' : 'rgba(255,255,255,0.65)'; }}>
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#c8a727'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = isActive ? '#c8a727' : 'rgba(255,255,255,0.82)'; }}>
                 {link}
               </a>
             );
@@ -1513,7 +1513,7 @@ function Navbar({ navigate }) {
 
         {/* Nav links */}
         {navLinks.map((link, i) =>
-          <a key={link} href="#" onClick={(e) => { e.preventDefault(); setMenuOpen(false); if (pageMap[link]) navigate(pageMap[link]); else navigate('home'); }} style={{
+          <a key={link} href="#" onClick={(e) => { e.preventDefault(); setMenuOpen(false); if (pageMap[link]) navigate(pageMap[link]); else navigate('home'); window.scrollTo({ top: 0, behavior: 'instant' }); }} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             color: '#fff', textDecoration: 'none',
             fontSize: 17, fontWeight: 600, padding: '14px 4px',
