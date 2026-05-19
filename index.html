@@ -1364,38 +1364,49 @@ function Navbar({ navigate }) {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      background: scrolled ? 'rgba(3,14,8,0.82)' : 'rgba(3,14,8,0.55)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      borderBottom: scrolled ? '1px solid rgba(200,167,39,0.13)' : '1px solid transparent',
-      boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.45)' : 'none',
-      transition: 'all 0.3s ease',
-      padding: '0 24px'
+      background: scrolled ? 'rgba(3,12,7,0.92)' : 'rgba(3,12,7,0.6)',
+      backdropFilter: 'blur(14px)',
+      WebkitBackdropFilter: 'blur(14px)',
+      borderBottom: scrolled ? '1px solid rgba(200,167,39,0.18)' : '1px solid rgba(255,255,255,0.04)',
+      boxShadow: scrolled ? '0 2px 40px rgba(0,0,0,0.6)' : 'none',
+      transition: 'all 0.35s ease',
+      padding: '0 28px'
     }}>
       <div className="navbar-inner" style={{
-        maxWidth: 1200, margin: '0 auto',
+        maxWidth: 1280, margin: '0 auto',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: 80, position: 'relative'
+        height: 72, position: 'relative'
       }}>
         {/* Logo */}
-        <div className="navbar-logo" style={{ cursor: 'pointer', marginTop: 6 }} onClick={() => navigate('home')}>
-          <CrescentLogo size={120} />
+        <div className="navbar-logo" style={{ cursor: 'pointer', marginTop: 4, flexShrink: 0 }} onClick={() => navigate('home')}>
+          <CrescentLogo size={110} />
         </div>
 
         {/* Desktop nav links */}
-        <div className="hide-mobile" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-          {navLinks.map((link) =>
-          <a key={link} href="#" onClick={(e) => {e.preventDefault();if (pageMap[link]) navigate(pageMap[link]);else navigate('home');}} style={{
-            color: 'rgba(255,255,255,0.82)',
-            textDecoration: 'none',
-            fontSize: 14,
-            fontWeight: 500,
-            transition: 'color 0.2s'
-          }}
-          onMouseEnter={(e) => e.target.style.color = '#c8a727'}
-          onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.82)'}>
-            {link}</a>
-          )}
+        <div className="hide-mobile" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {navLinks.map((link) => {
+            const isActive = (link === 'Accueil' && window.location.hash === '') ||
+              (pageMap[link] && window.location.hash === '#' + pageMap[link]);
+            return (
+              <a key={link} href="#" onClick={(e) => {e.preventDefault();if (pageMap[link]) navigate(pageMap[link]);else navigate('home');}}
+                style={{
+                  color: isActive ? '#c8a727' : 'rgba(255,255,255,0.78)',
+                  textDecoration: 'none',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  transition: 'all 0.18s ease',
+                  letterSpacing: '0.01em',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  position: 'relative',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#c8a727'; e.currentTarget.style.background = 'rgba(200,167,39,0.08)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = isActive ? '#c8a727' : 'rgba(255,255,255,0.78)'; e.currentTarget.style.background = 'transparent'; }}>
+                {link}
+              </a>
+            );
+          })}
         </div>
 
         {/* CTA buttons */}
