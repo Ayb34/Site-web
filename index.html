@@ -3636,7 +3636,7 @@ function Footer({ navigate }) {
               {[
                 { label:'Mentions légales',            page:'mentions-legales' },
                 { label:'Politique de confidentialité', page:'confidentialite' },
-                { label:'CGU',                          page:'cgu' },
+                { label:'CGV',                          page:'cgu' },
                 { label:'Contact',                      page:null, href:'mailto:contact.heritagemusulman@gmail.com' },
               ].map(function(l) {
                 return (
@@ -5853,9 +5853,9 @@ function MentionsLegalesPage({ navigate }) {
       <h2 style={LS.h2}>3. Hébergement</h2>
       <p style={LS.p}>Le site est hébergé par :</p>
       <ul style={LS.ul}>
-        <li style={LS.li}><strong>Société :</strong> Hostinger International Ltd</li>
-        <li style={LS.li}><strong>Adresse :</strong> 61 Lordou Vironos Street, 6023 Larnaca, Chypre</li>
-        <li style={LS.li}><strong>Site :</strong> www.hostinger.fr</li>
+        <li style={LS.li}><strong>Société :</strong> Vercel Inc.</li>
+        <li style={LS.li}><strong>Adresse :</strong> 340 Pine Street, Suite 701, San Francisco, CA 94104, États-Unis</li>
+        <li style={LS.li}><strong>Site :</strong> www.vercel.com</li>
       </ul>
 
       <h2 style={LS.h2}>4. Propriété intellectuelle</h2>
@@ -6051,9 +6051,9 @@ function PolitiqueConfidentialitePage({ navigate }) {
             <td style={tdStyle}>États-Unis / UE</td>
           </tr>
           <tr>
-            <td style={tdStyle}>Hostinger</td>
+            <td style={tdStyle}>Vercel Inc.</td>
             <td style={tdStyle}>Hébergement du site</td>
-            <td style={tdStyle}>Union Européenne</td>
+            <td style={tdStyle}>États-Unis (transfers CCT)</td>
           </tr>
           <tr>
             <td style={tdStyle}>EmailJS</td>
@@ -6106,6 +6106,115 @@ function PolitiqueConfidentialitePage({ navigate }) {
         Cette politique peut être mise à jour. En cas de modification substantielle, vous serez informé par email. La version en vigueur est celle affichée sur cette page avec sa date de mise à jour.
       </p>
     </LegalLayout>
+  );
+}
+
+/* ─── CGV Page ─── */
+function CGVPage({ navigate }) {
+  return (
+    <LegalLayout navigate={navigate} title="Conditions Générales de Vente">
+      <p style={LS.p}>Dernière mise à jour : mai 2026. Les présentes CGV régissent l'achat de l'abonnement Héritage Pro sur <strong>heritage-musulman.com</strong>.</p>
+
+      <h2 style={LS.h2}>1. Vendeur</h2>
+      <ul style={LS.ul}>
+        <li style={LS.li}><strong>Nom :</strong> Ayoub Rachidi</li>
+        <li style={LS.li}><strong>Statut :</strong> Micro-entrepreneur</li>
+        <li style={LS.li}><strong>SIRET :</strong> 10481878600001</li>
+        <li style={LS.li}><strong>Email :</strong> contact.heritagemusulman@gmail.com</li>
+      </ul>
+
+      <h2 style={LS.h2}>2. Produit et prix</h2>
+      <p style={LS.p}>L'abonnement <strong>Héritage Pro</strong> donne accès à l'intégralité des fonctionnalités de la plateforme (tous niveaux de quiz, blind test illimité, studio vidéo HD).</p>
+      <ul style={LS.ul}>
+        <li style={LS.li}><strong>Prix :</strong> 7,99 € TTC / mois</li>
+        <li style={LS.li}><strong>Facturation :</strong> mensuelle, reconduite automatiquement</li>
+        <li style={LS.li}><strong>Paiement :</strong> carte bancaire via Stripe (sécurisé, certifié PCI DSS)</li>
+        <li style={LS.li}><strong>TVA :</strong> non applicable — micro-entrepreneur (art. 293 B CGI)</li>
+      </ul>
+
+      <h2 style={LS.h2}>3. Accès au service</h2>
+      <p style={LS.p}>L'accès Pro est activé immédiatement après confirmation du paiement par Stripe. Il est lié à votre compte et non transférable.</p>
+
+      <h2 style={LS.h2}>4. Rétractation</h2>
+      <p style={LS.p}>Conformément à l'article L.221-28 du Code de la consommation, <strong>le droit de rétractation de 14 jours ne s'applique pas</strong> aux contenus numériques fournis immédiatement après confirmation de paiement, avec votre accord exprès.</p>
+      <p style={LS.p}>Toutefois, si vous n'avez pas encore accédé au service, vous pouvez demander un remboursement dans les 48h à : <strong>contact.heritagemusulman@gmail.com</strong>.</p>
+
+      <h2 style={LS.h2}>5. Résiliation</h2>
+      <p style={LS.p}>Vous pouvez résilier votre abonnement à tout moment depuis votre espace <strong>Profil</strong> sur le site. La résiliation prend effet à la fin de la période de facturation en cours — vous conservez l'accès Pro jusqu'à cette date. Aucun remboursement partiel n'est effectué.</p>
+
+      <h2 style={LS.h2}>6. Renouvellement et résiliation par le vendeur</h2>
+      <p style={LS.p}>L'abonnement est renouvelé automatiquement chaque mois. Vous serez notifié par email en cas d'échec de paiement. Le vendeur se réserve le droit de suspendre un compte en cas de violation des présentes CGV ou d'utilisation abusive de la plateforme.</p>
+
+      <h2 style={LS.h2}>7. Responsabilité</h2>
+      <p style={LS.p}>La plateforme est fournie « en l'état ». Le vendeur s'engage à maintenir un niveau de disponibilité raisonnable mais ne peut garantir un accès ininterrompu. En cas d'interruption prolongée (plus de 72h), un avoir pourra être accordé sur demande.</p>
+
+      <h2 style={LS.h2}>8. Litiges</h2>
+      <p style={LS.p}>En cas de litige, une solution amiable sera recherchée en priorité via <strong>contact.heritagemusulman@gmail.com</strong>. À défaut, les tribunaux français seront compétents, le droit français applicable. Vous pouvez également recourir à la médiation via la plateforme européenne : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color:'#c8a727' }}>ec.europa.eu/consumers/odr</a>.</p>
+    </LegalLayout>
+  );
+}
+
+/* ─── Bannière RGPD ─── */
+function RgpdBanner({ onAccept, onDecline }) {
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(function() {
+    var consent = localStorage.getItem('hm_cookie_consent');
+    if (!consent) setVisible(true);
+  }, []);
+
+  if (!visible) return null;
+
+  function accept() {
+    localStorage.setItem('hm_cookie_consent', 'accepted');
+    setVisible(false);
+    if (onAccept) onAccept();
+  }
+  function decline() {
+    localStorage.setItem('hm_cookie_consent', 'declined');
+    setVisible(false);
+    if (onDecline) onDecline();
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99998,
+      background: 'rgba(3,12,7,0.97)', backdropFilter: 'blur(16px)',
+      borderTop: '1px solid rgba(200,167,39,0.2)',
+      padding: '16px 24px',
+      display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+      boxShadow: '0 -4px 32px rgba(0,0,0,0.5)',
+      fontFamily: 'Plus Jakarta Sans, sans-serif',
+    }}>
+      <div style={{ flex: 1, minWidth: 240 }}>
+        <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+          🍪 Nous utilisons des cookies strictement nécessaires au fonctionnement du site (session, paiement).
+          {' '}<span style={{ color: 'rgba(255,255,255,0.45)' }}>Aucun cookie publicitaire sans votre accord.</span>
+        </p>
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+        <button onClick={decline} style={{
+          background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
+          color: 'rgba(255,255,255,0.55)', padding: '8px 18px', borderRadius: 8,
+          fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+          transition: 'all 0.2s'
+        }}
+        onMouseEnter={e => e.currentTarget.style.borderColor='rgba(255,255,255,0.4)'}
+        onMouseLeave={e => e.currentTarget.style.borderColor='rgba(255,255,255,0.2)'}>
+          Refuser
+        </button>
+        <button onClick={accept} style={{
+          background: 'linear-gradient(135deg,#c8a727,#e6c84a)',
+          border: 'none', color: '#1c1200', padding: '8px 22px', borderRadius: 8,
+          fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+          boxShadow: '0 2px 12px rgba(200,167,39,0.35)', transition: 'all 0.2s'
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'}
+        onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
+          Accepter
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -6262,6 +6371,7 @@ function App() {
     <AuthContext.Provider value={authCtx}>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       {children}
+      <RgpdBanner />
     </AuthContext.Provider>
   );
 
@@ -6283,7 +6393,7 @@ function App() {
   if (page === 'payment-success') return wrap(<PaymentSuccessPage navigate={setPage} />);
   if (page === 'profile') return wrap(<><Navbar navigate={setPage} /><ProfilePage navigate={setPage} /></>);
   if (page === 'mentions-legales') return wrap(<MentionsLegalesPage navigate={setPage} />);
-  if (page === 'cgu') return wrap(<CguPage navigate={setPage} />);
+  if (page === 'cgu') return wrap(<CGVPage navigate={setPage} />);
   if (page === 'confidentialite') return wrap(<PolitiqueConfidentialitePage navigate={setPage} />);
 
   if (page !== 'home') return wrap(<NotFoundPage navigate={setPage} />);
