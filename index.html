@@ -35,9 +35,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="preconnect" href="https://www.gstatic.com"/>
-<link rel="dns-prefetch" href="https://unpkg.com"/>
-<link rel="dns-prefetch" href="https://cdn.jsdelivr.net"/>
+<link rel="preconnect" href="https://unpkg.com" crossorigin/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link rel="preconnect" href="https://js.stripe.com" crossorigin/>
 <link rel="dns-prefetch" href="https://api.emailjs.com"/>
+<link rel="dns-prefetch" href="https://firestore.googleapis.com"/>
+<link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com"/>
 
 <!-- ── Fonts (DM Serif Display supprimé — 0 usage) ── -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel:wght@400;600;700&family=Fraunces:ital,opsz,wght@1,144,200;1,144,300&display=swap" rel="stylesheet"/>
@@ -91,6 +94,31 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { overflow-x: hidden; width: 100%; }
 
+  /* ── Loading screen — visible avant que React monte ── */
+  #app-loading {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #040a06;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.4s ease;
+  }
+  #app-loading.hidden { opacity: 0; pointer-events: none; }
+  #app-loading-inner {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 3px solid rgba(200,167,39,0.15);
+    border-top-color: #c8a727;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* ── Reduced motion: désactive toutes les animations ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip,
+    .reveal-stagger > *, .reveal-stagger-alt > *,
+    .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards > * {
+      opacity: 1 !important; transform: none !important; filter: none !important;
+    }
+  }
+
   :root {
     --green-dark: #1a5c35;
     --green-mid: #236b3e;
@@ -129,82 +157,90 @@
   /* ── Base reveal — monte avec légère rotation ── */
   .reveal {
     opacity: 0;
-    transform: translateY(56px) scale(0.96) rotate(-0.8deg);
-    transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1);
+    transform: translateY(40px) scale(0.97);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
   .reveal.visible {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
   }
 
   /* ── Slide depuis la gauche avec rotation ── */
   .reveal-left {
     opacity: 0;
-    transform: translateX(-80px) skewX(4deg) scale(0.95);
-    transition: opacity 0.95s cubic-bezier(0.22,1,0.36,1), transform 0.95s cubic-bezier(0.22,1,0.36,1);
+    transform: translateX(-60px) scale(0.97);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
   .reveal-left.visible {
     opacity: 1;
-    transform: translateX(0) skewX(0deg) scale(1);
+    transform: translateX(0) scale(1);
   }
 
-  /* ── Slide depuis la droite avec rotation ── */
+  /* ── Slide depuis la droite ── */
   .reveal-right {
     opacity: 0;
-    transform: translateX(80px) skewX(-4deg) scale(0.95);
-    transition: opacity 0.95s cubic-bezier(0.22,1,0.36,1), transform 0.95s cubic-bezier(0.22,1,0.36,1);
+    transform: translateX(60px) scale(0.97);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
   .reveal-right.visible {
     opacity: 1;
-    transform: translateX(0) skewX(0deg) scale(1);
+    transform: translateX(0) scale(1);
   }
 
   /* ── Scale pop élastique ── */
   .reveal-scale {
     opacity: 0;
-    transform: scale(0.75) rotate(2deg);
-    transition: opacity 0.85s cubic-bezier(0.34,1.56,0.64,1), transform 0.85s cubic-bezier(0.34,1.56,0.64,1);
+    transform: scale(0.82);
+    transition: opacity 0.65s cubic-bezier(0.34,1.4,0.64,1), transform 0.65s cubic-bezier(0.34,1.4,0.64,1);
+    will-change: transform, opacity;
   }
   .reveal-scale.visible {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
+    transform: scale(1);
   }
 
-  /* ── Stagger: chaque enfant monte + rebond ── */
+  /* ── Stagger: chaque enfant monte ── */
   .reveal-stagger > * {
     opacity: 0;
-    transform: translateY(50px) scale(0.93);
-    transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.34,1.4,0.64,1);
+    transform: translateY(36px);
+    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
-  .reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0) scale(1); transition-delay: 0s; }
-  .reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0) scale(1); transition-delay: 0.15s; }
-  .reveal-stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0) scale(1); transition-delay: 0.30s; }
-  .reveal-stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0) scale(1); transition-delay: 0.45s; }
-  .reveal-stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0) scale(1); transition-delay: 0.60s; }
-  .reveal-stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0) scale(1); transition-delay: 0.75s; }
+  .reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay: 0s; }
+  .reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay: 0.10s; }
+  .reveal-stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay: 0.20s; }
+  .reveal-stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay: 0.30s; }
+  .reveal-stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay: 0.40s; }
+  .reveal-stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay: 0.50s; }
 
-  /* ── Stagger alt: gauche/droite + légère rotation ── */
+  /* ── Stagger alt: gauche/droite ── */
   .reveal-stagger-alt > *:nth-child(odd) {
     opacity: 0;
-    transform: translateX(-70px) rotate(-2deg) scale(0.94);
-    transition: opacity 0.85s cubic-bezier(0.22,1,0.36,1), transform 0.85s cubic-bezier(0.22,1,0.36,1);
+    transform: translateX(-50px);
+    transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
   .reveal-stagger-alt > *:nth-child(even) {
     opacity: 0;
-    transform: translateX(70px) rotate(2deg) scale(0.94);
-    transition: opacity 0.85s cubic-bezier(0.22,1,0.36,1), transform 0.85s cubic-bezier(0.22,1,0.36,1);
+    transform: translateX(50px);
+    transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
-  .reveal-stagger-alt.visible > *:nth-child(1) { opacity:1; transform:translateX(0) rotate(0deg) scale(1); transition-delay: 0s; }
-  .reveal-stagger-alt.visible > *:nth-child(2) { opacity:1; transform:translateX(0) rotate(0deg) scale(1); transition-delay: 0.15s; }
-  .reveal-stagger-alt.visible > *:nth-child(3) { opacity:1; transform:translateX(0) rotate(0deg) scale(1); transition-delay: 0.30s; }
-  .reveal-stagger-alt.visible > *:nth-child(4) { opacity:1; transform:translateX(0) rotate(0deg) scale(1); transition-delay: 0.45s; }
+  .reveal-stagger-alt.visible > *:nth-child(1) { opacity:1; transform:translateX(0); transition-delay: 0s; }
+  .reveal-stagger-alt.visible > *:nth-child(2) { opacity:1; transform:translateX(0); transition-delay: 0.10s; }
+  .reveal-stagger-alt.visible > *:nth-child(3) { opacity:1; transform:translateX(0); transition-delay: 0.20s; }
+  .reveal-stagger-alt.visible > *:nth-child(4) { opacity:1; transform:translateX(0); transition-delay: 0.30s; }
 
-  /* ── Flip depuis le bas (pour éléments isolés) ── */
+  /* ── Flip depuis le bas ── */
   .reveal-flip {
     opacity: 0;
-    transform: perspective(600px) rotateX(18deg) translateY(40px);
+    transform: translateY(40px) scale(0.96);
     transform-origin: top center;
-    transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1);
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
   .reveal-flip.visible {
     opacity: 1;
@@ -441,35 +477,32 @@
 
   /* ── Classes scroll-reveal enrichies ── */
   .reveal-blur {
-    opacity: 0; filter: blur(12px); transform: translateY(32px);
-    transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1),
-                filter 0.9s cubic-bezier(0.22,1,0.36,1),
-                transform 0.9s cubic-bezier(0.22,1,0.36,1);
+    opacity: 0; transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
-  .reveal-blur.visible { opacity: 1; filter: blur(0); transform: translateY(0); }
+  .reveal-blur.visible { opacity: 1; transform: translateY(0); }
 
   .reveal-zoom {
-    opacity: 0; transform: scale(0.85);
-    transition: opacity 0.85s cubic-bezier(0.34,1.4,0.64,1),
-                transform 0.85s cubic-bezier(0.34,1.4,0.64,1);
+    opacity: 0; transform: scale(0.88);
+    transition: opacity 0.6s cubic-bezier(0.34,1.4,0.64,1), transform 0.6s cubic-bezier(0.34,1.4,0.64,1);
+    will-change: transform, opacity;
   }
   .reveal-zoom.visible { opacity: 1; transform: scale(1); }
 
   .reveal-drop {
-    opacity: 0; transform: translateY(-36px) scale(0.96);
-    transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1),
-                transform 0.75s cubic-bezier(0.34,1.3,0.64,1);
+    opacity: 0; transform: translateY(-28px) scale(0.97);
+    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.34,1.3,0.64,1);
+    will-change: transform, opacity;
   }
   .reveal-drop.visible { opacity: 1; transform: translateY(0) scale(1); }
 
   .reveal-glow {
     opacity: 0; transform: translateY(20px);
-    filter: blur(4px);
-    transition: opacity 1s cubic-bezier(0.22,1,0.36,1),
-                transform 1s cubic-bezier(0.22,1,0.36,1),
-                filter 1s ease;
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    will-change: transform, opacity;
   }
-  .reveal-glow.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+  .reveal-glow.visible { opacity: 1; transform: translateY(0); }
 
   /* stagger jusqu'à 8 enfants */
   .reveal-stagger > *:nth-child(7) { transition-delay: 0.9s; }
@@ -632,6 +665,7 @@
 </head>
 <body>
 
+<div id="app-loading"><div id="app-loading-inner"></div></div>
 <div id="root"></div>
 
 
@@ -6264,6 +6298,11 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+// Hide loading screen once React is mounted
+requestAnimationFrame(() => {
+  const loader = document.getElementById('app-loading');
+  if (loader) { loader.classList.add('hidden'); setTimeout(() => loader.remove(), 500); }
+});
 </script>
 
 <style>
