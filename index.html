@@ -766,7 +766,22 @@ function AuthModal({ onClose }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
   const { onAuthSuccess } = useAuth();
+
+  const sendReset = async () => {
+    if (!email) { setError('Entre ton email pour réinitialiser.'); return; }
+    if (!window._auth) { setError('Firebase non configuré.'); return; }
+    setLoading(true); setError('');
+    try {
+      await window._auth.sendPasswordResetEmail(email);
+      setForgotSent(true);
+    } catch(e) {
+      const m = { 'auth/user-not-found': 'Aucun compte avec cet email.', 'auth/invalid-email': 'Email invalide.' };
+      setError(m[e.code] || 'Erreur. Réessaie.');
+    } finally { setLoading(false); }
+  };
   const errorFr = (code) => {
     const m = {
       'auth/email-already-in-use': 'Email déjà utilisé.',
@@ -826,22 +841,67 @@ function AuthModal({ onClose }) {
           <button style={tabBtn(tab === 'signup')} onClick={() => { setTab('signup'); setError(''); }}>Créer un compte</button>
           <button style={tabBtn(tab === 'login')} onClick={() => { setTab('login'); setError(''); }}>Se connecter</button>
         </div>
-        {tab === 'signup' && <input type="text" placeholder="Prénom (optionnel)" value={name} onChange={e => setName(e.target.value)} style={inp} />}
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={inp} />
-        <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && submit()} style={{...inp, marginBottom: 18}} />
-        {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 14, textAlign: 'center' }}>{error}</p>}
-        <button onClick={submit} disabled={loading} style={{
-          width: '100%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
-          border: 'none', color: '#1c1200', padding: '14px', borderRadius: 10,
-          fontSize: 15, fontWeight: 700, cursor: loading ? 'wait' : 'pointer',
-          fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 14
-        }}>{loading ? '…' : (tab === 'signup' ? 'Créer mon compte' : 'Se connecter')}</button>
-        <button onClick={onClose} style={{
-          display: 'block', width: '100%', background: 'none', border: 'none',
-          color: 'rgba(255,255,255,0.28)', fontSize: 13, cursor: 'pointer',
-          fontFamily: 'Plus Jakarta Sans, sans-serif'
-        }}>Annuler</button>
+        {forgotMode ? (
+          <>
+            {forgotSent ? (
+              <div style={{ textAlign: 'center', padding: '12px 0 20px' }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>📧</div>
+                <p style={{ color: '#4ade80', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Email envoyé !</p>
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 1.6 }}>
+                  Vérifie ta boîte mail (et tes spams). Clique sur le lien pour réinitialiser ton mot de passe.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 16, lineHeight: 1.6 }}>
+                  Entre ton email — on t'envoie un lien pour réinitialiser ton mot de passe.
+                </p>
+                <input type="email" placeholder="Ton email" value={email} onChange={e => setEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && sendReset()} style={inp} />
+                {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 12, textAlign: 'center' }}>{error}</p>}
+                <button onClick={sendReset} disabled={loading} style={{
+                  width: '100%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
+                  border: 'none', color: '#1c1200', padding: '14px', borderRadius: 10,
+                  fontSize: 15, fontWeight: 700, cursor: loading ? 'wait' : 'pointer',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 12
+                }}>{loading ? '…' : 'Envoyer le lien'}</button>
+              </>
+            )}
+            <button onClick={() => { setForgotMode(false); setForgotSent(false); setError(''); }} style={{
+              display: 'block', width: '100%', background: 'none', border: 'none',
+              color: 'rgba(255,255,255,0.35)', fontSize: 13, cursor: 'pointer',
+              fontFamily: 'Plus Jakarta Sans, sans-serif'
+            }}>← Retour à la connexion</button>
+          </>
+        ) : (
+          <>
+            {tab === 'signup' && <input type="text" placeholder="Prénom (optionnel)" value={name} onChange={e => setName(e.target.value)} style={inp} />}
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={inp} />
+            <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} style={{...inp, marginBottom: tab === 'login' ? 6 : 18}} />
+            {tab === 'login' && (
+              <div style={{ textAlign: 'right', marginBottom: 16 }}>
+                <button onClick={() => { setForgotMode(true); setError(''); }} style={{
+                  background: 'none', border: 'none', color: 'rgba(200,167,39,0.7)',
+                  fontSize: 12, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  textDecoration: 'underline'
+                }}>Mot de passe oublié ?</button>
+              </div>
+            )}
+            {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 14, textAlign: 'center' }}>{error}</p>}
+            <button onClick={submit} disabled={loading} style={{
+              width: '100%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
+              border: 'none', color: '#1c1200', padding: '14px', borderRadius: 10,
+              fontSize: 15, fontWeight: 700, cursor: loading ? 'wait' : 'pointer',
+              fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 14
+            }}>{loading ? '…' : (tab === 'signup' ? 'Créer mon compte' : 'Se connecter')}</button>
+            <button onClick={onClose} style={{
+              display: 'block', width: '100%', background: 'none', border: 'none',
+              color: 'rgba(255,255,255,0.28)', fontSize: 13, cursor: 'pointer',
+              fontFamily: 'Plus Jakarta Sans, sans-serif'
+            }}>Annuler</button>
+          </>
+        )}
       </div>
     </div>
   );
