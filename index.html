@@ -6167,13 +6167,11 @@ function App() {
     const revealObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => { e.target.classList.add('visible'); });
-          });
+          e.target.classList.add('visible');
           revealObs.unobserve(e.target);
         }
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.01, rootMargin: '0px' });
 
     function observeNew() {
       document.querySelectorAll(CLASSES).forEach((el) => {
@@ -6181,18 +6179,24 @@ function App() {
       });
     }
 
-    // Initial scan + delayed scans to catch async-rendered sections
     observeNew();
     const t1 = setTimeout(observeNew, 150);
     const t2 = setTimeout(observeNew, 600);
     const t3 = setTimeout(observeNew, 1500);
 
-    // Hard fallback: force-reveal anything still hidden after 4s
-    const fallback = setTimeout(() => {
+    // Smart fallback: every 200ms reveal elements currently visible in viewport
+    function revealVisible() {
+      const vh = window.innerHeight + 60;
       document.querySelectorAll(CLASSES).forEach((el) => {
-        if (!el.classList.contains('visible')) el.classList.add('visible');
+        if (!el.classList.contains('visible')) {
+          const r = el.getBoundingClientRect();
+          if (r.top < vh && r.bottom > -60) el.classList.add('visible');
+        }
       });
-    }, 4000);
+    }
+    const poll = setInterval(revealVisible, 200);
+    const stopPoll = setTimeout(() => clearInterval(poll), 8000);
+    document.addEventListener('visibilitychange', revealVisible);
 
     // Counter observer
     const counterObs = new IntersectionObserver((entries) => {
@@ -6224,7 +6228,7 @@ function App() {
 
     document.querySelectorAll('[data-counter]').forEach((el) => counterObs.observe(el));
 
-    return () => {revealObs.disconnect();counterObs.disconnect();clearTimeout(t1);clearTimeout(t2);clearTimeout(t3);clearTimeout(fallback);};
+    return () => { revealObs.disconnect(); counterObs.disconnect(); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearInterval(poll); clearTimeout(stopPoll); document.removeEventListener('visibilitychange', revealVisible); };
   }, []);
 
   React.useEffect(() => {
