@@ -662,6 +662,8 @@
     .hide-desktop { display: none !important; }
   }
 </style>
+  <!-- Vercel Analytics (no cookies, RGPD compliant) -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -6355,6 +6357,9 @@ function App() {
       });
     }
 
+    // Expose globally so navigation-back re-scan can call it
+    window._revealScan = observeNew;
+
     observeNew();
     const t1 = setTimeout(observeNew, 150);
     const t2 = setTimeout(observeNew, 600);
@@ -6406,6 +6411,26 @@ function App() {
 
     return () => { revealObs.disconnect(); counterObs.disconnect(); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearInterval(poll); clearTimeout(stopPoll); document.removeEventListener('visibilitychange', revealVisible); };
   }, []);
+
+  // Re-trigger reveal when navigating back to home (new DOM elements after page switch)
+  React.useEffect(() => {
+    if (page !== 'home') return;
+    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line';
+    function forceRevealInViewport() {
+      const vh = window.innerHeight + 60;
+      document.querySelectorAll(CLASSES).forEach((el) => {
+        if (!el.classList.contains('visible')) {
+          const r = el.getBoundingClientRect();
+          if (r.top < vh && r.bottom > -60) el.classList.add('visible');
+        }
+      });
+    }
+    // Scan new elements into observer + force-reveal anything already visible
+    const t1 = setTimeout(() => { if (window._revealScan) window._revealScan(); forceRevealInViewport(); }, 50);
+    const t2 = setTimeout(() => { if (window._revealScan) window._revealScan(); forceRevealInViewport(); }, 200);
+    const t3 = setTimeout(() => { if (window._revealScan) window._revealScan(); forceRevealInViewport(); }, 500);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [page]);
 
   React.useEffect(() => {
     if (!window._auth) { setUser(null); return; }
