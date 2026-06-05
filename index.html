@@ -729,9 +729,16 @@ function ProGateModal({ onClose, navigate }) {
         <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 20px' }}>🔒</div>
 
         <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>Fonctionnalité Pro</h2>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 24px' }}>
-          Tu as atteint la limite gratuite.<br/>Passe à Pro pour continuer sans limite.
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 12px' }}>
+          Ce niveau est réservé aux membres Pro.<br/>Débloques-y <strong style={{color:'#c8a727'}}>Intermédiaire & Avancé</strong>, le blind test complet et le studio vidéo.
         </p>
+        <div style={{ display:'flex', flexDirection:'column', gap:6, margin:'0 0 20px', textAlign:'left' }}>
+          {['🧠 Quiz illimités tous niveaux','🎵 Blind Test — 114 sourates','🎬 Studio vidéo & téléchargement','📅 Nouveau contenu chaque semaine'].map(function(f){
+            return React.createElement('div',{key:f,style:{fontFamily:'Plus Jakarta Sans,sans-serif',fontSize:12,color:'rgba(240,237,230,0.7)',display:'flex',alignItems:'center',gap:8}},
+              React.createElement('span',{style:{color:'#4ade80',fontWeight:800}},'✓'),f
+            );
+          })}
+        </div>
 
         {/* Price */}
         <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
@@ -911,8 +918,32 @@ function AuthModal({ onClose }) {
 
 /* --- Subscription Page --- */
 function SubscriptionPage({ navigate }) {
-  const { user } = useAuth();
+  const { user, openAuth } = useAuth();
   const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
+
+  // Guard: non connecté → montrer auth modal + page de présentation
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 20px 40px', textAlign: 'center', background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,167,39,0.08) 0%, transparent 70%)' }}>
+        <div style={{ fontSize: 52, marginBottom: 20 }}>🔒</div>
+        <h1 style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 10, letterSpacing: '-0.5px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          Accès Pro — 7,99€/mois
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          Quiz illimités · Blind Test complet · Studio vidéo
+        </p>
+        <p style={{ color: 'rgba(200,167,39,0.7)', fontSize: 13, marginBottom: 32, fontStyle: 'italic', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          Crée ton compte gratuitement pour continuer.
+        </p>
+        <button onClick={openAuth} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '16px 40px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 24px rgba(200,167,39,0.35)', marginBottom: 14 }}>
+          Créer mon compte — c'est gratuit
+        </button>
+        <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', textDecoration: 'underline' }}>
+          Retour à l'accueil
+        </button>
+      </div>
+    );
+  }
   const [showCheckout, setShowCheckout] = React.useState(false);
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
   const [checkoutError, setCheckoutError] = React.useState(null);
@@ -971,10 +1002,10 @@ function SubscriptionPage({ navigate }) {
 
       {/* Title */}
       <h1 className="sub-title" style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 6, letterSpacing: '-0.5px' }}>
-        Compte créé avec succès !
+        Passe à Pro 🔓
       </h1>
       <p className="sub-welcome" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 15, marginBottom: 8, maxWidth: 380 }}>
-        Bienvenue{firstName ? <strong style={{ color: '#c8a727' }}> {firstName}</strong> : ''} 👋 — ton voyage commence ici.
+        {firstName ? <><strong style={{ color: '#c8a727' }}>{firstName}</strong>, débloques l'accès complet.</> : 'Débloque l\'accès complet — quiz illimités, blind test, studio.'}
       </p>
       <p className="sub-hadith" style={{ color: 'rgba(200,167,39,0.65)', fontSize: 12, marginBottom: 32, fontStyle: 'italic', maxWidth: 360 }}>
         « Celui qui suit un chemin pour acquérir une connaissance, Allah lui facilite le chemin vers le Paradis. »
@@ -1520,7 +1551,7 @@ function Navbar({ navigate }) {
               onMouseLeave={(e) => {e.target.style.background = 'transparent';}}>
                 Connexion
               </button>
-              <button onClick={() => window.open(window.STRIPE_LINK,'_blank')} style={{
+              <button onClick={() => { openAuth(); }} style={{
                 background: 'linear-gradient(135deg,#c8a727 0%,#e6c84a 100%)',
                 border: 'none', color: '#1c1200', padding: '8px 18px', borderRadius: 8,
                 fontSize: 13, fontWeight: 700, cursor: 'pointer',
@@ -1617,7 +1648,7 @@ function Navbar({ navigate }) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button onClick={() => { setMenuOpen(false); window.open(window.STRIPE_LINK,'_blank'); }} style={{
+            <button onClick={() => { setMenuOpen(false); openAuth(); }} style={{
               background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
               border: 'none', color: '#1c1200', padding: '15px', borderRadius: 12,
               fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
@@ -1948,7 +1979,7 @@ function Hero({ navigate }) {
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-start' }}>
           <div style={{ display:'flex', gap:1 }}>{'★★★★★'.split('').map((s,i)=><span key={i} style={{ color:'#c8a727', fontSize:12 }}>{s}</span>)}</div>
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:1 }}>
-            « La meilleure appli islamique FR » — Ahmed
+            22+ membres · plateforme islamique francophone
           </span>
         </div>
       </div>
@@ -2019,10 +2050,10 @@ function ReassuranceBanner() {
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
-  { value: 'Résiliable', label: 'sans engagement' },
+  { value: '22+', label: 'membres actifs' },
   { value: '3', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
-  { value: 'Gratuit', label: 'pour commencer' }];
+  { value: '7,99€', label: 'offre de lancement' }];
 
 
   // Duplicate items for seamless loop
@@ -2517,7 +2548,7 @@ function TestimonialsSection() {
 }
 
 /* ─── Comparison Table ─── */
-function ComparisonTable() {
+function ComparisonTable({ navigate }) {
   const freeItems = [
   { text: '5 questions par thème (aperçu)', ok: true },
   { text: '3 sourates en blind test', ok: true },
@@ -2641,7 +2672,7 @@ function ComparisonTable() {
                 </div>
               )}
             </div>
-            <button onClick={() => window.open(window.STRIPE_LINK,'_blank')} style={{
+            <button onClick={() => navigate('subscription')} style={{
               marginTop: 32, width: '100%', position: 'relative', zIndex: 1,
               background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
               border: 'none', color: '#fff', padding: '15px', borderRadius: 10,
@@ -2652,7 +2683,7 @@ function ComparisonTable() {
             }}
             onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.55)';e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.background='linear-gradient(135deg, #d4b42e 0%, #b8991f 100%)';}}
             onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 4px 20px rgba(200,167,39,0.35)';e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.background='linear-gradient(135deg, #c8a727 0%, #a8891f 100%)';}}>
-              S'abonner maintenant →
+              Débloquer l'accès complet →
             </button>
           </div>
         </div>
@@ -3355,67 +3386,84 @@ function FaqSection() {
   );
 }
 
-function SoftPaywall() {
+function SoftPaywall({ navigate }) {
+  const { user, openAuth } = useAuth();
   return (
     <section style={{
-      padding: '80px 24px',
-      background: 'linear-gradient(180deg, rgba(200,167,39,0.04) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.3) 100%)',
+      padding: '80px 24px 100px',
+      background: 'linear-gradient(180deg, rgba(200,167,39,0.06) 0%, rgba(0,0,0,0.3) 100%)',
       textAlign: 'center',
       position: 'relative', overflow: 'hidden'
     }}>
-      {/* Lueur dorée centre-haut */}
-      <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(200,167,39,0.14) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      {/* Lueur verte bas-gauche */}
-      <div style={{ position: 'absolute', bottom: '-10%', left: '-5%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(26,92,53,0.4) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      {/* Lueur verte bas-droite */}
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(26,92,53,0.35) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div className="reveal-flip" style={{ maxWidth: 600, margin: '0 auto' }}>
-        <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 16 }}>
-          ◆ CONTINUE TON APPRENTISSAGE
-        </p>
+      <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse, rgba(200,167,39,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div className="reveal-flip" style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        {/* Pill urgence */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(200,167,39,0.12)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 30, padding: '6px 18px', marginBottom: 24 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', display: 'inline-block', boxShadow: '0 0 6px #4ade80' }} />
+          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#c8a727', letterSpacing: '0.08em' }}>🕌 22 MUSULMANS FRANCOPHONES DÉJÀ INSCRITS</span>
+        </div>
+
         <h2 style={{
           fontFamily: 'Playfair Display, serif', fontWeight: 900,
-          fontSize: 'clamp(24px,4.5vw,40px)', color: '#fff',
-          letterSpacing: '-0.5px', lineHeight: 1.15,
-          marginBottom: 16
+          fontSize: 'clamp(26px,4.5vw,44px)', color: '#fff',
+          letterSpacing: '-0.5px', lineHeight: 1.15, marginBottom: 16
         }}>
-          Tu as aimé le contenu gratuit ?
+          Tu as vu l'aperçu.<br />
+          <span style={{ color: '#c8a727' }}>Maintenant imagine l'accès complet.</span>
         </h2>
-        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 12 }}>
-          Continue avec l'accès complet — quiz illimités, blind test Coran,<br className="hide-mobile" />
-          studio vidéo et bien plus encore.
+
+        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 32, maxWidth: 520, margin: '0 auto 32px' }}>
+          Tu es bloqué au niveau Débutant, à 3 sourates en blind test, sans accès au studio.<br />
+          Pour moins d'un café par semaine, tu débloques tout.
         </p>
-        <p style={{ fontSize: 14, color: '#c8a727', fontWeight: 600, marginBottom: 40 }}>
-          Résiliable à tout moment, sans engagement.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center' }}>
-          <button onClick={() => window.open(window.STRIPE_LINK,'_blank')} style={{
+
+        {/* Value stack */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 36, textAlign: 'left' }}>
+          {[
+            { icon: '🧠', title: 'Quiz illimités', desc: 'Tous niveaux, toutes catégories' },
+            { icon: '🎵', title: 'Blind test complet', desc: '114 sourates à reconnaître' },
+            { icon: '🎬', title: 'Studio vidéo', desc: 'Crée & télécharge tes clips' },
+            { icon: '📅', title: 'Nouveau contenu', desc: 'Chaque semaine incha\'Allah' },
+          ].map((item) => (
+            <div key={item.title} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.15)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
+              <div>
+                <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{item.title}</div>
+                <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{item.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Price anchor */}
+        <div style={{ marginBottom: 24 }}>
+          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through', marginRight: 10 }}>14,99€/mois</span>
+          <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
+          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois · offre de lancement</span>
+        </div>
+
+        {/* CTA buttons */}
+        <div className="soft-paywall-btns" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <button onClick={() => { if (!user) { openAuth(); } else { navigate('subscription'); } }} style={{
             background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
-            border: 'none', color: '#fff', padding: '16px 40px', borderRadius: 12,
-            fontSize: 15, fontWeight: 800, cursor: 'pointer',
-            boxShadow: '0 4px 20px rgba(200,167,39,0.35)',
+            border: 'none', color: '#0a1a08', padding: '18px 48px', borderRadius: 14,
+            fontSize: 16, fontWeight: 800, cursor: 'pointer',
+            boxShadow: '0 6px 32px rgba(200,167,39,0.45)',
             fontFamily: 'Plus Jakarta Sans, sans-serif',
-            width: '100%', maxWidth: 360,
-            transition: 'all 0.2s'
+            width: '100%', maxWidth: 400,
+            transition: 'all 0.2s',
+            letterSpacing: '0.02em'
           }}
-          onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.55)';e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.background='linear-gradient(135deg, #d4b42e 0%, #b8991f 100%)';}}
-          onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 4px 20px rgba(200,167,39,0.35)';e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.background='linear-gradient(135deg, #c8a727 0%, #a8891f 100%)';}}>
-            S'abonner — 7,99€/mois
+          onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 8px 40px rgba(200,167,39,0.65)';e.currentTarget.style.transform='translateY(-2px)';}}
+          onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
+            🔓 Débloquer l'accès — 7,99€/mois
           </button>
-          <button style={{
-            background: 'transparent', border: '1.5px solid rgba(255,255,255,0.25)',
-            color: '#fff', fontSize: 14, cursor: 'pointer', padding: '15px 40px', borderRadius: 12,
-            fontFamily: 'Plus Jakarta Sans, sans-serif', width: '100%', maxWidth: 360,
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(255,255,255,0.08)';e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';}}
-          onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent';e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)';}}>
-            Rester en version gratuite
-          </button>
+          <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
+            ✓ Sans engagement · ✓ Résiliable à tout moment · ✓ Paiement sécurisé Stripe
+          </div>
         </div>
       </div>
     </section>);
-
 }
 
 /* ─── Start / Découverte Page ─── */
@@ -6308,6 +6356,62 @@ function NotFoundPage({ navigate }) {
   );
 }
 
+/* ─── Sticky Upgrade Banner (non-Pro logged-in users) ─── */
+function StickyUpgradeBanner({ navigate }) {
+  const { user, isPro } = useAuth();
+  const [visible, setVisible] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
+
+  React.useEffect(function() {
+    if (isPro || !user || dismissed) return;
+    var onScroll = function() {
+      setVisible(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', onScroll);
+    return function() { window.removeEventListener('scroll', onScroll); };
+  }, [isPro, user, dismissed]);
+
+  if (!user || isPro || dismissed || !visible) return null;
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
+      background: 'linear-gradient(90deg, #0d1f10 0%, #0f2414 50%, #0d1f10 100%)',
+      borderTop: '1px solid rgba(200,167,39,0.35)',
+      padding: '12px 20px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+      boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
+      flexWrap: 'wrap'
+    }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10, flex:1, minWidth:200 }}>
+        <span style={{ fontSize:18 }}>🔒</span>
+        <div>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color:'#fff' }}>
+            Tu es en version gratuite
+          </div>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.45)' }}>
+            Intermédiaire, Avancé, Blind Test complet, Studio — bloqués
+          </div>
+        </div>
+      </div>
+      <button onClick={() => navigate('subscription')} style={{
+        background:'linear-gradient(135deg,#c8a727,#a8891f)',
+        border:'none', color:'#0a1a08', padding:'10px 24px', borderRadius:10,
+        fontSize:13, fontWeight:800, cursor:'pointer',
+        fontFamily:'Plus Jakarta Sans,sans-serif',
+        boxShadow:'0 4px 20px rgba(200,167,39,0.4)',
+        whiteSpace:'nowrap', flexShrink:0
+      }}>
+        Passer à Pro — 7,99€/mois →
+      </button>
+      <button onClick={() => setDismissed(true)} style={{
+        background:'transparent', border:'none', color:'rgba(255,255,255,0.25)',
+        fontSize:18, cursor:'pointer', padding:'4px 8px', flexShrink:0, lineHeight:1
+      }}>✕</button>
+    </div>
+  );
+}
+
 /* ─── App ─── */
 function App() {
   const [page, setPage] = React.useState(function () {
@@ -6317,6 +6421,12 @@ function App() {
       return 'payment-success';
     }
     const h = window.location.hash.slice(1);
+    // Pages auth-only: ne pas restaurer depuis le hash sans session active
+    const AUTH_PAGES = ['subscription', 'payment-success', 'profile'];
+    if (AUTH_PAGES.includes(h)) {
+      window.history.replaceState(null, '', window.location.pathname);
+      return 'home';
+    }
     return h || 'home';
   });
   const [user, setUser] = React.useState(undefined);
@@ -6502,13 +6612,14 @@ function App() {
         <StudioViralSection navigate={setPage} />
         <ImportanceSection />
         <TestimonialsSection />
-        <ComparisonTable />
+        <ComparisonTable navigate={setPage} />
         <ParcoursSection />
         <StatsBar />
         <FaqSection />
-        <SoftPaywall />
+        <SoftPaywall navigate={setPage} />
       </main>
       <Footer navigate={setPage} />
+      <StickyUpgradeBanner navigate={setPage} />
     </>
   );
 
