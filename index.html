@@ -6392,60 +6392,6 @@ function NotFoundPage({ navigate }) {
   );
 }
 
-/* ─── Social Proof Toast ─── */
-function SocialProofToast() {
-  const names = [
-    { name: 'Haitam', action: 'vient de s\'inscrire 🎉' },
-    { name: 'Fatima', action: 'a débloqué le niveau Avancé ✨' },
-    { name: 'Ibrahim', action: 'vient de s\'inscrire 🎉' },
-    { name: 'Mariam', action: 'teste le Blind Test Coran 🎵' },
-    { name: 'Youssef', action: 'vient de s\'inscrire 🎉' },
-    { name: 'Aïcha', action: 'a créé sa première vidéo 🎬' },
-    { name: 'Omar', action: 'vient de s\'inscrire 🎉' },
-    { name: 'Nour', action: 'a débloqué le niveau Intermédiaire ⚡' },
-  ];
-  const [current, setCurrent] = React.useState(null);
-  const [visible, setVisible] = React.useState(false);
-
-  React.useEffect(function() {
-    var idx = 0;
-    function show() {
-      idx = (idx + 1) % names.length;
-      setCurrent(names[idx]);
-      setVisible(true);
-      setTimeout(function() { setVisible(false); }, 4000);
-    }
-    var initial = setTimeout(show, 8000);
-    var interval = setInterval(show, 18000);
-    return function() { clearTimeout(initial); clearInterval(interval); };
-  }, []);
-
-  if (!current) return null;
-
-  return (
-    <div style={{
-      position: 'fixed', bottom: 80, left: 20, zIndex: 998,
-      background: 'rgba(10,26,14,0.95)', border: '1px solid rgba(200,167,39,0.25)',
-      borderRadius: 14, padding: '12px 16px',
-      display: 'flex', alignItems: 'center', gap: 12,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      maxWidth: 280,
-      transform: visible ? 'translateX(0)' : 'translateX(-320px)',
-      opacity: visible ? 1 : 0,
-      transition: 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease',
-      pointerEvents: 'none',
-    }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(200,167,39,0.15)', border: '1.5px solid rgba(200,167,39,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: '#c8a727', fontFamily: 'Plus Jakarta Sans,sans-serif', flexShrink: 0 }}>
-        {current.name[0]}
-      </div>
-      <div>
-        <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, fontWeight: 700, color: '#fff' }}>{current.name}</div>
-        <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{current.action}</div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Exit Intent Popup ─── */
 function ExitIntentPopup({ navigate }) {
   const { user, openAuth } = useAuth();
@@ -6761,7 +6707,6 @@ function App() {
       </main>
       <Footer navigate={setPage} />
       <StickyUpgradeBanner navigate={setPage} />
-      <SocialProofToast />
       <ExitIntentPopup navigate={setPage} />
     </>
   );
