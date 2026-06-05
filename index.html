@@ -743,6 +743,7 @@ function ProGateModal({ onClose, navigate }) {
         {/* Price */}
         <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
           <div style={{ marginBottom:8 }}>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.3)', textDecoration:'line-through', marginRight:6 }}>19,99€</span>
             <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>7,99€</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / mois</span>
           </div>
@@ -926,9 +927,14 @@ function SubscriptionPage({ navigate }) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 20px 40px', textAlign: 'center', background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,167,39,0.08) 0%, transparent 70%)' }}>
         <div style={{ fontSize: 52, marginBottom: 20 }}>🔒</div>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 10, letterSpacing: '-0.5px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Accès Pro — 7,99€/mois
+        <h1 style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 6, letterSpacing: '-0.5px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          Accès Pro
         </h1>
+        <div style={{ marginBottom: 10 }}>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.3)', textDecoration:'line-through', marginRight:8 }}>19,99€/mois</span>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.6)', marginLeft:6 }}>· offre lancement</span>
+        </div>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Quiz illimités · Blind Test complet · Studio vidéo
         </p>
@@ -1025,6 +1031,9 @@ function SubscriptionPage({ navigate }) {
         </div>
 
         {/* Price */}
+        <div style={{ marginBottom: 4, textAlign: 'center' }}>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.3)', textDecoration:'line-through' }}>19,99€/mois</span>
+        </div>
         <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
           <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
           <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/mois</span>
@@ -2658,6 +2667,9 @@ function ComparisonTable({ navigate }) {
             </div>
             <div style={{ marginBottom: 24 }}>
               <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 8 }}>Accès complet</p>
+              <div style={{ marginBottom: 2 }}>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(255,255,255,0.3)', textDecoration:'line-through' }}>19,99€/mois</span>
+              </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                 <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
@@ -3437,7 +3449,7 @@ function SoftPaywall({ navigate }) {
 
         {/* Price anchor */}
         <div style={{ marginBottom: 24 }}>
-          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through', marginRight: 10 }}>14,99€/mois</span>
+          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through', marginRight: 10 }}>19,99€/mois</span>
           <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
           <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois · offre de lancement</span>
         </div>
