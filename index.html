@@ -3566,9 +3566,10 @@ function StartPage({ navigate }) {
             ✦ Créer mon compte — c'est gratuit
           </button>
           <button onClick={function(){ navigate('subscription'); }}
-            style={{ background:'rgba(200,167,39,0.07)', border:'1.5px solid rgba(200,167,39,0.28)', color:'rgba(200,167,39,0.88)', padding:'13px 24px', borderRadius:13, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s', width:'100%' }}
+            style={{ background:'rgba(200,167,39,0.07)', border:'1.5px solid rgba(200,167,39,0.28)', color:'rgba(200,167,39,0.88)', padding:'13px 24px', borderRadius:13, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s', width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}
             onMouseEnter={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.14)'; }}
             onMouseLeave={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.07)'; }}>
+            <span style={{ textDecoration:'line-through', color:'rgba(200,167,39,0.38)', fontSize:12, fontWeight:400 }}>19,99€</span>
             Voir l'offre Pro — 7,99€/mois
           </button>
         </div>
