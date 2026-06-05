@@ -2566,6 +2566,7 @@ function TestimonialsSection() {
 
 /* ─── Comparison Table ─── */
 function ComparisonTable({ navigate }) {
+  const { user, openAuth } = useAuth();
   const freeItems = [
   { text: '5 questions par thème (aperçu)', ok: true },
   { text: '3 sourates en blind test', ok: true },
@@ -2646,7 +2647,7 @@ function ComparisonTable({ navigate }) {
                 </div>
               )}
             </div>
-            <button style={{
+            <button onClick={function(){ user ? navigate('start') : openAuth(); }} style={{
               marginTop: 28, width: '100%',
               background: 'transparent', border: '1.5px solid rgba(255,255,255,0.25)',
               color: '#fff', padding: '13px', borderRadius: 10,
@@ -2656,7 +2657,7 @@ function ComparisonTable({ navigate }) {
             }}
             onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(255,255,255,0.08)';e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';}}
             onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent';e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)';}}>
-              Commencer gratuitement
+              {user ? 'Accéder au contenu gratuit' : 'Commencer gratuitement'}
             </button>
           </div>
 
@@ -3747,14 +3748,14 @@ function StartPage({ navigate }) {
             })}
           </div>
 
-          <button onClick={openAuth}
+          <button onClick={function(){ user ? navigate('subscription') : openAuth(); }}
             style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 56px', borderRadius:15, fontSize:16.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 8px 36px rgba(200,167,39,0.45)', marginBottom:16, transition:'all 0.2s' }}
             onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 10px 48px rgba(200,167,39,0.65)'; }}
             onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 8px 36px rgba(200,167,39,0.45)'; }}>
-            Commencer gratuitement →
+            {user ? '🔓 Débloquer l\'accès complet →' : 'Commencer gratuitement →'}
           </button>
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.2)' }}>
-            Sans carte bancaire · Résiliable à tout moment · 100% en français
+            {user ? 'Moins d\'un café par semaine · résiliable en 1 clic' : 'Sans carte bancaire · Résiliable à tout moment · 100% en français'}
           </p>
         </div>
       </div>
