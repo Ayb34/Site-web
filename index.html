@@ -1109,7 +1109,7 @@ function SubscriptionPage({ navigate }) {
 
         {/* CTA */}
         <button
-          onClick={openCheckout}
+          onClick={() => openCheckout('card')}
           className="sub-cta-btn"
           style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)',
             border: 'none', color: '#0a1a08', padding: '16px', borderRadius: 12,
@@ -1183,7 +1183,7 @@ function SubscriptionPage({ navigate }) {
               <div style={{ padding:40, textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
                 <div style={{ fontSize:32, marginBottom:12 }}>⚠️</div>
                 <p style={{ color:'#dc2626', fontSize:14, marginBottom:20 }}>{checkoutError}</p>
-                <button onClick={openCheckout} style={{ background:'#c8a727', border:'none', color:'#1c1200', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:700, cursor:'pointer' }}>Réessayer</button>
+                <button onClick={() => openCheckout('card')} style={{ background:'#c8a727', border:'none', color:'#1c1200', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:700, cursor:'pointer' }}>Réessayer</button>
               </div>
             )}
 
