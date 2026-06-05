@@ -6586,9 +6586,10 @@ function App() {
   const [isPro, setIsPro] = React.useState(false);
   const [showAuth, setShowAuth] = React.useState(false);
 
-  // Write page to hash so refresh restores it
+  // Write page to hash so refresh restores it + scroll to top on every navigation
   React.useEffect(function () {
     window.location.hash = page === 'home' ? '' : page;
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [page]);
 
   // Handle browser back/forward
