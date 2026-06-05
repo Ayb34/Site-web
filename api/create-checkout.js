@@ -1,4 +1,6 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2024-06-20',
+});
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -37,11 +39,14 @@ module.exports = async (req, res) => {
         locale: 'fr',
       });
     } else {
-      // Abonnement carte récurrent
+      // Abonnement carte + Apple Pay / Google Pay automatiques
       session = await stripe.checkout.sessions.create({
         mode: 'subscription',
         line_items: [{ price: 'price_1TXkOqCI24S0XReb1I9KiKuv', quantity: 1 }],
-        payment_method_types: ['card'],
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: 'never', // exclut Link (redirect), garde Apple Pay + carte
+        },
         ui_mode: 'embedded',
         return_url: `${origin}/#payment-success`,
         locale: 'fr',
