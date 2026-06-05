@@ -1678,6 +1678,7 @@ function Navbar({ navigate }) {
 
 /* ─── Hero ─── */
 function Hero({ navigate }) {
+  const { user, openAuth } = useAuth();
   return (
     <section className="hero-section" style={{
       background: 'transparent',
@@ -1950,7 +1951,7 @@ function Hero({ navigate }) {
 
       {/* CTA buttons */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', width: '100%', maxWidth: 440 }}>
-        <button onClick={() => navigate('start')} className="hero-btn-primary" style={{
+        <button onClick={() => user ? navigate('start') : openAuth()} className="hero-btn-primary" style={{
             width: '100%',
             background: 'linear-gradient(135deg, #c8a727 0%, #e6c84a 100%)',
             border: 'none', color: '#1a0e00', padding: '16px 40px', borderRadius: 12,
@@ -3410,10 +3411,24 @@ function SoftPaywall({ navigate }) {
       <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse, rgba(200,167,39,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="reveal-flip" style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Pill urgence */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(200,167,39,0.12)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 30, padding: '6px 18px', marginBottom: 24 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(200,167,39,0.12)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 30, padding: '6px 18px', marginBottom: 12 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', display: 'inline-block', boxShadow: '0 0 6px #4ade80' }} />
           <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#c8a727', letterSpacing: '0.08em' }}>🕌 22 MUSULMANS FRANCOPHONES DÉJÀ INSCRITS</span>
         </div>
+        {/* Countdown */}
+        {(function() {
+          var deadline = new Date('2026-07-15T23:59:59');
+          var now = new Date();
+          var diff = Math.max(0, Math.floor((deadline - now) / (1000 * 60 * 60 * 24)));
+          return (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.28)', borderRadius: 30, padding: '5px 16px', marginBottom: 24 }}>
+              <span style={{ fontSize: 12 }}>⏳</span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>
+                OFFRE LANCEMENT — expire dans {diff} jour{diff > 1 ? 's' : ''}
+              </span>
+            </div>
+          );
+        })()}
 
         <h2 style={{
           fontFamily: 'Playfair Display, serif', fontWeight: 900,
@@ -3883,7 +3898,7 @@ function BlindTestPage({ navigate }) {
   const audioRef = React.useRef(null);
 
   const SESSION_SIZE = 10;
-  const FREE_LIMIT   = 5; // questions max pour les utilisateurs gratuits
+  const FREE_LIMIT   = 3; // questions max pour les utilisateurs gratuits
   const NEXT_DIFF = { debutant: 'amateur', amateur: 'avance', avance: null };
 
   React.useEffect(() => () => {if (audioRef.current) audioRef.current.pause();}, []);
@@ -4287,7 +4302,7 @@ function BlindTestPage({ navigate }) {
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                  {sessionCount + 1 >= SESSION_SIZE ? '📊 Voir le bilan' : `Suivant (${sessionCount + 1}/${SESSION_SIZE}) →`}
+                  {sessionCount + 1 >= SESSION_SIZE ? '📊 Voir le bilan' : `Suivant (${sessionCount + 1}/${SESSION_SIZE}) →`}{!isPro && sessionCount + 1 < FREE_LIMIT && ` · ${Math.max(0, FREE_LIMIT - sessionCount - 1)} gratuite${Math.max(0, FREE_LIMIT - sessionCount - 1) > 1 ? 's' : ''} restante${Math.max(0, FREE_LIMIT - sessionCount - 1) > 1 ? 's' : ''}`}
                 </button>
               </div>
             }
@@ -6377,6 +6392,111 @@ function NotFoundPage({ navigate }) {
   );
 }
 
+/* ─── Social Proof Toast ─── */
+function SocialProofToast() {
+  const names = [
+    { name: 'Haitam', action: 'vient de s\'inscrire 🎉' },
+    { name: 'Fatima', action: 'a débloqué le niveau Avancé ✨' },
+    { name: 'Ibrahim', action: 'vient de s\'inscrire 🎉' },
+    { name: 'Mariam', action: 'teste le Blind Test Coran 🎵' },
+    { name: 'Youssef', action: 'vient de s\'inscrire 🎉' },
+    { name: 'Aïcha', action: 'a créé sa première vidéo 🎬' },
+    { name: 'Omar', action: 'vient de s\'inscrire 🎉' },
+    { name: 'Nour', action: 'a débloqué le niveau Intermédiaire ⚡' },
+  ];
+  const [current, setCurrent] = React.useState(null);
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(function() {
+    var idx = 0;
+    function show() {
+      idx = (idx + 1) % names.length;
+      setCurrent(names[idx]);
+      setVisible(true);
+      setTimeout(function() { setVisible(false); }, 4000);
+    }
+    var initial = setTimeout(show, 8000);
+    var interval = setInterval(show, 18000);
+    return function() { clearTimeout(initial); clearInterval(interval); };
+  }, []);
+
+  if (!current) return null;
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 80, left: 20, zIndex: 998,
+      background: 'rgba(10,26,14,0.95)', border: '1px solid rgba(200,167,39,0.25)',
+      borderRadius: 14, padding: '12px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+      maxWidth: 280,
+      transform: visible ? 'translateX(0)' : 'translateX(-320px)',
+      opacity: visible ? 1 : 0,
+      transition: 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease',
+      pointerEvents: 'none',
+    }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(200,167,39,0.15)', border: '1.5px solid rgba(200,167,39,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: '#c8a727', fontFamily: 'Plus Jakarta Sans,sans-serif', flexShrink: 0 }}>
+        {current.name[0]}
+      </div>
+      <div>
+        <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, fontWeight: 700, color: '#fff' }}>{current.name}</div>
+        <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{current.action}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Exit Intent Popup ─── */
+function ExitIntentPopup({ navigate }) {
+  const { user, openAuth } = useAuth();
+  const [show, setShow] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
+  const fired = React.useRef(false);
+
+  React.useEffect(function() {
+    if (dismissed) return;
+    function onMouseOut(e) {
+      if (e.clientY <= 5 && !fired.current) {
+        fired.current = true;
+        setShow(true);
+      }
+    }
+    document.addEventListener('mouseleave', onMouseOut);
+    return function() { document.removeEventListener('mouseleave', onMouseOut); };
+  }, [dismissed]);
+
+  if (!show || dismissed) return null;
+
+  return (
+    <div onClick={function(e){ if(e.target===e.currentTarget){ setShow(false); setDismissed(true); } }}
+      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(8px)', zIndex:10001, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+      <div style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'40px 32px', maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
+        <button onClick={function(){ setShow(false); setDismissed(true); }} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', color:'rgba(255,255,255,0.3)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
+        <div style={{ fontSize:44, marginBottom:16 }}>🕌</div>
+        <h2 style={{ fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:24, color:'#fff', marginBottom:10, lineHeight:1.2 }}>
+          Attends ! Une dernière chose...
+        </h2>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.5)', lineHeight:1.7, marginBottom:8 }}>
+          Tu pars sans avoir essayé le Blind Test Coran ni les quiz Pro. C'est la plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète qui existe.
+        </p>
+        <div style={{ marginBottom:20 }}>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(255,255,255,0.28)', textDecoration:'line-through', marginRight:8 }}>19,99€/mois</span>
+          <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>offre de lancement — sans engagement</div>
+        </div>
+        <button onClick={function(){ setShow(false); setDismissed(true); if(!user) openAuth(); else navigate('subscription'); }}
+          style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
+          🔓 Débloquer l'accès complet
+        </button>
+        <button onClick={function(){ setShow(false); setDismissed(true); }}
+          style={{ background:'none', border:'none', color:'rgba(255,255,255,0.2)', fontSize:12, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', textDecoration:'underline' }}>
+          Non merci, je pars sans essayer
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Sticky Upgrade Banner (non-Pro logged-in users) ─── */
 function StickyUpgradeBanner({ navigate }) {
   const { user, isPro } = useAuth();
@@ -6641,6 +6761,8 @@ function App() {
       </main>
       <Footer navigate={setPage} />
       <StickyUpgradeBanner navigate={setPage} />
+      <SocialProofToast />
+      <ExitIntentPopup navigate={setPage} />
     </>
   );
 
