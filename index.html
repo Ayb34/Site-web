@@ -732,7 +732,7 @@ function ProGateModal({ onClose, navigate }) {
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 12px' }}>
           Ce niveau est réservé aux membres Pro.<br/>Débloques-y <strong style={{color:'#c8a727'}}>Intermédiaire & Avancé</strong>, le blind test complet et le studio vidéo.
         </p>
-        <div style={{ display:'flex', flexDirection:'column', gap:6, margin:'0 0 20px', textAlign:'left' }}>
+        <div className="pro-gate-feat-list" style={{ display:'flex', flexDirection:'column', gap:6, margin:'0 0 20px', textAlign:'left' }}>
           {['🧠 Quiz illimités tous niveaux','🎵 Blind Test — 114 sourates','🎬 Studio vidéo & téléchargement','📅 Nouveau contenu chaque semaine'].map(function(f){
             return React.createElement('div',{key:f,style:{fontFamily:'Plus Jakarta Sans,sans-serif',fontSize:12,color:'rgba(240,237,230,0.7)',display:'flex',alignItems:'center',gap:8}},
               React.createElement('span',{style:{color:'#4ade80',fontWeight:800}},'✓'),f
@@ -3429,7 +3429,7 @@ function SoftPaywall({ navigate }) {
           var now = new Date();
           var diff = Math.max(0, Math.floor((deadline - now) / (1000 * 60 * 60 * 24)));
           return (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.28)', borderRadius: 30, padding: '5px 16px', marginBottom: 24 }}>
+            <div className="soft-paywall-countdown" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.28)', borderRadius: 30, padding: '5px 16px', marginBottom: 24 }}>
               <span style={{ fontSize: 12 }}>⏳</span>
               <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>
                 OFFRE LANCEMENT — expire dans {diff} jour{diff > 1 ? 's' : ''}
@@ -3453,7 +3453,7 @@ function SoftPaywall({ navigate }) {
         </p>
 
         {/* Value stack */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 36, textAlign: 'left' }}>
+        <div className="soft-paywall-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 36, textAlign: 'left' }}>
           {[
             { icon: '🧠', title: 'Quiz illimités', desc: 'Tous niveaux, toutes catégories' },
             { icon: '🎵', title: 'Blind test complet', desc: '114 sourates à reconnaître' },
@@ -3471,10 +3471,10 @@ function SoftPaywall({ navigate }) {
         </div>
 
         {/* Price anchor */}
-        <div style={{ marginBottom: 24 }}>
-          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through', marginRight: 10 }}>19,99€/mois</span>
-          <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
-          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois · offre de lancement</span>
+        <div className="soft-paywall-price-row" style={{ marginBottom: 24, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
+          <span className="price-strike-old" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>19,99€/mois</span>
+          <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
+          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois · offre de lancement</span>
         </div>
 
         {/* CTA buttons */}
@@ -3593,7 +3593,7 @@ function StartPage({ navigate }) {
           // Connecté non-Pro : CTA upgrade direct
           <div className="sp-4" style={{ maxWidth:440, margin:'0 auto' }}>
             {/* Résumé de ce qui est bloqué */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:24 }}>
+            <div className="sp-locked-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:24 }}>
               {[
                 { icon:'🔒', label:'Blind Test complet', sub:'111 sourates verrouillées' },
                 { icon:'🔒', label:'Quiz Avancé', sub:'Niveaux Amateur & Avancé' },
@@ -6479,7 +6479,7 @@ function ExitIntentPopup({ navigate }) {
   return (
     <div onClick={function(e){ if(e.target===e.currentTarget) close(); }}
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(8px)', zIndex:10001, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-      <div style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'40px 32px', maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
+      <div className="pro-popup-inner" style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'40px 32px', maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
         <button onClick={close} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', color:'rgba(255,255,255,0.3)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
         <div style={{ fontSize:44, marginBottom:16 }}>🕌</div>
         <h2 style={{ fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:24, color:'#fff', marginBottom:10, lineHeight:1.2 }}>
@@ -6527,7 +6527,7 @@ function StickyUpgradeBanner({ navigate }) {
   if (!user || isPro || dismissed || !visible) return null;
 
   return (
-    <div style={{
+    <div className="sticky-upgrade-banner" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
       background: 'linear-gradient(90deg, #0d1f10 0%, #0f2414 50%, #0d1f10 100%)',
       borderTop: '1px solid rgba(200,167,39,0.35)',
@@ -6536,18 +6536,18 @@ function StickyUpgradeBanner({ navigate }) {
       boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
       flexWrap: 'wrap'
     }}>
-      <div style={{ display:'flex', alignItems:'center', gap:10, flex:1, minWidth:200 }}>
-        <span style={{ fontSize:18 }}>🔒</span>
+      <div style={{ display:'flex', alignItems:'center', gap:10, flex:1, minWidth:0 }}>
+        <span style={{ fontSize:18, flexShrink:0 }}>🔒</span>
         <div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color:'#fff' }}>
             Tu es en version gratuite
           </div>
-          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.45)' }}>
+          <div className="sticky-upgrade-banner-desc" style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.45)' }}>
             Intermédiaire, Avancé, Blind Test complet, Studio — bloqués
           </div>
         </div>
       </div>
-      <button onClick={() => navigate('subscription')} style={{
+      <button onClick={() => navigate('subscription')} className="sticky-upgrade-banner-btn" style={{
         background:'linear-gradient(135deg,#c8a727,#a8891f)',
         border:'none', color:'#0a1a08', padding:'10px 24px', borderRadius:10,
         fontSize:13, fontWeight:800, cursor:'pointer',
@@ -6886,6 +6886,84 @@ requestAnimationFrame(() => {
     gap: 12px !important;
     flex-wrap: wrap !important;
   }
+}
+
+/* ── Mobile — nouveaux composants (ajouts conversion) ───────── */
+@media (max-width: 768px) {
+
+  /* StickyUpgradeBanner */
+  .sticky-upgrade-banner-desc { display: none !important; }
+  .sticky-upgrade-banner {
+    padding: 10px 14px !important;
+    gap: 10px !important;
+  }
+  .sticky-upgrade-banner-btn {
+    font-size: 12px !important;
+    padding: 9px 16px !important;
+    white-space: nowrap !important;
+  }
+
+  /* SoftPaywall — value stack grid */
+  .soft-paywall-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  /* Countdown pill — wrap propre */
+  .soft-paywall-countdown {
+    font-size: 10px !important;
+    padding: 5px 12px !important;
+    text-align: center !important;
+  }
+  /* Prix ancré sur 1 ligne */
+  .soft-paywall-price-row {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  /* StartPage non-Pro locked grid */
+  .sp-locked-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 18px !important;
+  }
+  .sp-locked-grid > div {
+    padding: 10px 10px !important;
+    border-radius: 10px !important;
+  }
+  .sp-locked-grid > div > div:nth-child(1) { font-size: 14px !important; margin-bottom: 2px !important; }
+  .sp-locked-grid > div > div:nth-child(2) { font-size: 11px !important; }
+  .sp-locked-grid > div > div:nth-child(3) { font-size: 9px !important; }
+
+  /* PostActivityPopup / ExitIntentPopup */
+  .pro-popup-inner {
+    padding: 28px 20px !important;
+    border-radius: 18px !important;
+    max-width: 95vw !important;
+  }
+  .pro-popup-inner h2 { font-size: 20px !important; }
+  .pro-popup-inner p  { font-size: 13px !important; }
+
+  /* ProGateModal feature list */
+  .pro-gate-feat-list { margin-bottom: 14px !important; }
+  .pro-gate-feat-list > div { font-size: 11px !important; padding: 2px 0 !important; }
+
+  /* Prix barré — ligne compacte */
+  .price-strike-row {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    justify-content: center !important;
+  }
+  .price-strike-old { font-size: 12px !important; }
+  .price-strike-new { font-size: 22px !important; }
+  .price-strike-label { font-size: 10px !important; }
+}
+
+@media (max-width: 400px) {
+  /* Très petits écrans */
+  .soft-paywall-grid { grid-template-columns: 1fr !important; }
+  .sp-locked-grid { grid-template-columns: 1fr !important; }
+  .sticky-upgrade-banner-btn { font-size: 11px !important; padding: 8px 12px !important; }
 }
 </style>
 </body>
