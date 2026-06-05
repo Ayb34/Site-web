@@ -4963,7 +4963,8 @@ function VideoCreatorPage({ navigate }) {
   const [audioMode, setAudioMode] = React.useState('auto'); // 'auto' | 'custom'
   const [markingCountdown, setMarkingCountdown] = React.useState(null); // null | 3 | 2 | 1
   const [showProGate, setShowProGate] = React.useState(false);
-  const { isPro } = useAuth();
+  const [showGuestGate, setShowGuestGate] = React.useState(false);
+  const { isPro, user } = useAuth();
 
   const canvasRef = React.useRef(null);
   const audioRef = React.useRef(null);
@@ -5617,7 +5618,7 @@ function VideoCreatorPage({ navigate }) {
                 <canvas ref={canvasRef} className="studio-canvas-preview" width={320} height={568} style={{ display: 'block', height: '78vh', width: 'auto', maxHeight: 680 }} />
               </div>
               <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, margin: 0, textAlign: 'center' }}>Format 9:16 · TikTok & Reels</p>
-              <button onClick={() => setStep(2)} style={{ ...btnPrimary, padding: '13px 48px' }} onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+              <button onClick={() => user ? setStep(2) : setShowGuestGate(true)} style={{ ...btnPrimary, padding: '13px 48px' }} onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
                 Suivant — Choisir l'audio →
               </button>
             </div>
@@ -5845,6 +5846,7 @@ function VideoCreatorPage({ navigate }) {
                         </button>
                   )}
                   {showProGate && <ProGateModal onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
+                  {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); setStep(2); }} />}
                 </div>
 
                 {/* Back */}
