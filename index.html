@@ -3989,6 +3989,7 @@ function BlindTestPage({ navigate }) {
     // Limite gratuit : 5 questions par session
     if (!isPro && sessionCount + 1 >= FREE_LIMIT) {
       setShowProGate(true);
+      window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
       return;
     }
     if (sessionCount + 1 >= SESSION_SIZE) {
@@ -4594,6 +4595,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
           localStorage.setItem(storageKey, JSON.stringify({ correct: newScore, total: questions.length }));
         }
       }
+      window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
       setDone(true);
     } else {
       setCurrent(c => c + 1);
@@ -6403,54 +6405,58 @@ function NotFoundPage({ navigate }) {
   );
 }
 
-/* ─── Exit Intent Popup ─── */
+/* ─── Post Activity Popup (affiché une seule fois après une activité gratuite) ─── */
 function ExitIntentPopup({ navigate }) {
-  const { user, openAuth } = useAuth();
+  const { user, openAuth, isPro } = useAuth();
   const [show, setShow] = React.useState(false);
-  const [dismissed, setDismissed] = React.useState(false);
-  const fired = React.useRef(false);
+  const STORAGE_KEY = 'heritage_pro_popup_shown';
 
   React.useEffect(function() {
-    if (dismissed) return;
-    function onMouseOut(e) {
-      if (e.clientY <= 5 && !fired.current) {
-        fired.current = true;
-        setShow(true);
-      }
+    if (isPro) return;
+    function onActivity() {
+      if (localStorage.getItem(STORAGE_KEY)) return;
+      setTimeout(function() {
+        if (!localStorage.getItem(STORAGE_KEY)) setShow(true);
+      }, 5000);
     }
-    document.addEventListener('mouseleave', onMouseOut);
-    return function() { document.removeEventListener('mouseleave', onMouseOut); };
-  }, [dismissed]);
+    window.addEventListener('heritage:pro-popup', onActivity);
+    return function() { window.removeEventListener('heritage:pro-popup', onActivity); };
+  }, [isPro]);
 
-  if (!show || dismissed) return null;
+  function close() {
+    localStorage.setItem(STORAGE_KEY, '1');
+    setShow(false);
+  }
+
+  if (!show || isPro) return null;
 
   return (
-    <div onClick={function(e){ if(e.target===e.currentTarget){ setShow(false); setDismissed(true); } }}
+    <div onClick={function(e){ if(e.target===e.currentTarget) close(); }}
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(8px)', zIndex:10001, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
       <div style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'40px 32px', maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
-        <button onClick={function(){ setShow(false); setDismissed(true); }} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', color:'rgba(255,255,255,0.3)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
+        <button onClick={close} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', color:'rgba(255,255,255,0.3)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
         <div style={{ fontSize:44, marginBottom:16 }}>🕌</div>
         <h2 style={{ fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:24, color:'#fff', marginBottom:10, lineHeight:1.2 }}>
-          Attends ! Une dernière chose...
+          Tu as vu l'aperçu gratuit.
         </h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.5)', lineHeight:1.7, marginBottom:8 }}>
-          Tu pars sans avoir essayé le Blind Test Coran ni les quiz Pro. C'est la plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète qui existe.
+          Le niveau <strong style={{color:'#fff'}}>Intermédiaire & Avancé</strong>, le Blind Test complet et le Studio vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(255,255,255,0.28)', textDecoration:'line-through', marginRight:8 }}>19,99€/mois</span>
           <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>offre de lancement — sans engagement</div>
         </div>
-        <button onClick={function(){ setShow(false); setDismissed(true); if(!user) openAuth(); else navigate('subscription'); }}
+        <button onClick={function(){ close(); if(!user) openAuth(); else navigate('subscription'); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
           🔓 Débloquer l'accès complet
         </button>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.28)', margin:'8px 0 10px', lineHeight:1.6 }}>
           Moins d'un café par semaine pour enrichir ton Deen · résiliable en 1 clic
         </p>
-        <button onClick={function(){ setShow(false); setDismissed(true); }}
+        <button onClick={close}
           style={{ background:'none', border:'none', color:'rgba(255,255,255,0.2)', fontSize:12, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', textDecoration:'underline' }}>
-          Non merci, je pars sans essayer
+          Pas maintenant
         </button>
       </div>
     </div>
