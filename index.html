@@ -996,19 +996,22 @@ function SubscriptionPage({ navigate }) {
   const checkoutRef = React.useRef(null);
   const containerRef = React.useRef(null);
 
-  const openCheckout = async function() {
+  const openCheckout = async function(method) {
     setCheckoutLoading(true);
     setCheckoutError(null);
     setShowCheckout(true);
     try {
       var stripe = window.Stripe('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
-      var res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      var res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ method: method || 'card' }),
+      });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
       var checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
       checkoutRef.current = checkout;
       setCheckoutLoading(false);
-      // Wait for container to render
       setTimeout(function() {
         if (containerRef.current) checkout.mount(containerRef.current);
       }, 80);
@@ -1114,6 +1117,31 @@ function SubscriptionPage({ navigate }) {
         >
           🔓 Débloquer l'accès — 7,99€/mois
         </button>
+
+        {/* Séparateur */}
+        <div style={{ display:'flex', alignItems:'center', gap:12, margin:'14px 0' }}>
+          <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.08)' }} />
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.25)' }}>ou</span>
+          <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.08)' }} />
+        </div>
+
+        {/* PayPal — paiement unique 1 mois */}
+        <button
+          onClick={() => openCheckout('paypal')}
+          style={{ width:'100%', background:'#FFC439', border:'none', color:'#003087', padding:'14px', borderRadius:12,
+            fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans, sans-serif',
+            boxShadow:'0 4px 20px rgba(255,196,57,0.35)', transition:'transform 0.15s, box-shadow 0.15s',
+            display:'flex', alignItems:'center', justifyContent:'center', gap:10
+          }}
+          onMouseOver={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(255,196,57,0.5)'; }}
+          onMouseOut={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 20px rgba(255,196,57,0.35)'; }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#003087"><path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.99-.032.17a.804.804 0 0 1-.794.68H8.54a.483.483 0 0 1-.477-.558l.925-5.832.01-.07c.06-.372.382-.64.758-.64h1.482c3.102 0 5.533-1.258 6.243-4.895.312-1.588.05-2.85-.693-3.85a3.745 3.745 0 0 0-.72-.332z"/><path d="M18.14 7.7a6.143 6.143 0 0 0-.738-.16 9.294 9.294 0 0 0-1.476-.108H11.4a.804.804 0 0 0-.795.68L9.418 16.05l-.01.07a.805.805 0 0 0 .795.92h1.773c.37 0 .692-.267.76-.63l.63-3.99.04-.22a.804.804 0 0 1 .795-.68h.5c3.237 0 5.773-1.314 6.513-5.12.27-1.313.197-2.443-.327-3.327a3.83 3.83 0 0 0-1.747-.663 6.73 6.73 0 0 0-1.1 3.29z"/></svg>
+          PayPal — 7,99€ · 1 mois
+        </button>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8 }}>
+          Paiement unique · renouvellement manuel par email
+        </p>
 
         {/* Trust */}
         <div className="sub-trust" style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>

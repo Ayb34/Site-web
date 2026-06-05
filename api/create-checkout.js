@@ -11,15 +11,42 @@ module.exports = async (req, res) => {
 
   try {
     const origin = req.headers.origin || 'https://heritage-musulman.com';
+    const method = (req.body && req.body.method) || 'card';
 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      line_items: [{ price: 'price_1TXkOqCI24S0XReb1I9KiKuv', quantity: 1 }],
-      payment_method_types: ['card'],
-      ui_mode: 'embedded',
-      return_url: `${origin}/#payment-success`,
-      locale: 'fr',
-    });
+    let session;
+
+    if (method === 'paypal') {
+      // Paiement unique PayPal — 7,99€ / 30 jours
+      session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['paypal'],
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            unit_amount: 799,
+            product_data: {
+              name: 'Héritage Musulman Pro — 1 mois',
+              description: 'Accès complet pendant 30 jours · renouvelable',
+            },
+          },
+          quantity: 1,
+        }],
+        metadata: { payment_method: 'paypal', duration_days: '30' },
+        ui_mode: 'embedded',
+        return_url: `${origin}/#payment-success`,
+        locale: 'fr',
+      });
+    } else {
+      // Abonnement carte récurrent
+      session = await stripe.checkout.sessions.create({
+        mode: 'subscription',
+        line_items: [{ price: 'price_1TXkOqCI24S0XReb1I9KiKuv', quantity: 1 }],
+        payment_method_types: ['card'],
+        ui_mode: 'embedded',
+        return_url: `${origin}/#payment-success`,
+        locale: 'fr',
+      });
+    }
 
     res.json({ clientSecret: session.client_secret });
   } catch (err) {

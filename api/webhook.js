@@ -43,11 +43,24 @@ async function handler(req, res) {
         session.customer_email;
       if (email) {
         const userRecord = await admin.auth().getUserByEmail(email);
+        const data = {
+          isPro: true,
+          proSince: new Date().toISOString(),
+        };
+        // PayPal one-time : stocker date d'expiry à J+30
+        if (session.metadata && session.metadata.payment_method === 'paypal') {
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + 30);
+          data.proExpiry = expiry.toISOString();
+          data.proType = 'paypal_onetime';
+        } else {
+          data.proType = 'stripe_subscription';
+        }
         await db
           .collection('users')
           .doc(userRecord.uid)
-          .set({ isPro: true, proSince: new Date().toISOString() }, { merge: true });
-        console.log('isPro activated for:', email);
+          .set(data, { merge: true });
+        console.log('isPro activated for:', email, '| type:', data.proType);
       }
     }
 
