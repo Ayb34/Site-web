@@ -756,9 +756,12 @@ function ProGateModal({ onClose, navigate }) {
 
         {/* CTA */}
         <button onClick={function(){ navigate('subscription'); onClose(); }}
-          style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:12, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
+          style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
           Passer à Pro — 7,99€/mois
         </button>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.35)', marginBottom:12, lineHeight:1.5 }}>
+          Moins d'un café par semaine pour enrichir ta dîn · résiliable en 1 clic
+        </p>
         <button onClick={onClose}
           style={{ background:'none', border:'none', color:'rgba(240,237,230,0.3)', fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
           Continuer en gratuit
@@ -941,10 +944,13 @@ function SubscriptionPage({ navigate }) {
         <p style={{ color: 'rgba(200,167,39,0.7)', fontSize: 13, marginBottom: 32, fontStyle: 'italic', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Crée ton compte gratuitement pour continuer.
         </p>
-        <button onClick={openAuth} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '16px 40px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 24px rgba(200,167,39,0.35)', marginBottom: 14 }}>
+        <button onClick={openAuth} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '16px 40px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 24px rgba(200,167,39,0.35)', marginBottom: 10 }}>
           Créer mon compte — c'est gratuit
         </button>
-        <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', textDecoration: 'underline' }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 14, lineHeight: 1.6 }}>
+          Moins d'un café par semaine pour enrichir ta dîn · résiliable en 1 clic
+        </p>
+        <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', textDecoration: 'underline' }}>
           Retour à l'accueil
         </button>
       </div>
@@ -1038,8 +1044,9 @@ function SubscriptionPage({ navigate }) {
           <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
           <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/mois</span>
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 28 }}>
-          Sans engagement · Résiliable à tout moment
+        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 28, lineHeight: 1.6 }}>
+          Moins d'un café par semaine pour enrichir ta dîn.<br />
+          <span style={{ color: 'rgba(200,167,39,0.55)' }}>Résiliable en 1 clic · sans engagement · paiement sécurisé.</span>
         </p>
 
         {/* Features */}
@@ -1075,8 +1082,8 @@ function SubscriptionPage({ navigate }) {
         </button>
 
         {/* Trust */}
-        <div className="sub-trust" style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 16 }}>
-          {['🔒 Paiement sécurisé', '📵 Sans pub', '✦ Halal'].map(t => (
+        <div className="sub-trust" style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+          {['🔒 Paiement sécurisé', '📵 Sans pub', '✦ Halal', '↩ Résiliable en 1 clic'].map(t => (
             <span key={t} style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>{t}</span>
           ))}
         </div>
@@ -2675,7 +2682,7 @@ function ComparisonTable({ navigate }) {
                 <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
               </div>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Résiliable à tout moment, sans engagement</p>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>Moins d'un café par semaine pour enrichir ta dîn.<br/><span style={{color:'rgba(200,167,39,0.6)'}}>Résiliable en 1 clic · sans engagement.</span></p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', zIndex: 1 }}>
               {proItems.map((item, i) =>
@@ -3485,8 +3492,9 @@ function SoftPaywall({ navigate }) {
           onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
             🔓 Débloquer l'accès — 7,99€/mois
           </button>
-          <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
-            ✓ Sans engagement · ✓ Résiliable à tout moment · ✓ Paiement sécurisé Stripe
+          <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.6, textAlign: 'center' }}>
+            Moins d'un café par semaine pour enrichir ta dîn.<br/>
+            <span style={{color:'rgba(200,167,39,0.5)'}}>✓ Résiliable en 1 clic · ✓ Sans engagement · ✓ Paiement sécurisé</span>
           </div>
         </div>
       </div>
@@ -3589,7 +3597,10 @@ function StartPage({ navigate }) {
           </button>
         </div>
 
-        <p className="sp-5" style={{ marginTop:18, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.18)' }}>
+        <p style={{ marginTop:14, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.35)', textAlign:'center', lineHeight:1.6 }}>
+          Moins d'un café par semaine pour enrichir ta dîn · résiliable en 1 clic
+        </p>
+        <p className="sp-5" style={{ marginTop:6, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.18)' }}>
           ✓ Sans carte bancaire &nbsp;·&nbsp; ✓ Résiliable à tout moment &nbsp;·&nbsp; ✓ 100% en français
         </p>
       </div>
@@ -6434,6 +6445,9 @@ function ExitIntentPopup({ navigate }) {
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
           🔓 Débloquer l'accès complet
         </button>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.28)', margin:'8px 0 10px', lineHeight:1.6 }}>
+          Moins d'un café par semaine pour enrichir ta dîn · résiliable en 1 clic
+        </p>
         <button onClick={function(){ setShow(false); setDismissed(true); }}
           style={{ background:'none', border:'none', color:'rgba(255,255,255,0.2)', fontSize:12, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', textDecoration:'underline' }}>
           Non merci, je pars sans essayer
