@@ -6673,15 +6673,23 @@ function App() {
     }
     return h || 'home';
   });
+  const [navKey, setNavKey] = React.useState(0);
   const [user, setUser] = React.useState(undefined);
   const [isPro, setIsPro] = React.useState(false);
   const [showAuth, setShowAuth] = React.useState(false);
+
+  // navigate wrapper — scroll to top even if page doesn't change (ex: logo click depuis home)
+  const navigate = React.useCallback(function(p) {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    setPage(p);
+    setNavKey(function(k) { return k + 1; });
+  }, []);
 
   // Write page to hash so refresh restores it + scroll to top on every navigation
   React.useEffect(function () {
     window.location.hash = page === 'home' ? '' : page;
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [page]);
+  }, [page, navKey]);
 
   // Handle browser back/forward
   React.useEffect(function () {
@@ -6822,50 +6830,50 @@ function App() {
     </AuthContext.Provider>
   );
 
-  if (page === 'blind-test') return wrap(<BlindTestPage navigate={setPage} />);
-  if (page === 'quiz') return wrap(<QuizPage navigate={setPage} />);
+  if (page === 'blind-test') return wrap(<BlindTestPage navigate={navigate} />);
+  if (page === 'quiz') return wrap(<QuizPage navigate={navigate} />);
   if (page.startsWith('quiz-')) {
     const rest = page.slice(5);
     const levels = ['debutant', 'amateur', 'avance'];
     const lv = levels.find((l) => rest.endsWith('-' + l));
     if (lv) {
       const ck = rest.slice(0, rest.length - lv.length - 1);
-      return wrap(<QuizCategoryPage catKey={ck} level={lv} navigate={setPage} />);
+      return wrap(<QuizCategoryPage catKey={ck} level={lv} navigate={navigate} />);
     }
-    return wrap(<QuizCategoryPage catKey={rest} level="debutant" navigate={setPage} />);
+    return wrap(<QuizCategoryPage catKey={rest} level="debutant" navigate={navigate} />);
   }
-  if (page === 'studio') return wrap(<VideoCreatorPage navigate={setPage} />);
-  if (page === 'start') return wrap(<StartPage navigate={setPage} />);
-  if (page === 'subscription') return wrap(<><Navbar navigate={setPage} /><SubscriptionPage navigate={setPage} /></>);
-  if (page === 'payment-success') return wrap(<PaymentSuccessPage navigate={setPage} />);
-  if (page === 'profile') return wrap(<><Navbar navigate={setPage} /><ProfilePage navigate={setPage} /></>);
-  if (page === 'mentions-legales') return wrap(<MentionsLegalesPage navigate={setPage} />);
-  if (page === 'cgu') return wrap(<CGVPage navigate={setPage} />);
-  if (page === 'confidentialite') return wrap(<PolitiqueConfidentialitePage navigate={setPage} />);
+  if (page === 'studio') return wrap(<VideoCreatorPage navigate={navigate} />);
+  if (page === 'start') return wrap(<StartPage navigate={navigate} />);
+  if (page === 'subscription') return wrap(<><Navbar navigate={navigate} /><SubscriptionPage navigate={navigate} /></>);
+  if (page === 'payment-success') return wrap(<PaymentSuccessPage navigate={navigate} />);
+  if (page === 'profile') return wrap(<><Navbar navigate={navigate} /><ProfilePage navigate={navigate} /></>);
+  if (page === 'mentions-legales') return wrap(<MentionsLegalesPage navigate={navigate} />);
+  if (page === 'cgu') return wrap(<CGVPage navigate={navigate} />);
+  if (page === 'confidentialite') return wrap(<PolitiqueConfidentialitePage navigate={navigate} />);
 
-  if (page !== 'home') return wrap(<NotFoundPage navigate={setPage} />);
+  if (page !== 'home') return wrap(<NotFoundPage navigate={navigate} />);
 
   return wrap(
     <>
-      <Navbar navigate={setPage} />
+      <Navbar navigate={navigate} />
       <main>
-        <Hero navigate={setPage} />
+        <Hero navigate={navigate} />
         <ReassuranceBanner />
-        <FeatureCards navigate={setPage} />
+        <FeatureCards navigate={navigate} />
         <HowItWorksSection />
-        <LearnPlaySection navigate={setPage} />
-        <StudioViralSection navigate={setPage} />
+        <LearnPlaySection navigate={navigate} />
+        <StudioViralSection navigate={navigate} />
         <ImportanceSection />
         <TestimonialsSection />
-        <ComparisonTable navigate={setPage} />
+        <ComparisonTable navigate={navigate} />
         <ParcoursSection />
         <StatsBar />
         <FaqSection />
-        <SoftPaywall navigate={setPage} />
+        <SoftPaywall navigate={navigate} />
       </main>
-      <Footer navigate={setPage} />
-      <StickyUpgradeBanner navigate={setPage} />
-      <ExitIntentPopup navigate={setPage} />
+      <Footer navigate={navigate} />
+      <StickyUpgradeBanner navigate={navigate} />
+      <ExitIntentPopup navigate={navigate} />
     </>
   );
 
