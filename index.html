@@ -2096,6 +2096,7 @@ function Hero({ navigate }) {
 
 /* ─── Reassurance Banner ─── */
 function ReassuranceBanner() {
+  const { isPro } = useAuth();
   return (
     <div style={{
       background: 'linear-gradient(90deg, transparent 0%, rgba(4,14,8,0.72) 20%, rgba(4,14,8,0.72) 80%, transparent 100%)',
