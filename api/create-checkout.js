@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
         }],
         metadata: { payment_method: 'paypal', duration_days: '30' },
         ui_mode: 'embedded',
-        return_url: `${origin}/#payment-success`,
+        return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
       });
     } else {
@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
         line_items: [{ price: 'price_1TXkOqCI24S0XReb1I9KiKuv', quantity: 1 }],
         payment_method_types: ['card'],
         ui_mode: 'embedded',
-        return_url: `${origin}/#payment-success`,
+        return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
       });
     }

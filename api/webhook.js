@@ -42,7 +42,17 @@ async function handler(req, res) {
         (session.customer_details && session.customer_details.email) ||
         session.customer_email;
       if (email) {
-        const userRecord = await admin.auth().getUserByEmail(email);
+        let userRecord;
+        try {
+          userRecord = await admin.auth().getUserByEmail(email);
+        } catch (e) {
+          // Compte inexistant → Option A : créer automatiquement après paiement
+          userRecord = await admin.auth().createUser({
+            email: email,
+            emailVerified: false,
+          });
+          console.log('New Firebase user created after payment:', email);
+        }
         const data = {
           isPro: true,
           proSince: new Date().toISOString(),

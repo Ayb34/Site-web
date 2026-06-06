@@ -722,7 +722,7 @@ function useAuth() { return React.useContext(AuthContext); }
 
 /* ─── Guest Gate Modal (après 1ère action gratuite) ─── */
 function GuestGateModal({ onClose }) {
-  const { openAuth } = useAuth();
+  const { openAuth, openQuickCheckout } = useAuth();
   return (
     <div onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
@@ -789,7 +789,7 @@ function ProGateModal({ onClose, navigate }) {
         </div>
 
         {/* CTA */}
-        <button onClick={function(){ navigate('subscription'); onClose(); }}
+        <button onClick={function(){ onClose(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
           Passer à Pro — 7,99€/mois
         </button>
@@ -2633,7 +2633,7 @@ function TestimonialsSection() {
 
 /* ─── Comparison Table ─── */
 function ComparisonTable({ navigate }) {
-  const { user, openAuth } = useAuth();
+  const { user, openAuth, openQuickCheckout } = useAuth();
   const freeItems = [
   { text: '5 questions par thème (aperçu)', ok: true },
   { text: '3 sourates en blind test', ok: true },
@@ -2763,7 +2763,7 @@ function ComparisonTable({ navigate }) {
                 </div>
               )}
             </div>
-            <button onClick={() => navigate('subscription')} style={{
+            <button onClick={() => openQuickCheckout()} style={{
               marginTop: 32, width: '100%', position: 'relative', zIndex: 1,
               background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
               border: 'none', color: '#fff', padding: '15px', borderRadius: 10,
@@ -3478,7 +3478,7 @@ function FaqSection() {
 }
 
 function SoftPaywall({ navigate }) {
-  const { user, openAuth } = useAuth();
+  const { user, openAuth, openQuickCheckout } = useAuth();
   return (
     <section style={{
       padding: '80px 24px 100px',
@@ -3549,7 +3549,7 @@ function SoftPaywall({ navigate }) {
 
         {/* CTA buttons */}
         <div className="soft-paywall-btns" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-          <button onClick={() => { if (!user) { openAuth(); } else { navigate('subscription'); } }} style={{
+          <button onClick={() => openQuickCheckout()} style={{
             background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
             border: 'none', color: '#0a1a08', padding: '18px 48px', borderRadius: 14,
             fontSize: 16, fontWeight: 800, cursor: 'pointer',
@@ -3577,7 +3577,7 @@ function SoftPaywall({ navigate }) {
 
 /* ─── Start / Découverte Page ─── */
 function StartPage({ navigate }) {
-  const { openAuth, user, isPro } = useAuth();
+  const { openAuth, user, isPro, openQuickCheckout } = useAuth();
   const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
   const [bottomVis, setBottomVis] = React.useState(false);
   const bottomRef = React.useRef(null);
@@ -3689,7 +3689,7 @@ function StartPage({ navigate }) {
             </div>
 
             {/* Bouton principal */}
-            <button onClick={function(){ navigate('subscription'); }} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'17px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 32px rgba(200,167,39,0.45)', transition:'all 0.2s', letterSpacing:'-0.1px', marginBottom:12 }}
+            <button onClick={function(){ openQuickCheckout(); }} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'17px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 32px rgba(200,167,39,0.45)', transition:'all 0.2s', letterSpacing:'-0.1px', marginBottom:12 }}
               onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 40px rgba(200,167,39,0.6)'; }}
               onMouseLeave={function(e){ e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)'; }}>
               🔓 Débloquer l'accès complet
@@ -3708,7 +3708,7 @@ function StartPage({ navigate }) {
               onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.42)'; }}>
               ✦ Créer mon compte — c'est gratuit
             </button>
-            <button onClick={function(){ navigate('subscription'); }}
+            <button onClick={function(){ openQuickCheckout(); }}
               style={{ background:'rgba(200,167,39,0.07)', border:'1.5px solid rgba(200,167,39,0.28)', color:'rgba(200,167,39,0.88)', padding:'13px 24px', borderRadius:13, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s', width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}
               onMouseEnter={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.14)'; }}
               onMouseLeave={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.07)'; }}>
@@ -3822,7 +3822,7 @@ function StartPage({ navigate }) {
             })}
           </div>
 
-          <button onClick={function(){ user ? navigate('subscription') : openAuth(); }}
+          <button onClick={function(){ openQuickCheckout(); }}
             style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 56px', borderRadius:15, fontSize:16.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 8px 36px rgba(200,167,39,0.45)', marginBottom:16, transition:'all 0.2s' }}
             onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 10px 48px rgba(200,167,39,0.65)'; }}
             onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 8px 36px rgba(200,167,39,0.45)'; }}>
@@ -6008,6 +6008,24 @@ function PaymentSuccessPage({ navigate }) {
   const [proConfirmed, setProConfirmed] = React.useState(false);
   const [checkDot, setCheckDot] = React.useState(0);
 
+  // Option A — nouvel utilisateur non-connecté
+  const [prefillEmail, setPrefillEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [setupLoading, setSetupLoading] = React.useState(false);
+  const [setupError, setSetupError] = React.useState('');
+  const [resetSent, setResetSent] = React.useState(false);
+
+  // Récupérer l'email depuis le session_id Stripe
+  React.useEffect(function() {
+    if (user) return;
+    var psid = new URLSearchParams(window.location.search).get('psid');
+    if (!psid) return;
+    fetch('/api/session-email?sid=' + psid)
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if (d.email) setPrefillEmail(d.email); })
+      .catch(function(){});
+  }, []);
+
   // Pulse animation tick
   React.useEffect(function () {
     var t = setInterval(function () { setTick(function (n) { return n + 1; }); }, 40);
@@ -6027,7 +6045,7 @@ function PaymentSuccessPage({ navigate }) {
           setProConfirmed(true);
           clearInterval(interval);
         } else if (attempts >= maxAttempts) {
-          setProConfirmed(true); // let user through anyway after 30s
+          setProConfirmed(true);
           clearInterval(interval);
         }
       }).catch(function () {
@@ -6043,6 +6061,30 @@ function PaymentSuccessPage({ navigate }) {
     var t = setInterval(function () { setCheckDot(function (n) { return (n + 1) % 4; }); }, 500);
     return function () { clearInterval(t); };
   }, [proConfirmed]);
+
+  async function handleSetupAccount(e) {
+    e.preventDefault();
+    if (!prefillEmail || !password) return;
+    setSetupLoading(true);
+    setSetupError('');
+    try {
+      await window._auth.createUserWithEmailAndPassword(prefillEmail, password);
+      // Compte créé + connecté — isPro arrivera via webhook
+    } catch(err) {
+      if (err.code === 'auth/email-already-in-use') {
+        // Webhook a déjà créé le compte → envoyer lien reset mot de passe
+        try {
+          await window._auth.sendPasswordResetEmail(prefillEmail);
+          setResetSent(true);
+        } catch(e2) {
+          setSetupError('Erreur : ' + e2.message);
+        }
+      } else {
+        setSetupError(err.message);
+      }
+    }
+    setSetupLoading(false);
+  }
 
   var ring = 'conic-gradient(#c8a727 ' + Math.min(360, tick * 6) + 'deg, rgba(255,255,255,0.06) 0deg)';
 
@@ -6071,9 +6113,8 @@ function PaymentSuccessPage({ navigate }) {
             </svg>
           </div>
         </div>
-        {/* Stars */}
         {[[-44,-18],[44,-10],[-28,52],[38,48],[0,-50]].map(function([x,y],i){
-          return <div key={i} style={{ position:'absolute', top:'50%', left:'50%', transform:`translate(${x}px,${y}px)`, fontSize: 14 + (i%2)*4, opacity: tick > 20 ? 1 : 0, transition: 'opacity 0.4s', animationDelay: i*0.1+'s' }}>✦</div>;
+          return <div key={i} style={{ position:'absolute', top:'50%', left:'50%', transform:`translate(${x}px,${y}px)`, fontSize: 14 + (i%2)*4, opacity: tick > 20 ? 1 : 0, transition: 'opacity 0.4s' }}>✦</div>;
         })}
       </div>
 
@@ -6083,19 +6124,19 @@ function PaymentSuccessPage({ navigate }) {
         <h1 style={{ fontSize: 'clamp(28px,6vw,42px)', fontWeight: 900, color: '#fff', margin: '0 0 14px', lineHeight: 1.15 }}>
           Bienvenue dans<br /><span style={{ color: '#c8a727' }}>Héritage Pro 🌙</span>
         </h1>
-        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.45)', maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
-          {user ? `${user.displayName || user.email}, ton` : 'Ton'} abonnement Pro est actif. Toutes les fonctionnalités sont maintenant disponibles.
+        <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+          Ton abonnement Pro est actif. Toutes les fonctionnalités sont débloquées.
         </p>
       </div>
 
       {/* Perks */}
-      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.18)', borderRadius: 20, padding: '24px 28px', maxWidth: 380, width: '100%', marginTop: 28, marginBottom: 32 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(200,167,39,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Accès débloqué</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.18)', borderRadius: 20, padding: '24px 28px', maxWidth: 380, width: '100%', marginTop: 24, marginBottom: 28 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(200,167,39,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>Accès débloqué</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {perks.map(function(p, i) {
             return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>{p.icon}</div>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{p.icon}</div>
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.82)' }}>{p.label}</span>
                 <span style={{ marginLeft: 'auto', fontSize: 13, color: '#4ade80' }}>✓</span>
               </div>
@@ -6104,8 +6145,39 @@ function PaymentSuccessPage({ navigate }) {
         </div>
       </div>
 
-      {/* CTA */}
-      {!proConfirmed ? (
+      {/* Option A — Nouveau compte si non connecté */}
+      {!user && !resetSent && (
+        <div style={{ background: 'rgba(200,167,39,0.06)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 18, padding: '24px 24px', maxWidth: 380, width: '100%', marginBottom: 20 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#c8a727', marginBottom: 6 }}>🔑 Active ton accès</div>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.5 }}>
+            Crée ton mot de passe pour accéder à ton espace Pro à tout moment.
+          </p>
+          <form onSubmit={handleSetupAccount} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <input type="email" value={prefillEmail} onChange={function(e){ setPrefillEmail(e.target.value); }} placeholder="Ton email de paiement"
+              required style={{ padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(200,167,39,0.3)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 14, fontFamily: 'Plus Jakarta Sans,sans-serif', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+            <input type="password" value={password} onChange={function(e){ setPassword(e.target.value); }} placeholder="Crée ton mot de passe (6 car. min.)"
+              required minLength="6" style={{ padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(200,167,39,0.3)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 14, fontFamily: 'Plus Jakarta Sans,sans-serif', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
+            {setupError && <p style={{ color: '#f87171', fontSize: 12, margin: 0 }}>{setupError}</p>}
+            <button type="submit" disabled={setupLoading}
+              style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+              {setupLoading ? 'Création...' : 'Activer mon accès Pro →'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Email reset envoyé */}
+      {resetSent && (
+        <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 14, padding: '18px 20px', maxWidth: 380, width: '100%', marginBottom: 20, textAlign: 'center' }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>📬</div>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: 0, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+            Un email a été envoyé à <strong style={{ color: '#c8a727' }}>{prefillEmail}</strong> pour créer ton mot de passe. Vérifie ta boîte mail puis reviens te connecter.
+          </p>
+        </div>
+      )}
+
+      {/* CTA — si connecté */}
+      {user && (!proConfirmed ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 44, height: 44, border: '3px solid rgba(200,167,39,0.25)', borderTopColor: '#c8a727', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -6113,16 +6185,22 @@ function PaymentSuccessPage({ navigate }) {
           </p>
         </div>
       ) : (
-        <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s', letterSpacing: 0.3 }}
-          onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(200,167,39,0.5)'; }}
-          onMouseLeave={function(e){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}>
+        <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s' }}
+          onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; }}
+          onMouseLeave={function(e){ e.currentTarget.style.transform='translateY(0)'; }}>
           Découvrir mes fonctionnalités →
+        </button>
+      ))}
+
+      {/* Lien accueil si non connecté */}
+      {!user && (
+        <button onClick={function(){ navigate('home'); }} style={{ marginTop: 12, background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontSize: 12, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', textDecoration: 'underline' }}>
+          Retour à l'accueil
         </button>
       )}
 
-      {/* Receipt note */}
-      <p style={{ marginTop: 20, fontSize: 12, color: 'rgba(255,255,255,0.22)', textAlign: 'center', maxWidth: 320 }}>
-        Un reçu a été envoyé par Stripe à ton adresse e-mail. Pour gérer ton abonnement, rends-toi dans ton profil.
+      <p style={{ marginTop: 16, fontSize: 11, color: 'rgba(255,255,255,0.18)', textAlign: 'center', maxWidth: 320 }}>
+        Un reçu Stripe a été envoyé à ton adresse e-mail. Gestion de l'abonnement dans ton profil.
       </p>
     </div>
   );
@@ -6543,7 +6621,7 @@ function NotFoundPage({ navigate }) {
 
 /* ─── Post Activity Popup (affiché une seule fois après une activité gratuite) ─── */
 function ExitIntentPopup({ navigate }) {
-  const { user, openAuth, isPro } = useAuth();
+  const { user, openAuth, isPro, openQuickCheckout } = useAuth();
   const [show, setShow] = React.useState(false);
   const STORAGE_KEY = 'heritage_pro_popup_shown';
 
@@ -6583,7 +6661,7 @@ function ExitIntentPopup({ navigate }) {
           <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>offre de lancement — sans engagement</div>
         </div>
-        <button onClick={function(){ close(); if(!user) openAuth(); else navigate('subscription'); }}
+        <button onClick={function(){ close(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
           🔓 Débloquer l'accès complet
         </button>
@@ -6602,7 +6680,7 @@ function ExitIntentPopup({ navigate }) {
 
 /* ─── Sticky Upgrade Banner (non-Pro logged-in users) ─── */
 function StickyUpgradeBanner({ navigate }) {
-  const { user, isPro } = useAuth();
+  const { user, isPro, openQuickCheckout } = useAuth();
   const [visible, setVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
 
@@ -6638,7 +6716,7 @@ function StickyUpgradeBanner({ navigate }) {
           </div>
         </div>
       </div>
-      <button onClick={() => navigate('subscription')} className="sticky-upgrade-banner-btn" style={{
+      <button onClick={() => openQuickCheckout()} className="sticky-upgrade-banner-btn" style={{
         background:'linear-gradient(135deg,#c8a727,#a8891f)',
         border:'none', color:'#0a1a08', padding:'10px 24px', borderRadius:10,
         fontSize:13, fontWeight:800, cursor:'pointer',
@@ -6656,6 +6734,130 @@ function StickyUpgradeBanner({ navigate }) {
   );
 }
 
+/* ─── QuickCheckoutModal — Option A : checkout direct sans auth ─── */
+function QuickCheckoutModal({ onClose, initialMethod }) {
+  const { user } = useAuth();
+  const [activeMethod, setActiveMethod] = React.useState(initialMethod || 'card');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const checkoutRef = React.useRef(null);
+  const containerRef = React.useRef(null);
+
+  // Bloquer scroll body
+  React.useEffect(function () {
+    document.body.style.overflow = 'hidden';
+    return function () { document.body.style.overflow = ''; };
+  }, []);
+
+  // Lancer checkout au montage
+  React.useEffect(function () {
+    startCheckout(initialMethod || 'card');
+    return function () { destroyCheckout(); };
+  }, []);
+
+  function destroyCheckout() {
+    if (checkoutRef.current) { checkoutRef.current.destroy(); checkoutRef.current = null; }
+  }
+
+  async function startCheckout(method) {
+    setLoading(true);
+    setError(null);
+    destroyCheckout();
+    try {
+      var stripe = window.Stripe('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
+      var res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ method: method }),
+      });
+      var data = await res.json();
+      if (data.error) throw new Error(data.error);
+      var checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+      checkoutRef.current = checkout;
+      setLoading(false);
+      setTimeout(function () {
+        if (containerRef.current) checkout.mount(containerRef.current);
+      }, 80);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  }
+
+  function handleClose() {
+    destroyCheckout();
+    onClose();
+  }
+
+  function switchMethod(m) {
+    if (m === activeMethod && !error) return;
+    setActiveMethod(m);
+    startCheckout(m);
+  }
+
+  return (
+    <div onClick={function (e) { if (e.target === e.currentTarget) handleClose(); }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(12px)', zIndex: 10000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '16px', overflowY: 'auto' }}>
+      <div style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 520, position: 'relative', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', marginTop: 'max(16px, env(safe-area-inset-top))', marginBottom: 16 }}>
+
+        {/* Header */}
+        <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro · Offre lancement</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: '#bbb', textDecoration: 'line-through' }}>19,99€</span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 20, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>/mois</span></span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#16a34a', fontWeight: 700, background: 'rgba(22,163,74,0.1)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
+            </div>
+          </div>
+          <button onClick={handleClose} style={{ background: 'rgba(0,0,0,0.07)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+        </div>
+
+        {/* Tabs méthode de paiement */}
+        <div style={{ padding: '10px 14px 0', display: 'flex', gap: 8 }}>
+          <button onClick={() => switchMethod('card')}
+            style={{ flex: 1, padding: '9px 6px', borderRadius: 10, border: activeMethod === 'card' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: activeMethod === 'card' ? 'rgba(200,167,39,0.08)' : '#fff', color: activeMethod === 'card' ? '#b8960a' : '#666', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s' }}>
+            💳 Carte / Apple Pay
+          </button>
+          <button onClick={() => switchMethod('paypal')}
+            style={{ flex: 1, padding: '9px 6px', borderRadius: 10, border: activeMethod === 'paypal' ? '2px solid #FFC439' : '1px solid #e5e5e5', background: activeMethod === 'paypal' ? 'rgba(255,196,57,0.10)' : '#fff', color: activeMethod === 'paypal' ? '#003087' : '#666', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s' }}>
+            PayPal · 1 mois
+          </button>
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div style={{ padding: '50px 20px', textAlign: 'center', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+            <div style={{ width: 36, height: 36, border: '3px solid #f0e8d0', borderTopColor: '#c8a727', borderRadius: '50%', margin: '0 auto 14px', animation: 'spin 0.8s linear infinite' }} />
+            <p style={{ color: '#888', fontSize: 13 }}>Chargement du paiement sécurisé…</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && !loading && (
+          <div style={{ padding: '30px 20px', textAlign: 'center', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>⚠️</div>
+            <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{error}</p>
+            <button onClick={() => startCheckout(activeMethod)} style={{ background: '#c8a727', border: 'none', color: '#1c1200', padding: '10px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>Réessayer</button>
+          </div>
+        )}
+
+        {/* Stripe checkout */}
+        <div ref={containerRef} />
+
+        {/* Trust */}
+        {!loading && !error && (
+          <div style={{ padding: '8px 14px 14px', display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap', borderTop: '1px solid #f5f5f5', marginTop: 4 }}>
+            {['🔒 Paiement sécurisé', '↩ Résiliable en 1 clic', '📵 Sans pub'].map(function (t) {
+              return <span key={t} style={{ color: '#bbb', fontSize: 11, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{t}</span>;
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── App ─── */
 function App() {
   const [page, setPage] = React.useState(function () {
@@ -6666,7 +6868,7 @@ function App() {
     }
     const h = window.location.hash.slice(1);
     // Pages auth-only: ne pas restaurer depuis le hash sans session active
-    const AUTH_PAGES = ['subscription', 'payment-success', 'profile'];
+    const AUTH_PAGES = ['subscription', 'profile'];
     if (AUTH_PAGES.includes(h)) {
       window.history.replaceState(null, '', window.location.pathname);
       return 'home';
@@ -6677,6 +6879,7 @@ function App() {
   const [user, setUser] = React.useState(undefined);
   const [isPro, setIsPro] = React.useState(false);
   const [showAuth, setShowAuth] = React.useState(false);
+  const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
 
   // navigate wrapper — scroll to top even if page doesn't change (ex: logo click depuis home)
   const navigate = React.useCallback(function(p) {
@@ -6816,15 +7019,16 @@ function App() {
     isPro,
     logout: () => window._auth && window._auth.signOut(),
     openAuth: () => setShowAuth(true),
-    onAuthSuccess: (action) => {
+    openQuickCheckout: (method) => setQuickCheckoutMethod(method || 'card'),
+    onAuthSuccess: () => {
       setShowAuth(false);
-      if (action === 'signup') setPage('subscription');
     }
   };
 
   const wrap = (children) => (
     <AuthContext.Provider value={authCtx}>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
       {children}
       <RgpdBanner />
     </AuthContext.Provider>
