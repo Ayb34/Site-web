@@ -6068,22 +6068,40 @@ function PaymentSuccessPage({ navigate }) {
     setSetupLoading(true);
     setSetupError('');
     try {
-      await window._auth.createUserWithEmailAndPassword(prefillEmail, password);
-      // Compte créé + connecté — isPro arrivera via webhook
-    } catch(err) {
-      if (err.code === 'auth/email-already-in-use') {
-        // Webhook a déjà créé le compte → envoyer lien reset mot de passe
+      // Essayer connexion d'abord (compte existant)
+      await window._auth.signInWithEmailAndPassword(prefillEmail, password);
+      // Connecté → isPro arrivera via Firestore polling
+    } catch(loginErr) {
+      var noAccount = loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential';
+      var wrongPwd = loginErr.code === 'auth/wrong-password' || loginErr.code === 'auth/invalid-login-credentials';
+      if (noAccount) {
+        // Nouveau compte → créer
         try {
-          await window._auth.sendPasswordResetEmail(prefillEmail);
-          setResetSent(true);
-        } catch(e2) {
-          setSetupError('Erreur : ' + e2.message);
+          await window._auth.createUserWithEmailAndPassword(prefillEmail, password);
+        } catch(createErr) {
+          if (createErr.code === 'auth/email-already-in-use') {
+            // Compte créé par webhook sans mot de passe → reset
+            try { await window._auth.sendPasswordResetEmail(prefillEmail); setResetSent(true); }
+            catch(e3) { setSetupError('Erreur : ' + e3.message); }
+          } else {
+            setSetupError(createErr.message);
+          }
         }
+      } else if (wrongPwd) {
+        setSetupError('Mot de passe incorrect. Utilise ton mot de passe habituel ou réinitialise-le ci-dessous.');
       } else {
-        setSetupError(err.message);
+        setSetupError(loginErr.message);
       }
     }
     setSetupLoading(false);
+  }
+
+  async function handleResetPassword() {
+    if (!prefillEmail) { setSetupError('Entre ton email d\'abord.'); return; }
+    try {
+      await window._auth.sendPasswordResetEmail(prefillEmail);
+      setResetSent(true);
+    } catch(e) { setSetupError('Erreur : ' + e.message); }
   }
 
   var ring = 'conic-gradient(#c8a727 ' + Math.min(360, tick * 6) + 'deg, rgba(255,255,255,0.06) 0deg)';
@@ -6148,19 +6166,27 @@ function PaymentSuccessPage({ navigate }) {
       {/* Option A — Nouveau compte si non connecté */}
       {!user && !resetSent && (
         <div style={{ background: 'rgba(200,167,39,0.06)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 18, padding: '24px 24px', maxWidth: 380, width: '100%', marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#c8a727', marginBottom: 6 }}>🔑 Active ton accès</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#c8a727', marginBottom: 6 }}>🔑 Accède à ton espace Pro</div>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.5 }}>
-            Crée ton mot de passe pour accéder à ton espace Pro à tout moment.
+            Entre l'email utilisé lors du paiement et ton mot de passe. Pas encore de compte ? Il sera créé automatiquement.
           </p>
           <form onSubmit={handleSetupAccount} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <input type="email" value={prefillEmail} onChange={function(e){ setPrefillEmail(e.target.value); }} placeholder="Ton email de paiement"
+            <input type="email" value={prefillEmail} onChange={function(e){ setPrefillEmail(e.target.value); }} placeholder="Email utilisé lors du paiement"
               required style={{ padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(200,167,39,0.3)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 14, fontFamily: 'Plus Jakarta Sans,sans-serif', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
-            <input type="password" value={password} onChange={function(e){ setPassword(e.target.value); }} placeholder="Crée ton mot de passe (6 car. min.)"
+            <input type="password" value={password} onChange={function(e){ setPassword(e.target.value); }} placeholder="Ton mot de passe (6 car. min.)"
               required minLength="6" style={{ padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(200,167,39,0.3)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 14, fontFamily: 'Plus Jakarta Sans,sans-serif', outline: 'none', width: '100%', boxSizing: 'border-box' }} />
-            {setupError && <p style={{ color: '#f87171', fontSize: 12, margin: 0 }}>{setupError}</p>}
+            {setupError && (
+              <div>
+                <p style={{ color: '#f87171', fontSize: 12, margin: '0 0 4px' }}>{setupError}</p>
+                <button type="button" onClick={handleResetPassword}
+                  style={{ background: 'none', border: 'none', color: 'rgba(200,167,39,0.7)', fontSize: 12, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', textDecoration: 'underline', padding: 0 }}>
+                  Réinitialiser mon mot de passe →
+                </button>
+              </div>
+            )}
             <button type="submit" disabled={setupLoading}
               style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
-              {setupLoading ? 'Création...' : 'Activer mon accès Pro →'}
+              {setupLoading ? 'Connexion...' : 'Accéder à mon espace Pro →'}
             </button>
           </form>
         </div>
