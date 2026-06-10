@@ -1783,7 +1783,6 @@ function Navbar({ navigate }) {
 /* ─── Hero ─── */
 function Hero({ navigate }) {
   const { user, openAuth, isPro } = useAuth();
-  const countdown = useLaunchCountdown();
   return (
     <section className="hero-section" style={{
       background: 'transparent',
@@ -2088,7 +2087,7 @@ function Hero({ navigate }) {
       {!isPro && (
         <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.3)', borderRadius: 30, padding: '5px 16px' }}>
           <span style={{ fontSize: 12 }}>⏳</span>
-          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>OFFRE LANCEMENT — expire dans {countdown}</span>
+          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>⚡ Offre de lancement — expire bientôt</span>
         </div>
       )}
 
@@ -2673,7 +2672,6 @@ function TestimonialsSection() {
 /* ─── Comparison Table ─── */
 function ComparisonTable({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
-  const countdown = useLaunchCountdown();
   const freeItems = [
   { text: '5 questions par thème (aperçu)', ok: true },
   { text: '3 sourates en blind test', ok: true },
@@ -2806,7 +2804,7 @@ function ComparisonTable({ navigate }) {
             {!isPro && (
               <div style={{ marginTop:24, display:'flex', alignItems:'center', justifyContent:'center', gap:7, background:'rgba(220,50,50,0.1)', border:'1px solid rgba(220,50,50,0.28)', borderRadius:20, padding:'5px 14px' }}>
                 <span style={{ fontSize:11 }}>⏳</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'#ff7070', letterSpacing:'0.05em' }}>OFFRE LANCEMENT — expire dans {countdown}</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'#ff7070', letterSpacing:'0.05em' }}>⚡ Offre de lancement — expire bientôt</span>
               </div>
             )}
             <button onClick={() => isPro ? navigate('blind-test') : openQuickCheckout()} style={{
@@ -3525,7 +3523,6 @@ function FaqSection() {
 
 function SoftPaywall({ navigate }) {
   const { user, openAuth, openQuickCheckout, isPro } = useAuth();
-  const countdown = useLaunchCountdown();
   if (isPro) return null;
   return (
     <section style={{
@@ -3545,7 +3542,7 @@ function SoftPaywall({ navigate }) {
         <div className="soft-paywall-countdown" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.28)', borderRadius: 30, padding: '5px 16px', marginBottom: 24 }}>
           <span style={{ fontSize: 12 }}>⏳</span>
           <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>
-            OFFRE LANCEMENT — expire dans {countdown}
+            ⚡ Offre de lancement — expire bientôt
           </span>
         </div>
 
@@ -3619,7 +3616,6 @@ function SoftPaywall({ navigate }) {
 /* ─── Start / Découverte Page ─── */
 function StartPage({ navigate }) {
   const { openAuth, user, isPro, openQuickCheckout } = useAuth();
-  const countdown = useLaunchCountdown();
   const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
   const [bottomVis, setBottomVis] = React.useState(false);
   const bottomRef = React.useRef(null);
@@ -3913,7 +3909,7 @@ function StartPage({ navigate }) {
             <>
               <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(220,50,50,0.1)', border:'1px solid rgba(220,50,50,0.28)', borderRadius:30, padding:'5px 16px', marginBottom:16 }}>
                 <span style={{ fontSize:12 }}>⏳</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'#ff7070', letterSpacing:'0.06em' }}>OFFRE LANCEMENT — expire dans {countdown}</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'#ff7070', letterSpacing:'0.06em' }}>⚡ Offre de lancement — expire bientôt</span>
               </div>
               <button onClick={function(){ openQuickCheckout(); }}
                 style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 56px', borderRadius:15, fontSize:16.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 8px 36px rgba(200,167,39,0.45)', marginBottom:16, transition:'all 0.2s', display:'block' }}
