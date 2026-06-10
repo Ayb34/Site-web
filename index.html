@@ -6923,9 +6923,9 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           <div>
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro · Offre lancement</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: '#bbb', textDecoration: 'line-through' }}>19,99€</span>
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 20, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#888' }}>/mois</span></span>
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#16a34a', fontWeight: 700, background: 'rgba(22,163,74,0.1)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: '#999', textDecoration: 'line-through' }}>19,99€</span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 20, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#15803d', fontWeight: 700, background: 'rgba(22,163,74,0.12)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
             </div>
           </div>
           <button onClick={handleClose} style={{ background: 'rgba(0,0,0,0.07)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
@@ -6967,7 +6967,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
         {!loading && !error && (
           <div style={{ padding: '8px 14px 14px', display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap', borderTop: '1px solid #f5f5f5', marginTop: 4 }}>
             {['🔒 Paiement sécurisé', '↩ Résiliable en 1 clic', '📵 Sans pub'].map(function (t) {
-              return <span key={t} style={{ color: '#bbb', fontSize: 11, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{t}</span>;
+              return <span key={t} style={{ color: '#555', fontSize: 11, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{t}</span>;
             })}
           </div>
         )}
