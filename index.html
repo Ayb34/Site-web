@@ -45,26 +45,37 @@
 <!-- ── Fonts (DM Serif Display supprimé — 0 usage) ── -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel:wght@400;600;700&family=Fraunces:ital,opsz,wght@1,144,200;1,144,300&display=swap" rel="stylesheet"/>
 
+<!-- ── Preload critiques ── -->
+<link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
+<link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
+<link rel="preload" as="script" href="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"/>
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
 <!-- ── Stripe.js ── -->
-<script src="https://js.stripe.com/v3/" async></script>
-<!-- ── React 18 production builds (~800KB vs ~8MB dev) ── -->
+<script src="https://js.stripe.com/v3/" async defer></script>
+<!-- ── React 18 production builds ── -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous" defer></script>
+<!-- ── Firebase (sync — requis avant l'init inline) ── -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- ── EmailJS (différé — init lazy au premier envoi) ── -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 <script>
   (function(){
-    // ── EmailJS config ──────────────────────────────────────────
     var _EJS_PUBLIC_KEY  = '0p0THZMRdSKSdd8Yj';
     var _EJS_SERVICE_ID  = 'service_s1qs19r';
     var _EJS_TEMPLATE_ID = 'template_17svpba';
-    // ────────────────────────────────────────────────────────────
-    try { emailjs.init({ publicKey: _EJS_PUBLIC_KEY }); } catch(e) {}
+    var _ejsInited = false;
     window._ejsSend = function(toEmail, toName) {
       try {
+        if (!_ejsInited && typeof emailjs !== 'undefined') {
+          emailjs.init({ publicKey: _EJS_PUBLIC_KEY });
+          _ejsInited = true;
+        }
         emailjs.send(_EJS_SERVICE_ID, _EJS_TEMPLATE_ID, {
           to_email: toEmail,
           to_name:  toName || 'cher(e) membre'
