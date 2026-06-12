@@ -807,7 +807,7 @@ function ProGateModal({ onClose, navigate }) {
         {/* Price */}
         <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
           <div style={{ marginBottom:8 }}>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.3)', textDecoration:'line-through', marginRight:6 }}>19,99€</span>
+            
             <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>7,99€</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / mois</span>
           </div>
@@ -999,7 +999,7 @@ function SubscriptionPage({ navigate }) {
           Accès Pro
         </h1>
         <div style={{ marginBottom: 10 }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.3)', textDecoration:'line-through', marginRight:8 }}>19,99€/mois</span>
+          
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.6)', marginLeft:6 }}>· offre lancement</span>
         </div>
@@ -1107,7 +1107,7 @@ function SubscriptionPage({ navigate }) {
 
         {/* Price */}
         <div style={{ marginBottom: 4, textAlign: 'center' }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.3)', textDecoration:'line-through' }}>19,99€/mois</span>
+          
         </div>
         <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
           <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
@@ -2091,21 +2091,6 @@ function Hero({ navigate }) {
         </div>
       )}
 
-      {/* Social proof */}
-      <div className="hero-social-proof" style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex' }}>
-          {[{l:'H',c:'#c8a727'},{l:'F',c:'#60a5fa'},{l:'A',c:'#4ade80'}].map((a,i) => (
-            <div key={i} style={{ width:30, height:30, borderRadius:'50%', background:`${a.c}22`, border:`2px solid ${a.c}55`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:800, color:a.c, marginLeft: i===0?0:-8, fontFamily:'Plus Jakarta Sans,sans-serif' }}>{a.l}</div>
-          ))}
-        </div>
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-start' }}>
-          <div style={{ display:'flex', gap:1 }}>{'★★★★★'.split('').map((s,i)=><span key={i} style={{ color:'#c8a727', fontSize:12 }}>{s}</span>)}</div>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:1 }}>
-            22+ membres · plateforme islamique francophone
-          </span>
-        </div>
-      </div>
-
       {/* Trust badges */}
       <div className="hero-trust-badges" style={{ marginTop: 16, display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
         {[['✓','Sans carte bancaire'],['✓','Résiliable à tout moment'],['✓','100% en français']].map(([icon,label]) => (
@@ -2172,7 +2157,7 @@ function ReassuranceBanner() {
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
-  { value: '22+', label: 'membres actifs' },
+  { value: 'Lancé', label: 'en 2026' },
   { value: '3', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
   { value: '7,99€', label: 'offre de lancement' }];
@@ -2597,78 +2582,6 @@ function HowItWorksSection() {
   );
 }
 
-/* ─── Testimonials ─── */
-function TestimonialsSection() {
-  const testimonials = [
-    {
-      name: 'Haitam',
-      age: '23 ans · Créateur TikTok',
-      avatar: { l: 'H', c: '#c8a727' },
-      stars: 5,
-      text: 'Grâce au studio, je poste des vidéos avec les versets chaque semaine. En 2 mois j\'ai doublé mes abonnés. Le contenu islamique marche vraiment fort sur TikTok et cet outil me fait gagner un temps fou.',
-      highlight: 'doublé mes abonnés en 2 mois'
-    },
-    {
-      name: 'Fatima',
-      age: '31 ans · Mère de famille',
-      avatar: { l: 'F', c: '#60a5fa' },
-      stars: 5,
-      text: 'Le blind test, c\'est devenu notre activité du vendredi soir en famille. Mes enfants apprennent les sourates sans s\'en rendre compte. C\'est le seul site islamique en français qui soit vraiment bien fait.',
-      highlight: 'mes enfants apprennent sans s\'en rendre compte'
-    },
-    {
-      name: 'Ahmed',
-      age: '27 ans · Étudiant',
-      avatar: { l: 'A', c: '#4ade80' },
-      stars: 5,
-      text: 'J\'ai essayé des dizaines d\'applis islamiques. Celle-là est dans une autre catégorie. Le quiz m\'a appris des choses sur les prophètes que je ne savais pas après des années. Et tout est en français, enfin.',
-      highlight: 'dans une autre catégorie'
-    }
-  ];
-  return (
-    <section style={{ padding: '90px 24px', background: 'linear-gradient(180deg, #020a04 0%, #030e07 100%)', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(200,167,39,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ maxWidth: 1060, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <div className="reveal-glow" style={{ textAlign: 'center', marginBottom: 56 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#c8a727', marginBottom: 12, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>◆ ILS EN PARLENT</p>
-          <h2 style={{ fontFamily: 'Fraunces, serif', fontWeight: 200, fontStyle: 'italic', fontSize: 'clamp(30px,4.5vw,50px)', color: '#fff', margin: 0, letterSpacing: '-0.5px' }}>
-            Ils ont commencé.<br /><span style={{ color: '#c8a727' }}>Ils ne s'arrêtent plus.</span>
-          </h2>
-        </div>
-        <div className="reveal-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px,1fr))', gap: 24 }}>
-          {testimonials.map((t, i) => (
-            <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.14)', borderRadius: 20, padding: '28px 26px', display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', overflow: 'hidden' }}>
-              {/* quote mark */}
-              <div style={{ position: 'absolute', top: 16, right: 20, fontFamily: 'Georgia, serif', fontSize: 72, color: 'rgba(200,167,39,0.08)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none' }}>"</div>
-              {/* stars */}
-              <div style={{ display: 'flex', gap: 3 }}>
-                {Array(t.stars).fill(0).map((_,j) => <span key={j} style={{ color: '#c8a727', fontSize: 14 }}>★</span>)}
-              </div>
-              {/* text */}
-              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.72)', lineHeight: 1.7, margin: 0, position: 'relative', zIndex: 1 }}>
-                {t.text.split(t.highlight).map((part, j, arr) => (
-                  <React.Fragment key={j}>
-                    {part}
-                    {j < arr.length - 1 && <strong style={{ color: '#e6c84a', fontWeight: 700 }}>{t.highlight}</strong>}
-                  </React.Fragment>
-                ))}
-              </p>
-              {/* author */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 'auto', paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${t.avatar.c}18`, border: `1.5px solid ${t.avatar.c}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: t.avatar.c, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{t.avatar.l}</div>
-                <div>
-                  <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 14, color: '#fff', margin: 0 }}>{t.name}</p>
-                  <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.38)', margin: 0 }}>{t.age}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─── Comparison Table ─── */
 function ComparisonTable({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
@@ -2782,7 +2695,7 @@ function ComparisonTable({ navigate }) {
             <div style={{ marginBottom: 24 }}>
               <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 8 }}>Accès complet</p>
               <div style={{ marginBottom: 2 }}>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(255,255,255,0.3)', textDecoration:'line-through' }}>19,99€/mois</span>
+                
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                 <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
@@ -3283,7 +3196,7 @@ function StudioViralSection({ navigate }) {
   const stats = [
     { value: '847M', label: 'vues #islam sur TikTok en 2024', icon: '🔥' },
     { value: '×12', label: 'croissance contenu islamique FR', icon: '📈' },
-    { value: '5 000€', label: 'revenus/mois pour les top créateurs halal', icon: '💰' },
+    { value: '100%', label: 'contenu vérifié islamiquement', icon: '🕌' },
   ];
   const phones = [
     { views: '2.4M', likes: '187K', comments: '4.2K', shares: '43K', user: '@nour_islamique', arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', fr: 'Au nom d\'Allah, le Tout Miséricordieux', ref: 'Al-Fatiha · V.1', tag: '#coran #fyp #islam' },
@@ -3309,10 +3222,10 @@ function StudioViralSection({ navigate }) {
             </div>
           </div>
           <h2 style={{ fontFamily: 'Fraunces, serif', fontWeight: 200, fontStyle: 'italic', fontSize: 'clamp(48px, 7vw, 82px)', color: '#fff', margin: '0 0 22px', lineHeight: 1.05, letterSpacing: '-2px' }}>
-            Des hassanats.<br /><span style={{ color: '#c8a727' }}>Et des revenus.</span>
+            Des hassanats.<br /><span style={{ color: '#c8a727' }}>Pour ta communauté.</span>
           </h2>
           <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 'clamp(16px, 1.8vw, 20px)', color: 'rgba(255,255,255,0.52)', maxWidth: 600, margin: '0 auto 20px', lineHeight: 1.8 }}>
-            Le contenu islamique explose sur TikTok et YouTube. Crée tes vidéos en quelques clics — et poste. Chaque partage peut te rapporter des hassanats <em>et</em> un revenu halal. Les meilleurs créateurs islamiques FR dépassent les <strong style={{ color: '#c8a727' }}>5 000€/mois</strong>.
+            Le contenu islamique explose sur TikTok et YouTube. Crée tes vidéos en quelques clics — et poste. Chaque partage peut être une sadaqa jariya : une bonne action qui continue de porter ses fruits tant que quelqu'un la regarde.
           </p>
           <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(18px, 2vw, 22px)', color: 'rgba(200,167,39,0.65)', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
             « Celui qui guide vers le bien obtient la même récompense que celui qui le fait. » — Sahih Muslim
@@ -3391,12 +3304,12 @@ function StudioViralSection({ navigate }) {
               </div>
             ))}
 
-            {/* Dream income block */}
+            {/* Reach block */}
             <div style={{ background: 'linear-gradient(135deg,rgba(200,167,39,0.1),rgba(200,167,39,0.04))', border: '1px solid rgba(200,167,39,0.28)', borderRadius: 16, padding: '20px 20px' }}>
-              <div style={{ fontFamily: 'Cinzel, sans-serif', fontSize: 28, color: '#e6c84a', fontWeight: 700, lineHeight: 1, marginBottom: 4 }}>5 000€<span style={{ fontSize: 14, color: 'rgba(200,167,39,0.6)', fontWeight: 400 }}>/mois</span></div>
-              <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: 'rgba(200,167,39,0.7)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>💰 Revenu halal atteignable</div>
+              <div style={{ fontFamily: 'Cinzel, sans-serif', fontSize: 28, color: '#e6c84a', fontWeight: 700, lineHeight: 1, marginBottom: 4 }}>847M</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: 'rgba(200,167,39,0.7)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔥 vues #islam sur TikTok en 2024</div>
               <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12.5, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.7 }}>
-                Monétisation YouTube, dons communauté, partenariats halal. Des créateurs islamiques FR y sont déjà — avec les mêmes outils que toi.
+                Le contenu islamique est l'un des plus partagés sur les réseaux. Chaque vidéo que tu crées peut toucher des milliers de personnes.
               </p>
             </div>
 
@@ -3575,7 +3488,7 @@ function SoftPaywall({ navigate }) {
 
         {/* Price anchor */}
         <div className="soft-paywall-price-row" style={{ marginBottom: 24, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
-          <span className="price-strike-old" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'line-through' }}>19,99€/mois</span>
+          
           <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
           <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois · offre de lancement</span>
         </div>
@@ -3720,7 +3633,7 @@ function StartPage({ navigate }) {
 
             {/* Prix */}
             <div style={{ textAlign:'center', marginBottom:16 }}>
-              <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(255,255,255,0.28)', textDecoration:'line-through', marginRight:8 }}>19,99€/mois</span>
+              
               <span style={{ fontFamily:'Playfair Display,serif', fontSize:30, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
               <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.55)', marginLeft:8 }}>offre lancement</span>
             </div>
@@ -3749,7 +3662,7 @@ function StartPage({ navigate }) {
               style={{ background:'rgba(200,167,39,0.07)', border:'1.5px solid rgba(200,167,39,0.28)', color:'rgba(200,167,39,0.88)', padding:'13px 24px', borderRadius:13, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s', width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}
               onMouseEnter={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.14)'; }}
               onMouseLeave={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.07)'; }}>
-              <span style={{ textDecoration:'line-through', color:'rgba(200,167,39,0.38)', fontSize:12, fontWeight:400 }}>19,99€</span>
+              
               Voir l'offre Pro — 7,99€/mois
             </button>
             <p style={{ marginTop:6, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.35)', textAlign:'center', lineHeight:1.6 }}>
@@ -3824,7 +3737,7 @@ function StartPage({ navigate }) {
                   <div style={{ background:'rgba('+act.tagRgb+',0.05)', border:'1px solid rgba('+act.tagRgb+',0.15)', borderRadius:12, padding:'16px 18px', marginBottom:24 }}>
                     <div style={{ marginBottom:12, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
                       <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>✦ PRO — 7,99€/mois</span>
-                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:9, color:'rgba(255,255,255,0.28)', textDecoration:'line-through' }}>19,99€</span>
+                      
                     </div>
                     {act.pro.map(function(p) {
                       return (
@@ -3875,7 +3788,7 @@ function StartPage({ navigate }) {
                 Accède à tout ce que la plateforme a à offrir. Sans engagement. Résiliable en un clic.
               </p>
               <div style={{ marginBottom:36, display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:15, color:'rgba(255,255,255,0.28)', textDecoration:'line-through' }}>19,99€/mois</span>
+                
                 <span style={{ fontFamily:'Playfair Display,serif', fontSize:28, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
                 <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.25)', borderRadius:20, padding:'2px 10px' }}>offre lancement</span>
               </div>
@@ -6769,7 +6682,7 @@ function ExitIntentPopup({ navigate }) {
           Le niveau <strong style={{color:'#fff'}}>Intermédiaire & Avancé</strong>, le Blind Test complet et le Studio vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(255,255,255,0.28)', textDecoration:'line-through', marginRight:8 }}>19,99€/mois</span>
+          
           <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>offre de lancement — sans engagement</div>
         </div>
@@ -6917,7 +6830,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           <div>
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro · Offre lancement</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: '#999', textDecoration: 'line-through' }}>19,99€</span>
+              
               <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 20, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
               <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#15803d', fontWeight: 700, background: 'rgba(22,163,74,0.12)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
             </div>
@@ -7180,7 +7093,7 @@ function App() {
         <LearnPlaySection navigate={navigate} />
         <StudioViralSection navigate={navigate} />
         <ImportanceSection />
-        <TestimonialsSection />
+
         <ComparisonTable navigate={navigate} />
         <ParcoursSection />
         <StatsBar />
