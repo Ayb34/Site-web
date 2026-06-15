@@ -725,17 +725,17 @@ const { useState, useEffect, useRef } = React;
 /* ─── Affichage prix offre lancement (cohérent partout) ─── */
 function OfferPrice({ big = 40, light = false }) {
   var priceColor = light ? '#1a1a1a' : '#f5d76e';
-  var subColor   = light ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.62)';
-  var mutedColor = light ? 'rgba(0,0,0,0.42)' : 'rgba(255,255,255,0.45)';
+  var subColor   = light ? 'rgba(0,0,0,0.6)' : '#ffffff';
+  var mutedColor = light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.88)';
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7 }}>
       <div style={{ display:'flex', alignItems:'baseline', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
         <span style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:big, lineHeight:1, color:priceColor, letterSpacing:'-0.5px', textShadow: light ? 'none' : '0 2px 16px rgba(200,167,39,0.35)' }}>3,99€</span>
         <span style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.36), fontWeight:700, color:subColor }}>le 1<sup style={{ fontSize:'0.6em' }}>er</sup> mois</span>
-        <span style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.3), fontWeight:800, color:'#06210f', background:'linear-gradient(135deg,#6ee79a,#22c55e)', borderRadius:30, padding:'3px 11px', letterSpacing:'0.02em', boxShadow:'0 2px 12px rgba(34,197,94,0.35)' }}>−50%</span>
+        <span style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.3), fontWeight:800, color:'#ffffff', background:'linear-gradient(135deg,#6ee79a,#22c55e)', borderRadius:30, padding:'3px 11px', letterSpacing:'0.02em', boxShadow:'0 2px 12px rgba(34,197,94,0.35)' }}>−50%</span>
       </div>
       <div style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.33), fontWeight:600, color:mutedColor }}>
-        puis <span style={{ textDecoration:'line-through', opacity:0.8 }}>7,99€</span>/mois · sans engagement
+        puis <span style={{ textDecoration:'line-through', opacity:0.85 }}>7,99€</span>/mois · sans engagement
       </div>
     </div>
   );
