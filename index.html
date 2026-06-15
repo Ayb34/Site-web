@@ -105,14 +105,9 @@
       localStorage.setItem('hm_founder', '1');
     }
   } catch(e) {}
-  window.HM_FOUNDER = function() {
-    try {
-      var p = new URLSearchParams(window.location.search).get('offer');
-      if (p === 'lancement' || p === 'fondateur') return true;        // l'URL suffit
-      if (window.location.hash.indexOf('offer=lancement') !== -1) return true;
-      return localStorage.getItem('hm_founder') === '1';              // sinon mémoire
-    } catch(e) { return false; }
-  };
+  // Offre de lancement PUBLIQUE : visible pour tout le monde.
+  // (Pour repasser en "via lien seulement", remettre la logique URL/localStorage ci-dessous.)
+  window.HM_FOUNDER = function() { return true; };
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
