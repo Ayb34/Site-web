@@ -98,8 +98,13 @@
     window._auth = firebase.auth();
     window._db   = firebase.firestore();
   } catch(e) { console.warn("Firebase non configure:", e.message); }
-  // Stripe Payment Link
-  window.STRIPE_LINK = 'https://buy.stripe.com/test_dRm3cv0tzdWJh1g6Qp5Vu00';
+  // ── Offre Fondateur : ?offer=fondateur => mémorisé (1er mois -50%) ──
+  try {
+    if (new URLSearchParams(window.location.search).get('offer') === 'fondateur') {
+      localStorage.setItem('hm_founder', '1');
+    }
+  } catch(e) {}
+  window.HM_FOUNDER = function() { try { return localStorage.getItem('hm_founder') === '1'; } catch(e) { return false; } };
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1083,7 +1088,7 @@ function SubscriptionPage({ navigate }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method || 'card' }),
+        body: JSON.stringify({ method: method || 'card', founder: window.HM_FOUNDER && window.HM_FOUNDER() }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -6856,7 +6861,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method }),
+        body: JSON.stringify({ method: method, founder: window.HM_FOUNDER && window.HM_FOUNDER() }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -6898,10 +6903,12 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
         {/* Header */}
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro · Offre lancement</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? 'Héritage Pro · Offre Fondateur' : 'Héritage Pro · Offre lancement'}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-              
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 20, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
+              {(window.HM_FOUNDER && window.HM_FOUNDER()) && (
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 20, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>3,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}> le 1er mois</span></span>
+              )}
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: (window.HM_FOUNDER && window.HM_FOUNDER()) ? 13 : 20, fontWeight: (window.HM_FOUNDER && window.HM_FOUNDER()) ? 600 : 900, color: (window.HM_FOUNDER && window.HM_FOUNDER()) ? '#999' : '#1a1a1a', lineHeight: 1, textDecoration: (window.HM_FOUNDER && window.HM_FOUNDER()) ? 'line-through' : 'none' }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
               <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#15803d', fontWeight: 700, background: 'rgba(22,163,74,0.12)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
             </div>
           </div>
