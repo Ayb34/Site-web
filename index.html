@@ -2772,9 +2772,18 @@ function ComparisonTable({ navigate }) {
               <div style={{ marginBottom: 2 }}>
                 
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
+                  <>
+                    <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>3,99€</p>
+                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>le 1er mois · puis 7,99€ · 🎉 -50%</p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
+                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
+                  </>
+                )}
               </div>
               <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginTop:4, display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
