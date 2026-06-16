@@ -3750,26 +3750,33 @@ function StartPage({ navigate }) {
             </div>
           </div>
         ) : !user ? (
-          // Non connecté : inscription + voir offre
-          <div className="sp-4" style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap', width:'100%', maxWidth:420, margin:'0 auto' }}>
-            <button onClick={openAuth}
-              style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'15px 24px', borderRadius:13, fontSize:15.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 28px rgba(200,167,39,0.42)', transition:'all 0.2s', letterSpacing:'-0.1px', width:'100%' }}
-              onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 8px 36px rgba(200,167,39,0.6)'; }}
+          // Non connecté : on lance direct dans le jeu (goûter d'abord)
+          <div className="sp-4" style={{ display:'flex', flexDirection:'column', gap:12, width:'100%', maxWidth:460, margin:'0 auto' }}>
+            <button onClick={function(){ navigate('blind-test'); }}
+              style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 24px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 28px rgba(200,167,39,0.42)', transition:'all 0.2s', letterSpacing:'-0.1px', width:'100%' }}
+              onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.03)'; e.currentTarget.style.boxShadow='0 8px 36px rgba(200,167,39,0.6)'; }}
               onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.42)'; }}>
-              ✦ Créer mon compte — c'est gratuit
+              🎵 Jouer au Blind Test
             </button>
-            <button onClick={function(){ openQuickCheckout(); }}
-              style={{ background:'rgba(200,167,39,0.07)', border:'1.5px solid rgba(200,167,39,0.28)', color:'rgba(200,167,39,0.88)', padding:'13px 24px', borderRadius:13, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s', width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}
-              onMouseEnter={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.14)'; }}
-              onMouseLeave={function(e){ e.currentTarget.style.background='rgba(200,167,39,0.07)'; }}>
-              
-              {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "Voir l'offre — 3,99€ le 1er mois" : "Voir l'offre Pro — 7,99€/mois"}
-            </button>
-            <p style={{ marginTop:6, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.35)', textAlign:'center', lineHeight:1.6 }}>
-              Moins d'un café par semaine pour enrichir ton Deen · résiliable en 1 clic
+            <div style={{ display:'flex', gap:12 }}>
+              <button onClick={function(){ navigate('quiz'); }}
+                style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1.5px solid rgba(74,222,128,0.3)', color:'#fff', padding:'15px 16px', borderRadius:13, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s' }}
+                onMouseEnter={function(e){ e.currentTarget.style.background='rgba(74,222,128,0.12)'; }}
+                onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}>
+                🧠 Quiz
+              </button>
+              <button onClick={function(){ navigate('studio'); }}
+                style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1.5px solid rgba(167,139,250,0.3)', color:'#fff', padding:'15px 16px', borderRadius:13, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s' }}
+                onMouseEnter={function(e){ e.currentTarget.style.background='rgba(167,139,250,0.12)'; }}
+                onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}>
+                🎬 Studio
+              </button>
+            </div>
+            <p style={{ marginTop:4, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.4)', textAlign:'center', lineHeight:1.6 }}>
+              100% gratuit · sans carte · joue sans compte 🎯
             </p>
-            <p className="sp-5" style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.18)' }}>
-              ✓ Sans carte bancaire &nbsp;·&nbsp; ✓ Résiliable à tout moment &nbsp;·&nbsp; ✓ 100% en français
+            <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.3)', textAlign:'center' }}>
+              Déjà un compte ? <span onClick={openAuth} style={{ color:'#c8a727', cursor:'pointer', textDecoration:'underline' }}>Se connecter</span>
             </p>
           </div>
         ) : null}
