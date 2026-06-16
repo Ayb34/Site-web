@@ -2139,7 +2139,7 @@ function Hero({ navigate }) {
 
       {/* CTA buttons */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', width: '100%', maxWidth: 440 }}>
-        <button onClick={() => user ? navigate('start') : openAuth()} className="hero-btn-primary" style={{
+        <button onClick={() => navigate('start')} className="hero-btn-primary" style={{
             width: '100%',
             background: 'linear-gradient(135deg, #c8a727 0%, #e6c84a 100%)',
             border: 'none', color: '#1a0e00', padding: '16px 40px', borderRadius: 12,
@@ -2749,7 +2749,7 @@ function ComparisonTable({ navigate }) {
                 </div>
               )}
             </div>
-            <button onClick={function(){ user ? navigate('start') : openAuth(); }} style={{
+            <button onClick={function(){ navigate('start'); }} style={{
               marginTop: 28, width: '100%',
               background: 'transparent', border: '1.5px solid rgba(255,255,255,0.25)',
               color: '#fff', padding: '13px', borderRadius: 10,
@@ -3852,7 +3852,7 @@ function StartPage({ navigate }) {
               )}
 
               {/* CTA */}
-              <button onClick={function(){ user ? navigate(act.page) : openAuth(); }}
+              <button onClick={function(){ navigate(act.page); }}
                 style={{ background:'rgba('+act.tagRgb+',0.1)', border:'1.5px solid rgba('+act.tagRgb+',0.32)', color:act.tagColor, padding:'14px', borderRadius:12, fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', width:'100%', transition:'all 0.2s', letterSpacing:'-0.1px' }}
                 onMouseEnter={function(e){ e.currentTarget.style.background='rgba('+act.tagRgb+',0.22)'; e.currentTarget.style.transform='scale(1.02)'; }}
                 onMouseLeave={function(e){ e.currentTarget.style.background='rgba('+act.tagRgb+',0.1)'; e.currentTarget.style.transform='scale(1)'; }}>
@@ -4590,7 +4590,7 @@ function QuizPage({ navigate }) {
   }, []);
 
   const handleClick = (key, cat) => {
-    if (!user) { openAuth(); return; }
+    // Invités : on laisse goûter (le gate inscription arrive après quelques questions)
     setLevelModal({ key, cat });
   };
 
@@ -4708,9 +4708,9 @@ function QuizPage({ navigate }) {
                       )}
                     </div>
 
-                    {/* Arrow / lock */}
-                    <div style={{ fontSize: 20, color: user ? cat.color : 'rgba(255,255,255,0.25)', flexShrink: 0, marginRight: 4 }}>
-                      {user ? '›' : '🔒'}
+                    {/* Arrow (jouable, même invité) */}
+                    <div style={{ fontSize: 20, color: cat.color, flexShrink: 0, marginRight: 4 }}>
+                      ›
                     </div>
                   </button>
                 );
@@ -4720,8 +4720,8 @@ function QuizPage({ navigate }) {
 
         {/* ── Not logged in note ── */}
         {!user && (
-          <div style={{ marginTop: 32, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
-            <span onClick={openAuth} style={{ color: '#c8a727', cursor: 'pointer', textDecoration: 'underline' }}>Connecte-toi</span> pour accéder aux quiz et sauvegarder ta progression.
+          <div style={{ marginTop: 32, textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+            Choisis une catégorie et joue tout de suite 🎯 — <span onClick={openAuth} style={{ color: '#c8a727', cursor: 'pointer', textDecoration: 'underline' }}>crée ton compte gratuit</span> pour sauvegarder ton score.
           </div>
         )}
       </div>
@@ -4780,7 +4780,7 @@ function QuizPage({ navigate }) {
 
 /* ─── Quiz Category Page ─── */
 function QuizCategoryPage({ catKey, level, navigate }) {
-  const { user } = useAuth();
+  const { user, openAuth } = useAuth();
   const QUIZ_SIZE = 10;
   const LABELS = ['A', 'B', 'C', 'D'];
   const [showGuestGate, setShowGuestGate] = React.useState(false);
@@ -4818,8 +4818,8 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   };
 
   const next = () => {
-    // Gate invité après 1ère question
-    if (!user && current === 0 && current + 1 < questions.length) {
+    // Gate invité après 3 questions (assez de goût + investi -> max inscriptions)
+    if (!user && current === 2 && current + 1 < questions.length) {
       setShowGuestGate(true);
       return;
     }
@@ -4883,10 +4883,21 @@ function QuizCategoryPage({ catKey, level, navigate }) {
           </div>
 
           {/* Category + level */}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 36 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 28 }}>
             <span style={{ fontSize: 13, fontWeight: 700, padding: '4px 14px', borderRadius: 20, background: `${cat.color}18`, border: `1px solid ${cat.color}44`, color: cat.color }}>{cat.icon} {cat.title}</span>
             <span style={{ fontSize: 13, fontWeight: 700, padding: '4px 14px', borderRadius: 20, background: `${lvMeta.color}18`, border: `1px solid ${lvMeta.color}44`, color: lvMeta.color }}>{lvMeta.icon} {lvMeta.label}</span>
           </div>
+
+          {/* Invité : pousse l'inscription au moment du score (pic d'intérêt) */}
+          {!user && (
+            <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.12), rgba(200,167,39,0.04))', border: '1.5px solid rgba(200,167,39,0.4)', borderRadius: 18, padding: '20px 22px', marginBottom: 28, textAlign: 'center' }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 6 }}>💾 Sauvegarde ce score de {finalScore}/{questions.length}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16, lineHeight: 1.5 }}>Crée ton compte gratuit pour garder ta progression et débloquer <strong style={{ color: '#c8a727' }}>toutes les catégories</strong>. 10 secondes.</div>
+              <button onClick={openAuth} style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
+                Créer mon compte gratuit →
+              </button>
+            </div>
+          )}
 
           {/* Buttons */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
