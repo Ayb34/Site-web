@@ -6907,40 +6907,58 @@ function StickyUpgradeBanner({ navigate }) {
 
   if (!user || isPro || dismissed || !visible) return null;
 
+  var founder = window.HM_FOUNDER && window.HM_FOUNDER();
   return (
     <div className="sticky-upgrade-banner" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
-      background: 'linear-gradient(90deg, #0d1f10 0%, #0f2414 50%, #0d1f10 100%)',
-      borderTop: '1px solid rgba(200,167,39,0.35)',
-      padding: '12px 20px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
-      boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
-      flexWrap: 'wrap'
+      background: 'linear-gradient(180deg, #102a18 0%, #0b1d11 100%)',
+      borderTop: '1.5px solid rgba(200,167,39,0.5)',
+      borderRadius: '18px 18px 0 0',
+      padding: '13px 16px calc(13px + env(safe-area-inset-bottom, 0px))',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+      boxShadow: '0 -10px 48px rgba(0,0,0,0.7)'
     }}>
-      <div style={{ display:'flex', alignItems:'center', gap:10, flex:1, minWidth:0 }}>
-        <span style={{ fontSize:18, flexShrink:0 }}>🔒</span>
-        <div>
-          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color:'#fff' }}>
-            Tu es en version gratuite
+      {/* liseré doré lumineux en haut */}
+      <div style={{ position:'absolute', top:-1, left:'10%', right:'10%', height:2, background:'linear-gradient(90deg,transparent,#e6c84a,transparent)', borderRadius:2 }} />
+
+      <div style={{ display:'flex', alignItems:'center', gap:12, flex:1, minWidth:0 }}>
+        {/* badge -50% */}
+        {founder && (
+          <div style={{ flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg,#6ee79a,#22c55e)', borderRadius:12, padding:'6px 10px', boxShadow:'0 2px 12px rgba(34,197,94,0.4)' }}>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:15, fontWeight:900, color:'#06210f', lineHeight:1 }}>-50%</span>
           </div>
-          <div className="sticky-upgrade-banner-desc" style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.45)' }}>
-            Intermédiaire, Avancé, Blind Test complet, Studio — bloqués
+        )}
+        <div style={{ minWidth:0 }}>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, fontWeight:800, color:'#fff', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+            Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span>
+          </div>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap' }}>
+            {founder ? (
+              <>
+                <span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>3,99€</span>
+                <span style={{ textDecoration:'line-through', opacity:0.6, margin:'0 5px' }}>7,99€</span>
+                le 1<sup style={{ fontSize:'0.7em' }}>er</sup> mois
+              </>
+            ) : (
+              <><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>7,99€</span> /mois</>
+            )}
           </div>
         </div>
       </div>
+
       <button onClick={() => openQuickCheckout()} className="sticky-upgrade-banner-btn" style={{
-        background:'linear-gradient(135deg,#c8a727,#a8891f)',
-        border:'none', color:'#0a1a08', padding:'10px 24px', borderRadius:10,
-        fontSize:13, fontWeight:800, cursor:'pointer',
+        background:'linear-gradient(135deg,#e6c84a,#c8a727)',
+        border:'none', color:'#0a1a08', padding:'13px 22px', borderRadius:12,
+        fontSize:14, fontWeight:900, cursor:'pointer',
         fontFamily:'Plus Jakarta Sans,sans-serif',
-        boxShadow:'0 4px 20px rgba(200,167,39,0.4)',
+        boxShadow:'0 4px 22px rgba(200,167,39,0.55)',
         whiteSpace:'nowrap', flexShrink:0
       }}>
-        {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "Passer à Pro — 3,99€ le 1er mois →" : "Passer à Pro — 7,99€/mois →"}
+        Débloquer →
       </button>
-      <button onClick={() => setDismissed(true)} style={{
-        background:'transparent', border:'none', color:'rgba(255,255,255,0.25)',
-        fontSize:18, cursor:'pointer', padding:'4px 8px', flexShrink:0, lineHeight:1
+      <button onClick={() => setDismissed(true)} aria-label="Fermer" style={{
+        background:'transparent', border:'none', color:'rgba(255,255,255,0.3)',
+        fontSize:17, cursor:'pointer', padding:'4px 4px', flexShrink:0, lineHeight:1
       }}>✕</button>
     </div>
   );
@@ -7432,14 +7450,13 @@ requestAnimationFrame(() => {
 @media (max-width: 768px) {
 
   /* StickyUpgradeBanner */
-  .sticky-upgrade-banner-desc { display: none !important; }
   .sticky-upgrade-banner {
-    padding: 10px 14px !important;
-    gap: 10px !important;
+    padding: 11px 13px calc(11px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 8px !important;
   }
   .sticky-upgrade-banner-btn {
-    font-size: 12px !important;
-    padding: 9px 16px !important;
+    font-size: 13px !important;
+    padding: 12px 18px !important;
     white-space: nowrap !important;
   }
 
