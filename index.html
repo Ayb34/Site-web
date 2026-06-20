@@ -399,6 +399,10 @@
     from { opacity:0; transform:translateY(44px) scale(0.97); }
     to   { opacity:1; transform:translateY(0) scale(1); }
   }
+  @keyframes pulseUrgent {
+    0%,100% { box-shadow:0 0 0 0 rgba(220,50,50,0.35); }
+    50%     { box-shadow:0 0 0 8px rgba(220,50,50,0); }
+  }
   @keyframes spGlowPulse {
     0%,100% { opacity:0.45; }
     50%     { opacity:0.85; }
@@ -3626,17 +3630,18 @@ function SoftPaywall({ navigate }) {
         <div className="soft-paywall-btns" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
           <button onClick={() => openQuickCheckout()} style={{
             background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
-            border: 'none', color: '#0a1a08', padding: '18px 48px', borderRadius: 14,
-            fontSize: 16, fontWeight: 800, cursor: 'pointer',
+            border: 'none', color: '#0a1a08', padding: '18px 44px', borderRadius: 14,
+            fontSize: 16.5, fontWeight: 800, cursor: 'pointer',
             boxShadow: '0 6px 32px rgba(200,167,39,0.45)',
             fontFamily: 'Plus Jakarta Sans, sans-serif',
-            width: '100%', maxWidth: 400,
+            width: 'auto', maxWidth: '100%', whiteSpace: 'nowrap',
+            margin: '0 auto',
             transition: 'all 0.2s',
             letterSpacing: '0.02em'
           }}
           onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 8px 40px rgba(200,167,39,0.65)';e.currentTarget.style.transform='translateY(-2px)';}}
           onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
-            {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "🔓 1er mois à 3,99€ — puis 7,99€/mois" : "🔓 Débloquer l'accès — 7,99€/mois"}
+            {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "🔓 Débloquer l'accès — 3,99€" : "🔓 Débloquer l'accès — 7,99€/mois"}
           </button>
           <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
@@ -3920,23 +3925,40 @@ function StartPage({ navigate }) {
             </div>
           ) : (
             <>
+              {/* Rappel : pourquoi apprendre sa religion ne peut pas attendre */}
+              <p style={{ fontFamily:'Cormorant Garamond,Georgia,serif', fontSize:'clamp(16px,2vw,19px)', fontStyle:'italic', color:'rgba(240,237,230,0.6)', maxWidth:520, margin:'0 auto 28px', lineHeight:1.7 }}>
+                « La recherche du savoir est une obligation pour tout musulman. » — Chaque jour sans apprendre est un jour qui ne reviendra pas.
+              </p>
+
               <p style={{ fontFamily:'Cinzel,serif', fontSize:11, color:'rgba(200,167,39,0.5)', letterSpacing:'0.18em', textTransform:'uppercase', marginBottom:18 }}>◆ Accès complet</p>
               <h2 style={{ fontFamily:'Cinzel,serif', fontSize:'clamp(24px,4.5vw,46px)', color:'#f0ede6', marginBottom:16, lineHeight:1.2 }}>
                 Un abonnement.<br />
                 <span style={{ color:'#c8a727' }}>Trois activités. Sans limite.</span>
               </h2>
-              <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:16, color:'rgba(240,237,230,0.43)', lineHeight:1.8, maxWidth:460, margin:'0 auto 16px' }}>
-                Accède à tout ce que la plateforme a à offrir. Sans engagement. Résiliable en un clic.
+              <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:16, color:'rgba(240,237,230,0.43)', lineHeight:1.8, maxWidth:460, margin:'0 auto 24px' }}>
+                Accède à tout ce que la plateforme a à offrir. Sans engagement. Résiliable en un clic, à tout moment.
               </p>
-              <div style={{ marginBottom:36, display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
+
+              {/* PRIX — gros, central, mis en valeur */}
+              <div style={{ background:'linear-gradient(160deg,rgba(200,167,39,0.1) 0%,rgba(200,167,39,0.03) 100%)', border:'1.5px solid rgba(200,167,39,0.35)', borderRadius:24, padding:'36px 28px', maxWidth:480, margin:'0 auto 16px', boxShadow:'0 8px 50px rgba(200,167,39,0.12)' }}>
                 {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-                  <OfferPrice big={40} />
+                  <OfferPrice big={52} />
                 ) : (
-                  <>
-                    <span style={{ fontFamily:'Playfair Display,serif', fontSize:28, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
+                    <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
                     <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.25)', borderRadius:20, padding:'2px 10px' }}>offre lancement</span>
-                  </>
+                  </div>
                 )}
+                <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.5)', marginTop:16, lineHeight:1.6 }}>
+                  Moins cher qu'un kebab par mois — pour un savoir qui te suit toute ta vie.
+                </p>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:10, justifyContent:'center', marginTop:18 }}>
+                  {['✓ Sans engagement', '✓ Résiliable à tout moment, en 1 clic', '✓ Sans carte bancaire pour démarrer'].map(function(t) {
+                    return (
+                      <span key={t} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:600, color:'#7bc99a', background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.25)', borderRadius:20, padding:'5px 12px' }}>{t}</span>
+                    );
+                  })}
+                </div>
               </div>
             </>
           )}
@@ -3961,20 +3983,23 @@ function StartPage({ navigate }) {
             </button>
           ) : (
             <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(220,50,50,0.1)', border:'1px solid rgba(220,50,50,0.28)', borderRadius:30, padding:'5px 16px', marginBottom:16 }}>
-                <span style={{ fontSize:12 }}>⏳</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'#ff7070', letterSpacing:'0.06em' }}>⚡ Offre de lancement — expire bientôt</span>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(220,50,50,0.12)', border:'1px solid rgba(220,50,50,0.35)', borderRadius:30, padding:'6px 18px', marginBottom:18, animation:'pulseUrgent 2.2s ease-in-out infinite' }}>
+                <span style={{ fontSize:13 }}>⏳</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, fontWeight:800, color:'#ff7070', letterSpacing:'0.06em' }}>⚡ Offre de lancement -50% — expire bientôt</span>
               </div>
               <button onClick={function(){ openQuickCheckout(); }}
-                style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'18px 52px', borderRadius:15, fontSize:16.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 8px 36px rgba(200,167,39,0.45)', marginBottom:16, transition:'all 0.2s', display:'inline-block', maxWidth:'100%' }}
-                onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 10px 48px rgba(200,167,39,0.65)'; }}
-                onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 8px 36px rgba(200,167,39,0.45)'; }}>
+                style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'20px 60px', borderRadius:16, fontSize:18, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 10px 44px rgba(200,167,39,0.55)', marginBottom:14, transition:'all 0.2s', display:'inline-block', maxWidth:'100%' }}
+                onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 12px 56px rgba(200,167,39,0.75)'; }}
+                onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 10px 44px rgba(200,167,39,0.55)'; }}>
                 {user ? '🔓 Débloquer l\'accès complet →' : 'Accéder à l\'offre →'}
               </button>
+              <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.35)', margin:'0 0 4px' }}>
+                Tu ne perds rien à essayer : résiliable en 1 clic, à tout moment.
+              </p>
             </div>
           )}
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.2)' }}>
-            {isPro ? 'Accès illimité · Quiz · Blind Test · Studio' : user ? 'Moins d\'un café par semaine · résiliable en 1 clic' : 'Sans carte bancaire · Résiliable à tout moment · 100% en français'}
+            {isPro ? 'Accès illimité · Quiz · Blind Test · Studio' : user ? 'Moins d\'un café par semaine · résiliable en 1 clic' : 'Sans carte bancaire pour démarrer · 100% en français'}
           </p>
         </div>
       </div>
