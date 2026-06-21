@@ -1347,6 +1347,8 @@ function ProfilePage({ navigate }) {
     { key: 'histoire',   title: 'Histoire islamique',   icon: '📜', color: '#fb923c' },
     { key: 'compagnons', title: 'Les Compagnons',       icon: '⭐', color: '#a78bfa' },
     { key: 'jugement',   title: 'Jour du Jugement',     icon: '⚖️', color: '#4ade80' },
+    { key: 'hadiths',    title: 'Hadiths & Sunna',      icon: '📖', color: '#34d399' },
+    { key: 'fiqh',       title: 'Fiqh & Pratique',      icon: '🤲', color: '#f472b6' },
   ];
   const LEVELS = [
     { id: 'debutant', label: 'Débutant', icon: '🌱', color: '#4ade80' },
@@ -4689,7 +4691,7 @@ function QuizPage({ navigate }) {
           Teste tes <span style={{ color: '#c8a727' }}>connaissances</span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, margin: '0 0 16px', lineHeight: 1.6 }}>
-          5 catégories · 3 niveaux
+          7 catégories · 3 niveaux
         </p>
         {isPro ? (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(200,167,39,0.08)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 12, padding: '8px 18px' }}>

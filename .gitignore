@@ -23,3 +23,8 @@ Thumbs.db
 graphify-out/
 .graphify_*
 raw/
+serviceAccount.json
+*firebase-adminsdk*.json
+contacts.csv
+questions.json.bak
+fix.py

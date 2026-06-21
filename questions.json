@@ -3886,5 +3886,1529 @@
         "explication": "La vision d'Allah (Ru'yat Allah) au Paradis est la plus haute récompense selon la théologie sunnite. Le Coran dit : 'Certains visages ce jour-là seront resplendissants, regardant leur Seigneur' (75:22-23). Le Prophète ﷺ dit que les croyants verront Allah comme on voit la pleine lune (Bukhari-Muslim). C'est un pilier de la croyance sunnite contre les Mu'tazilites qui le niaient."
       }
     ]
+  },
+  "hadiths": {
+    "title": "Hadiths & Sunna",
+    "icon": "📖",
+    "color": "#34d399",
+    "free": false,
+    "questions": [
+      {
+        "id": "ha_d_01",
+        "level": "debutant",
+        "q": "Qu'est-ce qu'un hadith ?",
+        "choices": [
+          "Un verset du Coran",
+          "Une parole, un acte ou une approbation du Prophète ﷺ",
+          "Un livre de jurisprudence",
+          "Une invocation collective"
+        ],
+        "correct": 1,
+        "explication": "Un hadith est une parole, un acte ou une approbation rapportée du Prophète Muhammad ﷺ, transmise par une chaîne de narrateurs."
+      },
+      {
+        "id": "ha_d_02",
+        "level": "debutant",
+        "q": "Quel recueil de hadiths est considéré comme le plus authentique après le Coran ?",
+        "choices": [
+          "Sunan Abu Dawud",
+          "Sahih Muslim",
+          "Sahih al-Bukhari",
+          "Sunan an-Nasa'i"
+        ],
+        "correct": 2,
+        "explication": "Sahih al-Bukhari est unanimement considéré comme le recueil de hadiths le plus authentique après le Coran."
+      },
+      {
+        "id": "ha_d_03",
+        "level": "debutant",
+        "q": "Qui est l'auteur du Sahih al-Bukhari ?",
+        "choices": [
+          "Imam Muslim",
+          "Imam al-Bukhari",
+          "Imam Malik",
+          "Imam Ahmad"
+        ],
+        "correct": 1,
+        "explication": "L'imam Muhammad al-Bukhari a compilé ce recueil après avoir vérifié rigoureusement chaque chaîne de transmission."
+      },
+      {
+        "id": "ha_d_04",
+        "level": "debutant",
+        "q": "Qu'est-ce que la « Sunna » ?",
+        "choices": [
+          "Le jeûne du lundi et jeudi",
+          "La voie et les enseignements du Prophète ﷺ",
+          "Un type de prière surérogatoire uniquement",
+          "Un pilier de l'islam"
+        ],
+        "correct": 1,
+        "explication": "La Sunna désigne l'ensemble des paroles, actes et façons de vivre du Prophète ﷺ, qui sert de modèle aux musulmans."
+      },
+      {
+        "id": "ha_d_05",
+        "level": "debutant",
+        "q": "Combien existe-t-il de recueils de hadiths considérés comme « authentiques » (Sahih) parmi les six livres majeurs (Kutub as-Sittah) ?",
+        "choices": [
+          "4",
+          "5",
+          "6",
+          "7"
+        ],
+        "correct": 2,
+        "explication": "Les six livres majeurs (Kutub as-Sittah) sont : Bukhari, Muslim, Abu Dawud, At-Tirmidhi, An-Nasa'i et Ibn Majah."
+      },
+      {
+        "id": "ha_d_06",
+        "level": "debutant",
+        "q": "Quel hadith célèbre commence par « Les actes ne valent que par leur intention » ?",
+        "choices": [
+          "Hadith de Jibril",
+          "Hadith des intentions (Innama al-a'mal)",
+          "Hadith de la miséricorde",
+          "Hadith du repentir"
+        ],
+        "correct": 1,
+        "explication": "Ce hadith rapporté par Omar ibn al-Khattab est l'un des plus fondamentaux : la valeur d'un acte dépend de l'intention (niyyah)."
+      },
+      {
+        "id": "ha_d_07",
+        "level": "debutant",
+        "q": "Qu'est-ce qu'un hadith « qudsi » ?",
+        "choices": [
+          "Un hadith rapporté par un compagnon",
+          "Un hadith où le Prophète ﷺ rapporte directement une parole d'Allah",
+          "Un hadith faible",
+          "Un hadith concernant Jérusalem (al-Quds)"
+        ],
+        "correct": 1,
+        "explication": "Un hadith qudsi est une parole d'Allah rapportée par le Prophète ﷺ mais qui n'est pas un verset du Coran."
+      },
+      {
+        "id": "ha_d_08",
+        "level": "debutant",
+        "q": "Qui sont les transmetteurs d'un hadith appelés ?",
+        "choices": [
+          "Les muhaddithin",
+          "Les rawis (narrateurs) formant la chaîne (sanad)",
+          "Les huffaz",
+          "Les muftis"
+        ],
+        "correct": 1,
+        "explication": "Chaque hadith est transmis par une chaîne de narrateurs (sanad), dont la fiabilité est étudiée pour juger l'authenticité du hadith."
+      },
+      {
+        "id": "ha_d_09",
+        "level": "debutant",
+        "q": "Quel terme désigne un hadith jugé authentique sans aucun défaut dans sa chaîne ?",
+        "choices": [
+          "Hadith hassan",
+          "Hadith sahih",
+          "Hadith da'if",
+          "Hadith mawdu'"
+        ],
+        "correct": 1,
+        "explication": "Sahih signifie « authentique » : la chaîne de transmission est continue et chaque narrateur est fiable."
+      },
+      {
+        "id": "ha_d_10",
+        "level": "debutant",
+        "q": "Que veut dire « Hadith da'if » ?",
+        "choices": [
+          "Hadith fort",
+          "Hadith faible",
+          "Hadith inventé",
+          "Hadith du vendredi"
+        ],
+        "correct": 1,
+        "explication": "Da'if signifie « faible » : un ou plusieurs maillons de la chaîne de transmission présentent un défaut de fiabilité."
+      },
+      {
+        "id": "ha_d_11",
+        "level": "debutant",
+        "q": "Quel compagnon est connu pour avoir rapporté le plus grand nombre de hadiths ?",
+        "choices": [
+          "Abou Bakr",
+          "Abou Houraira",
+          "Omar ibn al-Khattab",
+          "Othman ibn Affan"
+        ],
+        "correct": 1,
+        "explication": "Abou Houraira a passé de nombreuses années aux côtés du Prophète ﷺ et est le narrateur ayant transmis le plus de hadiths."
+      },
+      {
+        "id": "ha_d_12",
+        "level": "debutant",
+        "q": "Qu'est-ce qu'un hadith « mawdu' » ?",
+        "choices": [
+          "Un hadith approuvé",
+          "Un hadith inventé/fabriqué, attribué faussement au Prophète ﷺ",
+          "Un hadith rare",
+          "Un hadith concernant le mariage"
+        ],
+        "correct": 1,
+        "explication": "Mawdu' signifie « fabriqué » : ce sont des paroles inventées, faussement attribuées au Prophète ﷺ, à rejeter totalement."
+      },
+      {
+        "id": "ha_d_13",
+        "level": "debutant",
+        "q": "D'après un hadith célèbre, quelle est la meilleure parole après le Coran ?",
+        "choices": [
+          "Le dhikr",
+          "La salat sur le Prophète ﷺ",
+          "Toutes les invocations sont égales",
+          "Le tasbih uniquement"
+        ],
+        "correct": 1,
+        "explication": "Le Prophète ﷺ a encouragé à multiplier les prières (salat) sur lui, notamment le vendredi."
+      },
+      {
+        "id": "ha_d_14",
+        "level": "debutant",
+        "q": "Quel hadith dit : « Aucun de vous n'aura la foi complète tant qu'il n'aimera pas pour son frère ce qu'il aime pour lui-même » ?",
+        "choices": [
+          "Hadith rapporté dans Sahih Muslim uniquement",
+          "Hadith rapporté dans Sahih al-Bukhari",
+          "Hadith faible non retenu",
+          "Hadith qudsi"
+        ],
+        "correct": 1,
+        "explication": "Ce hadith fondamental sur la fraternité est rapporté dans Sahih al-Bukhari, transmis par Anas ibn Malik."
+      },
+      {
+        "id": "ha_d_15",
+        "level": "debutant",
+        "q": "Que signifie le mot « Sunna » à l'origine ?",
+        "choices": [
+          "Loi",
+          "Voie / chemin suivi",
+          "Prière",
+          "Récompense"
+        ],
+        "correct": 1,
+        "explication": "Sunna signifie littéralement « voie » ou « chemin », désignant la pratique et l'exemple du Prophète ﷺ à suivre."
+      },
+      {
+        "id": "ha_d_16",
+        "level": "debutant",
+        "q": "Quel hadith rappelle l'importance de la bonne conduite envers les parents ?",
+        "choices": [
+          "Hadith sur le jeûne",
+          "Hadith sur la piété filiale (birr al-walidayn)",
+          "Hadith sur le commerce",
+          "Hadith sur le voyage"
+        ],
+        "correct": 1,
+        "explication": "Plusieurs hadiths insistent sur l'immense importance d'être bon envers ses parents, notamment la mère."
+      },
+      {
+        "id": "ha_d_17",
+        "level": "debutant",
+        "q": "Quel calife a ordonné la première grande compilation écrite organisée des hadiths (au sens de mouvement scientifique) ?",
+        "choices": [
+          "Abou Bakr",
+          "Omar ibn al-Khattab",
+          "Le calife omeyyade Omar ibn Abd al-Aziz",
+          "Ali ibn Abi Talib"
+        ],
+        "correct": 2,
+        "explication": "Omar ibn Abd al-Aziz (calife omeyyade) a officiellement encouragé la collecte écrite systématique des hadiths au début du 2e siècle de l'Hégire."
+      },
+      {
+        "id": "ha_d_18",
+        "level": "debutant",
+        "q": "Que veut dire « rapporté à l'unanimité » (muttafaq alayh) ?",
+        "choices": [
+          "Un hadith rapporté uniquement par Bukhari",
+          "Un hadith rapporté à la fois par Bukhari et Muslim",
+          "Un hadith faible",
+          "Un hadith abrogé"
+        ],
+        "correct": 1,
+        "explication": "Quand un hadith figure à la fois dans Sahih al-Bukhari et Sahih Muslim, on dit qu'il est « muttafaq alayh » (sur lequel il y a accord)."
+      },
+      {
+        "id": "ha_d_19",
+        "level": "debutant",
+        "q": "D'après le hadith de Jibril, combien de piliers de la foi (Iman) sont mentionnés ?",
+        "choices": [
+          "5",
+          "6",
+          "7",
+          "3"
+        ],
+        "correct": 1,
+        "explication": "Le célèbre hadith de Jibril énumère 6 piliers de la foi : croire en Allah, aux anges, aux livres, aux prophètes, au Jour Dernier, et au destin (Qadar)."
+      },
+      {
+        "id": "ha_d_20",
+        "level": "debutant",
+        "q": "Quel est le sens du mot « Sahaba » dans le contexte des hadiths ?",
+        "choices": [
+          "Les savants modernes",
+          "Les compagnons du Prophète ﷺ",
+          "Les premiers califes uniquement",
+          "Les juges religieux"
+        ],
+        "correct": 1,
+        "explication": "Les Sahaba sont les compagnons ayant côtoyé le Prophète ﷺ et cru en lui ; ils sont la première source de transmission des hadiths."
+      },
+      {
+        "id": "ha_a_01",
+        "level": "amateur",
+        "q": "Quelle est la différence principale entre un hadith « sahih » et un hadith « hassan » ?",
+        "choices": [
+          "Aucune différence",
+          "Le hassan a une chaîne légèrement moins parfaite mais reste acceptable",
+          "Le hassan est inventé",
+          "Le sahih concerne uniquement le Coran"
+        ],
+        "correct": 1,
+        "explication": "Un hadith hassan est authentique mais sa chaîne de transmission est légèrement moins rigoureuse qu'un hadith sahih, sans être pour autant rejeté."
+      },
+      {
+        "id": "ha_a_02",
+        "level": "amateur",
+        "q": "Qui est l'auteur du Sahih Muslim ?",
+        "choices": [
+          "Muslim ibn al-Hajjaj",
+          "Muhammad al-Bukhari",
+          "Malik ibn Anas",
+          "At-Tirmidhi"
+        ],
+        "correct": 0,
+        "explication": "L'imam Muslim ibn al-Hajjaj a compilé ce recueil, considéré comme le 2e plus authentique après celui de Bukhari."
+      },
+      {
+        "id": "ha_a_03",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Muwatta » et qui l'a compilé ?",
+        "choices": [
+          "Un recueil de l'imam Malik ibn Anas",
+          "Un recueil tardif sans valeur",
+          "Un commentaire du Coran",
+          "Un livre de grammaire arabe"
+        ],
+        "correct": 0,
+        "explication": "Le Muwatta est l'un des plus anciens recueils de hadiths et de droit islamique, compilé par l'imam Malik ibn Anas."
+      },
+      {
+        "id": "ha_a_04",
+        "level": "amateur",
+        "q": "Que signifie « Mutawatir » concernant un hadith ?",
+        "choices": [
+          "Un hadith rapporté par un seul narrateur",
+          "Un hadith rapporté par un grand nombre de narrateurs à chaque génération, rendant le mensonge collectif impossible",
+          "Un hadith abrogé",
+          "Un hadith concernant le jugement dernier"
+        ],
+        "correct": 1,
+        "explication": "Un hadith mutawatir est transmis par tant de narrateurs indépendants à chaque génération qu'une fabrication collective est inconcevable."
+      },
+      {
+        "id": "ha_a_05",
+        "level": "amateur",
+        "q": "Quel terme désigne la science qui étudie la biographie des narrateurs de hadiths ?",
+        "choices": [
+          "Tafsir",
+          "Fiqh",
+          "Ilm al-Jarh wa at-Ta'dil",
+          "Aqida"
+        ],
+        "correct": 2,
+        "explication": "L'Ilm al-Jarh wa at-Ta'dil est la science critique qui examine la fiabilité, la mémoire et l'intégrité de chaque narrateur."
+      },
+      {
+        "id": "ha_a_06",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un hadith « mu'allaq » ?",
+        "choices": [
+          "Un hadith dont le début de la chaîne de transmission est omis",
+          "Un hadith très long",
+          "Un hadith concernant le mariage suspendu",
+          "Un hadith rapporté deux fois"
+        ],
+        "correct": 0,
+        "explication": "Mu'allaq signifie « suspendu » : un ou plusieurs narrateurs au début de la chaîne (du côté du compilateur) manquent."
+      },
+      {
+        "id": "ha_a_07",
+        "level": "amateur",
+        "q": "Quel sahabi (compagnon) est connu comme le « scribe de la révélation » mais aussi grand transmetteur de hadiths sur la jurisprudence successorale ?",
+        "choices": [
+          "Zayd ibn Thabit",
+          "Abou Houraira",
+          "Ibn Abbas",
+          "Mou'awiya"
+        ],
+        "correct": 0,
+        "explication": "Zayd ibn Thabit était l'un des principaux scribes du Coran sous le Prophète ﷺ et un expert reconnu en héritage (fara'id)."
+      },
+      {
+        "id": "ha_a_08",
+        "level": "amateur",
+        "q": "Que veut dire « Isnad » ?",
+        "choices": [
+          "Le texte du hadith",
+          "La chaîne des narrateurs reliant le compilateur au Prophète ﷺ",
+          "Le jugement d'un savant",
+          "Un type de prière"
+        ],
+        "correct": 1,
+        "explication": "L'Isnad est la chaîne de transmission citée avant le texte du hadith (matn), élément central pour juger son authenticité."
+      },
+      {
+        "id": "ha_a_09",
+        "level": "amateur",
+        "q": "Quel est le nom du recueil de hadiths compilé par At-Tirmidhi ?",
+        "choices": [
+          "Sunan At-Tirmidhi (Jami' At-Tirmidhi)",
+          "Sahih At-Tirmidhi",
+          "Muwatta At-Tirmidhi",
+          "Musannaf At-Tirmidhi"
+        ],
+        "correct": 0,
+        "explication": "Le Jami' At-Tirmidhi (Sunan At-Tirmidhi) fait partie des six livres majeurs et est connu pour classer le degré d'authenticité de chaque hadith."
+      },
+      {
+        "id": "ha_a_10",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un hadith « gharib » ?",
+        "choices": [
+          "Un hadith rapporté par un seul narrateur à un point de la chaîne",
+          "Un hadith très célèbre",
+          "Un hadith concernant les étrangers",
+          "Un hadith abrogé"
+        ],
+        "correct": 0,
+        "explication": "Gharib signifie « rare/isolé » : à un certain niveau de la chaîne, un seul narrateur rapporte ce hadith."
+      },
+      {
+        "id": "ha_a_11",
+        "level": "amateur",
+        "q": "Quel hadith évoque les « sept catégories de personnes à l'ombre d'Allah le Jour du Jugement » ?",
+        "choices": [
+          "Hadith rapporté dans Sahih al-Bukhari et Sahih Muslim",
+          "Un hadith faible isolé",
+          "Un hadith qudsi uniquement",
+          "Hadith abrogé par le Coran"
+        ],
+        "correct": 0,
+        "explication": "Ce hadith bien connu, rapporté par Abou Houraira, énumère sept profils (juge équitable, jeune adorateur, etc.) protégés par l'ombre d'Allah."
+      },
+      {
+        "id": "ha_a_12",
+        "level": "amateur",
+        "q": "Que signifie « Matn » dans la science du hadith ?",
+        "choices": [
+          "La chaîne de transmission",
+          "Le texte/contenu du hadith lui-même",
+          "Le narrateur principal",
+          "Le commentaire du savant"
+        ],
+        "correct": 1,
+        "explication": "Le Matn est le contenu textuel du hadith, à distinguer de l'Isnad qui est la chaîne des narrateurs."
+      },
+      {
+        "id": "ha_a_13",
+        "level": "amateur",
+        "q": "Quel imam a écrit « Sunan Abu Dawud » ?",
+        "choices": [
+          "Abu Dawud as-Sijistani",
+          "Ibn Majah",
+          "An-Nasa'i",
+          "Al-Bukhari"
+        ],
+        "correct": 0,
+        "explication": "Abu Dawud as-Sijistani a compilé ce recueil centré particulièrement sur les hadiths à portée juridique (fiqh)."
+      },
+      {
+        "id": "ha_a_14",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un hadith « hassan li-ghayrihi » ?",
+        "choices": [
+          "Un hadith hassan par sa propre chaîne",
+          "Un hadith initialement faible mais renforcé par d'autres chaînes corroborantes",
+          "Un hadith inventé renforcé artificiellement",
+          "Un hadith qudsi renforcé"
+        ],
+        "correct": 1,
+        "explication": "Quand plusieurs chaînes faibles se corroborent mutuellement, l'ensemble peut être élevé au rang de hassan li-ghayrihi."
+      },
+      {
+        "id": "ha_a_15",
+        "level": "amateur",
+        "q": "Quel hadith célèbre traite de la division en 73 groupes après la mort du Prophète ﷺ ?",
+        "choices": [
+          "Hadith sur la division de la Oumma",
+          "Hadith sur le jeûne",
+          "Hadith sur les héritages",
+          "Hadith sur le commerce"
+        ],
+        "correct": 0,
+        "explication": "Ce hadith, dont l'authenticité est discutée selon les chaînes, évoque la division future de la communauté en de nombreux groupes."
+      },
+      {
+        "id": "ha_a_16",
+        "level": "amateur",
+        "q": "Que veut dire « Marfu' » pour un hadith ?",
+        "choices": [
+          "Un hadith attribué directement au Prophète ﷺ, peu importe qui le rapporte",
+          "Un hadith rapporté uniquement par un compagnon sur lui-même",
+          "Un hadith arrêté à un successeur",
+          "Un hadith inventé"
+        ],
+        "correct": 0,
+        "explication": "Marfu' signifie « élevé/rattaché » : la parole, l'acte ou l'approbation est explicitement attribué au Prophète ﷺ."
+      },
+      {
+        "id": "ha_a_17",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un hadith « mawquf » ?",
+        "choices": [
+          "Un hadith attribué à un compagnon, sans remonter au Prophète ﷺ",
+          "Un hadith fabriqué",
+          "Un hadith mutawatir",
+          "Un hadith qudsi"
+        ],
+        "correct": 0,
+        "explication": "Mawquf signifie « arrêté » : la parole ou l'acte rapporté est attribué à un compagnon et non explicitement au Prophète ﷺ."
+      },
+      {
+        "id": "ha_a_18",
+        "level": "amateur",
+        "q": "Quel savant est l'auteur du célèbre recueil de hadiths sur les bonnes manières « Riyad as-Salihin » ?",
+        "choices": [
+          "Ibn Kathir",
+          "Imam An-Nawawi",
+          "Ibn Taymiyyah",
+          "Al-Ghazali"
+        ],
+        "correct": 1,
+        "explication": "L'imam An-Nawawi a compilé Riyad as-Salihin, un recueil très populaire centré sur l'éthique et la spiritualité quotidienne."
+      },
+      {
+        "id": "ha_a_19",
+        "level": "amateur",
+        "q": "Que désigne le terme « Sunan Ibn Majah » ?",
+        "choices": [
+          "Un recueil de tafsir",
+          "Un des six livres majeurs de hadiths, compilé par Ibn Majah",
+          "Un livre de grammaire",
+          "Un commentaire juridique tardif"
+        ],
+        "correct": 1,
+        "explication": "Sunan Ibn Majah fait partie des Kutub as-Sittah (six livres majeurs) reconnus par les savants sunnites."
+      },
+      {
+        "id": "ha_a_20",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un hadith « munkar » ?",
+        "choices": [
+          "Un hadith très fort",
+          "Un hadith rapporté par un narrateur peu fiable et contredisant d'autres chaînes plus fortes",
+          "Un hadith mutawatir",
+          "Un hadith qudsi rare"
+        ],
+        "correct": 1,
+        "explication": "Munkar signifie « désavoué/rejeté » : le hadith provient d'un narrateur faible et contredit des transmissions plus solides."
+      },
+      {
+        "id": "ha_a_01",
+        "level": "avance",
+        "q": "Quel critère, parmi les cinq conditions classiques d'authenticité d'un hadith (sahih), concerne l'absence de contradiction avec une transmission plus fiable ?",
+        "choices": [
+          "Ittisal as-sanad",
+          "Adalah ar-ruwah",
+          "Adam ash-shudhudh",
+          "Adam al-'illah"
+        ],
+        "correct": 2,
+        "explication": "« Adam ash-shudhudh » (absence d'anomalie) signifie que le hadith ne doit pas contredire une transmission plus fiable et plus répandue."
+      },
+      {
+        "id": "ha_a_02",
+        "level": "avance",
+        "q": "Qu'est-ce que le « tadlis » dans la science du hadith ?",
+        "choices": [
+          "Une fabrication totale du hadith",
+          "Le fait de dissimuler un défaut dans la chaîne de transmission, par exemple en omettant un maillon sans le préciser clairement",
+          "Un hadith mutawatir",
+          "Une variante de récitation coranique"
+        ],
+        "correct": 1,
+        "explication": "Le tadlis est une pratique consistant à présenter une chaîne de transmission de façon trompeuse, dissimulant une rupture ou un défaut."
+      },
+      {
+        "id": "ha_a_03",
+        "level": "avance",
+        "q": "Quel ouvrage est considéré comme la référence principale en terminologie du hadith (Mustalah al-Hadith) écrite par Ibn Hajar al-Asqalani ?",
+        "choices": [
+          "Nukhbat al-Fikar",
+          "Fath al-Bari",
+          "Al-Isaba",
+          "Tahdhib at-Tahdhib"
+        ],
+        "correct": 0,
+        "explication": "Nukhbat al-Fikar d'Ibn Hajar al-Asqalani est un texte fondamental et très étudié en terminologie de la science du hadith."
+      },
+      {
+        "id": "ha_a_04",
+        "level": "avance",
+        "q": "Quelle est la différence entre un hadith « aziz » et un hadith « mashhur » selon le nombre de narrateurs à chaque niveau de la chaîne ?",
+        "choices": [
+          "Aziz = rapporté par 2 narrateurs minimum à un niveau, Mashhur = par 3 ou plus sans atteindre le mutawatir",
+          "Ce sont des synonymes exacts",
+          "Aziz concerne uniquement les hadiths qudsi",
+          "Mashhur est toujours faible"
+        ],
+        "correct": 0,
+        "explication": "Aziz : au moins deux narrateurs transmettent à un niveau donné. Mashhur : trois ou plus, mais sans atteindre le seuil du mutawatir."
+      },
+      {
+        "id": "ha_a_05",
+        "level": "avance",
+        "q": "Quel grand savant a écrit « Fath al-Bari », le commentaire le plus célèbre du Sahih al-Bukhari ?",
+        "choices": [
+          "Ibn Hajar al-Asqalani",
+          "Imam An-Nawawi",
+          "Al-Qastalani",
+          "As-Suyuti"
+        ],
+        "correct": 0,
+        "explication": "Ibn Hajar al-Asqalani a rédigé Fath al-Bari, considéré comme le commentaire le plus complet et le plus respecté du Sahih al-Bukhari."
+      },
+      {
+        "id": "ha_a_06",
+        "level": "avance",
+        "q": "Qu'est-ce qu'un hadith « mudraj » ?",
+        "choices": [
+          "Un hadith où une phrase d'un narrateur a été insérée dans le texte original sans distinction claire",
+          "Un hadith mutawatir",
+          "Un hadith abrogé par consensus",
+          "Un hadith concernant les voyages"
+        ],
+        "correct": 0,
+        "explication": "Mudraj signifie « inséré » : un ajout (souvent un commentaire d'un narrateur) se retrouve mélangé au texte original du hadith."
+      },
+      {
+        "id": "ha_a_07",
+        "level": "avance",
+        "q": "Quelle condition, parmi les cinq de l'authenticité, concerne la mémoire et la précision du narrateur ?",
+        "choices": [
+          "Adalah",
+          "Dabt",
+          "Ittisal as-sanad",
+          "Adam al-'illah"
+        ],
+        "correct": 1,
+        "explication": "Le « Dabt » est la précision et la solidité de la mémoire du narrateur, condition essentielle pour accepter sa transmission."
+      },
+      {
+        "id": "ha_a_08",
+        "level": "avance",
+        "q": "Qu'est-ce que la « illah qadihah » (vice caché) dans la critique d'un hadith ?",
+        "choices": [
+          "Un défaut apparent et évident",
+          "Un défaut subtil et caché qui affecte l'authenticité malgré une chaîne apparemment correcte",
+          "Une faute de syntaxe arabe",
+          "Un ajout volontaire du compilateur"
+        ],
+        "correct": 1,
+        "explication": "La illah qadihah est un défaut caché, décelable seulement par les spécialistes, qui peut invalider un hadith malgré une apparence correcte."
+      },
+      {
+        "id": "ha_a_09",
+        "level": "avance",
+        "q": "Quel terme désigne un hadith rapporté par un narrateur connu pour avoir une mémoire faible mais sans être accusé de mensonge ?",
+        "choices": [
+          "Hadith da'if",
+          "Hadith mawdu'",
+          "Hadith sahih",
+          "Hadith mutawatir"
+        ],
+        "correct": 0,
+        "explication": "Un narrateur à mémoire faible (sans être menteur) produit généralement un hadith jugé da'if (faible), non utilisable en matière de croyance ou de jurisprudence stricte."
+      },
+      {
+        "id": "ha_a_10",
+        "level": "avance",
+        "q": "Qu'est-ce que le « jarh mufassar » en critique des narrateurs ?",
+        "choices": [
+          "Une critique vague sans précision",
+          "Une critique détaillée précisant exactement la raison du rejet du narrateur",
+          "Un éloge sans nuance",
+          "Une approbation collective"
+        ],
+        "correct": 1,
+        "explication": "Le jarh mufassar est une critique argumentée et précise (ex. : mauvaise mémoire constatée, mensonge prouvé) plutôt qu'une simple accusation vague."
+      },
+      {
+        "id": "ha_a_11",
+        "level": "avance",
+        "q": "Quel calife omeyyade est historiquement crédité d'avoir initié la compilation écrite systématique et officielle des hadiths ?",
+        "choices": [
+          "Mou'awiya ibn Abi Sufyan",
+          "Omar ibn Abd al-Aziz",
+          "Al-Walid ibn Abd al-Malik",
+          "Yazid ibn Mou'awiya"
+        ],
+        "correct": 1,
+        "explication": "Omar ibn Abd al-Aziz, craignant la disparition des hadiths avec la mort des derniers compagnons et successeurs, a ordonné leur collecte écrite officielle vers 100H."
+      },
+      {
+        "id": "ha_a_12",
+        "level": "avance",
+        "q": "Que signifie « al-jam' bayn ar-riwayatayn » en méthodologie du hadith ?",
+        "choices": [
+          "Annuler une chaîne de transmission",
+          "Concilier deux hadiths apparemment contradictoires plutôt que de les opposer directement",
+          "Rejeter systématiquement le hadith le plus récent",
+          "Combiner deux narrateurs en un seul"
+        ],
+        "correct": 1,
+        "explication": "Cette méthode consiste à chercher une conciliation logique entre deux hadiths semblant se contredire, avant de conclure à une contradiction réelle."
+      },
+      {
+        "id": "ha_a_13",
+        "level": "avance",
+        "q": "Qu'est-ce qu'un hadith « shadh » ?",
+        "choices": [
+          "Un hadith rapporté par un narrateur fiable mais qui contredit la version plus connue rapportée par des narrateurs plus fiables ou plus nombreux",
+          "Un hadith fabriqué de toutes pièces",
+          "Un hadith mutawatir incontestable",
+          "Un hadith concernant uniquement le fiqh"
+        ],
+        "correct": 0,
+        "explication": "Le hadith shadh est rapporté par un narrateur digne de confiance, mais en contradiction avec une version plus solide rapportée par d'autres, ce qui le rend problématique."
+      },
+      {
+        "id": "ha_a_14",
+        "level": "avance",
+        "q": "Quel ouvrage de Al-Hakim an-Nishapuri a tenté de réunir des hadiths jugés authentiques mais absents des recueils de Bukhari et Muslim, suscitant un débat sur sa rigueur ?",
+        "choices": [
+          "Al-Mustadrak ala as-Sahihayn",
+          "Al-Musannaf",
+          "Al-Adab al-Mufrad",
+          "As-Sunan al-Kubra"
+        ],
+        "correct": 0,
+        "explication": "Al-Mustadrak ala as-Sahihayn d'Al-Hakim a été critiqué par plusieurs savants pour avoir classé « sahih » des hadiths qui ne répondaient pas toujours strictement aux critères."
+      },
+      {
+        "id": "ha_a_15",
+        "level": "avance",
+        "q": "Qu'est-ce que la « naskh » (abrogation) appliquée aux hadiths juridiques ?",
+        "choices": [
+          "Le fait qu'un texte plus tardif puisse annuler ou modifier la portée légale d'un texte antérieur",
+          "Un type de falsification",
+          "Un terme exclusivement coranique",
+          "Une catégorie de hadith faible"
+        ],
+        "correct": 0,
+        "explication": "Tout comme pour le Coran, certains hadiths à portée légale peuvent être abrogés par un texte ultérieur du Prophète ﷺ, sujet étudié en usul al-fiqh."
+      },
+      {
+        "id": "ha_a_16",
+        "level": "avance",
+        "q": "Quel terme désigne le fait qu'un même narrateur transmette parfois un hadith de façon légèrement différente d'une fois à l'autre ?",
+        "choices": [
+          "Tafarrud",
+          "Ikhtilaf ar-ruwah / riwayat mukhtalifa",
+          "Tawatur",
+          "Idtirab toujours fatal"
+        ],
+        "correct": 1,
+        "explication": "On parle de riwayat mukhtalifa (versions divergentes) quand un même hadith circule avec de légères variantes, ce qui nécessite une étude comparative des chaînes."
+      },
+      {
+        "id": "ha_a_17",
+        "level": "avance",
+        "q": "Qu'est-ce que le « idtirab » dans la critique d'un hadith ?",
+        "choices": [
+          "Une confusion/instabilité dans les versions rapportées d'un hadith, sans qu'aucune version ne puisse être privilégiée avec certitude",
+          "Un terme désignant l'authenticité maximale",
+          "Un synonyme de mutawatir",
+          "Une qualité recherchée chez un narrateur"
+        ],
+        "correct": 0,
+        "explication": "L'idtirab désigne des versions contradictoires d'un même hadith sans possibilité de trancher clairement laquelle est la plus correcte, ce qui affaiblit le hadith."
+      },
+      {
+        "id": "ha_a_18",
+        "level": "avance",
+        "q": "Quel savant contemporain est particulièrement connu pour son travail de classification (sahih/da'if) des hadiths des six livres majeurs, facilitant leur étude moderne ?",
+        "choices": [
+          "Cheikh Al-Albani",
+          "Ibn Taymiyyah",
+          "Al-Ghazali",
+          "Ar-Razi"
+        ],
+        "correct": 0,
+        "explication": "Cheikh Muhammad Nasir ad-Din al-Albani est un savant du 20e siècle réputé pour avoir réexaminé et classé un très grand nombre de hadiths selon leur degré d'authenticité."
+      }
+    ]
+  },
+  "fiqh": {
+    "title": "Fiqh & Pratique",
+    "icon": "🤲",
+    "color": "#f472b6",
+    "free": false,
+    "questions": [
+      {
+        "id": "fi_d_01",
+        "level": "debutant",
+        "q": "Que signifie le mot « Fiqh » ?",
+        "choices": [
+          "La croyance",
+          "La jurisprudence islamique / compréhension des règles religieuses",
+          "La récitation du Coran",
+          "La science du hadith uniquement"
+        ],
+        "correct": 1,
+        "explication": "Le Fiqh désigne la compréhension et l'application pratique des règles islamiques tirées du Coran et de la Sunna."
+      },
+      {
+        "id": "fi_d_02",
+        "level": "debutant",
+        "q": "Combien de prières obligatoires y a-t-il par jour ?",
+        "choices": [
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "correct": 2,
+        "explication": "Les musulmans accomplissent 5 prières obligatoires quotidiennes : Fajr, Dhuhr, Asr, Maghrib et Isha."
+      },
+      {
+        "id": "fi_d_03",
+        "level": "debutant",
+        "q": "Qu'est-ce que les « ablutions » (Wudu) ?",
+        "choices": [
+          "Le jeûne quotidien",
+          "La purification rituelle avant la prière",
+          "Le pèlerinage",
+          "L'aumône obligatoire"
+        ],
+        "correct": 1,
+        "explication": "Le Wudu est une purification rituelle (visage, mains, tête, pieds) requise avant d'accomplir la prière."
+      },
+      {
+        "id": "fi_d_04",
+        "level": "debutant",
+        "q": "Quel acte annule les ablutions (Wudu) ?",
+        "choices": [
+          "Manger un fruit",
+          "Dormir profondément ou aller aux toilettes",
+          "Parler à voix haute",
+          "Lire le Coran"
+        ],
+        "correct": 1,
+        "explication": "Le sommeil profond, les besoins naturels, ou la perte de conscience annulent généralement les ablutions."
+      },
+      {
+        "id": "fi_d_05",
+        "level": "debutant",
+        "q": "Qu'est-ce que la Zakat ?",
+        "choices": [
+          "Une prière surérogatoire",
+          "L'aumône obligatoire annuelle sur certains biens",
+          "Le jeûne du Ramadan",
+          "Le pèlerinage à La Mecque"
+        ],
+        "correct": 1,
+        "explication": "La Zakat est l'aumône obligatoire, généralement 2,5% de l'épargne et des biens éligibles, versée une fois par an."
+      },
+      {
+        "id": "fi_d_06",
+        "level": "debutant",
+        "q": "Pendant quel mois le jeûne (Sawm) est-il obligatoire ?",
+        "choices": [
+          "Chaabane",
+          "Mouharram",
+          "Ramadan",
+          "Rajab"
+        ],
+        "correct": 2,
+        "explication": "Le jeûne du mois de Ramadan, du lever au coucher du soleil, est l'un des cinq piliers de l'islam."
+      },
+      {
+        "id": "fi_d_07",
+        "level": "debutant",
+        "q": "Qu'est-ce qui rompt le jeûne intentionnellement ?",
+        "choices": [
+          "Se brosser les dents à sec",
+          "Manger ou boire volontairement",
+          "Dormir",
+          "Se laver"
+        ],
+        "correct": 1,
+        "explication": "Manger ou boire volontairement pendant les heures de jeûne rompt le jeûne et peut nécessiter une compensation."
+      },
+      {
+        "id": "fi_d_08",
+        "level": "debutant",
+        "q": "Qu'est-ce que le Hajj ?",
+        "choices": [
+          "Le pèlerinage à La Mecque, obligatoire une fois dans la vie si on en a les moyens",
+          "La prière du vendredi",
+          "L'aumône de fin de Ramadan",
+          "Le sacrifice de l'Aïd"
+        ],
+        "correct": 0,
+        "explication": "Le Hajj est le grand pèlerinage à La Mecque, pilier de l'islam obligatoire pour celui qui en a la capacité physique et financière."
+      },
+      {
+        "id": "fi_d_09",
+        "level": "debutant",
+        "q": "Qu'est-ce que la « Niyyah » avant un acte d'adoration ?",
+        "choices": [
+          "Une prière courte",
+          "L'intention que l'on formule dans le cœur avant d'accomplir l'acte",
+          "Un type de jeûne",
+          "Un pilier de la foi"
+        ],
+        "correct": 1,
+        "explication": "La Niyyah, l'intention sincère, est une condition de validité de presque tous les actes d'adoration en islam."
+      },
+      {
+        "id": "fi_d_10",
+        "level": "debutant",
+        "q": "Vers quelle direction les musulmans se tournent-ils pour prier ?",
+        "choices": [
+          "Vers Médine",
+          "Vers la Qibla, direction de la Kaaba à La Mecque",
+          "Vers le soleil levant",
+          "Peu importe la direction"
+        ],
+        "correct": 1,
+        "explication": "Tous les musulmans dans le monde s'orientent vers la Kaaba à La Mecque (la Qibla) pendant la prière."
+      },
+      {
+        "id": "fi_d_11",
+        "level": "debutant",
+        "q": "Quel est le nom de l'appel à la prière ?",
+        "choices": [
+          "Iqama",
+          "Adhan",
+          "Khutba",
+          "Takbir"
+        ],
+        "correct": 1,
+        "explication": "L'Adhan est l'appel sonore lancé avant chaque prière obligatoire pour inviter les musulmans à se rassembler."
+      },
+      {
+        "id": "fi_d_12",
+        "level": "debutant",
+        "q": "Combien d'unités de prière (rak'at) compte la prière du Fajr ?",
+        "choices": [
+          "2",
+          "3",
+          "4",
+          "1"
+        ],
+        "correct": 0,
+        "explication": "La prière du Fajr (aube) comporte 2 rak'at obligatoires."
+      },
+      {
+        "id": "fi_d_13",
+        "level": "debutant",
+        "q": "Que veut dire « Halal » ?",
+        "choices": [
+          "Interdit",
+          "Permis/licite selon la loi islamique",
+          "Recommandé fortement",
+          "Douteux"
+        ],
+        "correct": 1,
+        "explication": "Halal signifie « permis » ou « licite », par opposition à Haram (interdit)."
+      },
+      {
+        "id": "fi_d_14",
+        "level": "debutant",
+        "q": "Que veut dire « Haram » ?",
+        "choices": [
+          "Permis",
+          "Interdit selon la loi islamique",
+          "Neutre",
+          "Recommandé"
+        ],
+        "correct": 1,
+        "explication": "Haram désigne tout ce qui est formellement interdit en islam, comme l'alcool ou le porc."
+      },
+      {
+        "id": "fi_d_15",
+        "level": "debutant",
+        "q": "Quelle viande est interdite (Haram) en islam ?",
+        "choices": [
+          "Le poulet",
+          "Le porc",
+          "L'agneau",
+          "Le bœuf"
+        ],
+        "correct": 1,
+        "explication": "La consommation de viande de porc est explicitement interdite dans le Coran."
+      },
+      {
+        "id": "fi_d_16",
+        "level": "debutant",
+        "q": "Qu'est-ce que la prière du vendredi (Jumu'ah) remplace pour les hommes ce jour-là ?",
+        "choices": [
+          "La prière du Fajr",
+          "La prière du Dhuhr",
+          "La prière de l'Asr",
+          "Rien, elle s'ajoute"
+        ],
+        "correct": 1,
+        "explication": "La prière collective du vendredi (Jumu'ah) remplace la prière du Dhuhr pour les hommes qui y assistent."
+      },
+      {
+        "id": "fi_d_17",
+        "level": "debutant",
+        "q": "Quel mois précède immédiatement le mois du Hajj dans le calendrier islamique ?",
+        "choices": [
+          "Chawwal",
+          "Dhul Qi'dah",
+          "Mouharram",
+          "Safar"
+        ],
+        "correct": 1,
+        "explication": "Dhul Qi'dah précède Dhul Hijjah, le mois sacré durant lequel se déroule le pèlerinage."
+      },
+      {
+        "id": "fi_d_18",
+        "level": "debutant",
+        "q": "Qu'est-ce que l'Aïd al-Fitr célèbre ?",
+        "choices": [
+          "La fin du Hajj",
+          "La fin du mois de Ramadan",
+          "La naissance du Prophète ﷺ",
+          "Le début de l'année hégirienne"
+        ],
+        "correct": 1,
+        "explication": "L'Aïd al-Fitr marque la fin du jeûne du Ramadan et est célébré par une prière collective et des festivités."
+      },
+      {
+        "id": "fi_d_19",
+        "level": "debutant",
+        "q": "Qu'est-ce que l'Aïd al-Adha commémore ?",
+        "choices": [
+          "La révélation du Coran",
+          "Le sacrifice d'Ibrahim (عليه السلام)",
+          "La conquête de La Mecque",
+          "La Hijra"
+        ],
+        "correct": 1,
+        "explication": "L'Aïd al-Adha commémore la soumission d'Ibrahim (عليه السلام), prêt à sacrifier son fils sur ordre d'Allah, qui le remplaça par un bélier."
+      },
+      {
+        "id": "fi_d_20",
+        "level": "debutant",
+        "q": "Qui est dispensé du jeûne du Ramadan parmi les cas suivants ?",
+        "choices": [
+          "Une personne malade ou en voyage, qui devra compenser plus tard",
+          "Toute personne fatiguée",
+          "Les hommes uniquement",
+          "Personne, c'est obligatoire pour tous sans exception"
+        ],
+        "correct": 0,
+        "explication": "Les malades, voyageurs, femmes enceintes ou qui allaitent peuvent être dispensés temporairement, à charge de compenser les jours selon les règles."
+      },
+      {
+        "id": "fi_a_01",
+        "level": "amateur",
+        "q": "Quel est le nombre minimum de personnes nécessaire pour que la prière du vendredi soit valide selon la majorité des écoles ?",
+        "choices": [
+          "1",
+          "Cela varie selon les écoles, généralement un nombre minimum de fidèles avec un imam",
+          "100 exactement",
+          "Aucun minimum requis"
+        ],
+        "correct": 1,
+        "explication": "Les écoles juridiques divergent sur le nombre minimum (de 3 à 40 selon les avis), mais toutes exigent une assemblée avec un imam."
+      },
+      {
+        "id": "fi_a_02",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Tayammum » ?",
+        "choices": [
+          "Une prière de nuit",
+          "Une purification sèche remplaçant le Wudu quand l'eau est indisponible",
+          "Le jeûne de compensation",
+          "Un type d'aumône"
+        ],
+        "correct": 1,
+        "explication": "Le Tayammum, effectué avec de la terre/sable propre, remplace les ablutions à l'eau en cas d'absence d'eau ou de maladie."
+      },
+      {
+        "id": "fi_a_03",
+        "level": "amateur",
+        "q": "Quelle est la différence entre la Zakat al-Mal et la Zakat al-Fitr ?",
+        "choices": [
+          "Aucune différence",
+          "La Zakat al-Mal porte sur les biens annuels, la Zakat al-Fitr est versée en nourriture avant l'Aïd al-Fitr",
+          "La Zakat al-Fitr concerne uniquement les riches",
+          "La Zakat al-Mal n'existe pas"
+        ],
+        "correct": 1,
+        "explication": "La Zakat al-Mal est calculée sur l'épargne/biens (2,5%/an), tandis que la Zakat al-Fitr est une obligation fixe par personne, versée avant la prière de l'Aïd al-Fitr."
+      },
+      {
+        "id": "fi_a_04",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Nisab » en matière de Zakat ?",
+        "choices": [
+          "Le montant minimum de biens à partir duquel la Zakat devient obligatoire",
+          "Le jour de versement de la Zakat",
+          "Le bénéficiaire de la Zakat",
+          "Une prière spéciale"
+        ],
+        "correct": 0,
+        "explication": "Le Nisab est le seuil minimal de richesse (souvent calculé par rapport à l'or/argent) au-delà duquel la Zakat devient une obligation."
+      },
+      {
+        "id": "fi_a_05",
+        "level": "amateur",
+        "q": "Qu'est-ce que la « Umrah », par rapport au Hajj ?",
+        "choices": [
+          "C'est un synonyme exact du Hajj",
+          "Le petit pèlerinage, qui peut être effectué à tout moment de l'année, contrairement au Hajj",
+          "Une prière spécifique au Ramadan",
+          "Une aumône particulière"
+        ],
+        "correct": 1,
+        "explication": "L'Umrah est un pèlerinage recommandé, plus court que le Hajj, réalisable à n'importe quel moment de l'année."
+      },
+      {
+        "id": "fi_a_06",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un acte « Mustahab » (ou Sunnah) en fiqh ?",
+        "choices": [
+          "Un acte obligatoire",
+          "Un acte recommandé mais non obligatoire",
+          "Un acte interdit",
+          "Un acte neutre sans valeur"
+        ],
+        "correct": 1,
+        "explication": "Mustahab désigne un acte recommandé, méritant une récompense s'il est accompli, mais dont l'abandon n'est pas sanctionné."
+      },
+      {
+        "id": "fi_a_07",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Qiyas » en méthodologie juridique islamique (Usul al-Fiqh) ?",
+        "choices": [
+          "Une prière facultative",
+          "Le raisonnement par analogie pour déduire une règle d'un cas similaire déjà tranché",
+          "Un type de jeûne",
+          "Le consensus des savants"
+        ],
+        "correct": 1,
+        "explication": "Le Qiyas est une des sources secondaires du droit islamique, consistant à appliquer une règle existante à un cas nouveau présentant une similarité de cause."
+      },
+      {
+        "id": "fi_a_08",
+        "level": "amateur",
+        "q": "Qu'est-ce que l'« Ijma' » ?",
+        "choices": [
+          "Le consensus des savants sur une question religieuse",
+          "Une prière collective",
+          "Un type de jeûne volontaire",
+          "Un acte interdit"
+        ],
+        "correct": 0,
+        "explication": "L'Ijma' est le consensus des savants qualifiés d'une époque sur une question de droit, considéré comme une source de la loi islamique."
+      },
+      {
+        "id": "fi_a_09",
+        "level": "amateur",
+        "q": "Combien de grandes écoles juridiques (madhabs) sunnites sont aujourd'hui les plus suivies ?",
+        "choices": [
+          "2",
+          "4 (Hanafite, Malikite, Chafiite, Hanbalite)",
+          "6",
+          "8"
+        ],
+        "correct": 1,
+        "explication": "Les quatre grandes écoles sunnites actuelles sont le Hanafisme, le Malikisme, le Chafiisme et le Hanbalisme."
+      },
+      {
+        "id": "fi_a_10",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Khul' » en droit familial islamique ?",
+        "choices": [
+          "Le mariage religieux",
+          "La procédure par laquelle la femme demande la dissolution du mariage en contrepartie, généralement, d'une compensation financière",
+          "Le divorce prononcé uniquement par l'époux",
+          "La dot versée par l'épouse"
+        ],
+        "correct": 1,
+        "explication": "Le Khul' est un mécanisme permettant à la femme d'obtenir le divorce, souvent en restituant la dot ou une compensation convenue."
+      },
+      {
+        "id": "fi_a_11",
+        "level": "amateur",
+        "q": "Qu'est-ce que la « Iddah » pour une femme divorcée ou veuve ?",
+        "choices": [
+          "Une amende financière",
+          "Une période d'attente avant un éventuel remariage",
+          "Un jeûne obligatoire",
+          "Une prière spécifique"
+        ],
+        "correct": 1,
+        "explication": "L'Iddah est une période d'attente (généralement liée aux cycles menstruels ou de durée fixe pour la veuve) avant un nouveau mariage possible."
+      },
+      {
+        "id": "fi_a_12",
+        "level": "amateur",
+        "q": "Quel terme désigne l'intérêt/usure formellement interdit en islam ?",
+        "choices": [
+          "Zakat",
+          "Riba",
+          "Sadaqa",
+          "Waqf"
+        ],
+        "correct": 1,
+        "explication": "Le Riba (intérêt/usure) est strictement interdit dans le Coran, fondement de la finance islamique sans intérêt."
+      },
+      {
+        "id": "fi_a_13",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un « Waqf » ?",
+        "choices": [
+          "Un don caritatif perpétuel, souvent un bien immobilisé au profit d'une cause religieuse ou sociale",
+          "Une prière du soir",
+          "Un type de jeûne",
+          "Le pèlerinage mineur"
+        ],
+        "correct": 0,
+        "explication": "Le Waqf est une donation pieuse perpétuelle (mosquée, terrain, fonds) dont les revenus ou l'usage profitent durablement à une cause d'intérêt général."
+      },
+      {
+        "id": "fi_a_14",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un acte « Makruh » ?",
+        "choices": [
+          "Un acte fortement recommandé",
+          "Un acte désapprouvé mais non formellement interdit",
+          "Un acte strictement interdit",
+          "Un acte obligatoire collectif"
+        ],
+        "correct": 1,
+        "explication": "Makruh désigne un acte déconseillé, dont l'abstention est préférable, sans pour autant être un péché formel comme le Haram."
+      },
+      {
+        "id": "fi_a_15",
+        "level": "amateur",
+        "q": "Quelle prière surérogatoire est particulièrement recommandée durant les nuits du Ramadan ?",
+        "choices": [
+          "Tahajjud uniquement",
+          "Tarawih",
+          "Duha",
+          "Witr du Fajr"
+        ],
+        "correct": 1,
+        "explication": "La prière des Tarawih, accomplie après Isha durant tout le mois de Ramadan, est une pratique très suivie dans les mosquées."
+      },
+      {
+        "id": "fi_a_16",
+        "level": "amateur",
+        "q": "Qu'est-ce que la « Kaffarah » en cas de rupture volontaire et injustifiée du jeûne du Ramadan ?",
+        "choices": [
+          "Aucune compensation requise",
+          "Une compensation lourde (souvent jeûner 60 jours consécutifs ou nourrir des pauvres) selon les écoles",
+          "Un simple jour de jeûne supplémentaire",
+          "Une amende financière fixe uniquement"
+        ],
+        "correct": 1,
+        "explication": "La Kaffarah pour rupture volontaire et injustifiée du jeûne est généralement plus lourde qu'un simple jour de rattrapage, selon l'école juridique suivie."
+      },
+      {
+        "id": "fi_a_17",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Sujud as-Sahw » ?",
+        "choices": [
+          "Une prosternation supplémentaire pour corriger un oubli pendant la prière",
+          "Une prosternation de remerciement",
+          "Le premier sujud de chaque rak'a",
+          "Une prosternation du vendredi uniquement"
+        ],
+        "correct": 0,
+        "explication": "Le Sujud as-Sahw est une prosternation de rattrapage effectuée en cas d'oubli ou d'erreur pendant l'accomplissement de la prière."
+      },
+      {
+        "id": "fi_a_18",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Tashahhud » dans la prière ?",
+        "choices": [
+          "Le premier takbir",
+          "L'invocation assise récitée après les prosternations, notamment avant de terminer la prière",
+          "L'appel à la prière",
+          "La prosternation finale uniquement"
+        ],
+        "correct": 1,
+        "explication": "Le Tashahhud est l'invocation récitée en position assise, notamment lors du témoignage de foi pendant la prière."
+      },
+      {
+        "id": "fi_a_19",
+        "level": "amateur",
+        "q": "Qu'est-ce qu'un mariage « Mut'ah » et quel est son statut chez les sunnites ?",
+        "choices": [
+          "Un mariage permanent classique, autorisé sans réserve",
+          "Un mariage temporaire, interdit selon la majorité des savants sunnites",
+          "Une forme de divorce",
+          "Un contrat commercial"
+        ],
+        "correct": 1,
+        "explication": "Le mariage Mut'ah (temporaire) est considéré comme interdit par la quasi-totalité des savants sunnites, bien qu'autorisé chez certains chiites."
+      },
+      {
+        "id": "fi_a_20",
+        "level": "amateur",
+        "q": "Qu'est-ce que le « Adhan al-Fajr » a de particulier par rapport aux autres appels à la prière ?",
+        "choices": [
+          "Il est identique aux autres",
+          "Il inclut souvent une phrase supplémentaire rappelant que la prière est meilleure que le sommeil",
+          "Il est silencieux",
+          "Il n'existe pas pour le Fajr"
+        ],
+        "correct": 1,
+        "explication": "L'Adhan du Fajr comporte généralement la phrase additionnelle « As-salatu khayrun min an-nawm » (la prière est meilleure que le sommeil)."
+      },
+      {
+        "id": "fi_a_01",
+        "level": "avance",
+        "q": "Qu'est-ce que le « Istihsan » en Usul al-Fiqh selon l'école Hanafite ?",
+        "choices": [
+          "Un rejet systématique de l'analogie",
+          "Le fait de privilégier une solution juridique plus juste/équitable même si elle s'écarte d'une analogie stricte, dans l'intérêt général",
+          "Un synonyme exact du Qiyas",
+          "Une règle réservée au culte uniquement"
+        ],
+        "correct": 1,
+        "explication": "L'Istihsan permet, dans certains cas, de privilégier une solution plus équitable et conforme à l'esprit général de la loi plutôt qu'une application stricte et littérale de l'analogie."
+      },
+      {
+        "id": "fi_a_02",
+        "level": "avance",
+        "q": "Qu'est-ce que la « Maslaha Mursalah » ?",
+        "choices": [
+          "Une source de droit fondée sur l'intérêt général non explicitement mentionné par un texte mais ne le contredisant pas",
+          "Un type de jeûne expiatoire",
+          "Une prosternation spécifique",
+          "Un consensus formel des quatre écoles"
+        ],
+        "correct": 0,
+        "explication": "La Maslaha Mursalah est un principe juridique permettant de légiférer dans l'intérêt général de la communauté, dans les cas non directement traités par un texte explicite."
+      },
+      {
+        "id": "fi_a_03",
+        "level": "avance",
+        "q": "Quelle est la position de l'école Hanafite concernant la nécessité du consentement du tuteur (wali) pour le mariage d'une femme majeure et saine d'esprit ?",
+        "choices": [
+          "Le consentement du wali est absolument indispensable dans tous les cas",
+          "Selon les Hanafites, une femme majeure et raisonnable peut, dans certains cas, conclure son mariage sans l'intervention obligatoire d'un wali, contrairement à d'autres écoles",
+          "Le mariage sans wali est totalement invalide selon toutes les écoles sans exception",
+          "Le wali n'a aucun rôle dans aucune école"
+        ],
+        "correct": 1,
+        "explication": "Les Hanafites considèrent qu'une femme majeure et raisonnable peut, selon certaines conditions, contracter elle-même son mariage, position plus souple que celle des autres écoles majoritaires."
+      },
+      {
+        "id": "fi_a_04",
+        "level": "avance",
+        "q": "Qu'est-ce que le « Sadd adh-Dhara'i » (fermer la porte aux moyens menant au mal) ?",
+        "choices": [
+          "Un principe juridique consistant à interdire un acte en soi permis, parce qu'il mène généralement à un interdit",
+          "Une obligation rituelle de purification",
+          "Un type d'aumône préventive",
+          "Une règle propre au jeûne uniquement"
+        ],
+        "correct": 0,
+        "explication": "Le Sadd adh-Dhara'i consiste à bloquer un moyen licite en apparence, lorsqu'il conduit fréquemment à un résultat illicite, par précaution juridique."
+      },
+      {
+        "id": "fi_a_05",
+        "level": "avance",
+        "q": "Quelle école juridique sunnite est connue pour accorder une place particulièrement importante à la pratique des habitants de Médine (Amal Ahl al-Madina) comme source de droit ?",
+        "choices": [
+          "Hanafite",
+          "Malikite",
+          "Chafiite",
+          "Hanbalite"
+        ],
+        "correct": 1,
+        "explication": "L'école Malikite accorde un poids particulier à la pratique consensuelle des habitants de Médine, considérée comme un héritage vivant de la pratique du Prophète ﷺ et des premiers musulmans."
+      },
+      {
+        "id": "fi_a_06",
+        "level": "avance",
+        "q": "Qu'est-ce que le concept de « Fard Kifaya » par opposition au « Fard 'Ayn » ?",
+        "choices": [
+          "Fard Kifaya est une obligation individuelle stricte pour chaque musulman, comme la prière",
+          "Fard Kifaya est une obligation collective qui retombe sur la communauté ; si une partie suffisante s'en charge, les autres en sont déchargés",
+          "Ce sont des synonymes exacts",
+          "Fard 'Ayn ne concerne que le Hajj"
+        ],
+        "correct": 1,
+        "explication": "Le Fard Kifaya (obligation collective) est satisfait dès qu'un nombre suffisant de musulmans l'accomplit, contrairement au Fard 'Ayn (obligation individuelle) qui incombe à chacun personnellement."
+      },
+      {
+        "id": "fi_a_07",
+        "level": "avance",
+        "q": "Quelle est la divergence principale entre les écoles concernant le moment où débute le jeûne quotidien du Ramadan par rapport à l'aube ?",
+        "choices": [
+          "Aucune divergence, toutes s'accordent parfaitement sur la minute exacte",
+          "Les écoles divergent légèrement sur la définition précise du « Fajr véritable » (Subh Sadiq) marquant le début du jeûne",
+          "Le jeûne commence toujours à minuit selon toutes les écoles",
+          "Le jeûne ne dépend pas de l'aube selon le fiqh"
+        ],
+        "correct": 1,
+        "explication": "Il existe des nuances entre savants/écoles sur l'identification précise du « vrai Fajr » par rapport à la lueur trompeuse précédente (Fajr Kadhib), influençant légèrement l'heure de début du jeûne."
+      },
+      {
+        "id": "fi_a_08",
+        "level": "avance",
+        "q": "Qu'est-ce que le « Urf » comme source secondaire du droit islamique ?",
+        "choices": [
+          "La coutume locale reconnue, prise en compte par le fiqh tant qu'elle ne contredit pas un texte explicite",
+          "Un consensus formel des quatre écoles uniquement",
+          "Une règle exclusivement rituelle",
+          "Un synonyme de Qiyas"
+        ],
+        "correct": 0,
+        "explication": "L'Urf (coutume) est pris en compte par plusieurs écoles comme élément d'appréciation juridique, à condition qu'il ne contrevienne pas à un principe ou texte religieux clair."
+      },
+      {
+        "id": "fi_a_09",
+        "level": "avance",
+        "q": "Quelle est la divergence classique entre Hanafites et Chafiites concernant le contact avec le sexe opposé sans désir et son effet sur les ablutions (Wudu) ?",
+        "choices": [
+          "Toutes les écoles s'accordent à dire que cela annule toujours le Wudu",
+          "Les Hanafites considèrent généralement que cela n'annule pas le Wudu sans désir, alors que les Chafiites considèrent que tout contact peau à peau entre homme et femme non apparentés l'annule",
+          "Aucune des deux écoles ne traite cette question",
+          "Le Wudu n'est jamais affecté par un contact physique selon le fiqh"
+        ],
+        "correct": 1,
+        "explication": "Cette divergence illustre des différences méthodologiques entre écoles sur l'interprétation des textes relatifs à la pureté rituelle et au contact physique."
+      },
+      {
+        "id": "fi_a_10",
+        "level": "avance",
+        "q": "Qu'est-ce que le principe de « la darar wa la dirar » (pas de préjudice ni de réciprocité de préjudice) en fiqh ?",
+        "choices": [
+          "Un principe juridique fondamental interdisant de causer un tort à autrui ou de répondre à un tort par un tort équivalent injustifié",
+          "Une règle réservée uniquement au commerce",
+          "Un hadith inventé tardivement sans valeur juridique",
+          "Une règle concernant uniquement le jeûne"
+        ],
+        "correct": 0,
+        "explication": "Ce principe, tiré d'un hadith largement accepté, est une maxime juridique fondamentale (qawa'id fiqhiyyah) qui structure de nombreuses règles de droit civil islamique."
+      },
+      {
+        "id": "fi_a_11",
+        "level": "avance",
+        "q": "Quelle est la position majoritaire concernant la validité du jeûne d'une personne qui mange par erreur en pensant que le Fajr n'est pas encore entré ?",
+        "choices": [
+          "Le jeûne est automatiquement invalide et doit être refait dans tous les cas selon toutes les écoles",
+          "Selon la majorité, si l'erreur est sincère et sans négligence, le jeûne reste valide et n'a pas à être compensé",
+          "Le jeûne est validé uniquement s'il y a témoin",
+          "Cette situation n'est jamais traitée par le fiqh classique"
+        ],
+        "correct": 1,
+        "explication": "La majorité des savants considèrent que manger par erreur sincère (en croyant le Fajr non encore entré) n'invalide pas le jeûne, l'intention et l'absence de négligence étant déterminantes."
+      },
+      {
+        "id": "fi_a_12",
+        "level": "avance",
+        "q": "Qu'est-ce que la « Khiyar al-Majlis » en droit des contrats islamique (vente) ?",
+        "choices": [
+          "Le droit de rétractation pendant la séance même de la transaction, avant la séparation des deux parties",
+          "Une obligation de payer immédiatement sans délai",
+          "Un droit réservé uniquement au vendeur",
+          "Une règle abrogée et sans valeur aujourd'hui"
+        ],
+        "correct": 0,
+        "explication": "Le Khiyar al-Majlis, reconnu notamment par les Chafiites et Hanbalites, donne à chaque partie le droit d'annuler la vente tant qu'elles ne se sont pas encore séparées physiquement après l'accord."
+      },
+      {
+        "id": "fi_a_13",
+        "level": "avance",
+        "q": "Quel principe juridique stipule que « la nécessité rend licite ce qui est interdit » (Adh-Dharurat tubihu al-mahdhurat), dans certaines limites strictes ?",
+        "choices": [
+          "Un principe rejeté par toutes les écoles",
+          "Un principe reconnu en fiqh, appliqué avec des conditions strictes de nécessité réelle et de proportionnalité",
+          "Une règle qui rend tout interdit totalement permis sans limite",
+          "Un principe propre uniquement au jeûne"
+        ],
+        "correct": 1,
+        "explication": "Ce principe permet, dans des cas de nécessité avérée (ex. : survie), de lever temporairement une interdiction, mais toujours dans des limites strictes et proportionnées à la nécessité réelle."
+      },
+      {
+        "id": "fi_a_14",
+        "level": "avance",
+        "q": "Qu'est-ce que le « Bay' al-'Inah » et pourquoi est-il controversé en finance islamique ?",
+        "choices": [
+          "Une vente classique sans controverse",
+          "Un montage de vente et rachat utilisé pour contourner l'interdiction du Riba, jugé invalide par la majorité des savants car considéré comme une ruse déguisant un prêt à intérêt",
+          "Une forme de Zakat",
+          "Un contrat de mariage"
+        ],
+        "correct": 1,
+        "explication": "Le Bay' al-'Inah est un montage financier critiqué par la majorité des savants classiques comme un moyen détourné de pratiquer le Riba sous une forme de vente apparente."
+      },
+      {
+        "id": "fi_a_15",
+        "level": "avance",
+        "q": "Quelle différence fait le fiqh classique entre « Fasid » et « Batil » concernant un contrat défectueux ?",
+        "choices": [
+          "Ce sont des synonymes exacts dans toutes les écoles",
+          "Batil désigne un contrat nul dès l'origine (élément essentiel manquant), tandis que Fasid désigne un contrat globalement valide mais affecté d'un vice corrigible",
+          "Fasid est toujours plus grave que Batil",
+          "Ces termes ne concernent que le mariage"
+        ],
+        "correct": 1,
+        "explication": "Batil = nullité totale et originelle (ex. : absence d'objet). Fasid = défaut secondaire qui rend le contrat irrégulier mais souvent réparable, distinction surtout développée par les Hanafites."
+      },
+      {
+        "id": "fi_a_16",
+        "level": "avance",
+        "q": "Qu'est-ce que le « Qard Hasan » en finance islamique ?",
+        "choices": [
+          "Un prêt avec intérêt modéré autorisé",
+          "Un prêt sans intérêt, accordé par bienfaisance, où seul le capital est remboursé",
+          "Un type de Zakat obligatoire",
+          "Une vente à crédit avec marge"
+        ],
+        "correct": 1,
+        "explication": "Le Qard Hasan est un prêt gratuit (sans intérêt), encouragé comme acte de bienfaisance, où l'emprunteur ne rembourse que le montant initial."
+      },
+      {
+        "id": "fi_a_17",
+        "level": "avance",
+        "q": "Qu'est-ce que le concept de « Ta'lil » en méthodologie juridique islamique ?",
+        "choices": [
+          "La recherche de la cause/raison sous-jacente (illah) d'une règle pour pouvoir l'étendre à des cas similaires",
+          "Une prosternation supplémentaire",
+          "Une règle réservée au jeûne",
+          "Un synonyme d'Ijma'"
+        ],
+        "correct": 0,
+        "explication": "Le Ta'lil est le processus consistant à identifier la cause effective (illah) derrière une règle, étape essentielle pour appliquer le Qiyas à de nouveaux cas."
+      },
+      {
+        "id": "fi_a_18",
+        "level": "avance",
+        "q": "Quelle est la divergence principale entre les quatre écoles sunnites sur la question du délai minimum de viduité (Iddah) lorsqu'une femme divorcée n'a pas de cycles menstruels (ex. : ménopause) ?",
+        "choices": [
+          "Toutes les écoles imposent exactement la même durée sans aucune divergence",
+          "La durée de base de 3 mois lunaires est globalement reconnue par toutes, mais des nuances existent sur les cas particuliers (grossesse, absence de cycle pour cause autre que l'âge, etc.)",
+          "La Iddah ne s'applique jamais en cas de ménopause selon le fiqh",
+          "Aucune école ne traite ce cas spécifique"
+        ],
+        "correct": 1,
+        "explication": "Le Coran fixe une base de 3 mois pour les femmes n'ayant plus de cycles, mais les écoles nuancent ce délai dans des cas particuliers (irrégularité du cycle pour une cause non liée à l'âge, etc.), nécessitant l'avis d'un savant qualifié."
+      }
+    ]
   }
 }
