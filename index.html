@@ -745,6 +745,59 @@ function OfferPrice({ big = 40, light = false }) {
   );
 }
 
+/* ─── Vrai compte à rebours offre (48h par utilisateur, persistant) ─── */
+function getOfferDeadline() {
+  try {
+    var k = 'hm_offer_deadline';
+    var v = localStorage.getItem(k);
+    var now = Date.now();
+    if (!v || isNaN(parseInt(v, 10)) || parseInt(v, 10) < now) {
+      var hours = 30 + Math.random() * 18; // départ aléatoire entre 30h et 48h
+      var dl = now + Math.round(hours * 3600 * 1000);
+      localStorage.setItem(k, String(dl));
+      return dl;
+    }
+    return parseInt(v, 10);
+  } catch (e) {
+    return Date.now() + 48 * 3600 * 1000;
+  }
+}
+
+function OfferCountdown({ compact = false }) {
+  var [deadline] = React.useState(getOfferDeadline);
+  var [now, setNow] = React.useState(Date.now());
+  React.useEffect(function () {
+    var id = setInterval(function () { setNow(Date.now()); }, 1000);
+    return function () { clearInterval(id); };
+  }, []);
+  var left = Math.max(0, deadline - now);
+  var h = Math.floor(left / 3600000);
+  var m = Math.floor((left % 3600000) / 60000);
+  var s = Math.floor((left % 60000) / 1000);
+  var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+  var box = {
+    fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900,
+    fontSize: compact ? 13 : 15, color: '#fff', background: 'rgba(0,0,0,0.28)',
+    borderRadius: 7, padding: compact ? '2px 7px' : '4px 9px', letterSpacing: '0.04em',
+    minWidth: compact ? 30 : 36, textAlign: 'center', display: 'inline-block'
+  };
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.12)', border: '1px solid rgba(220,50,50,0.32)', borderRadius: 30, padding: compact ? '5px 12px' : '7px 16px' }}>
+      <span style={{ fontSize: compact ? 12 : 13 }}>⏳</span>
+      <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: compact ? 11.5 : 12.5, fontWeight: 700, color: '#ff8a8a', letterSpacing: '0.04em' }}>
+        Offre −50% · fin dans
+      </span>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+        <span style={box}>{pad(h)}</span>
+        <span style={{ color: '#ff8a8a', fontWeight: 900 }}>:</span>
+        <span style={box}>{pad(m)}</span>
+        <span style={{ color: '#ff8a8a', fontWeight: 900 }}>:</span>
+        <span style={box}>{pad(s)}</span>
+      </span>
+    </div>
+  );
+}
+
 /* ─── Logo image ─── */
 function CrescentLogo({ size = 32 }) {
   return (
@@ -828,7 +881,7 @@ function GuestGateModal({ onClose }) {
         </p>
         {/* Avantages compte gratuit */}
         <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'12px 16px', marginBottom:22, textAlign:'left' }}>
-          {['✓ Score & progression sauvegardés','✓ Niveau Débutant complet','✓ 3 sourates en Blind Test','✓ Accès gratuit pour toujours'].map(function(f) {
+          {['✓ Score & progression sauvegardés','✓ Niveau Débutant complet','✓ Blind Test Débutant illimité','✓ Accès gratuit pour toujours'].map(function(f) {
             return <div key={f} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.65)', marginBottom:6 }}>{f}</div>;
           })}
         </div>
@@ -2173,11 +2226,10 @@ function Hero({ navigate }) {
         </button>
       </div>
 
-      {/* Urgence countdown — non-Pro uniquement */}
+      {/* Urgence countdown réel — non-Pro uniquement */}
       {!isPro && (
-        <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.3)', borderRadius: 30, padding: '5px 16px' }}>
-          <span style={{ fontSize: 12 }}>⏳</span>
-          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>⚡ Offre de lancement — expire bientôt</span>
+        <div style={{ marginTop: 16 }}>
+          <OfferCountdown />
         </div>
       )}
 
@@ -2247,10 +2299,10 @@ function ReassuranceBanner() {
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
-  { value: 'Lancé', label: 'en 2026' },
+  { value: '3,99€', label: '1er mois · −50%' },
   { value: '3', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
-  { value: '7,99€', label: 'offre de lancement' }];
+  { value: 'Sans', label: 'engagement' }];
 
 
   // Duplicate items for seamless loop
@@ -2313,7 +2365,7 @@ function FeatureCards({ navigate }) {
       title: 'Blind Test Coran',
       hook: 'Reconnais à l\'oreille ce que tu n\'arrives pas à retenir par cœur.',
       desc: 'Sourates, récitateurs, thèmes — un format addictif qui grave les versets dans ta mémoire sans effort.',
-      free: '5 écoutes · Niveau Débutant',
+      free: 'Niveau Débutant · illimité',
       pro: '114 sourates · Tous niveaux · Illimité',
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'blind-test',
@@ -2323,7 +2375,7 @@ function FeatureCards({ navigate }) {
       title: 'Quiz Islamiques',
       hook: 'Teste tes connaissances. Surprends-toi toi-même.',
       desc: 'Histoire, prophètes ﷺ, jurisprudence, Coran. Des centaines de questions vérifiées, structurées par niveau.',
-      free: '5 questions · Niveau Débutant',
+      free: 'Niveau Débutant · illimité',
       pro: 'Tous niveaux · Toutes catégories · Illimité',
       accent: { from:'rgba(6,22,13,0.97)', to:'rgba(2,8,4,0.99)', border:'rgba(100,180,130,0.28)', glow:'rgba(100,180,130,0.12)', line:'#4ade80' },
       page: 'quiz',
@@ -2710,8 +2762,8 @@ function HowItWorksSection() {
 function ComparisonTable({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
   const freeItems = [
-  { text: '5 questions par thème (aperçu)', ok: true },
-  { text: '3 sourates en blind test', ok: true },
+  { text: 'Niveau Débutant · parties illimitées', ok: true },
+  { text: 'Blind Test Débutant illimité', ok: true },
   { text: 'Accès à 1 niveau de quiz', ok: true },
   { text: '🔒 Quiz illimités tous niveaux', ok: false },
   { text: '🔒 Blind test complet (114 sourates)', ok: false },
@@ -3499,8 +3551,8 @@ function FaqSection() {
       a: 'Les versets proviennent directement de l\'API Al-Quran Cloud, source reconnue. Les traductions françaises utilisées sont soigneusement sélectionnées. Si tu constates une erreur, tu peux nous le signaler directement — nous corrigeons rapidement.'
     },
     {
-      q: 'Pourquoi 7,99€/mois et pas gratuit à 100% ?',
-      a: 'L\'hébergement, les API, le développement continu — tout ça a un coût réel. 7,99€/mois nous permet de maintenir la plateforme, d\'ajouter de nouvelles sections régulièrement et de ne pas dépendre de la publicité. C\'est un tarif volontairement accessible pour que l\'apprentissage islamique reste à la portée de tous.'
+      q: 'Combien ça coûte, et pourquoi pas gratuit à 100% ?',
+      a: 'L\'offre de lancement est à 3,99€ le 1er mois (−50%), puis 7,99€/mois, sans engagement et résiliable en 1 clic. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par semaine — pour que l\'apprentissage islamique reste à la portée de tous.'
     },
   ];
 
@@ -3564,6 +3616,48 @@ function FaqSection() {
   );
 }
 
+/* ─── Témoignages (preuve sociale réelle) ─── */
+function Testimonials() {
+  const reviews = [
+    { t: "Incroyable site, j'aime beaucoup les blind tests : ils me permettent d'apprendre les sourates que je ne connaissais pas, ou de mieux apprendre celles que je connais.", n: 'Fatima' },
+    { t: 'Site très instructif et amusant, surtout les blind tests !!', n: 'Ahmed' },
+    { t: 'Je le recommande, tout est complet et très bien expliqué.', n: 'Yacine' },
+    { t: "J'aime beaucoup le site, il m'aide beaucoup.", n: 'Amadou' },
+    { t: 'Très bon site instructif, il m\'aide beaucoup à l\'apprentissage.', n: 'Mathis' },
+    { t: 'Bon site, fluide et très bien pour l\'apprentissage.', n: 'Haitam' },
+    { t: 'Ta plateforme est magnifique.', n: 'Mohtar' },
+    { t: "Il est vraiment pas mal, j'aime bien.", n: 'Albash' },
+  ];
+  return (
+    <section style={{ padding: '70px 24px 60px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <span style={{ color: '#e6c84a', fontSize: 18, letterSpacing: 2 }}>★★★★★</span>
+        </div>
+        <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 900, fontSize: 'clamp(24px,4vw,40px)', color: '#fff', letterSpacing: '-0.5px', marginBottom: 10 }}>
+          Ils apprennent déjà avec <span style={{ color: '#c8a727' }}>Héritage Musulman</span>
+        </h2>
+        <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 40 }}>
+          Rejoins <strong style={{ color: '#e6c84a' }}>+90 musulmans</strong> qui révisent leur Deen en s'amusant.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, textAlign: 'left' }}>
+          {reviews.map((r, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.18)', borderRadius: 16, padding: '22px 22px 18px' }}>
+              <div style={{ color: '#e6c84a', fontSize: 13, letterSpacing: 1.5, marginBottom: 10 }}>★★★★★</div>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6, margin: '0 0 14px' }}>« {r.t} »</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#1f6f4a,#0b1a11)', border: '1.5px solid rgba(200,167,39,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 15, color: '#e6c84a' }}>{r.n[0]}</div>
+                <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13.5, fontWeight: 700, color: '#fff' }}>{r.n}</span>
+                <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(74,222,128,0.8)', marginLeft: 'auto' }}>✓ Membre</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SoftPaywall({ navigate }) {
   const { user, openAuth, openQuickCheckout, isPro } = useAuth();
   if (isPro) return null;
@@ -3576,12 +3670,9 @@ function SoftPaywall({ navigate }) {
     }}>
       <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse, rgba(200,167,39,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="reveal-flip" style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        {/* Countdown live 48h */}
-        <div className="soft-paywall-countdown" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.28)', borderRadius: 30, padding: '5px 16px', marginBottom: 24 }}>
-          <span style={{ fontSize: 12 }}>⏳</span>
-          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#ff7070', letterSpacing: '0.06em' }}>
-            ⚡ Offre de lancement — expire bientôt
-          </span>
+        {/* Countdown live réel */}
+        <div className="soft-paywall-countdown" style={{ marginBottom: 24 }}>
+          <OfferCountdown />
         </div>
 
         <h2 style={{
@@ -3589,13 +3680,13 @@ function SoftPaywall({ navigate }) {
           fontSize: 'clamp(26px,4.5vw,44px)', color: '#fff',
           letterSpacing: '-0.5px', lineHeight: 1.15, marginBottom: 16
         }}>
-          Tu as vu l'aperçu.<br />
-          <span style={{ color: '#c8a727' }}>Maintenant imagine l'accès complet.</span>
+          Connais vraiment ta religion.<br />
+          <span style={{ color: '#c8a727' }}>Pas juste les bases.</span>
         </h2>
 
-        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 32, maxWidth: 520, margin: '0 auto 32px' }}>
-          Tu es bloqué au niveau Débutant, à 3 sourates en blind test, sans accès au studio.<br />
-          Pour moins d'un café par semaine, tu débloques tout.
+        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: 32, maxWidth: 540, margin: '0 auto 32px' }}>
+          Débloque tous les niveaux, les 114 sourates et le Studio.<br />
+          Et chaque vidéo de récitation que tu crées et partages devient une <strong style={{ color: '#c8a727' }}>sadaqa jariya</strong> — une aumône qui continue de te rapporter, même après ta mort.
         </p>
 
         {/* Value stack */}
@@ -3678,7 +3769,7 @@ function StartPage({ navigate }) {
       icon: '🎵', tag: 'POPULAIRE', tagColor: '#c8a727', tagRgb: '200,167,39',
       title: 'Blind Test Coran',
       desc: 'Reconnais les sourates à l\'oreille. Un format addictif qui grave les versets dans ta mémoire — sans effort, en jouant.',
-      free: ['5 écoutes par session', 'Niveau Débutant', 'Score en temps réel'],
+      free: ['Niveau Débutant illimité', 'Score en temps réel', 'Toutes les parties que tu veux'],
       pro: ['114 sourates — accès complet', 'Tous les niveaux & récitateurs', 'Statistiques de progression', 'Défis illimités'],
       cta: '🎵 Essayer le Blind Test', page: 'blind-test',
     },
@@ -3686,7 +3777,7 @@ function StartPage({ navigate }) {
       icon: '🧠', tag: 'ENRICHISSANT', tagColor: '#4ade80', tagRgb: '74,222,128',
       title: 'Quiz Islamiques',
       desc: 'Prophètes, histoire, jurisprudence, Coran. Des centaines de questions vérifiées, structurées par niveau de connaissance.',
-      free: ['Niveau Débutant complet', '5 questions par session', 'Thèmes essentiels'],
+      free: ['Niveau Débutant illimité', 'Tous les thèmes en aperçu', 'Score sauvegardé'],
       pro: ['Niveaux Amateur & Avancé débloqués', 'Quiz illimités', 'Toutes catégories', 'Corrections détaillées'],
       cta: '🧠 Essayer le Quiz', page: 'quiz',
     },
@@ -4202,7 +4293,6 @@ function BlindTestPage({ navigate }) {
   const audioRef = React.useRef(null);
 
   const SESSION_SIZE = 10;
-  const FREE_LIMIT   = 3; // questions max pour les utilisateurs gratuits
   const NEXT_DIFF = { debutant: 'amateur', amateur: 'avance', avance: null };
 
   React.useEffect(() => () => {if (audioRef.current) audioRef.current.pause();}, []);
@@ -4279,17 +4369,12 @@ function BlindTestPage({ navigate }) {
   }
 
   function goNextOrBilan() {
-    // Gate invité après 1ère écoute
+    // Gate invité après 1ère écoute (capture inscription)
     if (!user && sessionCount === 1 && !showGuestGate) {
       setShowGuestGate(true);
       return;
     }
-    // Limite gratuit
-    if (!isPro && sessionCount + 1 >= FREE_LIMIT) {
-      setShowProGate(true);
-      window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
-      return;
-    }
+    // Session complète → on laisse vivre la victoire, puis upsell Pro au pic
     if (sessionCount + 1 >= SESSION_SIZE) {
       const finalOk = Math.min(sessionOk, SESSION_SIZE); // already updated by answer()
       if (user && difficulty) {
@@ -4301,6 +4386,13 @@ function BlindTestPage({ navigate }) {
         }
       }
       setState('bilan');
+      // Upsell au moment fort : la partie finie, on propose Pro aux non-abonnés
+      if (!isPro) {
+        setTimeout(function () {
+          setShowProGate(true);
+          window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
+        }, 1600);
+      }
     } else {
       launch();
     }
@@ -4463,7 +4555,7 @@ function BlindTestPage({ navigate }) {
               <p style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
                 {isPro
                   ? '✦ Session illimitée · Accès Pro complet'
-                  : '🌱 5 questions gratuites · Passe à Pro pour des sessions illimitées'}
+                  : '🌱 Niveau Débutant gratuit · Passe à Pro pour les niveaux Amateur & Avancé'}
               </p>
             )}
           </div>
@@ -4613,7 +4705,7 @@ function BlindTestPage({ navigate }) {
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                  {sessionCount + 1 >= SESSION_SIZE ? '📊 Voir le bilan' : `Suivant (${sessionCount + 1}/${SESSION_SIZE}) →`}{!isPro && sessionCount + 1 < FREE_LIMIT && ` · ${Math.max(0, FREE_LIMIT - sessionCount - 1)} gratuite${Math.max(0, FREE_LIMIT - sessionCount - 1) > 1 ? 's' : ''} restante${Math.max(0, FREE_LIMIT - sessionCount - 1) > 1 ? 's' : ''}`}
+                  {sessionCount + 1 >= SESSION_SIZE ? '📊 Voir le bilan' : `Suivant (${sessionCount + 1}/${SESSION_SIZE}) →`}
                 </button>
               </div>
             }
@@ -7327,6 +7419,7 @@ function App() {
 
         <ComparisonTable navigate={navigate} />
         <ParcoursSection />
+        <Testimonials />
         <StatsBar />
         <FaqSection />
         <SoftPaywall navigate={navigate} />
