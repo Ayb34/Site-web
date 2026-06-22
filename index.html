@@ -4342,8 +4342,8 @@ function BlindTestPage({ navigate }) {
   }
 
   function goNextOrBilan() {
-    // Gate invité après 1ère écoute (capture inscription)
-    if (!user && sessionCount === 1 && !showGuestGate) {
+    // Gate invité après 3 manches (assez de goût + investi → max inscriptions)
+    if (!user && sessionCount === 3 && !showGuestGate) {
       setShowGuestGate(true);
       return;
     }
