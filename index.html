@@ -3830,7 +3830,7 @@ function StartPage({ navigate }) {
           </p>
         ) : user && !isPro ? (
           <p className="sp-3" style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:'clamp(15px,1.8vw,18px)', color:'rgba(240,237,230,0.48)', maxWidth:540, margin:'22px auto 40px', lineHeight:1.8 }}>
-            {firstName ? <><strong style={{color:'rgba(200,167,39,0.8)'}}>{firstName}</strong>, tu es en accès gratuit.</> : 'Tu es en accès gratuit.'} Tu ne vois qu'une fraction de ce que la plateforme propose. <strong style={{color:'rgba(240,237,230,0.7)'}}>Le reste t'attend.</strong>
+            {firstName ? <>Content de te revoir <strong style={{color:'rgba(200,167,39,0.8)'}}>{firstName}</strong> 👋</> : 'Content de te revoir 👋'} <strong style={{color:'rgba(240,237,230,0.7)'}}>On continue à apprendre ?</strong> Choisis une activité et lance-toi.
           </p>
         ) : (
           <p className="sp-3" style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:'clamp(15px,1.8vw,18px)', color:'rgba(240,237,230,0.48)', maxWidth:520, margin:'22px auto 40px', lineHeight:1.8 }}>
@@ -3838,51 +3838,8 @@ function StartPage({ navigate }) {
           </p>
         )}
 
-        {/* CTA — conditionnel */}
-        {user && !isPro ? (
-          // Connecté non-Pro : CTA upgrade direct
-          <div className="sp-4" style={{ maxWidth:440, margin:'0 auto' }}>
-            {/* Résumé de ce qui est bloqué */}
-            <div className="sp-locked-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:24 }}>
-              {[
-                { icon:'🔒', label:'Blind Test complet', sub:'111 sourates verrouillées' },
-                { icon:'🔒', label:'Quiz Avancé', sub:'Niveaux Amateur & Avancé' },
-                { icon:'🔒', label:'Studio HD', sub:'Export sans watermark' },
-                { icon:'🔒', label:'Contenu hebdo', sub:'Nouvelles sorties Pro' },
-              ].map(function(item) { return (
-                <div key={item.label} style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:'12px 14px', textAlign:'left' }}>
-                  <div style={{ fontSize:16, marginBottom:4 }}>{item.icon}</div>
-                  <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.6)', marginBottom:2 }}>{item.label}</div>
-                  <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, color:'rgba(255,255,255,0.28)' }}>{item.sub}</div>
-                </div>
-              ); })}
-            </div>
-
-            {/* Prix */}
-            <div style={{ textAlign:'center', marginBottom:16 }}>
-              {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-                <OfferPrice big={36} />
-              ) : (
-                <>
-                  <span style={{ fontFamily:'Playfair Display,serif', fontSize:30, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
-                  <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.55)', marginLeft:8 }}>offre lancement</span>
-                </>
-              )}
-            </div>
-
-            {/* Bouton principal */}
-            <button onClick={function(){ openQuickCheckout(); }} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'17px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 32px rgba(200,167,39,0.45)', transition:'all 0.2s', letterSpacing:'-0.1px', marginBottom:12 }}
-              onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 40px rgba(200,167,39,0.6)'; }}
-              onMouseLeave={function(e){ e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)'; }}>
-              🔓 Débloquer l'accès complet
-            </button>
-            <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:4 }}>
-              <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
-              <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
-            </div>
-          </div>
-        ) : !user ? (
-          // Non connecté : on lance direct dans le jeu (goûter d'abord)
+        {/* CTA — jouer d'abord (gratuit + inscrit non-Pro), upsell discret ensuite */}
+        {!isPro ? (
           <div className="sp-4" style={{ display:'flex', flexDirection:'column', gap:12, width:'100%', maxWidth:460, margin:'0 auto' }}>
             <button onClick={function(){ navigate('blind-test'); }}
               style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 24px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 28px rgba(200,167,39,0.42)', transition:'all 0.2s', letterSpacing:'-0.1px', width:'100%' }}
@@ -3904,12 +3861,28 @@ function StartPage({ navigate }) {
                 🎬 Studio
               </button>
             </div>
-            <p style={{ marginTop:4, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.4)', textAlign:'center', lineHeight:1.6 }}>
-              100% gratuit · sans carte · joue sans compte 🎯
-            </p>
-            <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.3)', textAlign:'center' }}>
-              Déjà un compte ? <span onClick={openAuth} style={{ color:'#c8a727', cursor:'pointer', textDecoration:'underline' }}>Se connecter</span>
-            </p>
+            {user ? (
+              <>
+                <p style={{ marginTop:4, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.4)', textAlign:'center', lineHeight:1.6 }}>
+                  Niveau Débutant gratuit · rejoue autant que tu veux 🎯
+                </p>
+                {/* upsell discret — sous les boutons, jamais en barrage */}
+                <div onClick={function(){ openQuickCheckout(); }} style={{ cursor:'pointer', background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.22)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginTop:2 }}>
+                  <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.6)' }}>
+                    🔓 Tous les niveaux, 114 sourates & le Studio — <strong style={{ color:'#e6c84a' }}>3,99€ le 1er mois</strong> →
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{ marginTop:4, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.4)', textAlign:'center', lineHeight:1.6 }}>
+                  100% gratuit · sans carte · joue sans compte 🎯
+                </p>
+                <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.3)', textAlign:'center' }}>
+                  Déjà un compte ? <span onClick={openAuth} style={{ color:'#c8a727', cursor:'pointer', textDecoration:'underline' }}>Se connecter</span>
+                </p>
+              </>
+            )}
           </div>
         ) : null}
       </div>
