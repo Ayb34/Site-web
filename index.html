@@ -5935,7 +5935,7 @@ function VideoCreatorPage({ navigate }) {
   // ── Offline encoder via WebCodecs + mp4-muxer ──
   const createVideoOffline = async function () {
     if (!window.VideoEncoder || !window.AudioEncoder || !window.Mp4Muxer) return false;
-    const FPS = 24;
+    const FPS = 15;
     const W = cw, H = ch;
     const supportH264 = await VideoEncoder.isConfigSupported({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 4_000_000, framerate: FPS }).then(function (r) { return r && r.supported; }).catch(function () { return false; });
     if (!supportH264) return false;
@@ -6008,6 +6008,7 @@ function VideoCreatorPage({ navigate }) {
     });
 
     let lastYield = performance.now();
+    let lastFrameKey = '';
     for (let f = 0; f < totalFrames; f++) {
       const t = f / FPS;
       let vIdx = 0;
@@ -6015,13 +6016,19 @@ function VideoCreatorPage({ navigate }) {
       const verse = plan.verses[vIdx];
       const tInto = t - plan.starts[vIdx];
       const fade = Math.min(1, tInto / FADE_DURATION);
-      if (bgCache) {
-        ctx.drawImage(bgCache, 0, 0);
-        // Draw only text/watermark on top
-        drawTextAndWatermark(ctx, W, H, Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah }), fade, TEXT_CACHE[vIdx]);
-      } else {
-        const settings = Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah, loading: null });
-        renderStudioFrame(ctx, W, H, settings, t, particles, fade, null, bgImgRef.current);
+      // Skip redraw if static bg + settled fade + same verse — canvas already correct
+      const fadeBucket = fade >= 1 ? 'S' : Math.round(fade * 20);
+      const frameKey = vIdx + ':' + fadeBucket;
+      const needsRedraw = isAnimatedBg || frameKey !== lastFrameKey;
+      if (needsRedraw) {
+        if (bgCache) {
+          ctx.drawImage(bgCache, 0, 0);
+          drawTextAndWatermark(ctx, W, H, Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah }), fade, TEXT_CACHE[vIdx]);
+        } else {
+          const settings = Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah, loading: null });
+          renderStudioFrame(ctx, W, H, settings, t, particles, fade, null, bgImgRef.current);
+        }
+        lastFrameKey = frameKey;
       }
       const frame = new VideoFrame(off, { timestamp: Math.round(t * 1_000_000), duration: Math.round(1_000_000 / FPS) });
       videoEncoder.encode(frame, { keyFrame: f % (FPS * 2) === 0 });
@@ -6029,12 +6036,11 @@ function VideoCreatorPage({ navigate }) {
       if (videoEncoder.encodeQueueSize > 24) {
         await new Promise(function (r) { setTimeout(r, 0); });
       }
-      // Yield UI only every ~80ms instead of every 6 frames
       const now = performance.now();
-      if (now - lastYield > 80) {
+      if (now - lastYield > 120) {
         const pct = Math.round((f / totalFrames) * 100);
         setProgress(10 + Math.round((f / totalFrames) * 70));
-        setStatusMsg('Rendu vidéo… ' + pct + '%');
+        setStatusMsg('Encodage… ' + pct + '%');
         await new Promise(function (r) { setTimeout(r, 0); });
         lastYield = performance.now();
       }
