@@ -5361,7 +5361,28 @@ function VideoCreatorPage({ navigate }) {
   const [textPos, setTextPos] = React.useState('center');  // top | center | bottom
   const [watermark, setWatermark] = React.useState('');
   const [exportFormat, setExportFormat] = React.useState('mp4'); // detected at export
+  const [freeDlUsed, setFreeDlUsed] = React.useState(false);
   const { isPro, user } = useAuth();
+
+  // Track free download usage per logged-in user
+  React.useEffect(function () {
+    if (user && !isPro) {
+      try { setFreeDlUsed(localStorage.getItem('hm_free_dl_' + user.uid) === '1'); } catch (e) {}
+    } else {
+      setFreeDlUsed(false);
+    }
+  }, [user, isPro]);
+
+  const triggerFreeDownload = function () {
+    if (!downloadUrl) return;
+    if (!user) { setShowGuestGate(true); return; }
+    try { localStorage.setItem('hm_free_dl_' + user.uid, '1'); } catch (e) {}
+    setFreeDlUsed(true);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = 'recitation-' + surah.fr + '-' + ayahNum + '-' + verseCount + 'v.' + exportFormat;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
 
   const DIMS = { '9:16': [1080, 1920], '1:1': [1080, 1080], '16:9': [1920, 1080] };
   const cw = DIMS[aspect][0], ch = DIMS[aspect][1];
@@ -6363,15 +6384,33 @@ function VideoCreatorPage({ navigate }) {
                   )}
 
                   {downloadUrl && (
-                    isPro
-                      ? <a href={downloadUrl} download={`recitation-${surah.fr}-${ayahNum}-${verseCount}v.${exportFormat}`}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12, background: 'rgba(34,197,94,0.1)', border: '1.5px solid rgba(34,197,94,0.3)', color: '#4ade80', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, textAlign: 'center', textDecoration: 'none', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
-                          <span>⬇</span> Télécharger la vidéo (.{exportFormat})
-                        </a>
-                      : <button onClick={function(){ setShowProGate(true); }}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', marginTop: 12, background: 'rgba(200,167,39,0.08)', border: '1.5px solid rgba(200,167,39,0.25)', color: '#c8a727', padding: '14px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
-                          🔒 Télécharger — abonnés Pro
+                    isPro ? (
+                      <a href={downloadUrl} download={`recitation-${surah.fr}-${ayahNum}-${verseCount}v.${exportFormat}`}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12, background: 'rgba(34,197,94,0.1)', border: '1.5px solid rgba(34,197,94,0.3)', color: '#4ade80', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, textAlign: 'center', textDecoration: 'none', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+                        <span>⬇</span> Télécharger la vidéo (.{exportFormat})
+                      </a>
+                    ) : !user ? (
+                      <button onClick={function(){ setShowGuestGate(true); }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', marginTop: 12, background: 'rgba(200,167,39,0.10)', border: '1.5px solid rgba(200,167,39,0.35)', color: '#c8a727', padding: '14px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+                        👤 Crée ton compte gratuit pour télécharger
+                      </button>
+                    ) : !freeDlUsed ? (
+                      <div style={{ marginTop: 12 }}>
+                        <button onClick={triggerFreeDownload}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: 'rgba(34,197,94,0.10)', border: '1.5px solid rgba(34,197,94,0.35)', color: '#4ade80', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+                          <span>⬇</span> Télécharger ma vidéo gratuite (.{exportFormat})
                         </button>
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, textAlign: 'center', margin: '8px 0 0' }}>1 téléchargement offert · puis Pro pour vidéos illimitées</p>
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: 12 }}>
+                        <button onClick={function(){ setShowProGate(true); }}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: 'rgba(200,167,39,0.10)', border: '1.5px solid rgba(200,167,39,0.35)', color: '#c8a727', padding: '14px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+                          🔒 Téléchargement gratuit utilisé — passer Pro
+                        </button>
+                        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, textAlign: 'center', margin: '8px 0 0' }}>Tu as déjà utilisé ton téléchargement offert. Pro = vidéos illimitées.</p>
+                      </div>
+                    )
                   )}
                   {showProGate && <ProGateModal onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
                   {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); setStep(2); }} />}
