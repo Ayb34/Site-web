@@ -5971,17 +5971,21 @@ function VideoCreatorPage({ navigate }) {
     try { plan = await buildAudioPlan(actx); } catch (e) { return false; }
     if (!plan || !plan.audioBuf || plan.totalDur < 0.1) return false;
 
-    // ── Play audio during generation so user hears what's being produced ──
+    // ── Play audio during generation using the AudioContext created at user click ──
     try {
-      if (genAudioRef.current) { try { genAudioRef.current.stop(); } catch(e){} }
-      const pactx = new (window.AudioContext || window.webkitAudioContext)();
-      try { await pactx.resume(); } catch(e){}
-      const psrc = pactx.createBufferSource();
-      psrc.buffer = plan.audioBuf;
-      psrc.connect(pactx.destination);
-      psrc.start(0);
-      genAudioRef.current = { stop: function(){ try { psrc.stop(); } catch(e){} pactx.close().catch(function(){}); genAudioRef.current = null; } };
-      psrc.onended = function(){ if (genAudioRef.current) { try { genAudioRef.current = null; } catch(e){} } pactx.close().catch(function(){}); };
+      const slot = genAudioRef.current;
+      if (slot && slot.ctx && !slot.started) {
+        try { await slot.ctx.resume(); } catch(e){}
+        const psrc = slot.ctx.createBufferSource();
+        psrc.buffer = plan.audioBuf;
+        psrc.connect(slot.ctx.destination);
+        slot.src = psrc; slot.started = true;
+        psrc.onended = function(){
+          try { slot.ctx.close(); } catch(e){}
+          if (genAudioRef.current === slot) genAudioRef.current = null;
+        };
+        psrc.start(0);
+      }
     } catch (e) {}
 
     const totalFrames = Math.ceil(plan.totalDur * FPS);
@@ -6215,6 +6219,16 @@ function VideoCreatorPage({ navigate }) {
     if (isCreating) return;
     setIsCreating(true); setProgress(0); setDownloadUrl(null);
     setStatusMsg('Préparation…');
+
+    // Create playback AudioContext SYNCHRONOUSLY within user gesture so autoplay isn't blocked.
+    // Stored in ref; createVideoOffline picks it up later when plan is ready.
+    try {
+      if (genAudioRef.current) { try { genAudioRef.current.stop(); } catch(e){} }
+      const pactx = new (window.AudioContext || window.webkitAudioContext)();
+      try { pactx.resume(); } catch(e){}
+      genAudioRef.current = { ctx: pactx, src: null, started: false, stop: function(){ try { if(this.src) this.src.stop(); } catch(e){} try { pactx.close(); } catch(e){} genAudioRef.current = null; } };
+    } catch (e) {}
+
     try {
       const ok = await createVideoOffline();
       if (ok) return;
