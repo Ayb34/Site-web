@@ -527,6 +527,12 @@
     60%  { opacity: 1; transform: translateY(0) scale(1.012); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
   }
+  @keyframes verseSwap {
+    0%   { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+    18%  { opacity: 1; transform: translateY(0); filter: blur(0); }
+    82%  { opacity: 1; transform: translateY(0); filter: blur(0); }
+    100% { opacity: 0; transform: translateY(-8px); filter: blur(3px); }
+  }
 
   /* ── Classes scroll-reveal enrichies ── */
   .reveal-blur {
@@ -3410,9 +3416,25 @@ function StudioViralSection({ navigate }) {
     { value: '100%', label: 'contenu vérifié islamiquement', icon: '🕌' },
   ];
   const phones = [
-    { views: '2.4M', likes: '187K', comments: '4.2K', shares: '43K', user: '@nour_islamique', arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', fr: 'Au nom d\'Allah, le Tout Miséricordieux', ref: 'Al-Fatiha · V.1', tag: '#coran #fyp #islam' },
-    { views: '1.1M', likes: '94K', comments: '2.1K', shares: '28K', user: '@deen_content', arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ', fr: 'Celui qui s\'en remet à Allah, Il lui suffit', ref: 'At-Talaq · V.3', tag: '#rappel #islamfr #fyp' },
+    { views: '2.4M', likes: '187K', comments: '4.2K', shares: '43K', user: '@nour_islamique', tag: '#coran #fyp #islam' },
+    { views: '1.1M', likes: '94K', comments: '2.1K', shares: '28K', user: '@deen_content', tag: '#rappel #islamfr #fyp' },
   ];
+  // Reel de versets qui défile dans les téléphones — effet "studio vivant"
+  const VERSE_REEL = [
+    { arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', fr: 'Au nom d\'Allah, le Tout Miséricordieux', ref: 'Al-Fatiha · V.1' },
+    { arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ', fr: 'Celui qui s\'en remet à Allah, Il lui suffit', ref: 'At-Talaq · V.3' },
+    { arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا', fr: 'À côté de la difficulté est, certes, une facilité', ref: 'Ash-Sharh · V.6' },
+    { arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ', fr: 'Souvenez-vous de Moi, Je Me souviendrai de vous', ref: 'Al-Baqara · V.152' },
+    { arabic: 'وَقُل رَّبِّ زِدْنِي عِلْمًا', fr: 'Ô mon Seigneur, accrois mes connaissances', ref: 'Ta-Ha · V.114' },
+    { arabic: 'الَّذِينَ آمَنُوا وَتَطْمَئِنُّ قُلُوبُهُم بِذِكْرِ اللَّهِ', fr: 'C\'est par l\'évocation d\'Allah que les cœurs s\'apaisent', ref: 'Ar-Ra\'d · V.28' },
+  ];
+  const [reelIdx, setReelIdx] = React.useState(0);
+  React.useEffect(function () {
+    const id = setInterval(function () {
+      setReelIdx(function (v) { return (v + 1) % VERSE_REEL.length; });
+    }, 3400);
+    return function () { clearInterval(id); };
+  }, []);
   return (
     <section style={{ background: 'linear-gradient(180deg, #030d06 0%, #020a04 100%)', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
       {/* bg glow */}
@@ -3464,13 +3486,18 @@ function StudioViralSection({ navigate }) {
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px 0 6px', position: 'relative', zIndex: 3 }}>
                       <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 9, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Pour toi</span>
                     </div>
-                    {/* CENTER — Arabic subtitle (studio output) */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 14px', gap: 8 }}>
-                      <div style={{ fontFamily: '"Amiri", serif', fontSize: 20, color: '#e6c84a', direction: 'rtl', textAlign: 'center', lineHeight: 1.8, }}>{p.arabic}</div>
-                      <div style={{ width: 32, height: 1, background: 'rgba(200,167,39,0.3)' }} />
-                      <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 9, color: 'rgba(255,255,255,0.55)', textAlign: 'center', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>{p.fr}</p>
-                      <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 8, color: 'rgba(200,167,39,0.5)', margin: 0, fontWeight: 700 }}>{p.ref}</p>
-                    </div>
+                    {/* CENTER — Arabic subtitle (studio output, verset qui défile) */}
+                    {(function () {
+                      const v = VERSE_REEL[(reelIdx + i) % VERSE_REEL.length];
+                      return (
+                        <div key={reelIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 14px', gap: 8, animation: 'verseSwap 3.4s ease-in-out' }}>
+                          <div style={{ fontFamily: '"Amiri", serif', fontSize: 20, color: '#e6c84a', direction: 'rtl', textAlign: 'center', lineHeight: 1.8, }}>{v.arabic}</div>
+                          <div style={{ width: 32, height: 1, background: 'rgba(200,167,39,0.3)' }} />
+                          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 9, color: 'rgba(255,255,255,0.55)', textAlign: 'center', margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>{v.fr}</p>
+                          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 8, color: 'rgba(200,167,39,0.5)', margin: 0, fontWeight: 700 }}>{v.ref}</p>
+                        </div>
+                      );
+                    })()}
                     {/* Bottom gradient */}
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 130, background: 'linear-gradient(to top,rgba(0,0,0,0.95) 0%,transparent 100%)', zIndex: 2 }} />
                     {/* Right-side TikTok actions */}
@@ -7960,10 +7987,10 @@ function App() {
       <main>
         <Hero navigate={navigate} />
         <ReassuranceBanner />
+        <StudioViralSection navigate={navigate} />
         <FeatureCards navigate={navigate} />
         <HowItWorksSection />
         <LearnPlaySection navigate={navigate} />
-        <StudioViralSection navigate={navigate} />
         <ImportanceSection />
 
         <ComparisonTable navigate={navigate} />
