@@ -5576,112 +5576,85 @@ function VideoCreatorPage({ navigate }) {
 
   const startPreview = async function () {
     stopPreview();
-    let stopped = false;
-    const actx = new (window.AudioContext || window.webkitAudioContext)();
-    // Resume synchronously within user click — required by Safari/iOS autoplay policy
-    try { await actx.resume(); } catch (e) {}
-    previewRef.current = { stop: function () {stopped = true;actx.close().catch(function () {});setIsPlaying(false);setIsPreviewLoading(false);} };
     setIsPreviewLoading(true);
+    let stopped = false;
+    const audio = audioRef.current;
+    if (!audio) { setIsPreviewLoading(false); return; }
+    const timeouts = [];
+    previewRef.current = {
+      stop: function () {
+        stopped = true;
+        timeouts.forEach(clearTimeout);
+        try { audio.pause(); audio.removeAttribute('src'); audio.load(); } catch (e) {}
+        setIsPlaying(false); setIsPreviewLoading(false);
+      },
+      stopExtra: function () { timeouts.forEach(clearTimeout); }
+    };
 
     const actualCount = Math.min(verseCount, maxAyah - ayahNum + 1);
+    const vNums = Array.from({ length: actualCount }, function (_, i) { return ayahNum + i; });
+
+    // Fetch verse texts in parallel
+    const texts = await Promise.all(vNums.map(function (vNum) {
+      return fetch('https://api.alquran.cloud/v1/ayah/' + surahNum + ':' + vNum + '/editions/quran-simple,fr.hamidullah')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { return d.code === 200 ? { ar: d.data[0].text, fr: d.data[1].text } : { ar: '', fr: '' }; })
+        .catch(function () { return { ar: '', fr: '' }; });
+    }));
+    if (stopped) return;
 
     // ── Custom MP3 path ──
     if (customMp3 && customMp3.url) {
-      const textFetches = Array.from({ length: actualCount }, function (_, i) {
-        const vNum = ayahNum + i;
-        return fetch('https://api.alquran.cloud/v1/ayah/' + surahNum + ':' + vNum + '/editions/quran-simple,fr.hamidullah').
-        then(function (r) {return r.json();}).
-        then(function (d) {return d.code === 200 ? { ar: d.data[0].text, fr: d.data[1].text, vNum: vNum } : { ar: '', fr: '', vNum: vNum };}).
-        catch(function () {return { ar: '', fr: '', vNum: vNum };});
-      });
-      const [mp3Buf, ...texts] = await Promise.all([
-      fetch(customMp3.url).then(function (r) {return r.arrayBuffer();}).then(function (ab) {return actx.decodeAudioData(ab);}).catch(function () {return null;}),
-      ...textFetches]
-      );
+      // Get boundaries: prefer manual, else auto-detect via Web Audio decode
+      let boundaries = mp3Timestamps && mp3Timestamps.length === actualCount ? mp3Timestamps : null;
+      if (!boundaries) {
+        try {
+          const actx = new (window.AudioContext || window.webkitAudioContext)();
+          const ab = await fetch(customMp3.url).then(function (r) { return r.arrayBuffer(); });
+          const buf = await actx.decodeAudioData(ab);
+          boundaries = detectVerseBoundaries(buf, actualCount);
+          actx.close().catch(function () {});
+        } catch (e) { boundaries = vNums.map(function (_, i) { return i * 3; }); }
+      }
       if (stopped) return;
       setIsPreviewLoading(false);
       setIsPlaying(true);
-      if (mp3Buf) {
-        const boundaries = mp3Timestamps && mp3Timestamps.length === actualCount ?
-        mp3Timestamps :
-        detectVerseBoundaries(mp3Buf, actualCount);
-        texts.forEach(function (t, i) {
-          const delayMs = boundaries[i] * 1000;
-          if (delayMs < 20) {
-            cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: { ar: t.ar, fr: t.fr }, ayahNum: t.vNum, loading: false });
-          } else {
-            setTimeout(function () {
-              if (!stopped) cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: { ar: t.ar, fr: t.fr }, ayahNum: t.vNum, loading: false });
-            }, delayMs);
-          }
-        });
-        await new Promise(function (resolve) {
-          const src = actx.createBufferSource();
-          src.buffer = mp3Buf;
-          src.connect(actx.destination);
-          src.onended = resolve;
-          previewRef.current.stopSrc = function () {try {src.stop();} catch (e) {}};
-          src.start(0);
-        });
-      }
-      if (!stopped) {setIsPlaying(false);}
-      actx.close().catch(function () {});
-      previewRef.current = null;
+      audio.src = customMp3.url;
+      audio.onended = function () { if (!stopped) { setIsPlaying(false); } };
+      texts.forEach(function (t, i) {
+        const delayMs = boundaries[i] * 1000;
+        if (delayMs < 20) {
+          cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: t, ayahNum: vNums[i], loading: false });
+        } else {
+          timeouts.push(setTimeout(function () {
+            if (!stopped) cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: t, ayahNum: vNums[i], loading: false });
+          }, delayMs));
+        }
+      });
+      try { await audio.play(); } catch (e) { setIsPlaying(false); setIsPreviewLoading(false); }
       return;
     }
 
-    // Fetch ALL buffers + texts in parallel, then schedule gaplessly via Web Audio clock
-    const vNums = Array.from({ length: actualCount }, function (_, i) { return ayahNum + i; });
-    const textPs = vNums.map(function (vNum) {
-      return fetch('https://api.alquran.cloud/v1/ayah/' + surahNum + ':' + vNum + '/editions/quran-simple,fr.hamidullah').
-        then(function (r) { return r.json(); }).
-        then(function (d) { return d.code === 200 ? { ar: d.data[0].text, fr: d.data[1].text } : null; }).
-        catch(function () { return null; });
-    });
-    const bufPs = vNums.map(function (vNum) {
-      return fetch(getAudioUrl(surahNum, vNum)).
-        then(function (r) { return r.arrayBuffer(); }).
-        then(function (buf) { return actx.decodeAudioData(buf); }).
-        catch(function () { return null; });
-    });
-
-    const [texts, buffers] = await Promise.all([Promise.all(textPs), Promise.all(bufPs)]);
-    if (stopped) return;
-
+    // ── Auto reciter path: play each verse sequentially via HTMLAudioElement ──
     setIsPreviewLoading(false);
     setIsPlaying(true);
-
-    // Clear canvas while first verse hasn't started yet
     cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: null, loading: false });
 
-    // Schedule all verses back-to-back using Web Audio clock — zero gaps
-    // +120ms subtitle offset: accounts for audio hardware output latency so text appears with audio, not before
-    const SUBTITLE_OFFSET_MS = 120;
-    let scheduleTime = actx.currentTime + 0.05;
-    const timeouts = [];
     for (let i = 0; i < vNums.length; i++) {
-      if (!buffers[i]) continue;
-      const delayMs = Math.max(0, (scheduleTime - actx.currentTime) * 1000);
-      const capturedText = texts[i], capturedVNum = vNums[i];
-      timeouts.push(setTimeout(function () {
-        if (!stopped) cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: capturedText, ayahNum: capturedVNum, loading: false });
-      }, delayMs + SUBTITLE_OFFSET_MS));
-      const src = actx.createBufferSource();
-      src.buffer = buffers[i];
-      src.connect(actx.destination);
-      src.start(scheduleTime);
-      scheduleTime += buffers[i].duration;
+      if (stopped) break;
+      cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: texts[i], ayahNum: vNums[i], loading: false });
+      audio.src = getAudioUrl(surahNum, vNums[i]);
+      try {
+        await new Promise(function (resolve) {
+          audio.onended = resolve;
+          audio.onerror = resolve;
+          const p = audio.play();
+          if (p && p.catch) p.catch(resolve);
+        });
+      } catch (e) { break; }
     }
 
-    // Wait for all audio to finish
-    const totalMs = Math.max(0, (scheduleTime - actx.currentTime) * 1000) + 200;
-    await new Promise(function (resolve) {
-      const t = setTimeout(resolve, totalMs);
-      previewRef.current.stopExtra = function () { clearTimeout(t); timeouts.forEach(clearTimeout); };
-    });
-
-    if (!stopped) { setIsPlaying(false); }
-    actx.close().catch(function () {});
+    if (!stopped) setIsPlaying(false);
     previewRef.current = null;
   };
 
