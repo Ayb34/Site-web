@@ -517,6 +517,15 @@
     from { opacity: 0; transform: perspective(800px) rotateY(20deg) translateX(30px); }
     to   { opacity: 1; transform: perspective(800px) rotateY(0deg) translateX(0); }
   }
+  @keyframes overlayFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes proPop {
+    0%   { opacity: 0; transform: translateY(12px) scale(0.94); }
+    60%  { opacity: 1; transform: translateY(0) scale(1.012); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
   /* ── Classes scroll-reveal enrichies ── */
   .reveal-blur {
@@ -902,8 +911,8 @@ function GuestGateModal({ onClose }) {
 function ProGateModal({ onClose, navigate }) {
   const { openQuickCheckout } = useAuth();
   return (
-    <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto' }}>
-      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'40px 32px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)' }}>
+    <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', animation:'overlayFade 0.25s ease-out' }}>
+      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'40px 32px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {/* Lock icon */}
         <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 20px' }}>🔒</div>
 
