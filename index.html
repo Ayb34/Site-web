@@ -913,10 +913,21 @@ function ProGateModal({ onClose, navigate }) {
   const { openQuickCheckout } = useAuth();
   const overlayRef = React.useRef(null);
   React.useEffect(function () {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
     if (overlayRef.current) overlayRef.current.scrollTop = 0;
-    return function () { document.body.style.overflow = prev; };
+    return function () {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
+    };
   }, []);
   return (
     <div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
@@ -5323,6 +5334,67 @@ function drawProceduralBg(ctx, W, H, type, t, particlesRef) {
   ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
 }
 
+/* ─── Fast text+watermark blit (uses pre-computed lines from cache) ─── */
+function drawTextAndWatermark(ctx, W, H, s, fadeAlpha, cache) {
+  const fa = fadeAlpha == null ? 1 : fadeAlpha;
+  const showAr = s.textMode !== 'french';
+  const showFr = s.textMode !== 'arabic';
+  const COL = { white: '#fff', gold: '#e6c84a', outline: '#fff' };
+  const fillCol = COL[s.textColor] || '#fff';
+  const fontId = s.fontId || 'Amiri';
+  const fScale = s.fontScale || 1;
+  const arSz = Math.round(W * 0.052 * fScale);
+  const arFont = 'bold ' + arSz + 'px "' + fontId + '", "Amiri", serif';
+  const arLines = (cache && cache.arLines) || [];
+  const arLH = arSz * 1.65, arTH = arLines.length * arLH;
+  const frSz = Math.round(W * 0.036 * fScale);
+  const frFont = frSz + 'px "Plus Jakarta Sans", sans-serif';
+  const frLines = (cache && cache.frLines) || [];
+  const frLH = frSz * 1.5, frTH = frLines.length * frLH;
+  const gap = (showAr && showFr) ? frSz * 2.1 : 0;
+  const blockH = arTH + gap + frTH;
+  const textPos = s.textPos || 'center';
+  let topY;
+  if (textPos === 'top') topY = H * 0.16;
+  else if (textPos === 'bottom') topY = H * 0.80 - blockH;
+  else topY = H / 2 - blockH / 2;
+  const paint = function(line, x, yy, font, isAr) {
+    ctx.font = font;
+    if (s.textColor === 'outline') {
+      ctx.lineWidth = Math.round((isAr ? arSz : frSz) * 0.14);
+      ctx.strokeStyle = 'rgba(0,0,0,0.92)'; ctx.lineJoin = 'round';
+      ctx.strokeText(line, x, yy);
+    }
+    ctx.fillStyle = fillCol;
+    ctx.fillText(line, x, yy); ctx.fillText(line, x, yy);
+  };
+  if (showAr && arLines.length) {
+    ctx.save(); ctx.globalAlpha = fa;
+    ctx.direction = 'rtl'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = W*0.018; ctx.shadowOffsetY = 2;
+    let y = topY;
+    arLines.forEach(function(line) { paint(line, W/2, y + arSz, arFont, true); y += arLH; });
+    ctx.restore();
+  }
+  if (showFr && frLines.length) {
+    ctx.save(); ctx.globalAlpha = fa * 0.92;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = W*0.014; ctx.shadowOffsetY = 2;
+    let fy = topY + arTH + gap;
+    frLines.forEach(function(line) { paint(line, W/2, fy, frFont, false); fy += frLH; });
+    ctx.restore();
+  }
+  if (s.watermark) {
+    ctx.save(); ctx.globalAlpha = 0.6;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8;
+    ctx.font = '600 ' + Math.round(W * 0.026) + 'px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(s.watermark, W / 2, H - H * 0.035);
+    ctx.restore();
+  }
+}
+
 /* ─── Render a single studio frame (used by live preview AND offline export) ─── */
 function renderStudioFrame(ctx, W, H, s, t, particles, fadeAlpha, bgVideo, bgImg) {
   ctx.clearRect(0, 0, W, H);
@@ -5863,9 +5935,9 @@ function VideoCreatorPage({ navigate }) {
   // ── Offline encoder via WebCodecs + mp4-muxer ──
   const createVideoOffline = async function () {
     if (!window.VideoEncoder || !window.AudioEncoder || !window.Mp4Muxer) return false;
-    const FPS = 30;
+    const FPS = 24;
     const W = cw, H = ch;
-    const supportH264 = await VideoEncoder.isConfigSupported({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 5_000_000, framerate: FPS }).then(function (r) { return r && r.supported; }).catch(function () { return false; });
+    const supportH264 = await VideoEncoder.isConfigSupported({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 4_000_000, framerate: FPS }).then(function (r) { return r && r.supported; }).catch(function () { return false; });
     if (!supportH264) return false;
 
     setStatusMsg('Chargement des versets…');
@@ -5890,7 +5962,7 @@ function VideoCreatorPage({ navigate }) {
       output: function (chunk, meta) { muxer.addVideoChunk(chunk, meta); },
       error: function (e) { console.error('VideoEncoder error', e); },
     });
-    videoEncoder.configure({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 5_000_000, framerate: FPS, avc: { format: 'avc' } });
+    videoEncoder.configure({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 4_000_000, framerate: FPS, latencyMode: 'realtime', avc: { format: 'avc' } });
 
     const audioEncoder = new AudioEncoder({
       output: function (chunk, meta) { muxer.addAudioChunk(chunk, meta); },
@@ -5903,34 +5975,68 @@ function VideoCreatorPage({ navigate }) {
     setStatusMsg('Rendu vidéo…');
     const off = document.createElement('canvas');
     off.width = W; off.height = H;
-    const ctx = off.getContext('2d');
+    const ctx = off.getContext('2d', { alpha: false });
     const particles = { current: null };
     const baseSettings = { bgType, fontId, textMode, textColor, fontScale, textPos, watermark };
     const FADE_DURATION = 0.4; // seconds
 
+    // Pre-render static backgrounds once (huge speedup for non-animated bg types)
+    const ANIMATED_BG = { stars: 1, night: 1, kaaba: 1, bokeh: 1, video: 1 };
+    const isAnimatedBg = ANIMATED_BG[bgType] === 1;
+    let bgCache = null;
+    if (!isAnimatedBg) {
+      bgCache = document.createElement('canvas');
+      bgCache.width = W; bgCache.height = H;
+      const bctx = bgCache.getContext('2d', { alpha: false });
+      // Draw bg + vignette into cache using a no-text settings object
+      renderStudioFrame(bctx, W, H, { bgType: bgType, verse: null, loading: null }, 0, { current: null }, 1, null, bgImgRef.current);
+    }
+
+    // Pre-compute per-verse text layouts to avoid wrapCanvasText on every frame
+    const TEXT_CACHE = plan.verses.map(function (v) {
+      const tmp = document.createElement('canvas').getContext('2d');
+      const showAr = textMode !== 'french';
+      const showFr = textMode !== 'arabic';
+      const arSz = Math.round(W * 0.052 * fontScale);
+      const arFont = 'bold ' + arSz + 'px "' + fontId + '", "Amiri", serif';
+      const frSz = Math.round(W * 0.036 * fontScale);
+      const frFont = frSz + 'px "Plus Jakarta Sans", sans-serif';
+      return {
+        arLines: showAr ? wrapCanvasText(tmp, v.ar || '', W - W*0.12, arFont) : [],
+        frLines: showFr ? wrapCanvasText(tmp, v.fr || '', W - W*0.14, frFont) : [],
+      };
+    });
+
+    let lastYield = performance.now();
     for (let f = 0; f < totalFrames; f++) {
       const t = f / FPS;
-      // Determine current verse
       let vIdx = 0;
       for (let i = plan.starts.length - 1; i >= 0; i--) { if (t >= plan.starts[i]) { vIdx = i; break; } }
       const verse = plan.verses[vIdx];
       const tInto = t - plan.starts[vIdx];
       const fade = Math.min(1, tInto / FADE_DURATION);
-      const settings = Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah, loading: null });
-      renderStudioFrame(ctx, W, H, settings, t, particles, fade, null, null);
-      const frame = new VideoFrame(off, { timestamp: Math.round(t * 1_000_000), duration: Math.round(1_000_000 / FPS) });
-      videoEncoder.encode(frame, { keyFrame: f % 60 === 0 });
-      frame.close();
-      // Throttle to avoid OOM in encode queue
-      if (videoEncoder.encodeQueueSize > 12) {
-        await new Promise(function (r) { setTimeout(r, 1); });
+      if (bgCache) {
+        ctx.drawImage(bgCache, 0, 0);
+        // Draw only text/watermark on top
+        drawTextAndWatermark(ctx, W, H, Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah }), fade, TEXT_CACHE[vIdx]);
+      } else {
+        const settings = Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah, loading: null });
+        renderStudioFrame(ctx, W, H, settings, t, particles, fade, null, bgImgRef.current);
       }
-      if (f % 6 === 0) {
-        const p = 10 + Math.round((f / totalFrames) * 70);
-        setProgress(p);
-        setStatusMsg('Rendu vidéo… ' + Math.round((f / totalFrames) * 100) + '%');
-        // Yield to UI
+      const frame = new VideoFrame(off, { timestamp: Math.round(t * 1_000_000), duration: Math.round(1_000_000 / FPS) });
+      videoEncoder.encode(frame, { keyFrame: f % (FPS * 2) === 0 });
+      frame.close();
+      if (videoEncoder.encodeQueueSize > 24) {
         await new Promise(function (r) { setTimeout(r, 0); });
+      }
+      // Yield UI only every ~80ms instead of every 6 frames
+      const now = performance.now();
+      if (now - lastYield > 80) {
+        const pct = Math.round((f / totalFrames) * 100);
+        setProgress(10 + Math.round((f / totalFrames) * 70));
+        setStatusMsg('Rendu vidéo… ' + pct + '%');
+        await new Promise(function (r) { setTimeout(r, 0); });
+        lastYield = performance.now();
       }
     }
 
