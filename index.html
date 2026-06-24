@@ -5612,6 +5612,21 @@ function VideoCreatorPage({ navigate }) {
     particlesRef.current = null; // re-seed particles for new dims
   }, [aspect, cw, ch]);
 
+  // Invalidate existing download when any setting that affects output changes
+  React.useEffect(() => {
+    if (downloadUrl) { try { URL.revokeObjectURL(downloadUrl); } catch (e) {} setDownloadUrl(null); }
+  }, [surahNum, ayahNum, verseCount, reciterId, fontId, bgType, audioMode, customMp3, aspect, textMode, textColor, fontScale, textPos, watermark, mp3Timestamps]);
+
+  // Auto-start encoding as soon as user enters Step 3 (no waiting after click)
+  React.useEffect(() => {
+    if (step !== 3) return;
+    if (isCreating || downloadUrl) return;
+    const t = setTimeout(() => {
+      if (step === 3 && !isCreating && !downloadUrl) createVideoAuto();
+    }, 600);
+    return () => clearTimeout(t);
+  }, [step, surahNum, ayahNum, verseCount, reciterId, fontId, bgType, audioMode, customMp3, aspect, textMode, textColor, fontScale, textPos, watermark, mp3Timestamps]);
+
   // Fetch preview verse
   React.useEffect(() => {
     setLoading(true);
@@ -5935,7 +5950,10 @@ function VideoCreatorPage({ navigate }) {
   // ── Offline encoder via WebCodecs + mp4-muxer ──
   const createVideoOffline = async function () {
     if (!window.VideoEncoder || !window.AudioEncoder || !window.Mp4Muxer) return false;
-    const FPS = 15;
+    // Drop FPS aggressively for static content — text is stationary, eyes won't notice.
+    // Animated bgs need more frames; static ones can run at 4 fps with no visual loss.
+    const ANIMATED_BG_FPS = { stars: 1, night: 1, kaaba: 1, bokeh: 1, video: 1 };
+    const FPS = ANIMATED_BG_FPS[bgType] ? 15 : 4;
     const W = cw, H = ch;
     const supportH264 = await VideoEncoder.isConfigSupported({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 4_000_000, framerate: FPS }).then(function (r) { return r && r.supported; }).catch(function () { return false; });
     if (!supportH264) return false;
@@ -6050,7 +6068,7 @@ function VideoCreatorPage({ navigate }) {
     setProgress(82);
     // Feed audio in 1-second chunks
     const sr = plan.audioBuf.sampleRate;
-    const chunkFrames = sr; // 1s
+    const chunkFrames = sr * 5; // 5s chunks — fewer encode calls
     const numFrames = plan.audioBuf.length;
     // Interleave channels into Float32 planar packed
     for (let pos = 0; pos < numFrames; pos += chunkFrames) {
@@ -6608,15 +6626,13 @@ function VideoCreatorPage({ navigate }) {
 
                 {/* Create video CTA */}
                 <div>
-                  {!isCreating ? (
+                  {!isCreating && !downloadUrl ? (
                     <button onClick={createVideoAuto}
-                      style={{ width: '100%', background: 'linear-gradient(135deg,#a8891f,#c8a727)', border: 'none', color: '#0a1a08', padding: '17px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', letterSpacing: 0.2, boxShadow: '0 6px 28px rgba(200,167,39,0.3)', transition: 'transform 0.15s, box-shadow 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
-                      onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 36px rgba(200,167,39,0.4)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.3)'; }}>
+                      style={{ width: '100%', background: 'linear-gradient(135deg,#a8891f,#c8a727)', border: 'none', color: '#0a1a08', padding: '17px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', letterSpacing: 0.2, boxShadow: '0 6px 28px rgba(200,167,39,0.3)', transition: 'transform 0.15s, box-shadow 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                       <span style={{ fontSize: 18 }}>🎬</span>
-                      Générer la vidéo · {verseCount} verset{verseCount>1?'s':''}
+                      Préparer la vidéo · {verseCount} verset{verseCount>1?'s':''}
                     </button>
-                  ) : (
+                  ) : isCreating ? (
                     <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>
                         <span>🎬 Génération en cours…</span>
@@ -6627,7 +6643,7 @@ function VideoCreatorPage({ navigate }) {
                       </div>
                       <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, textAlign: 'center', margin: 0 }}>{statusMsg}</p>
                     </div>
-                  )}
+                  ) : null}
 
                   {downloadUrl && (
                     isPro ? (
