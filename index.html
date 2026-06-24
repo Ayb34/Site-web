@@ -64,6 +64,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <!-- ── EmailJS (différé — init lazy au premier envoi) ── -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.5/build/mp4-muxer.min.js" defer></script>
 <script>
   (function(){
     var _EJS_PUBLIC_KEY  = '0p0THZMRdSKSdd8Yj';
@@ -5315,6 +5316,88 @@ function drawProceduralBg(ctx, W, H, type, t, particlesRef) {
   ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
 }
 
+/* ─── Render a single studio frame (used by live preview AND offline export) ─── */
+function renderStudioFrame(ctx, W, H, s, t, particles, fadeAlpha, bgVideo, bgImg) {
+  ctx.clearRect(0, 0, W, H);
+  if (s.bgType === 'video' && bgVideo && bgVideo.readyState >= 2) {
+    const sc = Math.max(W / bgVideo.videoWidth, H / bgVideo.videoHeight);
+    ctx.drawImage(bgVideo, (W - bgVideo.videoWidth * sc) / 2, (H - bgVideo.videoHeight * sc) / 2, bgVideo.videoWidth * sc, bgVideo.videoHeight * sc);
+    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.fillRect(0, 0, W, H);
+  } else if (s.bgType === 'image' && bgImg && bgImg.complete && bgImg.naturalWidth) {
+    const sc = Math.max(W / bgImg.naturalWidth, H / bgImg.naturalHeight);
+    ctx.drawImage(bgImg, (W - bgImg.naturalWidth * sc) / 2, (H - bgImg.naturalHeight * sc) / 2, bgImg.naturalWidth * sc, bgImg.naturalHeight * sc);
+    ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.fillRect(0, 0, W, H);
+  } else {
+    drawProceduralBg(ctx, W, H, s.bgType, t, particles);
+  }
+  const vg = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.72);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.45)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  if (s.verse) {
+    const fa = fadeAlpha == null ? 1 : fadeAlpha;
+    const showAr = s.textMode !== 'french';
+    const showFr = s.textMode !== 'arabic';
+    const COL = { white: '#fff', gold: '#e6c84a', outline: '#fff' };
+    const fillCol = COL[s.textColor] || '#fff';
+    const fontId = s.fontId || 'Amiri';
+    const fScale = s.fontScale || 1;
+    const arSz = Math.round(W * 0.052 * fScale);
+    const arFont = 'bold ' + arSz + 'px "' + fontId + '", "Amiri", serif';
+    const arLines = showAr ? wrapCanvasText(ctx, s.verse.ar || '', W - W*0.12, arFont) : [];
+    const arLH = arSz * 1.65, arTH = arLines.length * arLH;
+    const frSz = Math.round(W * 0.036 * fScale);
+    const frFont = frSz + 'px "Plus Jakarta Sans", sans-serif';
+    const frLines = showFr ? wrapCanvasText(ctx, s.verse.fr || '', W - W*0.14, frFont) : [];
+    const frLH = frSz * 1.5, frTH = frLines.length * frLH;
+    const gap = (showAr && showFr) ? frSz * 2.1 : 0;
+    const blockH = arTH + gap + frTH;
+    const textPos = s.textPos || 'center';
+    let topY;
+    if (textPos === 'top') topY = H * 0.16;
+    else if (textPos === 'bottom') topY = H * 0.80 - blockH;
+    else topY = H / 2 - blockH / 2;
+    const paint = function(line, x, yy, font, isAr) {
+      ctx.font = font;
+      if (s.textColor === 'outline') {
+        ctx.lineWidth = Math.round((isAr ? arSz : frSz) * 0.14);
+        ctx.strokeStyle = 'rgba(0,0,0,0.92)'; ctx.lineJoin = 'round';
+        ctx.strokeText(line, x, yy);
+      }
+      ctx.fillStyle = fillCol;
+      ctx.fillText(line, x, yy); ctx.fillText(line, x, yy);
+    };
+    if (showAr) {
+      ctx.save(); ctx.globalAlpha = fa;
+      ctx.direction = 'rtl'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = W*0.018; ctx.shadowOffsetY = 2;
+      let y = topY;
+      arLines.forEach(function(line) { paint(line, W/2, y + arSz, arFont, true); y += arLH; });
+      ctx.restore();
+    }
+    if (showFr) {
+      ctx.save(); ctx.globalAlpha = fa * 0.92;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = W*0.014; ctx.shadowOffsetY = 2;
+      let fy = topY + arTH + gap;
+      frLines.forEach(function(line) { paint(line, W/2, fy, frFont, false); fy += frLH; });
+      ctx.restore();
+    }
+  } else if (s.loading != null) {
+    ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = Math.round(W * 0.04) + 'px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(s.loading ? 'Chargement…' : 'Aperçu de la vidéo', W / 2, H / 2);
+  }
+  if (s.watermark) {
+    ctx.save(); ctx.globalAlpha = 0.6;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8;
+    ctx.font = '600 ' + Math.round(W * 0.026) + 'px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(s.watermark, W / 2, H - H * 0.035);
+    ctx.restore();
+  }
+}
+
 /* ─── Video Creator Page ─── */
 function VideoCreatorPage({ navigate }) {
   const FONT_OPTIONS = [
@@ -5464,119 +5547,14 @@ function VideoCreatorPage({ navigate }) {
   // Canvas loop — runs ONCE, reads canvasRef.current on EVERY frame so it follows canvas across step changes
   React.useEffect(() => {
     function render() {
-      const canvas = canvasRef.current; // re-read every frame — follows DOM changes
+      const canvas = canvasRef.current;
       if (!canvas) { animRef.current = requestAnimationFrame(render); return; }
       const ctx = canvas.getContext('2d');
       const W = canvas.width, H = canvas.height;
       const cd = cvDataRef.current;
-      const { verse, bgType, fontId, ayahNum, loading } = cd;
-      const textMode = cd.textMode || 'both';
-      const textColor = cd.textColor || 'white';
-      const fontScale = cd.fontScale || 1;
-      const textPos = cd.textPos || 'center';
-      const watermark = cd.watermark || '';
-      const t = performance.now() / 1000;
-      ctx.clearRect(0, 0, W, H);
-
-      // ── Background ──
-      if (bgType === 'video' && bgVideoRef.current && bgVideoRef.current.readyState >= 2) {
-        const v = bgVideoRef.current;
-        const sc = Math.max(W / v.videoWidth, H / v.videoHeight);
-        ctx.drawImage(v, (W - v.videoWidth * sc) / 2, (H - v.videoHeight * sc) / 2, v.videoWidth * sc, v.videoHeight * sc);
-        ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.fillRect(0, 0, W, H);
-      } else if (bgType === 'image' && bgImgRef.current && bgImgRef.current.complete && bgImgRef.current.naturalWidth) {
-        const img = bgImgRef.current;
-        const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
-        ctx.drawImage(img, (W - img.naturalWidth * sc) / 2, (H - img.naturalHeight * sc) / 2, img.naturalWidth * sc, img.naturalHeight * sc);
-        ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.fillRect(0, 0, W, H);
-      } else {
-        drawProceduralBg(ctx, W, H, bgType, t, particlesRef);
-      }
-
-      // ── Subtle vignette for text legibility ──
-      const vg = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.72);
-      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)');
-      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
-
-      if (verse) {
-        if (verse !== fadeRef.current.prevVerse) { fadeRef.current.alpha = 0; fadeRef.current.prevVerse = verse; }
-        if (fadeRef.current.alpha < 1) fadeRef.current.alpha = Math.min(1, fadeRef.current.alpha + 0.045);
-        const fa = fadeRef.current.alpha;
-
-        const showAr = textMode !== 'french';
-        const showFr = textMode !== 'arabic';
-        const COL = { white: '#fff', gold: '#e6c84a', outline: '#fff' };
-        const fillCol = COL[textColor] || '#fff';
-
-        const arSz = Math.round(W * 0.052 * fontScale);
-        const arFont = 'bold ' + arSz + 'px "' + fontId + '", "Amiri", serif';
-        const arLines = showAr ? wrapCanvasText(ctx, verse.ar || '', W - W*0.12, arFont) : [];
-        const arLH = arSz * 1.65, arTH = arLines.length * arLH;
-
-        const frSz = Math.round(W * 0.036 * fontScale);
-        const frFont = frSz + 'px "Plus Jakarta Sans", sans-serif';
-        const frLines = showFr ? wrapCanvasText(ctx, verse.fr || '', W - W*0.14, frFont) : [];
-        const frLH = frSz * 1.5, frTH = frLines.length * frLH;
-
-        // Total block height to position vertically
-        const gap = (showAr && showFr) ? frSz * 2.1 : 0;
-        const blockH = arTH + gap + frTH;
-        let topY;
-        if (textPos === 'top') topY = H * 0.16;
-        else if (textPos === 'bottom') topY = H * 0.80 - blockH;
-        else topY = H / 2 - blockH / 2;
-
-        const paint = function(line, x, yy, font, isAr) {
-          ctx.font = font;
-          if (textColor === 'outline') {
-            ctx.lineWidth = Math.round((isAr ? arSz : frSz) * 0.14);
-            ctx.strokeStyle = 'rgba(0,0,0,0.92)';
-            ctx.lineJoin = 'round';
-            ctx.strokeText(line, x, yy);
-          }
-          ctx.fillStyle = fillCol;
-          ctx.fillText(line, x, yy);
-          ctx.fillText(line, x, yy);
-        };
-
-        // ── Arabic ──
-        if (showAr) {
-          ctx.save();
-          ctx.globalAlpha = fa;
-          ctx.direction = 'rtl'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-          ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = W*0.018; ctx.shadowOffsetY = 2;
-          let y = topY;
-          arLines.forEach(function(line) { paint(line, W/2, y + arSz, arFont, true); y += arLH; });
-          ctx.restore();
-        }
-
-        // ── French ──
-        if (showFr) {
-          ctx.save();
-          ctx.globalAlpha = fa * 0.92;
-          ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-          ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = W*0.014; ctx.shadowOffsetY = 2;
-          let fy = topY + arTH + gap;
-          frLines.forEach(function(line) { paint(line, W/2, fy, frFont, false); fy += frLH; });
-          ctx.restore();
-        }
-      } else {
-        ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.font = Math.round(W * 0.04) + 'px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(loading ? 'Chargement…' : 'Aperçu de la vidéo', W / 2, H / 2);
-      }
-
-      // ── Watermark / handle ──
-      if (watermark) {
-        ctx.save();
-        ctx.globalAlpha = 0.6;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = '#fff';
-        ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8;
-        ctx.font = '600 ' + Math.round(W * 0.026) + 'px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(watermark, W / 2, H - H * 0.035);
-        ctx.restore();
-      }
+      if (cd.verse !== fadeRef.current.prevVerse) { fadeRef.current.alpha = 0; fadeRef.current.prevVerse = cd.verse; }
+      if (fadeRef.current.alpha < 1) fadeRef.current.alpha = Math.min(1, fadeRef.current.alpha + 0.045);
+      renderStudioFrame(ctx, W, H, cd, performance.now() / 1000, particlesRef, fadeRef.current.alpha, bgVideoRef.current, bgImgRef.current);
       animRef.current = requestAnimationFrame(render);
     }
     render();
@@ -5830,19 +5808,174 @@ function VideoCreatorPage({ navigate }) {
     return function () { window.removeEventListener('keydown', onKey); };
   }, [isMarking]);
 
-  const createVideoAuto = async function () {
-    if (isCreating) return;
-    setIsCreating(true);setProgress(0);setDownloadUrl(null);
+  // Build the audio plan (concat each verse, return concatenated AudioBuffer + per-verse start times)
+  const buildAudioPlan = async function (actx) {
+    const actualCount = Math.min(verseCount, maxAyah - ayahNum + 1);
+    const verses = await Promise.all(Array.from({ length: actualCount }, async function (_, i) {
+      const vNum = ayahNum + i;
+      try {
+        const res = await fetch('https://api.alquran.cloud/v1/ayah/' + surahNum + ':' + vNum + '/editions/quran-simple,fr.hamidullah');
+        const d = await res.json();
+        return d.code === 200 ? { ar: d.data[0].text, fr: d.data[1].text, ayah: vNum } : { ar: '', fr: '', ayah: vNum };
+      } catch (e) { return { ar: '', fr: '', ayah: vNum }; }
+    }));
 
-    // Create AudioContext SYNCHRONOUSLY within user gesture (before any awaits)
+    // Custom MP3 path: single buffer, boundaries from calibration or auto-detect
+    if (customMp3 && customMp3.url) {
+      const ab = await fetch(customMp3.url).then(function (r) { return r.arrayBuffer(); });
+      const buf = await actx.decodeAudioData(ab);
+      const boundaries = (mp3Timestamps && mp3Timestamps.length === verses.length)
+        ? mp3Timestamps.slice() : detectVerseBoundaries(buf, verses.length);
+      return { verses: verses, audioBuf: buf, starts: boundaries, totalDur: buf.duration };
+    }
+
+    // Auto reciter path: fetch each verse mp3, concat into one AudioBuffer
+    const bufs = await Promise.all(verses.map(function (v) {
+      return fetch(getAudioUrl(surahNum, v.ayah))
+        .then(function (r) { return r.arrayBuffer(); })
+        .then(function (b) { return actx.decodeAudioData(b); })
+        .catch(function () { return null; });
+    }));
+    const sr = (bufs.find(function (b) { return b; }) || { sampleRate: 44100 }).sampleRate;
+    const channels = Math.max.apply(null, bufs.map(function (b) { return b ? b.numberOfChannels : 1; }));
+    const starts = []; let cursor = 0;
+    bufs.forEach(function (b) { starts.push(cursor); if (b) cursor += b.duration; });
+    const totalSamples = Math.ceil(cursor * sr);
+    const out = actx.createBuffer(channels, totalSamples, sr);
+    for (let i = 0; i < bufs.length; i++) {
+      const b = bufs[i]; if (!b) continue;
+      const offsetSamples = Math.floor(starts[i] * sr);
+      for (let c = 0; c < channels; c++) {
+        const src = b.getChannelData(Math.min(c, b.numberOfChannels - 1));
+        out.getChannelData(c).set(src, offsetSamples);
+      }
+    }
+    return { verses: verses, audioBuf: out, starts: starts, totalDur: cursor };
+  };
+
+  // ── Offline encoder via WebCodecs + mp4-muxer ──
+  const createVideoOffline = async function () {
+    if (!window.VideoEncoder || !window.AudioEncoder || !window.Mp4Muxer) return false;
+    const FPS = 30;
+    const W = cw, H = ch;
+    const supportH264 = await VideoEncoder.isConfigSupported({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 5_000_000, framerate: FPS }).then(function (r) { return r && r.supported; }).catch(function () { return false; });
+    if (!supportH264) return false;
+
+    setStatusMsg('Chargement des versets…');
+    setProgress(2);
+    const actx = new (window.OfflineAudioContext || window.AudioContext)(2, 44100 * 2, 44100); // throwaway just for decode
+    let plan;
+    try { plan = await buildAudioPlan(actx); } catch (e) { return false; }
+    if (!plan || !plan.audioBuf || plan.totalDur < 0.1) return false;
+
+    const totalFrames = Math.ceil(plan.totalDur * FPS);
+    setProgress(10);
+
+    // Muxer
+    const muxer = new window.Mp4Muxer.Muxer({
+      target: new window.Mp4Muxer.ArrayBufferTarget(),
+      video: { codec: 'avc', width: W, height: H, frameRate: FPS },
+      audio: { codec: 'aac', sampleRate: plan.audioBuf.sampleRate, numberOfChannels: Math.min(2, plan.audioBuf.numberOfChannels) },
+      fastStart: 'in-memory',
+    });
+
+    const videoEncoder = new VideoEncoder({
+      output: function (chunk, meta) { muxer.addVideoChunk(chunk, meta); },
+      error: function (e) { console.error('VideoEncoder error', e); },
+    });
+    videoEncoder.configure({ codec: 'avc1.42E01F', width: W, height: H, bitrate: 5_000_000, framerate: FPS, avc: { format: 'avc' } });
+
+    const audioEncoder = new AudioEncoder({
+      output: function (chunk, meta) { muxer.addAudioChunk(chunk, meta); },
+      error: function (e) { console.error('AudioEncoder error', e); },
+    });
+    const audioChannels = Math.min(2, plan.audioBuf.numberOfChannels);
+    audioEncoder.configure({ codec: 'mp4a.40.2', sampleRate: plan.audioBuf.sampleRate, numberOfChannels: audioChannels, bitrate: 128_000 });
+
+    // ── Render video frames offline ──
+    setStatusMsg('Rendu vidéo…');
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const ctx = off.getContext('2d');
+    const particles = { current: null };
+    const baseSettings = { bgType, fontId, textMode, textColor, fontScale, textPos, watermark };
+    const FADE_DURATION = 0.4; // seconds
+
+    for (let f = 0; f < totalFrames; f++) {
+      const t = f / FPS;
+      // Determine current verse
+      let vIdx = 0;
+      for (let i = plan.starts.length - 1; i >= 0; i--) { if (t >= plan.starts[i]) { vIdx = i; break; } }
+      const verse = plan.verses[vIdx];
+      const tInto = t - plan.starts[vIdx];
+      const fade = Math.min(1, tInto / FADE_DURATION);
+      const settings = Object.assign({}, baseSettings, { verse: { ar: verse.ar, fr: verse.fr }, ayahNum: verse.ayah, loading: null });
+      renderStudioFrame(ctx, W, H, settings, t, particles, fade, null, null);
+      const frame = new VideoFrame(off, { timestamp: Math.round(t * 1_000_000), duration: Math.round(1_000_000 / FPS) });
+      videoEncoder.encode(frame, { keyFrame: f % 60 === 0 });
+      frame.close();
+      // Throttle to avoid OOM in encode queue
+      if (videoEncoder.encodeQueueSize > 12) {
+        await new Promise(function (r) { setTimeout(r, 1); });
+      }
+      if (f % 6 === 0) {
+        const p = 10 + Math.round((f / totalFrames) * 70);
+        setProgress(p);
+        setStatusMsg('Rendu vidéo… ' + Math.round((f / totalFrames) * 100) + '%');
+        // Yield to UI
+        await new Promise(function (r) { setTimeout(r, 0); });
+      }
+    }
+
+    setStatusMsg('Encodage audio…');
+    setProgress(82);
+    // Feed audio in 1-second chunks
+    const sr = plan.audioBuf.sampleRate;
+    const chunkFrames = sr; // 1s
+    const numFrames = plan.audioBuf.length;
+    // Interleave channels into Float32 planar packed
+    for (let pos = 0; pos < numFrames; pos += chunkFrames) {
+      const size = Math.min(chunkFrames, numFrames - pos);
+      const planar = new Float32Array(size * audioChannels);
+      for (let c = 0; c < audioChannels; c++) {
+        planar.set(plan.audioBuf.getChannelData(c).subarray(pos, pos + size), c * size);
+      }
+      const ad = new AudioData({
+        format: 'f32-planar',
+        sampleRate: sr,
+        numberOfFrames: size,
+        numberOfChannels: audioChannels,
+        timestamp: Math.round((pos / sr) * 1_000_000),
+        data: planar,
+      });
+      audioEncoder.encode(ad);
+      ad.close();
+      if (audioEncoder.encodeQueueSize > 8) {
+        await new Promise(function (r) { setTimeout(r, 1); });
+      }
+    }
+
+    setStatusMsg('Finalisation…');
+    setProgress(95);
+    await videoEncoder.flush();
+    await audioEncoder.flush();
+    muxer.finalize();
+    const buf = muxer.target.buffer;
+    const blob = new Blob([buf], { type: 'video/mp4' });
+    setExportFormat('mp4');
+    setDownloadUrl(URL.createObjectURL(blob));
+    setIsCreating(false); setProgress(0); setStatusMsg('');
+    try { actx.close && actx.close(); } catch (e) {}
+    return true;
+  };
+
+  // ── Realtime fallback (MediaRecorder) for browsers without WebCodecs ──
+  const createVideoRealtime = async function () {
     const actx = new (window.AudioContext || window.webkitAudioContext)();
     actx.resume().catch(function () {});
     const audioDest = actx.createMediaStreamDestination();
-
     const canvas = canvasRef.current;
     const actualCount = Math.min(verseCount, maxAyah - ayahNum + 1);
-
-    // Fetch all verse texts in parallel
     setStatusMsg('Chargement des versets…');
     const verses = await Promise.all(Array.from({ length: actualCount }, async function (_, i) {
       const vNum = ayahNum + i;
@@ -5850,17 +5983,14 @@ function VideoCreatorPage({ navigate }) {
         const res = await fetch('https://api.alquran.cloud/v1/ayah/' + surahNum + ':' + vNum + '/editions/quran-simple,fr.hamidullah');
         const d = await res.json();
         return d.code === 200 ? { ar: d.data[0].text, fr: d.data[1].text, ayah: vNum } : { ar: '', fr: '', ayah: vNum };
-      } catch (e) {return { ar: '', fr: '', ayah: vNum };}
+      } catch (e) { return { ar: '', fr: '', ayah: vNum }; }
     }));
     setProgress(25);
-
-    // Setup recorder
     setStatusMsg('Enregistrement…');
     const cvStream = canvas.captureStream(30);
     const tracks = cvStream.getVideoTracks().slice();
-    audioDest.stream.getAudioTracks().forEach(function (t) {tracks.push(t);});
+    audioDest.stream.getAudioTracks().forEach(function (t) { tracks.push(t); });
     const finalStream = new MediaStream(tracks);
-    // Prefer MP4 (H.264) — directly postable to TikTok/Insta. Fall back to WebM.
     const MP4_TYPES = ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=h264', 'video/mp4'];
     const WEBM_TYPES = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
     let mime = '', isMp4 = false;
@@ -5870,28 +6000,21 @@ function VideoCreatorPage({ navigate }) {
     setExportFormat(isMp4 ? 'mp4' : 'webm');
     const rec = new MediaRecorder(finalStream, { mimeType: mime, videoBitsPerSecond: 8000000 });
     chunksRef.current = [];
-    rec.ondataavailable = function (ev) {if (ev.data.size > 0) chunksRef.current.push(ev.data);};
+    rec.ondataavailable = function (ev) { if (ev.data.size > 0) chunksRef.current.push(ev.data); };
     rec.onstop = function () {
       const blob = new Blob(chunksRef.current, { type: outType });
       setDownloadUrl(URL.createObjectURL(blob));
-      setIsCreating(false);setProgress(0);setStatusMsg('');
+      setIsCreating(false); setProgress(0); setStatusMsg('');
       actx.close().catch(function () {});
     };
     recorderRef.current = rec;
     rec.start(100);
-
-    // ── Custom MP3 path ──
     if (customMp3 && customMp3.url) {
-      setStatusMsg('Chargement du MP3…');
       try {
-        const mp3ArrayBuf = await fetch(customMp3.url).then(function (r) {return r.arrayBuffer();});
+        const mp3ArrayBuf = await fetch(customMp3.url).then(function (r) { return r.arrayBuffer(); });
         const mp3Buf = await actx.decodeAudioData(mp3ArrayBuf);
-        const boundaries = mp3Timestamps && mp3Timestamps.length === verses.length ?
-        mp3Timestamps :
-        detectVerseBoundaries(mp3Buf, verses.length);
+        const boundaries = mp3Timestamps && mp3Timestamps.length === verses.length ? mp3Timestamps : detectVerseBoundaries(mp3Buf, verses.length);
         setProgress(50);
-        setStatusMsg('Enregistrement avec votre MP3…');
-        // Schedule verse text changes — aligned to detected silence boundaries
         verses.forEach(function (v, i) {
           const delayMs = boundaries[i] * 1000;
           const apply = function () {
@@ -5899,31 +6022,21 @@ function VideoCreatorPage({ navigate }) {
             setProgress(50 + Math.round((i + 1) / verses.length * 50));
             setStatusMsg('Verset ' + (i + 1) + ' / ' + verses.length + '…');
           };
-          if (delayMs < 20) apply();else setTimeout(apply, delayMs);
+          if (delayMs < 20) apply(); else setTimeout(apply, delayMs);
         });
         await new Promise(function (resolve) {
           const src = actx.createBufferSource();
           src.buffer = mp3Buf;
-          src.connect(audioDest);
-          src.connect(actx.destination);
-          src.onended = resolve;
-          src.start(0);
+          src.connect(audioDest); src.connect(actx.destination);
+          src.onended = resolve; src.start(0);
         });
-      } catch (e) {setStatusMsg('Erreur MP3');}
+      } catch (e) { setStatusMsg('Erreur MP3'); }
       rec.stop();
       return;
     }
-
-    // Pre-fetch all audio buffers in parallel (start all downloads immediately)
-    setStatusMsg('Préparation de l\'audio…');
     const audioPending = verses.map(function (v) {
-      return fetch(getAudioUrl(surahNum, v.ayah)).
-      then(function (r) {return r.arrayBuffer();}).
-      then(function (buf) {return actx.decodeAudioData(buf);}).
-      catch(function () {return null;});
+      return fetch(getAudioUrl(surahNum, v.ayah)).then(function (r) { return r.arrayBuffer(); }).then(function (b) { return actx.decodeAudioData(b); }).catch(function () { return null; });
     });
-
-    // Play each verse seamlessly — audio already loading/loaded
     for (let i = 0; i < verses.length; i++) {
       const v = verses[i];
       cvDataRef.current = Object.assign({}, cvDataRef.current, { verse: { ar: v.ar, fr: v.fr }, ayahNum: v.ayah });
@@ -5933,15 +6046,29 @@ function VideoCreatorPage({ navigate }) {
         await new Promise(function (resolve) {
           const src = actx.createBufferSource();
           src.buffer = audioBuf;
-          src.connect(audioDest);
-          src.connect(actx.destination);
-          src.onended = resolve;
-          src.start(0);
+          src.connect(audioDest); src.connect(actx.destination);
+          src.onended = resolve; src.start(0);
         });
       }
       setProgress(25 + Math.round((i + 1) / verses.length * 75));
     }
     rec.stop();
+  };
+
+  const createVideoAuto = async function () {
+    if (isCreating) return;
+    setIsCreating(true); setProgress(0); setDownloadUrl(null);
+    setStatusMsg('Préparation…');
+    try {
+      const ok = await createVideoOffline();
+      if (ok) return;
+    } catch (e) { console.warn('Offline encode failed, falling back to realtime', e); }
+    // Fallback realtime
+    setStatusMsg('Mode compatible — enregistrement en temps réel…');
+    try { await createVideoRealtime(); } catch (e) {
+      setStatusMsg('Erreur génération');
+      setIsCreating(false); setProgress(0);
+    }
   };
 
   const selStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 10, color: '#fff', padding: '10px 14px', fontSize: 14, cursor: 'pointer', outline: 'none', fontFamily: 'Plus Jakarta Sans,sans-serif', WebkitAppearance: 'none', appearance: 'none' };
