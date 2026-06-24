@@ -3559,11 +3559,28 @@ function StudioViralSection({ navigate }) {
               </p>
             </div>
 
+            {/* Clarté prix — Gratuit vs Pro */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ flex: 1, background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 14, padding: '14px 14px' }}>
+                <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#4ade80', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Gratuit</div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#fff', fontWeight: 700, lineHeight: 1 }}>0€</div>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11.5, color: 'rgba(255,255,255,0.55)', margin: '8px 0 0', lineHeight: 1.6 }}>Aperçu illimité · <strong style={{ color: '#fff' }}>1 vidéo</strong> à télécharger</p>
+              </div>
+              <div style={{ flex: 1, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(200,167,39,0.05))', border: '1px solid rgba(200,167,39,0.4)', borderRadius: 14, padding: '14px 14px', position: 'relative' }}>
+                <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#e6c84a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Pro ✦</div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#e6c84a', fontWeight: 700, lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>/mois</span></div>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11.5, color: 'rgba(255,255,255,0.6)', margin: '8px 0 0', lineHeight: 1.6 }}>Vidéos <strong style={{ color: '#fff' }}>illimitées</strong> · tous les jeux Pro</p>
+              </div>
+            </div>
+
             <button onClick={() => navigate('studio')} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '15px 24px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 20px rgba(200,167,39,0.35)', transition: 'all 0.2s', textAlign: 'center' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(200,167,39,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(200,167,39,0.35)'; }}>
               🎬 Créer ma première vidéo →
             </button>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '2px 0 0' }}>
+              ✓ Aperçu gratuit, sans compte · ✓ sans carte bancaire
+            </p>
           </div>
         </div>
 
@@ -3596,7 +3613,7 @@ function FaqSection() {
     },
     {
       q: 'Le Studio Vidéo, c\'est compliqué à utiliser ?',
-      a: 'Non, c\'est pensé pour être aussi simple que possible. Tu sélectionnes une sourate, tu lances l\'enregistrement, et la vidéo se génère automatiquement avec les sous-titres, la musique de fond et le format adapté aux Reels / TikTok. Zéro compétence en montage requise. Et au-delà de la technique — chaque vidéo que tu partages peut être une sadaqa jariya : une bonne action qui continue de porter ses fruits tant que quelqu\'un la regarde ou la partage.'
+      a: 'Non, c\'est pensé pour être aussi simple que possible. Tu choisis une sourate et un récitateur (ou ton propre audio), un fond, et la vidéo se génère en quelques secondes avec les sous-titres arabe + traduction synchronisés et le format adapté aux Reels / TikTok / YouTube. Zéro compétence en montage requise. Et au-delà de la technique — chaque vidéo que tu partages peut être une sadaqa jariya : une bonne action qui continue de porter ses fruits tant que quelqu\'un la regarde ou la partage.'
     },
     {
       q: 'Est-ce que je peux résilier quand je veux ?',
@@ -8007,6 +8024,22 @@ function App() {
   );
 
 }
+
+// ── Attribution UTM — capture la 1ère source (TikTok/IG/etc.) en localStorage ──
+(function () {
+  try {
+    var qs = new URLSearchParams(window.location.search);
+    var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+    var found = {};
+    var has = false;
+    keys.forEach(function (k) { var v = qs.get(k); if (v) { found[k] = v; has = true; } });
+    if (has && !localStorage.getItem('hm_attribution')) {
+      found.first_seen = new Date().toISOString();
+      found.landing = window.location.pathname + window.location.hash;
+      localStorage.setItem('hm_attribution', JSON.stringify(found));
+    }
+  } catch (e) {}
+})();
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 // Hide loading screen once React is mounted
