@@ -883,10 +883,28 @@ function useLaunchCountdown() {
 /* ─── Guest Gate Modal (après 1ère action gratuite) ─── */
 function GuestGateModal({ onClose }) {
   const { openAuth, openQuickCheckout } = useAuth();
+  const overlayRef = React.useRef(null);
+  React.useEffect(function () {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    if (overlayRef.current) overlayRef.current.scrollTop = 0;
+    return function () {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
   return (
-    <div onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
-      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-      <div style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'36px 28px', maxWidth:400, width:'100%', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)' }}>
+    <div ref={overlayRef} onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
+      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
+      <div style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'36px 28px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div style={{ fontSize:44, marginBottom:14 }}>🎯</div>
         <h2 style={{ fontFamily:'Cinzel,serif', fontSize:21, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>
           Tu es lancé(e) !
@@ -6491,6 +6509,7 @@ function VideoCreatorPage({ navigate }) {
               <button onClick={() => user ? setStep(2) : setShowGuestGate(true)} style={{ ...btnPrimary, padding: '13px 48px' }} onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
                 Suivant — Choisir l'audio →
               </button>
+              {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); setStep(2); }} />}
             </div>
 
           </div>
