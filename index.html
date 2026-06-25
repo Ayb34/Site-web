@@ -2210,36 +2210,38 @@ function Hero({ navigate }) {
       <div className="hero-text-wrap">
 
       {/* Kicker — marque */}
-      <div className="fade-up-2" style={{ marginBottom: 14 }}>
+      <div className="fade-up-2" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+        <span style={{ width: 24, height: 1, background: 'linear-gradient(90deg, transparent, rgba(200,167,39,0.6))' }} />
         <span style={{
-            fontFamily: 'Cinzel, serif', fontWeight: 700,
-            fontSize: 'clamp(11px, 2.6vw, 14px)', color: '#c8a727',
-            letterSpacing: '0.26em', textTransform: 'uppercase'
-          }}>✦ Explore l'islam autrement</span>
+            fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700,
+            fontSize: 'clamp(10px, 2.4vw, 12.5px)', color: 'rgba(200,167,39,0.85)',
+            letterSpacing: '0.32em', textTransform: 'uppercase'
+          }}>Explore l'islam autrement</span>
+        <span style={{ width: 24, height: 1, background: 'linear-gradient(90deg, rgba(200,167,39,0.6), transparent)' }} />
       </div>
 
       {/* Title — promesse concrète */}
       <h1 className="fade-up-2 hero-h1" style={{
           fontFamily: 'Fraunces, serif',
-          fontWeight: 300,
-          fontStyle: 'italic',
+          fontWeight: 400,
+          fontStyle: 'normal',
           color: '#fff',
-          lineHeight: 0.98,
-          letterSpacing: '-1.5px',
+          lineHeight: 1.0,
+          letterSpacing: '-2px',
           margin: '0 0 18px',
-          fontVariationSettings: '"opsz" 144',
+          fontVariationSettings: '"opsz" 144, "SOFT" 0, "WONK" 0',
           fontSize: 'clamp(40px, 6vw, 84px)'
-        }}>L'islam comme tu<br />l'as <span style={{ color: '#e6c84a' }}>jamais appris</span>.</h1>
+        }}>L'islam comme tu<br />l'as <span style={{ color: '#e6c84a', fontStyle: 'italic', fontWeight: 400, fontVariationSettings: '"opsz" 144' }}>jamais appris</span>.</h1>
 
       <p className="fade-up-3 hero-subtitle" style={{
-          fontFamily: 'Cormorant Garamond, serif',
-          fontStyle: 'italic',
-          fontWeight: 300,
-          fontSize: 'clamp(19px, 3vw, 34px)',
-          color: 'rgba(255,255,255,0.6)',
+          fontFamily: 'Plus Jakarta Sans, sans-serif',
+          fontStyle: 'normal',
+          fontWeight: 500,
+          fontSize: 'clamp(15px, 2.4vw, 20px)',
+          color: 'rgba(255,255,255,0.5)',
           marginBottom: 30,
-          letterSpacing: '0.02em',
-          lineHeight: 1.35
+          letterSpacing: '0.01em',
+          lineHeight: 1.5
         }}>Joue, teste-toi, crée — en t'amusant.</p>
       {/* Cartes de jeu — accès direct, 1 tap = on joue */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
