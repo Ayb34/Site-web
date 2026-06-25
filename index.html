@@ -625,15 +625,15 @@
       gap: 0 !important;
     }
     .hero-text-wrap h1 {
-      font-size: clamp(34px, 9.6vw, 58px) !important;
+      font-size: clamp(42px, 11.5vw, 66px) !important;
       letter-spacing: -1px !important;
-      line-height: 1.0 !important;
-      margin-bottom: 14px !important;
+      line-height: 1.02 !important;
+      margin-bottom: 16px !important;
     }
-    /* Sous-titre — aéré */
+    /* Sous-titre — aéré, pousse les cartes plus bas */
     .hero-subtitle {
-      font-size: clamp(15px, 4.2vw, 20px) !important;
-      margin-bottom: 26px !important;
+      font-size: clamp(16px, 4.4vw, 21px) !important;
+      margin-bottom: 60px !important;
       line-height: 1.4 !important;
     }
     /* Feature list cachée — redondante */
@@ -2294,13 +2294,6 @@ function Hero({ navigate }) {
       </p>
 
       </div>{/* /hero-text-wrap */}
-      {/* Scroll hint */}
-      <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', animation: 'float 2s ease-in-out infinite', opacity: 0.4 }}>
-        <svg width="20" height="30" viewBox="0 0 20 30" fill="none">
-          <rect x="1" y="1" width="18" height="24" rx="9" stroke="white" strokeWidth="1.5" />
-          <circle cx="10" cy="8" r="2.5" fill="white" style={{ animation: 'float 2s ease-in-out infinite' }} />
-        </svg>
-      </div>
     </section>);
 
 }
