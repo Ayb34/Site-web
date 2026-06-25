@@ -2238,7 +2238,7 @@ function Hero({ navigate }) {
           marginBottom: 30,
           letterSpacing: '0.02em',
           lineHeight: 1.35
-        }}>Blind test, quiz et studio vidéo du Coran.<br />Joue, teste-toi, crée — en t'amusant.</p>
+        }}>Joue, teste-toi, crée — en t'amusant.</p>
       {/* Cartes de jeu — accès direct, 1 tap = on joue */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
         {[
@@ -2268,13 +2268,13 @@ function Hero({ navigate }) {
           </button>
         ))}
         <p style={{ margin: '6px 0 0', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12.5, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
-          ✦ Joue tout de suite — aucune inscription pour essayer
+          ✦ Sans inscription pour essayer
         </p>
       </div>
 
-      {/* Urgence countdown réel — non-Pro uniquement */}
+      {/* Urgence countdown réel — non-Pro, caché sur mobile pour alléger le hero */}
       {!isPro && (
-        <div style={{ marginTop: 16 }}>
+        <div className="hide-mobile" style={{ marginTop: 16 }}>
           <OfferCountdown />
         </div>
       )}
