@@ -533,6 +533,10 @@
     82%  { opacity: 1; transform: translateY(0); filter: blur(0); }
     100% { opacity: 0; transform: translateY(-8px); filter: blur(3px); }
   }
+  @keyframes eqBar {
+    0%, 100% { height: 7px; }
+    50%      { height: 22px; }
+  }
 
   /* ── Classes scroll-reveal enrichies ── */
   .reveal-blur {
@@ -608,7 +612,7 @@
     .hero-arch-wrap { top: -120px !important; left: -120% !important; right: -120% !important; width: 340% !important; opacity: 0.7 !important; }
     /* ── Section hero ── */
     .hero-section {
-      padding: 140px 24px 60px !important;
+      padding: 92px 22px 48px !important;
       align-items: center !important;
       text-align: center !important;
       min-height: 100svh !important;
@@ -621,15 +625,15 @@
       gap: 0 !important;
     }
     .hero-text-wrap h1 {
-      font-size: clamp(52px, 15vw, 76px) !important;
-      letter-spacing: -1.5px !important;
-      line-height: 0.93 !important;
-      margin-bottom: 16px !important;
+      font-size: clamp(34px, 9.6vw, 58px) !important;
+      letter-spacing: -1px !important;
+      line-height: 1.0 !important;
+      margin-bottom: 14px !important;
     }
-    /* Sous-titre — une ligne, aéré */
+    /* Sous-titre — aéré */
     .hero-subtitle {
-      font-size: clamp(17px, 4.8vw, 22px) !important;
-      margin-bottom: 40px !important;
+      font-size: clamp(15px, 4.2vw, 20px) !important;
+      margin-bottom: 26px !important;
       line-height: 1.4 !important;
     }
     /* Feature list cachée — redondante */
@@ -1986,7 +1990,7 @@ function Hero({ navigate }) {
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       textAlign: 'center',
-      padding: '160px 24px 80px',
+      padding: '120px 24px 70px',
       position: 'relative', overflow: 'visible'
     }}>
       {/* Bottom fade */}
@@ -2200,41 +2204,38 @@ function Hero({ navigate }) {
 
       <div className="hero-text-wrap">
 
-      {/* Title */}
-      <div className="fade-up-2" style={{ marginBottom: 10 }}>
-        <h1 style={{
-            fontFamily: 'Fraunces, serif',
-            fontWeight: 200,
-            fontStyle: 'italic',
-
-            color: '#fff',
-            lineHeight: 0.92,
-            letterSpacing: '-2px',
-            margin: 0,
-            fontVariationSettings: '"opsz" 144', fontSize: "100.92px"
-          }}>Explore l'islam</h1>
-        <div style={{
-            fontFamily: 'Cinzel, serif',
-            fontWeight: 700,
-            fontSize: 'clamp(26px, 5vw, 60px)',
-            color: '#c8a727',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            lineHeight: 1.2,
-            marginTop: 4
-          }}>Autrement</div>
+      {/* Kicker — marque */}
+      <div className="fade-up-2" style={{ marginBottom: 14 }}>
+        <span style={{
+            fontFamily: 'Cinzel, serif', fontWeight: 700,
+            fontSize: 'clamp(11px, 2.6vw, 14px)', color: '#c8a727',
+            letterSpacing: '0.26em', textTransform: 'uppercase'
+          }}>✦ Explore l'islam autrement</span>
       </div>
+
+      {/* Title — promesse concrète */}
+      <h1 className="fade-up-2 hero-h1" style={{
+          fontFamily: 'Fraunces, serif',
+          fontWeight: 300,
+          fontStyle: 'italic',
+          color: '#fff',
+          lineHeight: 0.98,
+          letterSpacing: '-1.5px',
+          margin: '0 0 18px',
+          fontVariationSettings: '"opsz" 144',
+          fontSize: 'clamp(40px, 6vw, 84px)'
+        }}>L'islam comme tu<br />l'as <span style={{ color: '#e6c84a' }}>jamais appris</span>.</h1>
 
       <p className="fade-up-3 hero-subtitle" style={{
           fontFamily: 'Cormorant Garamond, serif',
           fontStyle: 'italic',
           fontWeight: 300,
-          fontSize: 'clamp(20px, 3vw, 36px)',
-          color: 'rgba(255,255,255,0.55)',
+          fontSize: 'clamp(19px, 3vw, 34px)',
+          color: 'rgba(255,255,255,0.6)',
           marginBottom: 30,
           letterSpacing: '0.02em',
-          lineHeight: 1.3
-        }}>Apprends ta religion en t'amusant.<br />Joue, teste-toi, crée — 100% en français.</p>
+          lineHeight: 1.35
+        }}>Blind test, quiz et studio vidéo du Coran.<br />Joue, teste-toi, crée — en t'amusant.</p>
       {/* Cartes de jeu — accès direct, 1 tap = on joue */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
         {[
@@ -2251,7 +2252,11 @@ function Hero({ navigate }) {
             }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = c.accent; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.boxShadow = '0 10px 30px ' + c.glow; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.boxShadow = 'none'; }}>
-            <span style={{ flexShrink: 0, width: 48, height: 48, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid ' + c.glow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>{c.emoji}</span>
+            <span style={{ flexShrink: 0, width: 48, height: 48, borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid ' + c.glow, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, fontSize: 24, position: 'relative' }}>
+              {c.id === 'blind-test'
+                ? [0,1,2,3].map(function(n){ return <span key={n} style={{ width: 3.5, borderRadius: 2, background: c.accent, height: 10, animation: 'eqBar 0.9s ease-in-out infinite', animationDelay: (n*0.16)+'s' }} />; })
+                : c.emoji}
+            </span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16.5, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{c.title}</span>
               <span style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12.5, color: 'rgba(255,255,255,0.5)', marginTop: 3, lineHeight: 1.3 }}>{c.desc}</span>
