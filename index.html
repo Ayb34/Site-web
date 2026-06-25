@@ -5573,6 +5573,11 @@ function VideoCreatorPage({ navigate }) {
   const [freeDlUsed, setFreeDlUsed] = React.useState(false);
   const { isPro, user } = useAuth();
 
+  // À chaque changement d'étape du wizard, remonter en haut de page
+  React.useEffect(function () {
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }, [step]);
+
   // Track free download usage per logged-in user
   React.useEffect(function () {
     if (user && !isPro) {
