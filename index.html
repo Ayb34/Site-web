@@ -6506,10 +6506,9 @@ function VideoCreatorPage({ navigate }) {
                 <canvas ref={canvasRef} className="studio-canvas-preview" width={cw} height={ch} style={{ display: 'block', height: aspect === '16:9' ? 'auto' : '74vh', width: aspect === '16:9' ? 'min(100%,520px)' : 'auto', maxHeight: 660, maxWidth: '100%' }} />
               </div>
               <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, margin: 0, textAlign: 'center' }}>Format {aspect} · {cw}×{ch} HD</p>
-              <button onClick={() => user ? setStep(2) : setShowGuestGate(true)} style={{ ...btnPrimary, padding: '13px 48px' }} onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+              <button onClick={() => setStep(2)} style={{ ...btnPrimary, padding: '13px 48px' }} onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
                 Suivant — Choisir l'audio →
               </button>
-              {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); setStep(2); }} />}
             </div>
 
           </div>
