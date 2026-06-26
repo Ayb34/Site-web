@@ -18,7 +18,7 @@
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://heritage-musulman.com/"/>
 <meta property="og:title" content="Héritage Musulman — Explore l'islam autrement"/>
-<meta property="og:description" content="Blind test Coran, quiz islamiques, studio vidéo. Apprends en jouant. 7,99€/mois, sans engagement."/>
+<meta property="og:description" content="Blind test Coran, quiz islamiques, studio vidéo. Apprends en jouant. Offre lancement : 3,99€ le 1er mois, puis 7,99€/mois — sans engagement."/>
 <meta property="og:image" content="https://heritage-musulman.com/og-image.jpg"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
@@ -732,6 +732,15 @@
 </style>
   <!-- Vercel Analytics (no cookies, RGPD compliant) -->
   <script defer src="/_vercel/insights/script.js"></script>
+
+  <!-- ── PWA ── -->
+  <link rel="manifest" href="/manifest.webmanifest"/>
+  <meta name="theme-color" content="#030d06"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Héritage"/>
+  <link rel="apple-touch-icon" href="/uploads/logo.png"/>
 </head>
 <body>
 
@@ -890,9 +899,36 @@ function useLaunchCountdown() {
 }
 
 /* ─── Guest Gate Modal (après 1ère action gratuite) ─── */
-function GuestGateModal({ onClose }) {
+function GuestGateModal({ onClose, context = 'default' }) {
   const { openAuth, openQuickCheckout } = useAuth();
   const overlayRef = React.useRef(null);
+  const GATE_COPY = {
+    default: {
+      emoji: '🎯',
+      title: 'Tu es lancé(e) !',
+      sub: <>Crée ton compte gratuit pour continuer<br/>et sauvegarder ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
+      feats: ['✓ Score & progression sauvegardés','✓ Reprends là où tu t\'es arrêté','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+    },
+    blindtest: {
+      emoji: '🎵',
+      title: 'Beau parcours !',
+      sub: <>Crée ton compte gratuit pour continuer<br/>le Blind Test et garder ton score.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
+      feats: ['✓ Ton score sauvegardé','✓ Reprends quand tu veux','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+    },
+    quiz: {
+      emoji: '🧠',
+      title: 'Bien joué !',
+      sub: <>Crée ton compte gratuit pour continuer<br/>le quiz et suivre ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
+      feats: ['✓ Ta progression sauvegardée','✓ Reprends quand tu veux','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+    },
+    studio: {
+      emoji: '🎬',
+      title: 'Ta vidéo est prête !',
+      sub: <>Crée ton compte gratuit pour<br/>télécharger ta vidéo.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
+      feats: ['✓ Télécharge ta vidéo en HD','✓ 1 vidéo offerte, sans carte','✓ Tes créations sauvegardées','✓ Accès gratuit pour toujours'],
+    },
+  };
+  const copy = GATE_COPY[context] || GATE_COPY.default;
   React.useEffect(function () {
     const scrollY = window.scrollY;
     document.body.style.position = 'fixed';
@@ -914,17 +950,16 @@ function GuestGateModal({ onClose }) {
     <div ref={overlayRef} onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
       <div style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'36px 28px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
-        <div style={{ fontSize:44, marginBottom:14 }}>🎯</div>
+        <div style={{ fontSize:44, marginBottom:14 }}>{copy.emoji}</div>
         <h2 style={{ fontFamily:'Cinzel,serif', fontSize:21, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>
-          Tu es lancé(e) !
+          {copy.title}
         </h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 20px' }}>
-          Crée ton compte gratuit pour continuer<br/>et sauvegarder ta progression.<br/>
-          <strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong>
+          {copy.sub}
         </p>
         {/* Avantages compte gratuit */}
         <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'12px 16px', marginBottom:22, textAlign:'left' }}>
-          {['✓ Score & progression sauvegardés','✓ Niveau Débutant complet','✓ Blind Test Débutant illimité','✓ Accès gratuit pour toujours'].map(function(f) {
+          {copy.feats.map(function(f) {
             return <div key={f} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.65)', marginBottom:6 }}>{f}</div>;
           })}
         </div>
@@ -4029,7 +4064,7 @@ function StartPage({ navigate }) {
                   {/* Pro block */}
                   <div style={{ background:'rgba('+act.tagRgb+',0.05)', border:'1px solid rgba('+act.tagRgb+',0.15)', borderRadius:12, padding:'16px 18px', marginBottom:24 }}>
                     <div style={{ marginBottom:12, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>✦ PRO — 7,99€/mois</span>
+                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? "✦ PRO — 3,99€ le 1er mois" : "✦ PRO — 7,99€/mois"}</span>
                       
                     </div>
                     {act.pro.map(function(p) {
@@ -4493,7 +4528,7 @@ function BlindTestPage({ navigate }) {
     <div className="fade-up" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '90px 20px 80px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
 
       {showProGate && <ProGateModal onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
-      {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); launch(); }} />}
+      {showGuestGate && <GuestGateModal context="blindtest" onClose={function(){ setShowGuestGate(false); launch(); }} />}
 
       {/* ── Bouton Retour ── */}
       <button onClick={() => { if (audioRef.current) audioRef.current.pause(); navigate('home'); }} style={{
@@ -5134,7 +5169,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
 
   return (
     <div className="fade-up" style={{ minHeight: '100vh', fontFamily: 'Plus Jakarta Sans, sans-serif', paddingBottom: 60 }}>
-      {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); setCurrent(c => c + 1); setChosen(null); setAnswered(false); }} />}
+      {showGuestGate && <GuestGateModal context="quiz" onClose={function(){ setShowGuestGate(false); setCurrent(c => c + 1); setChosen(null); setAnswered(false); }} />}
 
       {/* ── Top bar ── */}
       <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(5,14,8,0.92)', backdropFilter: 'blur(14px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '14px 20px' }}>
@@ -6767,7 +6802,7 @@ function VideoCreatorPage({ navigate }) {
                     )
                   )}
                   {showProGate && <ProGateModal onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
-                  {showGuestGate && <GuestGateModal onClose={function(){ setShowGuestGate(false); setStep(2); }} />}
+                  {showGuestGate && <GuestGateModal context="studio" onClose={function(){ setShowGuestGate(false); }} />}
                 </div>
 
                 {/* Back */}
@@ -8239,6 +8274,112 @@ requestAnimationFrame(() => {
   .sp-locked-grid { grid-template-columns: 1fr !important; }
   .sticky-upgrade-banner-btn { font-size: 11px !important; padding: 8px 12px !important; }
 }
+
+/* ── PWA install banner ── */
+#pwa-install-banner{
+  position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(140%);
+  z-index:99999; display:flex; align-items:center; gap:14px;
+  max-width:calc(100vw - 28px); width:max-content;
+  padding:12px 14px 12px 16px; border-radius:18px;
+  background:linear-gradient(135deg,#0a1a08,#030d06);
+  border:1px solid rgba(231,196,92,.35);
+  box-shadow:0 18px 50px rgba(0,0,0,.55), 0 0 24px rgba(231,196,92,.12);
+  opacity:0; transition:transform .45s cubic-bezier(.2,.9,.25,1), opacity .35s;
+  font-family:system-ui,-apple-system,sans-serif;
+}
+#pwa-install-banner.show{ transform:translateX(-50%) translateY(0); opacity:1; }
+#pwa-install-banner img{ width:42px; height:42px; border-radius:10px; flex:0 0 auto; }
+#pwa-install-banner .pwa-txt{ display:flex; flex-direction:column; line-height:1.25; }
+#pwa-install-banner .pwa-t{ font-size:14px; font-weight:800; color:#fdfaf0; }
+#pwa-install-banner .pwa-s{ font-size:12px; color:rgba(253,250,240,.6); }
+#pwa-install-banner .pwa-go{
+  flex:0 0 auto; border:none; cursor:pointer; white-space:nowrap;
+  padding:10px 18px; border-radius:999px; font-size:14px; font-weight:900; color:#1a1205;
+  background:linear-gradient(135deg,#e7c45c,#b8922f); box-shadow:0 6px 18px rgba(231,196,92,.35);
+}
+#pwa-install-banner .pwa-x{
+  flex:0 0 auto; border:none; cursor:pointer; background:transparent;
+  color:rgba(253,250,240,.5); font-size:22px; line-height:1; padding:4px 6px;
+}
 </style>
+
+<!-- ── PWA install banner ── -->
+<div id="pwa-install-banner" role="dialog" aria-label="Installer l'application">
+  <img src="/uploads/logo.png" alt=""/>
+  <div class="pwa-txt">
+    <span class="pwa-t">Installe l'application</span>
+    <span class="pwa-s">Accès rapide, plein écran, hors-ligne</span>
+  </div>
+  <button class="pwa-go" id="pwa-install-go">Installer</button>
+  <button class="pwa-x" id="pwa-install-x" aria-label="Fermer">&times;</button>
+</div>
+
+<script>
+(function(){
+  /* ── Service worker ── */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("/sw.js").catch(function(e){
+        console.warn("[PWA] SW registration failed:", e);
+      });
+    });
+  }
+
+  /* ── Install prompt (Android / Chrome desktop) ── */
+  var deferredPrompt = null;
+  var banner = document.getElementById("pwa-install-banner");
+  var goBtn  = document.getElementById("pwa-install-go");
+  var xBtn   = document.getElementById("pwa-install-x");
+  var DISMISS_KEY = "hm_pwa_dismissed_at";
+  var DAY = 86400000;
+
+  function recentlyDismissed(){
+    var t = +localStorage.getItem(DISMISS_KEY) || 0;
+    return (Date.now() - t) < 14 * DAY; // re-propose après 14 jours
+  }
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches ||
+           window.navigator.standalone === true;
+  }
+  function showBanner(){
+    if (isStandalone() || recentlyDismissed()) return;
+    banner.classList.add("show");
+  }
+  function hideBanner(){ banner.classList.remove("show"); }
+
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(showBanner, 2500); // laisse l'utilisateur voir le contenu d'abord
+  });
+
+  goBtn.addEventListener("click", function(){
+    hideBanner();
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(function(){ deferredPrompt = null; });
+    }
+  });
+  xBtn.addEventListener("click", function(){
+    localStorage.setItem(DISMISS_KEY, Date.now());
+    hideBanner();
+  });
+  window.addEventListener("appinstalled", function(){
+    hideBanner();
+    deferredPrompt = null;
+  });
+
+  /* ── iOS : pas de beforeinstallprompt → instructions Partager → "Sur l'écran d'accueil" ── */
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS && !isStandalone() && !recentlyDismissed()) {
+    var bt = banner.querySelector(".pwa-t");
+    var bs = banner.querySelector(".pwa-s");
+    bt.textContent = "Ajoute à l'écran d'accueil";
+    bs.textContent = "Appuie sur Partager ⬆ puis « Sur l'écran d'accueil »";
+    goBtn.style.display = "none";
+    setTimeout(showBanner, 3000);
+  }
+})();
+</script>
 </body>
 </html>
