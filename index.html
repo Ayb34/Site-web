@@ -732,15 +732,6 @@
 </style>
   <!-- Vercel Analytics (no cookies, RGPD compliant) -->
   <script defer src="/_vercel/insights/script.js"></script>
-
-  <!-- ── PWA ── -->
-  <link rel="manifest" href="/manifest.webmanifest"/>
-  <meta name="theme-color" content="#030d06"/>
-  <meta name="mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Héritage"/>
-  <link rel="apple-touch-icon" href="/uploads/logo.png"/>
 </head>
 <body>
 
@@ -2277,13 +2268,13 @@ function Hero({ navigate }) {
           marginBottom: 30,
           letterSpacing: '0.01em',
           lineHeight: 1.5
-        }}>Joue, teste-toi, crée — en t'amusant.</p>
-      {/* Cartes de jeu — accès direct, 1 tap = on joue */}
+        }}>Blind test, quiz, et un studio pour <strong style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>créer tes vidéos du Coran en 1 min</strong>.</p>
+      {/* Cartes de jeu — accès direct, 1 tap = on joue. Studio en 1er (trafic TikTok). */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
         {[
+          { id: 'studio', emoji: '🎬', title: 'Studio Vidéo', desc: 'Crée tes vidéos du Coran en 1 min', accent: '#e6c84a', glow: 'rgba(200,167,39,0.32)', badge: 'NOUVEAU' },
           { id: 'blind-test', emoji: '🎧', title: 'Blind Test Coran', desc: 'Reconnais la sourate à l\'écoute', accent: '#4ade80', glow: 'rgba(74,222,128,0.28)' },
-          { id: 'quiz', emoji: '🧠', title: 'Quiz Islam', desc: 'Teste tes connaissances · tous niveaux', accent: '#60a5fa', glow: 'rgba(96,165,250,0.28)' },
-          { id: 'studio', emoji: '🎬', title: 'Studio Vidéo', desc: 'Crée tes vidéos du Coran en 1 min', accent: '#e6c84a', glow: 'rgba(200,167,39,0.32)' }
+          { id: 'quiz', emoji: '🧠', title: 'Quiz Islam', desc: 'Teste tes connaissances · tous niveaux', accent: '#60a5fa', glow: 'rgba(96,165,250,0.28)' }
         ].map((c) => (
           <button key={c.id} onClick={() => navigate(c.id)} className="hero-game-card" style={{
               display: 'flex', alignItems: 'center', gap: 14, width: '100%',
@@ -2300,7 +2291,10 @@ function Hero({ navigate }) {
                 : c.emoji}
             </span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16.5, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{c.title}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16.5, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>
+                {c.title}
+                {c.badge && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.08em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 7px', borderRadius: 999, textTransform: 'uppercase' }}>{c.badge}</span>}
+              </span>
               <span style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12.5, color: 'rgba(255,255,255,0.5)', marginTop: 3, lineHeight: 1.3 }}>{c.desc}</span>
             </span>
             <span style={{ flexShrink: 0, color: c.accent, fontSize: 22, fontWeight: 700, lineHeight: 1 }}>›</span>
@@ -2311,10 +2305,13 @@ function Hero({ navigate }) {
         </p>
       </div>
 
-      {/* Urgence countdown réel — non-Pro, caché sur mobile pour alléger le hero */}
+      {/* Urgence + prix — visible mobile (96% du trafic) : offre lancement claire */}
       {!isPro && (
-        <div className="hide-mobile" style={{ marginTop: 16 }}>
-          <OfferCountdown />
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9 }}>
+          <OfferCountdown compact />
+          <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 1.4 }}>
+            🎉 Offre lancement : <strong style={{ color: '#e6c84a', fontWeight: 800 }}>1er mois à 3,99€</strong> <span style={{ opacity: 0.6 }}>puis 7,99€/mois · sans engagement</span>
+          </p>
         </div>
       )}
 
@@ -8275,109 +8272,16 @@ requestAnimationFrame(() => {
   .sticky-upgrade-banner-btn { font-size: 11px !important; padding: 8px 12px !important; }
 }
 
-/* ── PWA install banner ── */
-#pwa-install-banner{
-  position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(140%);
-  z-index:99999; display:flex; align-items:center; gap:14px;
-  max-width:calc(100vw - 28px); width:max-content;
-  padding:12px 14px 12px 16px; border-radius:18px;
-  background:linear-gradient(135deg,#0a1a08,#030d06);
-  border:1px solid rgba(231,196,92,.35);
-  box-shadow:0 18px 50px rgba(0,0,0,.55), 0 0 24px rgba(231,196,92,.12);
-  opacity:0; transition:transform .45s cubic-bezier(.2,.9,.25,1), opacity .35s;
-  font-family:system-ui,-apple-system,sans-serif;
-}
-#pwa-install-banner.show{ transform:translateX(-50%) translateY(0); opacity:1; }
-#pwa-install-banner img{ width:42px; height:42px; border-radius:10px; flex:0 0 auto; }
-#pwa-install-banner .pwa-txt{ display:flex; flex-direction:column; line-height:1.25; }
-#pwa-install-banner .pwa-t{ font-size:14px; font-weight:800; color:#fdfaf0; }
-#pwa-install-banner .pwa-s{ font-size:12px; color:rgba(253,250,240,.6); }
-#pwa-install-banner .pwa-go{
-  flex:0 0 auto; border:none; cursor:pointer; white-space:nowrap;
-  padding:10px 18px; border-radius:999px; font-size:14px; font-weight:900; color:#1a1205;
-  background:linear-gradient(135deg,#e7c45c,#b8922f); box-shadow:0 6px 18px rgba(231,196,92,.35);
-}
-#pwa-install-banner .pwa-x{
-  flex:0 0 auto; border:none; cursor:pointer; background:transparent;
-  color:rgba(253,250,240,.5); font-size:22px; line-height:1; padding:4px 6px;
-}
 </style>
 
-<!-- ── PWA install banner ── -->
-<div id="pwa-install-banner" role="dialog" aria-label="Installer l'application">
-  <img src="/uploads/logo.png" alt=""/>
-  <div class="pwa-txt">
-    <span class="pwa-t">Installe l'application</span>
-    <span class="pwa-s">Accès rapide, plein écran, hors-ligne</span>
-  </div>
-  <button class="pwa-go" id="pwa-install-go">Installer</button>
-  <button class="pwa-x" id="pwa-install-x" aria-label="Fermer">&times;</button>
-</div>
-
 <script>
+/* PWA retiré — désinscrit tout service worker déjà installé chez les visiteurs récents + purge ses caches */
 (function(){
-  /* ── Service worker ── */
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function(){
-      navigator.serviceWorker.register("/sw.js").catch(function(e){
-        console.warn("[PWA] SW registration failed:", e);
-      });
-    });
+  if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations) {
+    navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
   }
-
-  /* ── Install prompt (Android / Chrome desktop) ── */
-  var deferredPrompt = null;
-  var banner = document.getElementById("pwa-install-banner");
-  var goBtn  = document.getElementById("pwa-install-go");
-  var xBtn   = document.getElementById("pwa-install-x");
-  var DISMISS_KEY = "hm_pwa_dismissed_at";
-  var DAY = 86400000;
-
-  function recentlyDismissed(){
-    var t = +localStorage.getItem(DISMISS_KEY) || 0;
-    return (Date.now() - t) < 14 * DAY; // re-propose après 14 jours
-  }
-  function isStandalone(){
-    return window.matchMedia("(display-mode: standalone)").matches ||
-           window.navigator.standalone === true;
-  }
-  function showBanner(){
-    if (isStandalone() || recentlyDismissed()) return;
-    banner.classList.add("show");
-  }
-  function hideBanner(){ banner.classList.remove("show"); }
-
-  window.addEventListener("beforeinstallprompt", function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-    setTimeout(showBanner, 2500); // laisse l'utilisateur voir le contenu d'abord
-  });
-
-  goBtn.addEventListener("click", function(){
-    hideBanner();
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.finally(function(){ deferredPrompt = null; });
-    }
-  });
-  xBtn.addEventListener("click", function(){
-    localStorage.setItem(DISMISS_KEY, Date.now());
-    hideBanner();
-  });
-  window.addEventListener("appinstalled", function(){
-    hideBanner();
-    deferredPrompt = null;
-  });
-
-  /* ── iOS : pas de beforeinstallprompt → instructions Partager → "Sur l'écran d'accueil" ── */
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  if (isIOS && !isStandalone() && !recentlyDismissed()) {
-    var bt = banner.querySelector(".pwa-t");
-    var bs = banner.querySelector(".pwa-s");
-    bt.textContent = "Ajoute à l'écran d'accueil";
-    bs.textContent = "Appuie sur Partager ⬆ puis « Sur l'écran d'accueil »";
-    goBtn.style.display = "none";
-    setTimeout(showBanner, 3000);
+  if (window.caches && caches.keys) {
+    caches.keys().then(function(keys){ keys.forEach(function(k){ if (/^hm-/.test(k)) caches.delete(k); }); }).catch(function(){});
   }
 })();
 </script>
