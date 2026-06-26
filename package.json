@@ -1,8 +1,15 @@
 {
   "name": "heritage-musulman",
   "version": "1.0.0",
+  "scripts": {
+    "compile": "esbuild src/app.jsx --minify --target=es2017 --jsx=transform --outfile=app.js",
+    "watch": "esbuild src/app.jsx --minify --target=es2017 --jsx=transform --outfile=app.js --watch"
+  },
   "dependencies": {
-    "stripe": "^17.0.0",
-    "firebase-admin": "^12.0.0"
+    "firebase-admin": "^12.0.0",
+    "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }
