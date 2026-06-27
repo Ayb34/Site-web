@@ -1526,7 +1526,7 @@ function Hero({ navigate }) {
       {/* Cartes de jeu — accès direct, 1 tap = on joue. Studio en 1er (trafic TikTok). */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
         {[
-          { id: 'studio', emoji: '🎬', title: 'Studio Vidéo', desc: 'Crée tes vidéos du Coran en 1 min', accent: '#e6c84a', glow: 'rgba(200,167,39,0.32)', badge: 'NOUVEAU' },
+          { id: 'comprendre', emoji: '📖', title: 'Comprends le Coran', desc: 'Comprends enfin ce que tu récites', accent: '#e6c84a', glow: 'rgba(200,167,39,0.32)', badge: 'NOUVEAU' },
           { id: 'blind-test', emoji: '🎧', title: 'Blind Test Coran', desc: 'Reconnais la sourate à l\'écoute', accent: '#4ade80', glow: 'rgba(74,222,128,0.28)' },
           { id: 'quiz', emoji: '🧠', title: 'Quiz Islam', desc: 'Teste tes connaissances · tous niveaux', accent: '#60a5fa', glow: 'rgba(96,165,250,0.28)' }
         ].map((c) => (
@@ -1710,10 +1710,20 @@ function FeatureCards({ navigate }) {
       page: 'quiz',
     },
     {
-      num: '03', icon: '🎬', tag: 'NOUVEAU', tagColor: '#c8a727', tagRgb: '200,167,39',
+      num: '03', icon: '📖', tag: 'NOUVEAU', tagColor: '#c8a727', tagRgb: '200,167,39',
+      title: 'Comprends le Coran',
+      hook: 'Tu pries en arabe depuis des années — sans vraiment comprendre les mots.',
+      desc: 'Apprends le Coran mot à mot. ~50 mots suffisent à saisir près de la moitié du Coran. Écoute, comprends, joue — et un jour, tu comprends ta prière.',
+      free: 'Al-Fâtiha · mot à mot · illimité',
+      pro: 'Toutes les sourates · progression complète',
+      accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
+      page: 'comprendre',
+    },
+    {
+      num: '04', icon: '🎬', tag: null, tagColor: '#a78bfa', tagRgb: '167,139,250',
       title: 'Studio Vidéo',
-      hook: 'Chaque vidéo partagée peut être une sadaqa jariya — une bonne action qui dure.',
-      desc: 'Crée tes vidéos de récitation avec sous-titres arabes et français. Poste sur TikTok, Instagram, YouTube. Chaque vue rapproche quelqu\'un d\'Allah — et la récompense te revient.',
+      hook: 'Crée tes vidéos de récitation à partager — chaque vue peut être une sadaqa jariya.',
+      desc: 'Sous-titres arabes et français, fonds, polices. Poste sur TikTok, Instagram et YouTube en quelques clics.',
       free: 'Créer · Prévisualiser · Personnaliser',
       pro: 'Téléchargement HD · Export illimité',
       accent: { from:'rgba(18,14,30,0.97)', to:'rgba(5,4,10,0.99)', border:'rgba(167,139,250,0.28)', glow:'rgba(167,139,250,0.12)', line:'#a78bfa' },
@@ -7098,6 +7108,538 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
   );
 }
 
+/* ═══════════════════════════════════════════════════════════
+   COMPRENDRE — « Comprends ce que tu récites »
+   Apprentissage des mots du Coran (mot-à-mot) + jeu + progression.
+   Donnée mot-à-mot vérifiée. Audio: everyayah (Alafasy).
+═══════════════════════════════════════════════════════════ */
+const CMP_RECITER = 'Alafasy_128kbps';
+const cmpPad3 = function (n) { return String(n).padStart(3, '0'); };
+const cmpAyahAudio = function (surah, ayah) {
+  return 'https://everyayah.com/data/' + CMP_RECITER + '/' + cmpPad3(surah) + cmpPad3(ayah) + '.mp3';
+};
+
+// Sourates avec découpage mot-à-mot (arabe + sens FR). Traductions standard.
+const CMP_SOURATES = [
+  {
+    id: 'fatiha', surah: 1, name: 'Al-Fâtiha', fr: "L'Ouverture", free: true,
+    ayahs: [
+      { n: 1, words: [ {ar:'بِسْمِ',fr:'Au nom de'}, {ar:'اللَّهِ',fr:'Allah'}, {ar:'الرَّحْمَٰنِ',fr:'le Tout-Miséricordieux'}, {ar:'الرَّحِيمِ',fr:'le Très-Miséricordieux'} ] },
+      { n: 2, words: [ {ar:'الْحَمْدُ',fr:'La louange'}, {ar:'لِلَّهِ',fr:'à Allah'}, {ar:'رَبِّ',fr:'Seigneur'}, {ar:'الْعَالَمِينَ',fr:"de l'univers"} ] },
+      { n: 3, words: [ {ar:'الرَّحْمَٰنِ',fr:'le Tout-Miséricordieux'}, {ar:'الرَّحِيمِ',fr:'le Très-Miséricordieux'} ] },
+      { n: 4, words: [ {ar:'مَالِكِ',fr:'Maître'}, {ar:'يَوْمِ',fr:'du Jour'}, {ar:'الدِّينِ',fr:'de la rétribution'} ] },
+      { n: 5, words: [ {ar:'إِيَّاكَ',fr:"C'est Toi que"}, {ar:'نَعْبُدُ',fr:'nous adorons'}, {ar:'وَإِيَّاكَ',fr:"et c'est Toi que"}, {ar:'نَسْتَعِينُ',fr:"nous implorons l'aide"} ] },
+      { n: 6, words: [ {ar:'اهْدِنَا',fr:'Guide-nous'}, {ar:'الصِّرَاطَ',fr:'le chemin'}, {ar:'الْمُسْتَقِيمَ',fr:'droit'} ] },
+      { n: 7, words: [ {ar:'صِرَاطَ',fr:'le chemin de'}, {ar:'الَّذِينَ',fr:'ceux'}, {ar:'أَنْعَمْتَ',fr:'Tu as comblés'}, {ar:'عَلَيْهِمْ',fr:'sur eux'}, {ar:'غَيْرِ',fr:'non pas'}, {ar:'الْمَغْضُوبِ',fr:'des réprouvés'}, {ar:'وَلَا',fr:'ni'}, {ar:'الضَّالِّينَ',fr:'des égarés'} ] },
+    ],
+  },
+  {
+    id: 'ikhlas', surah: 112, name: 'Al-Ikhlâs', fr: 'Le Monothéisme pur', free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'هُوَ',fr:'Il est'}, {ar:'اللَّهُ',fr:'Allah'}, {ar:'أَحَدٌ',fr:'Unique'} ] },
+      { n: 2, words: [ {ar:'اللَّهُ',fr:'Allah'}, {ar:'الصَّمَدُ',fr:"l'Absolu"} ] },
+      { n: 3, words: [ {ar:'لَمْ',fr:'ne pas'}, {ar:'يَلِدْ',fr:'a engendré'}, {ar:'وَلَمْ',fr:'et ne pas'}, {ar:'يُولَدْ',fr:'a été engendré'} ] },
+      { n: 4, words: [ {ar:'وَلَمْ',fr:'et ne pas'}, {ar:'يَكُن',fr:'est'}, {ar:'لَّهُ',fr:'à Lui'}, {ar:'كُفُوًا',fr:'égal'}, {ar:'أَحَدٌ',fr:'quiconque'} ] },
+    ],
+  },
+  {
+    id: 'asr', surah: 103, name: "Al-'Asr", fr: 'Le Temps', free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'وَالْعَصْرِ',fr:'Par le Temps'} ] },
+      { n: 2, words: [ {ar:'إِنَّ',fr:'Certes'}, {ar:'الْإِنسَانَ',fr:"l'être humain"}, {ar:'لَفِي',fr:'est bien dans'}, {ar:'خُسْرٍ',fr:'la perte'} ] },
+      { n: 3, words: [ {ar:'إِلَّا',fr:'sauf'}, {ar:'الَّذِينَ',fr:'ceux qui'}, {ar:'آمَنُوا',fr:'ont cru'}, {ar:'وَعَمِلُوا',fr:'et ont accompli'}, {ar:'الصَّالِحَاتِ',fr:'les bonnes œuvres'}, {ar:'وَتَوَاصَوْا',fr:'et se sont enjoint'}, {ar:'بِالْحَقِّ',fr:'la vérité'}, {ar:'وَتَوَاصَوْا',fr:'et se sont enjoint'}, {ar:'بِالصَّبْرِ',fr:"l'endurance"} ] },
+    ],
+  },
+];
+
+// Index global des mots uniques (clé = arabe). Sert au jeu + à la progression.
+const CMP_WORD_INDEX = (function () {
+  const map = {};
+  CMP_SOURATES.forEach(function (s) {
+    s.ayahs.forEach(function (a) {
+      a.words.forEach(function (w) {
+        if (!map[w.ar]) map[w.ar] = { ar: w.ar, fr: w.fr, sourates: [] };
+        if (map[w.ar].sourates.indexOf(s.id) < 0) map[w.ar].sourates.push(s.id);
+      });
+    });
+  });
+  return map;
+})();
+const CMP_ALL_WORDS = Object.keys(CMP_WORD_INDEX).map(function (k) { return CMP_WORD_INDEX[k]; });
+const CMP_MASTER_THRESHOLD = 2; // bonnes réponses pour "maîtrisé"
+
+// ── Persistance (localStorage) ──
+const CMP_KEY = 'hm_comprendre_v1';
+function cmpLoad() {
+  try {
+    const raw = localStorage.getItem(CMP_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { xp: 0, streak: 0, lastDay: null, words: {}, best: {}, totalCorrect: 0 };
+}
+function cmpSave(st) { try { localStorage.setItem(CMP_KEY, JSON.stringify(st)); } catch (e) {} }
+// Fusionne deux états (local + compte) sans rien perdre — prend le meilleur de chaque.
+function cmpMerge(a, b) {
+  a = a || {}; b = b || {};
+  const words = {};
+  Object.keys(a.words || {}).forEach(function (k) { words[k] = a.words[k]; });
+  Object.keys(b.words || {}).forEach(function (k) { words[k] = Math.max(words[k] || 0, b.words[k]); });
+  const best = {};
+  Object.keys(a.best || {}).forEach(function (k) { best[k] = a.best[k]; });
+  Object.keys(b.best || {}).forEach(function (k) { best[k] = Math.max(best[k] || 0, b.best[k]); });
+  const aDay = a.lastDay || '', bDay = b.lastDay || '';
+  const later = bDay >= aDay ? b : a;
+  return {
+    xp: Math.max(a.xp || 0, b.xp || 0),
+    streak: later.streak || 0,
+    lastDay: later.lastDay || null,
+    words: words,
+    best: best,
+    totalCorrect: Math.max(a.totalCorrect || 0, b.totalCorrect || 0),
+  };
+}
+function cmpTodayStr() { return new Date().toISOString().slice(0, 10); }
+function cmpLearnedCount(words) {
+  // mots vus correctement au moins une fois (progression visible dès la 1re partie)
+  return Object.keys(words || {}).filter(function (k) { return (words[k] || 0) >= 1; }).length;
+}
+function cmpMasteredCount(words) {
+  return Object.keys(words || {}).filter(function (k) { return (words[k] || 0) >= CMP_MASTER_THRESHOLD; }).length;
+}
+function cmpComprehensionPct(words) {
+  // estimation motivante : ~ chaque mot appris ≈ 1,6%
+  return Math.min(99, Math.round(cmpLearnedCount(words) * 1.6));
+}
+const CMP_LEVELS = ['Débutant', 'Apprenti', 'Étudiant', 'Connaisseur', 'Savant', 'Hâfiz'];
+function cmpLevel(xp) {
+  const lv = Math.floor((xp || 0) / 120);
+  return { n: lv + 1, title: CMP_LEVELS[Math.min(lv, CMP_LEVELS.length - 1)], inLevel: (xp || 0) % 120, need: 120 };
+}
+function cmpShuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+// Anneau de progression SVG
+function CmpRing({ pct, size, stroke, color, track, children }) {
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={track || 'rgba(255,255,255,0.08)'} strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - Math.max(0, Math.min(1, pct/100)))} style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)', filter: 'drop-shadow(0 0 6px ' + color + '88)' }} />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>{children}</div>
+    </div>
+  );
+}
+
+function ComprendrePage({ navigate }) {
+  const { isPro, openAuth, user, openQuickCheckout } = useAuth();
+  const [st, setSt] = React.useState(cmpLoad);
+  const [mode, setMode] = React.useState('hub'); // hub | discover | play | result
+  const [sourate, setSourate] = React.useState(CMP_SOURATES[0]);
+  const audioRef = React.useRef(null);
+
+  const persist = React.useCallback(function (next) { setSt(next); cmpSave(next); }, []);
+
+  React.useEffect(function () {
+    audioRef.current = typeof Audio !== 'undefined' ? new Audio() : null;
+    return function () { if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} } };
+  }, []);
+  const playAyah = React.useCallback(function (surah, ayah) {
+    if (!audioRef.current) return;
+    try { audioRef.current.pause(); audioRef.current.src = cmpAyahAudio(surah, ayah); audioRef.current.currentTime = 0; const p = audioRef.current.play(); if (p && p.catch) p.catch(function(){}); } catch (e) {}
+  }, []);
+
+  // Synchro compte : charge la progression Firestore et fusionne avec le local (suivi cross-device)
+  React.useEffect(function () {
+    if (!user || !window._db) return;
+    let cancelled = false;
+    window._db.collection('users').doc(user.uid).get().then(function (doc) {
+      if (cancelled || !doc.exists) return;
+      const remote = doc.data().comprendre;
+      if (!remote) return;
+      setSt(function (local) { const merged = cmpMerge(local, remote); cmpSave(merged); return merged; });
+    }).catch(function () {});
+    return function () { cancelled = true; };
+  }, [user]);
+
+  const mastered = cmpLearnedCount(st.words);
+  const pct = cmpComprehensionPct(st.words);
+  const lvl = cmpLevel(st.xp);
+
+  function openSourate(s) {
+    if (!s.free && !isPro) { if (openQuickCheckout) openQuickCheckout(); return; }
+    setSourate(s); setMode('discover');
+  }
+
+  // ── enregistre résultat d'une partie ──
+  function commitResult(res) {
+    const next = JSON.parse(JSON.stringify(st));
+    // streak
+    const today = cmpTodayStr();
+    if (next.lastDay !== today) {
+      const y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      next.streak = next.lastDay === y ? (next.streak || 0) + 1 : 1;
+      next.lastDay = today;
+    }
+    next.xp = (next.xp || 0) + res.xp;
+    next.totalCorrect = (next.totalCorrect || 0) + res.correct;
+    res.wordResults.forEach(function (wr) {
+      if (wr.correct) next.words[wr.ar] = Math.min(CMP_MASTER_THRESHOLD + 3, (next.words[wr.ar] || 0) + 1);
+    });
+    const prevBest = next.best[sourate.id] || 0;
+    if (res.scorePct > prevBest) next.best[sourate.id] = res.scorePct;
+    persist(next);
+    // Sauvegarde sur le compte (suivi + cross-device)
+    if (user && window._db) {
+      try { window._db.collection('users').doc(user.uid).set({ comprendre: next, comprendreUpdatedAt: Date.now() }, { merge: true }); } catch (e) {}
+    }
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 0%, #0a1f12 0%, #050f09 45%, #03070a 100%)', fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 60 }}>
+      <Navbar navigate={navigate} />
+      {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} />}
+      {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} onPlay={function(){ setMode('play'); }} onBack={function(){ setMode('hub'); }} />}
+      {mode === 'play' && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
+      {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} onReplay={function(){ setMode('discover'); }} onHub={function(){ setMode('hub'); }} />}
+    </div>
+  );
+}
+
+// ── HUB ──
+function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack }) {
+  const GOLD = '#e6c84a';
+  return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '90px 20px 0' }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 20 }}>← Accueil</button>
+
+      {/* En-tête */}
+      <div style={{ textAlign: 'center', marginBottom: 30 }}>
+        <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: GOLD, marginBottom: 12 }}>◆ Comprendre le Coran</p>
+        <h1 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 'clamp(28px,6vw,42px)', color: '#f0ede6', lineHeight: 1.15, margin: '0 0 14px' }}>
+          Comprends ce que<br/><span style={{ color: GOLD }}>tu récites.</span>
+        </h1>
+        <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', lineHeight: 1.7, maxWidth: 460, margin: '0 auto' }}>
+          Tu pries en arabe sans tout comprendre ? <strong style={{ color: '#f0ede6' }}>50 mots suffisent à saisir près de la moitié du Coran.</strong> Apprends-les, un verset à la fois.
+        </p>
+      </div>
+
+      {/* Tableau de progression */}
+      <div style={{ display: 'flex', gap: 14, alignItems: 'center', background: 'linear-gradient(160deg,rgba(200,167,39,0.08),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 22, padding: '22px 24px', marginBottom: 16 }}>
+        <CmpRing pct={pct} size={104} stroke={10} color={GOLD}>
+          <span style={{ fontSize: 28, fontWeight: 900, color: GOLD, lineHeight: 1 }}>{pct}<span style={{ fontSize: 15 }}>%</span></span>
+          <span style={{ fontSize: 9.5, color: 'rgba(240,237,230,0.5)', letterSpacing: '0.05em', marginTop: 2 }}>compris</span>
+        </CmpRing>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.55)', marginBottom: 4 }}>Niveau {lvl.n} · <span style={{ color: GOLD, fontWeight: 700 }}>{lvl.title}</span></div>
+          <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 5, overflow: 'hidden', marginBottom: 12 }}>
+            <div style={{ height: '100%', width: (lvl.inLevel / lvl.need * 100) + '%', background: 'linear-gradient(90deg,#a8891f,' + GOLD + ')', borderRadius: 5, transition: 'width 0.6s' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 18 }}>
+            <div><div style={{ fontSize: 20, fontWeight: 900, color: '#f0ede6' }}>{mastered}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>mots appris</div></div>
+            <div><div style={{ fontSize: 20, fontWeight: 900, color: '#ff8a4c' }}>🔥 {st.streak || 0}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>jours d'affilée</div></div>
+            <div><div style={{ fontSize: 20, fontWeight: 900, color: '#f0ede6' }}>{st.xp || 0}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>XP</div></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Liste des sourates */}
+      <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.4)', margin: '24px 0 12px' }}>Choisis une sourate</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {CMP_SOURATES.map(function (s) {
+          const locked = !s.free && !isPro;
+          const total = s.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0);
+          const best = st.best[s.id] || 0;
+          return (
+            <button key={s.id} onClick={function(){ onOpen(s); }} style={{ textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))', border: '1px solid ' + (locked ? 'rgba(255,255,255,0.1)' : 'rgba(200,167,39,0.3)'), borderRadius: 18, padding: '18px 20px', fontFamily: 'inherit', opacity: locked ? 0.7 : 1 }}>
+              <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: locked ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg,#c8a727,#a8891f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: locked ? 'rgba(255,255,255,0.4)' : '#1a1205' }}>{locked ? '🔒' : s.surah}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#f0ede6', fontFamily: 'Cinzel,serif' }}>{s.name}</div>
+                <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{s.fr} · {total} mots{best > 0 ? ' · record ' + best + '%' : ''}</div>
+              </div>
+              <span style={{ color: locked ? 'rgba(255,255,255,0.3)' : '#e6c84a', fontSize: 22 }}>{locked ? '' : '›'}</span>
+            </button>
+          );
+        })}
+      </div>
+      {!isPro && <p style={{ textAlign: 'center', fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 18 }}>🔓 Débloque toutes les sourates avec Pro</p>}
+    </div>
+  );
+}
+
+// ── DÉCOUVERTE (reveal mot-à-mot + audio) ──
+function CmpDiscover({ sourate, playAyah, onPlay, onBack }) {
+  const GOLD = '#e6c84a';
+  const [ai, setAi] = React.useState(0);
+  const [revealed, setRevealed] = React.useState(0); // nb de mots révélés sur l'ayah courant
+  const ayah = sourate.ayahs[ai];
+
+  React.useEffect(function () {
+    setRevealed(0);
+    playAyah(sourate.surah, ayah.n);
+    const timers = ayah.words.map(function (_, i) {
+      return setTimeout(function () { setRevealed(function (r) { return Math.max(r, i + 1); }); }, 500 + i * 850);
+    });
+    return function () { timers.forEach(clearTimeout); };
+  }, [ai]);
+
+  const last = ai >= sourate.ayahs.length - 1;
+  const allRevealed = revealed >= ayah.words.length;
+
+  return (
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>← Retour</button>
+        <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{sourate.name} · verset {ayah.n}/{sourate.ayahs.length}</span>
+      </div>
+
+      <div style={{ textAlign: 'center', margin: '10px 0 28px' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD }}>Découverte · écoute & lis</p>
+      </div>
+
+      {/* Mot-à-mot : RTL, chaque mot avec son sens dessous */}
+      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse', justifyContent: 'center', alignContent: 'flex-start', gap: '14px 12px', padding: '10px 0 30px' }}>
+        {ayah.words.map(function (w, i) {
+          const show = i < revealed;
+          return (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', borderRadius: 16, background: show ? 'rgba(200,167,39,0.10)' : 'rgba(255,255,255,0.03)', border: '1px solid ' + (show ? 'rgba(200,167,39,0.4)' : 'rgba(255,255,255,0.06)'), opacity: show ? 1 : 0.35, transform: show ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)', transition: 'all 0.5s cubic-bezier(0.34,1.56,0.64,1)' }}>
+              <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 40, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
+              <span style={{ fontSize: 14, color: show ? GOLD : 'transparent', fontWeight: 600, transition: 'color 0.4s' }}>{w.fr}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Traduction complète quand tout révélé */}
+      <div style={{ minHeight: 50, textAlign: 'center', opacity: allRevealed ? 1 : 0, transition: 'opacity 0.5s', marginBottom: 18 }}>
+        <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 20, fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.5 }}>
+          « {ayah.words.map(function (w) { return w.fr; }).join(' ')} »
+        </p>
+      </div>
+
+      {/* Contrôles */}
+      <div style={{ position: 'sticky', bottom: 0, background: 'linear-gradient(0deg,#03070a 60%,transparent)', padding: '16px 0 24px', display: 'flex', gap: 12 }}>
+        <button onClick={function(){ playAyah(sourate.surah, ayah.n); setRevealed(ayah.words.length); }} style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: 'rgba(200,167,39,0.12)', color: GOLD, fontSize: 22, cursor: 'pointer' }}>▶</button>
+        {!last ? (
+          <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
+        ) : (
+          <button onClick={onPlay} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#4ade80,#22a35a)', color: '#04140a', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>🎮 Maintenant, joue →</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── JEU ──
+function cmpBuildQuestions(sourate) {
+  // mots uniques de la sourate
+  const seen = {};
+  const words = [];
+  sourate.ayahs.forEach(function (a) { a.words.forEach(function (w) { if (!seen[w.ar]) { seen[w.ar] = 1; words.push(w); } }); });
+  const pool = words.length >= 4 ? words : CMP_ALL_WORDS;
+  const qs = cmpShuffle(words).slice(0, Math.min(8, words.length)).map(function (w, idx) {
+    const type = idx % 3; // 0: ar→fr, 1: fr→ar, 2: complète (ar→fr aussi mais présenté en verset)
+    const distract = cmpShuffle(pool.filter(function (x) { return x.fr !== w.fr; })).slice(0, 3);
+    if (type === 1) {
+      const opts = cmpShuffle([w].concat(distract));
+      return { kind: 'fr2ar', ar: w.ar, prompt: w.fr, options: opts.map(function (o) { return o.ar; }), answer: w.ar };
+    }
+    const opts = cmpShuffle([w].concat(distract));
+    return { kind: type === 2 ? 'fill' : 'ar2fr', ar: w.ar, prompt: w.ar, options: opts.map(function (o) { return o.fr; }), answer: w.fr };
+  });
+  return qs;
+}
+
+function CmpPlay({ sourate, st, onFinish, onBack }) {
+  const GOLD = '#e6c84a';
+  const GREEN = '#4ade80';
+  const RED = '#e8654a';
+  const [qs] = React.useState(function () { return cmpBuildQuestions(sourate); });
+  const [qi, setQi] = React.useState(0);
+  const [picked, setPicked] = React.useState(null);
+  const [score, setScore] = React.useState(0);
+  const [combo, setCombo] = React.useState(0);
+  const [results, setResults] = React.useState([]);
+  const q = qs[qi];
+
+  function pick(opt) {
+    if (picked != null) return;
+    const correct = opt === q.answer;
+    setPicked(opt);
+    const nc = correct ? combo + 1 : 0;
+    setCombo(nc);
+    if (correct) setScore(function (s) { return s + 10 + Math.min(10, (nc - 1) * 2); });
+    const nr = results.concat([{ ar: q.ar, correct: correct }]);
+    setResults(nr);
+    setTimeout(function () {
+      if (qi >= qs.length - 1) {
+        const correctCount = nr.filter(function (r) { return r.correct; }).length;
+        const scorePct = Math.round(correctCount / nr.length * 100);
+        const xp = score + (correct ? 10 + Math.min(10, (nc - 1) * 2) : 0) + (scorePct === 100 ? 20 : 0);
+        onFinish({ xp: xp, correct: correctCount, total: nr.length, scorePct: scorePct, wordResults: nr });
+      } else {
+        setQi(qi + 1); setPicked(null);
+      }
+    }, correct ? 700 : 1300);
+  }
+
+  const promptArabic = q.kind !== 'fr2ar';
+  return (
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* barre top */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 26 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+        <div style={{ flex: 1, height: 10, background: 'rgba(255,255,255,0.08)', borderRadius: 6, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: (qi / qs.length * 100) + '%', background: 'linear-gradient(90deg,#4ade80,#22a35a)', borderRadius: 6, transition: 'width 0.4s' }} />
+        </div>
+        {combo > 1 && <span style={{ fontSize: 15, fontWeight: 900, color: GOLD }}>🔥 x{combo}</span>}
+      </div>
+
+      <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,237,230,0.5)', marginBottom: 18 }}>
+        {q.kind === 'fr2ar' ? 'Quel mot arabe veut dire…' : q.kind === 'fill' ? 'Que signifie ce mot ?' : 'Que veut dire ce mot ?'}
+      </p>
+
+      {/* prompt */}
+      <div style={{ textAlign: 'center', padding: '20px', marginBottom: 26, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22 }}>
+        <span style={{ fontFamily: promptArabic ? 'Amiri,Georgia,serif' : 'Cormorant Garamond,serif', fontSize: promptArabic ? 56 : 34, fontStyle: promptArabic ? 'normal' : 'italic', color: '#f7eecb', direction: promptArabic ? 'rtl' : 'ltr', lineHeight: 1.2 }}>
+          {promptArabic ? q.prompt : '« ' + q.prompt + ' »'}
+        </span>
+      </div>
+
+      {/* options */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        {q.options.map(function (opt, i) {
+          const isAns = opt === q.answer;
+          const isPick = opt === picked;
+          let bg = 'linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))', bd = 'rgba(200,167,39,0.28)', col = '#f0ede6';
+          if (picked != null) {
+            if (isAns) { bg = 'rgba(74,222,128,0.16)'; bd = GREEN; col = '#eafff1'; }
+            else if (isPick) { bg = 'rgba(232,101,74,0.16)'; bd = RED; col = '#ffe9e3'; }
+            else { bg = 'rgba(255,255,255,0.02)'; bd = 'rgba(255,255,255,0.08)'; }
+          }
+          const optArabic = q.kind === 'fr2ar';
+          return (
+            <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null} style={{ minHeight: 84, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.2s', position: 'relative' }}>
+              {opt}
+              {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 16 }}>✓</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ flex: 1 }} />
+      <div style={{ textAlign: 'center', padding: '20px 0 28px', fontSize: 14, color: 'rgba(240,237,230,0.4)' }}>
+        Question {qi + 1} / {qs.length} · {score} pts
+      </div>
+    </div>
+  );
+}
+
+// ── RÉSULTAT ──
+function CmpResult({ res, sourate, st, pct, mastered, lvl, onReplay, onHub }) {
+  const GOLD = '#e6c84a';
+  const GREEN = '#4ade80';
+  if (!res) { return <div style={{ padding: 100, textAlign: 'center', color: '#f0ede6' }}>—</div>; }
+  const perfect = res.scorePct === 100;
+  const newlyMastered = res.wordResults.filter(function (wr) { return wr.correct && (st.words[wr.ar] || 0) >= CMP_MASTER_THRESHOLD; });
+
+  function share() {
+    const txt = "Je viens de comprendre des versets du Coran mot à mot sur Héritage Musulman ! Je comprends déjà " + pct + "% des mots. 🌙";
+    if (navigator.share) { navigator.share({ text: txt, url: 'https://heritage-musulman.com' }).catch(function(){}); }
+    else if (navigator.clipboard) { navigator.clipboard.writeText(txt + ' heritage-musulman.com'); }
+  }
+
+  return (
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '90px 20px 0', textAlign: 'center' }}>
+      <div style={{ fontSize: 56, marginBottom: 10 }}>{perfect ? '🌟' : res.scorePct >= 60 ? '✨' : '📖'}</div>
+      <h2 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 30, color: '#f0ede6', margin: '0 0 6px' }}>
+        {perfect ? 'Parfait, mâ shâ Allah !' : res.scorePct >= 60 ? 'Bien joué !' : 'Continue, tu progresses'}
+      </h2>
+      <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', marginBottom: 28 }}>{sourate.name} · {res.correct}/{res.total} bonnes réponses</p>
+
+      {/* gains */}
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24 }}>
+        <div style={{ flex: 1, maxWidth: 150, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 18, padding: '18px 12px' }}>
+          <div style={{ fontSize: 26, fontWeight: 900, color: GOLD }}>+{res.xp}</div>
+          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>XP gagnés</div>
+        </div>
+        <div style={{ flex: 1, maxWidth: 150, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 18, padding: '18px 12px' }}>
+          <div style={{ fontSize: 26, fontWeight: 900, color: GREEN }}>🔥 {st.streak || 0}</div>
+          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>jours d'affilée</div>
+        </div>
+      </div>
+
+      {/* jauge compréhension */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 20, padding: '20px', marginBottom: 26 }}>
+        <CmpRing pct={pct} size={84} stroke={9} color={GOLD}>
+          <span style={{ fontSize: 22, fontWeight: 900, color: GOLD }}>{pct}%</span>
+        </CmpRing>
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontSize: 15, color: '#f0ede6', fontWeight: 700 }}>Tu comprends ≈ {pct}% des mots fréquents</div>
+          <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{mastered} mots appris · niveau {lvl.title}</div>
+        </div>
+      </div>
+
+      {/* actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <button onClick={onReplay} style={{ padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Rejouer cette sourate</button>
+        <button onClick={share} style={{ padding: '14px', borderRadius: 16, border: '1px solid rgba(200,167,39,0.4)', background: 'rgba(200,167,39,0.08)', color: '#e6c84a', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>📤 Partager ma progression</button>
+        <button onClick={onHub} style={{ padding: '12px', borderRadius: 16, border: 'none', background: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Retour au menu</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Section accueil : promo « Comprendre le Coran » ──
+function ComprendreSection({ navigate }) {
+  const GOLD = '#e6c84a';
+  const demo = [ {ar:'بِسْمِ',fr:'Au nom de'}, {ar:'اللَّهِ',fr:'Allah'}, {ar:'الرَّحْمَٰنِ',fr:'le Tout-Miséricordieux'}, {ar:'الرَّحِيمِ',fr:'le Très-Miséricordieux'} ];
+  return (
+    <section style={{ padding: '80px 24px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: '10%', left: '-10%', width: 520, height: 520, background: 'radial-gradient(circle,rgba(200,167,39,0.12) 0%,transparent 70%)', pointerEvents: 'none' }} />
+      <div className="reveal-scale" style={{ maxWidth: 880, margin: '0 auto', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD, marginBottom: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>◆ Nouveau · Comprendre le Coran</p>
+        <h2 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 'clamp(26px,4.8vw,46px)', color: '#f0ede6', lineHeight: 1.18, margin: '0 0 16px' }}>
+          Tu récites l'arabe…<br/><span style={{ color: GOLD }}>sans le comprendre ?</span>
+        </h2>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 'clamp(15px,1.9vw,18px)', color: 'rgba(240,237,230,0.55)', maxWidth: 560, margin: '0 auto 30px', lineHeight: 1.8 }}>
+          Des millions de musulmans prient sans saisir les mots. Pourtant <strong style={{ color: '#f0ede6' }}>~50 mots suffisent à comprendre près de la moitié du Coran.</strong> Apprends-les, un verset à la fois.
+        </p>
+
+        {/* Aperçu mot-à-mot Al-Fâtiha */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse', justifyContent: 'center', gap: 12, maxWidth: 620, margin: '0 auto 34px' }}>
+          {demo.map(function (w, i) {
+            return (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 18px', borderRadius: 16, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)' }}>
+                <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 38, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
+                <span style={{ fontSize: 13, color: GOLD, fontWeight: 600 }}>{w.fr}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 3 étapes */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, flexWrap: 'wrap', marginBottom: 34 }}>
+          {[['🎧','Écoute'],['💡','Comprends'],['🎮','Joue']].map(function (s, i) {
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>{s[0]}</span>
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 15, fontWeight: 700, color: 'rgba(240,237,230,0.8)' }}>{s[1]}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <button onClick={function(){ if (navigate) navigate('comprendre'); }} style={{ padding: '16px 40px', borderRadius: 100, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', boxShadow: '0 8px 30px rgba(200,167,39,0.35)' }}>
+          Comprends le Coran →
+        </button>
+        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>Al-Fâtiha gratuite · sans inscription pour essayer</p>
+      </div>
+    </section>
+  );
+}
+
 /* ─── App ─── */
 function App() {
   const [page, setPage] = React.useState(function () {
@@ -7287,6 +7829,7 @@ function App() {
     return wrap(<QuizCategoryPage catKey={rest} level="debutant" navigate={navigate} />);
   }
   if (page === 'studio') return wrap(<VideoCreatorPage navigate={navigate} />);
+  if (page === 'comprendre') return wrap(<ComprendrePage navigate={navigate} />);
   if (page === 'start') return wrap(<StartPage navigate={navigate} />);
   if (page === 'subscription') return wrap(<><Navbar navigate={navigate} /><SubscriptionPage navigate={navigate} /></>);
   if (page === 'payment-success') return wrap(<PaymentSuccessPage navigate={navigate} />);
@@ -7303,7 +7846,7 @@ function App() {
       <main>
         <Hero navigate={navigate} />
         <ReassuranceBanner />
-        <StudioViralSection navigate={navigate} />
+        <ComprendreSection navigate={navigate} />
         <FeatureCards navigate={navigate} />
         <HowItWorksSection />
         <LearnPlaySection navigate={navigate} />
