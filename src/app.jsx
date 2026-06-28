@@ -7134,7 +7134,7 @@ const CMP_SOURATES = [
     ],
   },
   {
-    id: 'ikhlas', surah: 112, name: 'Al-Ikhlâs', fr: 'Le Monothéisme pur', free: false,
+    id: 'ikhlas', surah: 112, name: 'Al-Ikhlâs', fr: 'Le Monothéisme pur', free: true,
     ayahs: [
       { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'هُوَ',fr:'Il est'}, {ar:'اللَّهُ',fr:'Allah'}, {ar:'أَحَدٌ',fr:'Unique'} ] },
       { n: 2, words: [ {ar:'اللَّهُ',fr:'Allah'}, {ar:'الصَّمَدُ',fr:"l'Absolu"} ] },
@@ -7143,11 +7143,63 @@ const CMP_SOURATES = [
     ],
   },
   {
+    id: 'falaq', surah: 113, name: 'Al-Falaq', fr: "L'Aube naissante", free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'أَعُوذُ',fr:'je cherche refuge'}, {ar:'بِرَبِّ',fr:'auprès du Seigneur'}, {ar:'الْفَلَقِ',fr:"de l'aube"} ] },
+      { n: 2, words: [ {ar:'مِن',fr:'contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'مَا',fr:'de ce'}, {ar:'خَلَقَ',fr:"qu'Il a créé"} ] },
+      { n: 3, words: [ {ar:'وَمِن',fr:'et contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'غَاسِقٍ',fr:"de l'obscurité"}, {ar:'إِذَا',fr:'quand'}, {ar:'وَقَبَ',fr:'elle s\'étend'} ] },
+      { n: 4, words: [ {ar:'وَمِن',fr:'et contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'النَّفَّاثَاتِ',fr:'des souffleuses'}, {ar:'فِي',fr:'sur'}, {ar:'الْعُقَدِ',fr:'les nœuds'} ] },
+      { n: 5, words: [ {ar:'وَمِن',fr:'et contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'حَاسِدٍ',fr:"de l'envieux"}, {ar:'إِذَا',fr:'quand'}, {ar:'حَسَدَ',fr:'il envie'} ] },
+    ],
+  },
+  {
+    id: 'nas', surah: 114, name: 'An-Nâs', fr: 'Les Hommes', free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'أَعُوذُ',fr:'je cherche refuge'}, {ar:'بِرَبِّ',fr:'auprès du Seigneur'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
+      { n: 2, words: [ {ar:'مَلِكِ',fr:'le Roi'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
+      { n: 3, words: [ {ar:'إِلَٰهِ',fr:'le Dieu'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
+      { n: 4, words: [ {ar:'مِن',fr:'contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'الْوَسْوَاسِ',fr:'du souffleur'}, {ar:'الْخَنَّاسِ',fr:'sournois'} ] },
+      { n: 5, words: [ {ar:'الَّذِي',fr:'qui'}, {ar:'يُوَسْوِسُ',fr:'souffle'}, {ar:'فِي',fr:'dans'}, {ar:'صُدُورِ',fr:'les poitrines'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
+      { n: 6, words: [ {ar:'مِنَ',fr:'parmi'}, {ar:'الْجِنَّةِ',fr:'les djinns'}, {ar:'وَالنَّاسِ',fr:'et les hommes'} ] },
+    ],
+  },
+  {
     id: 'asr', surah: 103, name: "Al-'Asr", fr: 'Le Temps', free: false,
     ayahs: [
       { n: 1, words: [ {ar:'وَالْعَصْرِ',fr:'Par le Temps'} ] },
       { n: 2, words: [ {ar:'إِنَّ',fr:'Certes'}, {ar:'الْإِنسَانَ',fr:"l'être humain"}, {ar:'لَفِي',fr:'est bien dans'}, {ar:'خُسْرٍ',fr:'la perte'} ] },
       { n: 3, words: [ {ar:'إِلَّا',fr:'sauf'}, {ar:'الَّذِينَ',fr:'ceux qui'}, {ar:'آمَنُوا',fr:'ont cru'}, {ar:'وَعَمِلُوا',fr:'et ont accompli'}, {ar:'الصَّالِحَاتِ',fr:'les bonnes œuvres'}, {ar:'وَتَوَاصَوْا',fr:'et se sont enjoint'}, {ar:'بِالْحَقِّ',fr:'la vérité'}, {ar:'وَتَوَاصَوْا',fr:'et se sont enjoint'}, {ar:'بِالصَّبْرِ',fr:"l'endurance"} ] },
+    ],
+  },
+  {
+    id: 'kawthar', surah: 108, name: 'Al-Kawthar', fr: "L'Abondance", free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'إِنَّا',fr:'Certes Nous'}, {ar:'أَعْطَيْنَاكَ',fr:"t'avons accordé"}, {ar:'الْكَوْثَرَ',fr:"l'abondance"} ] },
+      { n: 2, words: [ {ar:'فَصَلِّ',fr:'Accomplis la prière'}, {ar:'لِرَبِّكَ',fr:'pour ton Seigneur'}, {ar:'وَانْحَرْ',fr:'et sacrifie'} ] },
+      { n: 3, words: [ {ar:'إِنَّ',fr:'Certes'}, {ar:'شَانِئَكَ',fr:'celui qui te déteste'}, {ar:'هُوَ',fr:'est celui'}, {ar:'الْأَبْتَرُ',fr:'sans postérité'} ] },
+    ],
+  },
+  {
+    id: 'kafirun', surah: 109, name: 'Al-Kâfirûn', fr: 'Les Mécréants', free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'يَا',fr:'Ô'}, {ar:'أَيُّهَا',fr:'vous'}, {ar:'الْكَافِرُونَ',fr:'les mécréants'} ] },
+      { n: 2, words: [ {ar:'لَا',fr:'ne pas'}, {ar:'أَعْبُدُ',fr:"j'adore"}, {ar:'مَا',fr:'ce que'}, {ar:'تَعْبُدُونَ',fr:'vous adorez'} ] },
+      { n: 3, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'أَنتُمْ',fr:'vous'}, {ar:'عَابِدُونَ',fr:'adorez'}, {ar:'مَا',fr:'ce que'}, {ar:'أَعْبُدُ',fr:"j'adore"} ] },
+      { n: 4, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'أَنَا',fr:'je suis'}, {ar:'عَابِدٌ',fr:'adorateur'}, {ar:'مَّا',fr:'de ce que'}, {ar:'عَبَدتُّمْ',fr:'vous avez adoré'} ] },
+      { n: 5, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'أَنتُمْ',fr:'vous'}, {ar:'عَابِدُونَ',fr:'adorez'}, {ar:'مَا',fr:'ce que'}, {ar:'أَعْبُدُ',fr:"j'adore"} ] },
+      { n: 6, words: [ {ar:'لَكُمْ',fr:'à vous'}, {ar:'دِينُكُمْ',fr:'votre religion'}, {ar:'وَلِيَ',fr:'et à moi'}, {ar:'دِينِ',fr:'ma religion'} ] },
+    ],
+  },
+  {
+    id: 'maun', surah: 107, name: "Al-Mâ'ûn", fr: "L'Ustensile", free: false,
+    ayahs: [
+      { n: 1, words: [ {ar:'أَرَأَيْتَ',fr:'As-tu vu'}, {ar:'الَّذِي',fr:'celui qui'}, {ar:'يُكَذِّبُ',fr:'traite de mensonge'}, {ar:'بِالدِّينِ',fr:'la religion'} ] },
+      { n: 2, words: [ {ar:'فَذَٰلِكَ',fr:"C'est celui"}, {ar:'الَّذِي',fr:'qui'}, {ar:'يَدُعُّ',fr:'repousse'}, {ar:'الْيَتِيمَ',fr:"l'orphelin"} ] },
+      { n: 3, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'يَحُضُّ',fr:'incite'}, {ar:'عَلَىٰ',fr:'à'}, {ar:'طَعَامِ',fr:'nourrir'}, {ar:'الْمِسْكِينِ',fr:'le pauvre'} ] },
+      { n: 4, words: [ {ar:'فَوَيْلٌ',fr:'Malheur'}, {ar:'لِّلْمُصَلِّينَ',fr:'à ceux qui prient'} ] },
+      { n: 5, words: [ {ar:'الَّذِينَ',fr:'qui'}, {ar:'هُمْ',fr:'sont'}, {ar:'عَن',fr:'de'}, {ar:'صَلَاتِهِمْ',fr:'leur prière'}, {ar:'سَاهُونَ',fr:'distraits'} ] },
+      { n: 6, words: [ {ar:'الَّذِينَ',fr:'qui'}, {ar:'هُمْ',fr:'sont'}, {ar:'يُرَاءُونَ',fr:"de l'ostentation"} ] },
+      { n: 7, words: [ {ar:'وَيَمْنَعُونَ',fr:'et refusent'}, {ar:'الْمَاعُونَ',fr:'la menue assistance'} ] },
     ],
   },
 ];
@@ -7363,6 +7415,14 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack }) {
           );
         })}
       </div>
+      {/* Teaser nouvelles sourates */}
+      <div style={{ marginTop: 14, padding: '14px 18px', background: 'linear-gradient(160deg,rgba(200,167,39,0.06),rgba(255,255,255,0.01))', border: '1px dashed rgba(200,167,39,0.28)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 22 }}>✨</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13.5, color: '#f0ede6', fontWeight: 700 }}>D'autres sourates arrivent bientôt</div>
+          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>On enrichit le contenu chaque semaine — reste à l'affût.</div>
+        </div>
+      </div>
       {!isPro && <p style={{ textAlign: 'center', fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 18 }}>🔓 Débloque toutes les sourates avec Pro</p>}
     </div>
   );
@@ -7461,47 +7521,74 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
   const [score, setScore] = React.useState(0);
   const [combo, setCombo] = React.useState(0);
   const [results, setResults] = React.useState([]);
+  const [burst, setBurst] = React.useState(null); // {xp, combo, ok}
+  const [shake, setShake] = React.useState(false);
   const q = qs[qi];
+
+  // vibration mobile + feedback visuel
+  function haptic(ok) {
+    if (navigator.vibrate) { try { navigator.vibrate(ok ? [20] : [30, 40, 30]); } catch (e) {} }
+  }
 
   function pick(opt) {
     if (picked != null) return;
     const correct = opt === q.answer;
     setPicked(opt);
+    haptic(correct);
     const nc = correct ? combo + 1 : 0;
     setCombo(nc);
-    if (correct) setScore(function (s) { return s + 10 + Math.min(10, (nc - 1) * 2); });
+    const gainXp = correct ? 10 + Math.min(10, (nc - 1) * 2) : 0;
+    if (correct) {
+      setScore(function (s) { return s + gainXp; });
+      setBurst({ xp: gainXp, combo: nc, ok: true });
+      setTimeout(function () { setBurst(null); }, 900);
+    } else {
+      setShake(true);
+      setTimeout(function () { setShake(false); }, 500);
+    }
     const nr = results.concat([{ ar: q.ar, correct: correct }]);
     setResults(nr);
     setTimeout(function () {
       if (qi >= qs.length - 1) {
         const correctCount = nr.filter(function (r) { return r.correct; }).length;
         const scorePct = Math.round(correctCount / nr.length * 100);
-        const xp = score + (correct ? 10 + Math.min(10, (nc - 1) * 2) : 0) + (scorePct === 100 ? 20 : 0);
+        const xp = score + gainXp + (scorePct === 100 ? 20 : 0);
         onFinish({ xp: xp, correct: correctCount, total: nr.length, scorePct: scorePct, wordResults: nr });
       } else {
         setQi(qi + 1); setPicked(null);
       }
-    }, correct ? 700 : 1300);
+    }, correct ? 800 : 1400);
   }
 
   const promptArabic = q.kind !== 'fr2ar';
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
+      {/* burst XP au centre quand bonne réponse */}
+      {burst && (
+        <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 50, pointerEvents: 'none', textAlign: 'center', animation: 'cmpBurst 0.9s ease-out forwards' }}>
+          <div style={{ fontSize: 64, fontWeight: 900, color: GREEN, textShadow: '0 0 30px rgba(74,222,128,0.8)' }}>+{burst.xp}</div>
+          {burst.combo >= 2 && <div style={{ fontSize: 24, fontWeight: 900, color: GOLD, letterSpacing: 2 }}>🔥 COMBO x{burst.combo}</div>}
+        </div>
+      )}
+      <style>{'@keyframes cmpBurst{0%{transform:translate(-50%,-30%) scale(0.5);opacity:0}20%{transform:translate(-50%,-50%) scale(1.15);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}@keyframes cmpShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}@keyframes cmpPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}'}</style>
+
       {/* barre top */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 26 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
         <div style={{ flex: 1, height: 10, background: 'rgba(255,255,255,0.08)', borderRadius: 6, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: (qi / qs.length * 100) + '%', background: 'linear-gradient(90deg,#4ade80,#22a35a)', borderRadius: 6, transition: 'width 0.4s' }} />
+          <div style={{ height: '100%', width: (qi / qs.length * 100) + '%', background: 'linear-gradient(90deg,#4ade80,#22a35a)', borderRadius: 6, transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)', boxShadow: '0 0 12px rgba(74,222,128,0.5)' }} />
         </div>
-        {combo > 1 && <span style={{ fontSize: 15, fontWeight: 900, color: GOLD }}>🔥 x{combo}</span>}
+        {combo > 1 && (
+          <span style={{ fontSize: 15, fontWeight: 900, color: GOLD, padding: '6px 12px', borderRadius: 999, background: 'rgba(230,200,74,0.14)', border: '1px solid rgba(230,200,74,0.4)', animation: 'cmpPulse 0.6s ease-in-out infinite' }}>🔥 x{combo}</span>
+        )}
       </div>
 
       <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,237,230,0.5)', marginBottom: 18 }}>
-        {q.kind === 'fr2ar' ? 'Quel mot arabe veut dire…' : q.kind === 'fill' ? 'Que signifie ce mot ?' : 'Que veut dire ce mot ?'}
+        {q.kind === 'fr2ar' ? 'Quel mot arabe veut dire…' : 'Que veut dire ce mot ?'}
       </p>
 
-      {/* prompt */}
-      <div style={{ textAlign: 'center', padding: '20px', marginBottom: 26, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22 }}>
+      {/* prompt avec shake si faux */}
+      <div style={{ textAlign: 'center', padding: '24px 20px', marginBottom: 26, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22, animation: shake ? 'cmpShake 0.4s ease-in-out' : 'none' }}>
         <span style={{ fontFamily: promptArabic ? 'Amiri,Georgia,serif' : 'Cormorant Garamond,serif', fontSize: promptArabic ? 56 : 34, fontStyle: promptArabic ? 'normal' : 'italic', color: '#f7eecb', direction: promptArabic ? 'rtl' : 'ltr', lineHeight: 1.2 }}>
           {promptArabic ? q.prompt : '« ' + q.prompt + ' »'}
         </span>
@@ -7512,17 +7599,21 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
         {q.options.map(function (opt, i) {
           const isAns = opt === q.answer;
           const isPick = opt === picked;
-          let bg = 'linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))', bd = 'rgba(200,167,39,0.28)', col = '#f0ede6';
+          let bg = 'linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))', bd = 'rgba(200,167,39,0.28)', col = '#f0ede6', tf = 'scale(1)';
           if (picked != null) {
-            if (isAns) { bg = 'rgba(74,222,128,0.16)'; bd = GREEN; col = '#eafff1'; }
-            else if (isPick) { bg = 'rgba(232,101,74,0.16)'; bd = RED; col = '#ffe9e3'; }
-            else { bg = 'rgba(255,255,255,0.02)'; bd = 'rgba(255,255,255,0.08)'; }
+            if (isAns) { bg = 'rgba(74,222,128,0.18)'; bd = GREEN; col = '#eafff1'; tf = isPick ? 'scale(1.04)' : 'scale(1)'; }
+            else if (isPick) { bg = 'rgba(232,101,74,0.18)'; bd = RED; col = '#ffe9e3'; tf = 'scale(0.96)'; }
+            else { bg = 'rgba(255,255,255,0.02)'; bd = 'rgba(255,255,255,0.08)'; tf = 'scale(0.98)'; }
           }
           const optArabic = q.kind === 'fr2ar';
           return (
-            <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null} style={{ minHeight: 84, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.2s', position: 'relative' }}>
+            <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null}
+              onMouseEnter={function(e){ if (picked == null) e.currentTarget.style.transform = 'scale(1.03)'; }}
+              onMouseLeave={function(e){ if (picked == null) e.currentTarget.style.transform = 'scale(1)'; }}
+              style={{ minHeight: 84, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
               {opt}
-              {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 16 }}>✓</span>}
+              {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: GREEN }}>✓</span>}
+              {picked != null && isPick && !isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: RED }}>✗</span>}
             </button>
           );
         })}
@@ -7530,7 +7621,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 
       <div style={{ flex: 1 }} />
       <div style={{ textAlign: 'center', padding: '20px 0 28px', fontSize: 14, color: 'rgba(240,237,230,0.4)' }}>
-        Question {qi + 1} / {qs.length} · {score} pts
+        Question {qi + 1} / {qs.length} · <span style={{ color: GOLD, fontWeight: 700 }}>{score} pts</span>
       </div>
     </div>
   );
