@@ -7220,6 +7220,26 @@ const CMP_WORD_INDEX = (function () {
 const CMP_ALL_WORDS = Object.keys(CMP_WORD_INDEX).map(function (k) { return CMP_WORD_INDEX[k]; });
 const CMP_MASTER_THRESHOLD = 2; // bonnes réponses pour "maîtrisé"
 
+// Phonétique (translittération FR) par mot arabe — pour ceux qui ne lisent pas l'arabe.
+const CMP_PHON = {
+  'بِسْمِ':'bismi','اللَّهِ':'Llâhi','الرَّحْمَٰنِ':'ar-Rahmâni','الرَّحِيمِ':'ar-Rahîm',
+  'الْحَمْدُ':'al-hamdu','لِلَّهِ':'lillâhi','رَبِّ':'rabbi','الْعَالَمِينَ':"al-'âlamîn",
+  'مَالِكِ':'mâliki','يَوْمِ':'yawmi','الدِّينِ':'ad-dîn',
+  'إِيَّاكَ':'iyyâka','نَعْبُدُ':"na'budu",'وَإِيَّاكَ':'wa iyyâka','نَسْتَعِينُ':"nasta'în",
+  'اهْدِنَا':'ihdinâ','الصِّرَاطَ':'as-sirâta','الْمُسْتَقِيمَ':'al-mustaqîm',
+  'صِرَاطَ':'sirâta','الَّذِينَ':'alladhîna','أَنْعَمْتَ':"an'amta",'عَلَيْهِمْ':"'alayhim",'غَيْرِ':'ghayri','الْمَغْضُوبِ':'al-maghdûbi','وَلَا':'wa lâ','الضَّالِّينَ':'ad-dâllîn',
+  'قُلْ':'qoul','هُوَ':'huwa','اللَّهُ':'Allâhu','أَحَدٌ':'ahad','الصَّمَدُ':'as-Samad',
+  'لَمْ':'lam','يَلِدْ':'yalid','وَلَمْ':'wa lam','يُولَدْ':'yûlad','يَكُن':'yakun','لَّهُ':'lahû','كُفُوًا':'koufouwan',
+  'أَعُوذُ':"a'oûdhou",'بِرَبِّ':'bi-rabbi','الْفَلَقِ':'al-falaq','مِن':'min','شَرِّ':'charri','مَا':'mâ','خَلَقَ':'khalaqa',
+  'وَمِن':'wa min','غَاسِقٍ':'ghâsiqin','إِذَا':'idhâ','وَقَبَ':'waqaba','النَّفَّاثَاتِ':'an-naffâthâti','فِي':'fî','الْعُقَدِ':"al-'uqad",'حَاسِدٍ':'hâsidin','حَسَدَ':'hasada',
+  'النَّاسِ':'an-nâs','مَلِكِ':'maliki','إِلَٰهِ':'ilâhi','الْوَسْوَاسِ':'al-waswâsi','الْخَنَّاسِ':'al-khannâs','الَّذِي':'alladhî','يُوَسْوِسُ':'youwaswisu','صُدُورِ':'sudûri','مِنَ':'mina','الْجِنَّةِ':'al-jinnati','وَالنَّاسِ':'wan-nâs',
+  'وَالْعَصْرِ':"wal-'asr",'إِنَّ':'inna','الْإِنسَانَ':'al-insâna','لَفِي':'lafî','خُسْرٍ':'khousr','إِلَّا':'illâ','آمَنُوا':'âmanû','وَعَمِلُوا':"wa 'amilû",'الصَّالِحَاتِ':'as-sâlihâti','وَتَوَاصَوْا':'wa tawâsaw','بِالْحَقِّ':'bil-haqqi','بِالصَّبْرِ':'bis-sabr',
+  'إِنَّا':'innâ','أَعْطَيْنَاكَ':"a'taynâka",'الْكَوْثَرَ':'al-kawthar','فَصَلِّ':'fa-salli','لِرَبِّكَ':'li-rabbika','وَانْحَرْ':'wanhar','شَانِئَكَ':'châni-aka','الْأَبْتَرُ':'al-abtar',
+  'يَا':'yâ','أَيُّهَا':'ayyuhâ','الْكَافِرُونَ':'al-kâfirûn','لَا':'lâ','أَعْبُدُ':"a'budu",'تَعْبُدُونَ':"ta'budûn",'وَلَا ':'wa lâ','أَنتُمْ':'antum','عَابِدُونَ':"'âbidûn",'أَنَا':'anâ','عَابِدٌ':"'âbidun",'مَّا':'mâ','عَبَدتُّمْ':"'abadtum",'لَكُمْ':'lakum','دِينُكُمْ':'dînukum','وَلِيَ':'wa liya','دِينِ':'dîn',
+  'أَرَأَيْتَ':'a-ra-ayta','يُكَذِّبُ':'youkadhdhibu','بِالدِّينِ':'bid-dîn','فَذَٰلِكَ':'fa-dhâlika','يَدُعُّ':"yadu''u",'الْيَتِيمَ':'al-yatîm','يَحُضُّ':'yahuddu','عَلَىٰ':"'alâ",'طَعَامِ':"ta'âmi",'الْمِسْكِينِ':'al-miskîn','فَوَيْلٌ':'fa-waylun','لِّلْمُصَلِّينَ':'lil-musallîn','هُمْ':'hum','عَن':"'an",'صَلَاتِهِمْ':'salâtihim','سَاهُونَ':'sâhûn','يُرَاءُونَ':'yurâ-ûn','وَيَمْنَعُونَ':"wa yamna'ûna",'الْمَاعُونَ':"al-mâ'ûn",
+};
+function cmpPhon(ar) { return CMP_PHON[ar] || ''; }
+
 // ── Persistance (localStorage) ──
 const CMP_KEY = 'hm_comprendre_v1';
 function cmpLoad() {
@@ -7465,6 +7485,7 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack }) {
           return (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', borderRadius: 16, background: show ? 'rgba(200,167,39,0.10)' : 'rgba(255,255,255,0.03)', border: '1px solid ' + (show ? 'rgba(200,167,39,0.4)' : 'rgba(255,255,255,0.06)'), opacity: show ? 1 : 0.35, transform: show ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)', transition: 'all 0.5s cubic-bezier(0.34,1.56,0.64,1)' }}>
               <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 40, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
+              <span style={{ fontSize: 12.5, color: show ? 'rgba(240,237,230,0.55)' : 'transparent', fontStyle: 'italic', fontWeight: 500, transition: 'color 0.4s' }}>{cmpPhon(w.ar)}</span>
               <span style={{ fontSize: 14, color: show ? GOLD : 'transparent', fontWeight: 600, transition: 'color 0.4s' }}>{w.fr}</span>
             </div>
           );
@@ -7589,9 +7610,10 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 
       {/* prompt avec shake si faux */}
       <div style={{ textAlign: 'center', padding: '24px 20px', marginBottom: 26, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22, animation: shake ? 'cmpShake 0.4s ease-in-out' : 'none' }}>
-        <span style={{ fontFamily: promptArabic ? 'Amiri,Georgia,serif' : 'Cormorant Garamond,serif', fontSize: promptArabic ? 56 : 34, fontStyle: promptArabic ? 'normal' : 'italic', color: '#f7eecb', direction: promptArabic ? 'rtl' : 'ltr', lineHeight: 1.2 }}>
+        <span style={{ fontFamily: promptArabic ? 'Amiri,Georgia,serif' : 'Cormorant Garamond,serif', fontSize: promptArabic ? 56 : 34, fontStyle: promptArabic ? 'normal' : 'italic', color: '#f7eecb', direction: promptArabic ? 'rtl' : 'ltr', lineHeight: 1.2, display: 'block' }}>
           {promptArabic ? q.prompt : '« ' + q.prompt + ' »'}
         </span>
+        {promptArabic && cmpPhon(q.prompt) && <div style={{ marginTop: 8, fontSize: 16, fontStyle: 'italic', color: 'rgba(240,237,230,0.6)', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{cmpPhon(q.prompt)}</div>}
       </div>
 
       {/* options */}
@@ -7610,8 +7632,9 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
             <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null}
               onMouseEnter={function(e){ if (picked == null) e.currentTarget.style.transform = 'scale(1.03)'; }}
               onMouseLeave={function(e){ if (picked == null) e.currentTarget.style.transform = 'scale(1)'; }}
-              style={{ minHeight: 84, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
-              {opt}
+              style={{ minHeight: 84, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
+              <span style={{ lineHeight: 1.1 }}>{opt}</span>
+              {optArabic && cmpPhon(opt) && <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, fontStyle: 'italic', fontWeight: 500, color: 'rgba(240,237,230,0.5)', direction: 'ltr' }}>{cmpPhon(opt)}</span>}
               {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: GREEN }}>✓</span>}
               {picked != null && isPick && !isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: RED }}>✗</span>}
             </button>
@@ -7704,6 +7727,7 @@ function ComprendreSection({ navigate }) {
             return (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 18px', borderRadius: 16, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)' }}>
                 <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 38, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
+                <span style={{ fontSize: 12, color: 'rgba(240,237,230,0.55)', fontStyle: 'italic', fontWeight: 500 }}>{cmpPhon(w.ar)}</span>
                 <span style={{ fontSize: 13, color: GOLD, fontWeight: 600 }}>{w.fr}</span>
               </div>
             );
