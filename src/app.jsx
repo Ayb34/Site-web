@@ -7238,7 +7238,10 @@ const CMP_PHON = {
   'يَا':'yâ','أَيُّهَا':'ayyuhâ','الْكَافِرُونَ':'al-kâfirûn','لَا':'lâ','أَعْبُدُ':"a'budu",'تَعْبُدُونَ':"ta'budûn",'وَلَا ':'wa lâ','أَنتُمْ':'antum','عَابِدُونَ':"'âbidûn",'أَنَا':'anâ','عَابِدٌ':"'âbidun",'مَّا':'mâ','عَبَدتُّمْ':"'abadtum",'لَكُمْ':'lakum','دِينُكُمْ':'dînukum','وَلِيَ':'wa liya','دِينِ':'dîn',
   'أَرَأَيْتَ':'a-ra-ayta','يُكَذِّبُ':'youkadhdhibu','بِالدِّينِ':'bid-dîn','فَذَٰلِكَ':'fa-dhâlika','يَدُعُّ':"yadu''u",'الْيَتِيمَ':'al-yatîm','يَحُضُّ':'yahuddu','عَلَىٰ':"'alâ",'طَعَامِ':"ta'âmi",'الْمِسْكِينِ':'al-miskîn','فَوَيْلٌ':'fa-waylun','لِّلْمُصَلِّينَ':'lil-musallîn','هُمْ':'hum','عَن':"'an",'صَلَاتِهِمْ':'salâtihim','سَاهُونَ':'sâhûn','يُرَاءُونَ':'yurâ-ûn','وَيَمْنَعُونَ':"wa yamna'ûna",'الْمَاعُونَ':"al-mâ'ûn",
 };
-function cmpPhon(ar) { return CMP_PHON[ar] || ''; }
+// Normalise (retire les diacritiques) pour une recherche robuste malgré les variations de harakat.
+function cmpNorm(s) { return (s || '').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ]/g, ''); }
+const CMP_PHON_NORM = (function () { var m = {}; Object.keys(CMP_PHON).forEach(function (k) { m[cmpNorm(k)] = CMP_PHON[k]; }); return m; })();
+function cmpPhon(ar) { return CMP_PHON[ar] || CMP_PHON_NORM[cmpNorm(ar)] || ''; }
 
 // ── Persistance (localStorage) ──
 const CMP_KEY = 'hm_comprendre_v1';
