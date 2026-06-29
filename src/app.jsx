@@ -172,6 +172,12 @@ function GuestGateModal({ onClose, context = 'default' }) {
       sub: <>Crée ton compte gratuit pour<br/>télécharger ta vidéo.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
       feats: ['✓ Télécharge ta vidéo en HD','✓ 1 vidéo offerte, sans carte','✓ Tes créations sauvegardées','✓ Accès gratuit pour toujours'],
     },
+    comprendre: {
+      emoji: '📖',
+      title: 'Continue ton apprentissage',
+      sub: <>Crée ton compte gratuit pour continuer<br/>et sauvegarder ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
+      feats: ['✓ Toutes les sourates débloquées*','✓ Ta progression sauvegardée','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+    },
   };
   const copy = GATE_COPY[context] || GATE_COPY.default;
   React.useEffect(function () {
@@ -7271,6 +7277,7 @@ function cmpMerge(a, b) {
     words: words,
     best: best,
     totalCorrect: Math.max(a.totalCorrect || 0, b.totalCorrect || 0),
+    plays: Math.max(a.plays || 0, b.plays || 0),
   };
 }
 function cmpTodayStr() { return new Date().toISOString().slice(0, 10); }
@@ -7342,7 +7349,12 @@ function ComprendrePage({ navigate }) {
   const pct = cmpComprehensionPct(st.words);
   const lvl = cmpLevel(st.xp);
 
+  const [showGate, setShowGate] = React.useState(false);
+  // Invité : 1 sourate offerte. Ensuite (autre sourate OU rejouer) → compte requis.
+  const guestBlocked = !user && (st.plays || 0) > 0;
+
   function openSourate(s) {
+    if (guestBlocked) { setShowGate(true); return; }
     if (!s.free && !isPro) { if (openQuickCheckout) openQuickCheckout(); return; }
     setSourate(s); setMode('discover');
   }
@@ -7364,6 +7376,7 @@ function ComprendrePage({ navigate }) {
     });
     const prevBest = next.best[sourate.id] || 0;
     if (res.scorePct > prevBest) next.best[sourate.id] = res.scorePct;
+    next.plays = (next.plays || 0) + 1;
     persist(next);
     // Sauvegarde sur le compte (suivi + cross-device)
     if (user && window._db) {
@@ -7377,7 +7390,8 @@ function ComprendrePage({ navigate }) {
       {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} />}
       {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} onPlay={function(){ setMode('play'); }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'play' && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} onReplay={function(){ setMode('discover'); }} onHub={function(){ setMode('hub'); }} />}
+      {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} />}
+      {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
     </div>
   );
 }
