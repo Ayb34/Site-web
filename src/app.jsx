@@ -256,10 +256,10 @@ function ProGateModal({ onClose, navigate }) {
 
         <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>Fonctionnalité Pro</h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 12px' }}>
-          Ce niveau est réservé aux membres Pro.<br/>Débloque les niveaux <strong style={{color:'#c8a727'}}>Amateur & Avancé</strong>, le blind test complet et le studio vidéo.
+          Ce contenu est réservé aux membres Pro.<br/>Débloque <strong style={{color:'#c8a727'}}>tout le site</strong> — Comprendre le Coran, quiz, blind test et studio vidéo.
         </p>
         <div className="pro-gate-feat-list" style={{ display:'flex', flexDirection:'column', gap:6, margin:'0 0 20px', textAlign:'left' }}>
-          {['🧠 Quiz illimités tous niveaux','🎵 Blind Test — 114 sourates','🎬 Studio vidéo & téléchargement','📅 Nouveau contenu chaque semaine'].map(function(f){
+          {['📖 Comprendre le Coran — toutes les sourates mot à mot','🧠 Quiz illimités tous niveaux','🎵 Blind Test — 114 sourates','🎬 Studio vidéo & téléchargement','📅 Nouveau contenu chaque semaine'].map(function(f){
             return React.createElement('div',{key:f,style:{fontFamily:'Plus Jakarta Sans,sans-serif',fontSize:12,color:'rgba(240,237,230,0.7)',display:'flex',alignItems:'center',gap:8}},
               React.createElement('span',{style:{color:'#4ade80',fontWeight:800}},'✓'),f
             );
@@ -7350,12 +7350,13 @@ function ComprendrePage({ navigate }) {
   const lvl = cmpLevel(st.xp);
 
   const [showGate, setShowGate] = React.useState(false);
+  const [showPro, setShowPro] = React.useState(false);
   // Invité : 1 sourate offerte. Ensuite (autre sourate OU rejouer) → compte requis.
   const guestBlocked = !user && (st.plays || 0) > 0;
 
   function openSourate(s) {
+    if (!s.free && !isPro) { setShowPro(true); return; }
     if (guestBlocked) { setShowGate(true); return; }
-    if (!s.free && !isPro) { if (openQuickCheckout) openQuickCheckout(); return; }
     setSourate(s); setMode('discover');
   }
 
@@ -7387,17 +7388,66 @@ function ComprendrePage({ navigate }) {
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 0%, #0a1f12 0%, #050f09 45%, #03070a 100%)', fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 60 }}>
       <Navbar navigate={navigate} />
-      {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} />}
+      {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} />}
       {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} onPlay={function(){ setMode('play'); }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'play' && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} />}
+      {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} />}
       {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
+      {showPro && <CmpProModal pct={pct} onClose={function(){ setShowPro(false); }} />}
     </div>
   );
 }
 
 // ── HUB ──
-function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack }) {
+// ── Modal Pro contextuel « Comprendre » — vendu sur le bénéfice, pas sur le verrou ──
+function CmpProModal({ onClose, pct }) {
+  const { openQuickCheckout } = useAuth();
+  const GOLD = '#e6c84a';
+  const lockedCount = CMP_SOURATES.filter(function (s) { return !s.free; }).length;
+  React.useEffect(function () {
+    document.body.style.overflow = 'hidden';
+    return function () { document.body.style.overflow = ''; };
+  }, []);
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px 20px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', animation: 'overlayFade 0.25s ease-out' }}>
+      <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, padding: '34px 28px', maxWidth: 410, width: '100%', margin: '16px auto', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
+        <div style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
+        <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
+          {lockedCount} sourates<br /><span style={{ color: GOLD }}>t'attendent.</span>
+        </h2>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 14, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7, margin: '0 0 18px' }}>
+          Tu comprends déjà <strong style={{ color: GOLD }}>{pct}%</strong> des mots fréquents.
+          Ne t'arrête pas là — chaque sourate apprise te rapproche de <strong style={{ color: '#f0ede6' }}>comprendre ta prière</strong>.
+        </p>
+        <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 16, textAlign: 'left' }}>
+          {['📖 Les ' + CMP_SOURATES.length + ' sourates mot à mot — et toutes celles à venir', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '🎬 Studio vidéo + téléchargement HD'].map(function (f) {
+            return <div key={f} style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.7)', marginBottom: 7, display: 'flex', gap: 8 }}><span style={{ color: '#4ade80', fontWeight: 800 }}>✓</span>{f}</div>;
+          })}
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? <OfferPrice big={36} /> : (
+            <><span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>7,99€</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / mois</span></>
+          )}
+        </div>
+        <button onClick={function () { onClose(); openQuickCheckout(); }}
+          style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
+          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? 'Débloquer tout — 3,99€ le 1er mois' : 'Débloquer tout — 7,99€/mois'}
+        </button>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 10px' }}>
+          🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 12, fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
+          <span>✓ +130 membres</span><span>✓ Sans engagement</span><span>✓ Annulable en 1 clic</span>
+        </div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.3)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+          Plus tard
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
   const GOLD = '#e6c84a';
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '90px 20px 0' }}>
@@ -7441,26 +7491,39 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack }) {
           const total = s.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0);
           const best = st.best[s.id] || 0;
           return (
-            <button key={s.id} onClick={function(){ onOpen(s); }} style={{ textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))', border: '1px solid ' + (locked ? 'rgba(255,255,255,0.1)' : 'rgba(200,167,39,0.3)'), borderRadius: 18, padding: '18px 20px', fontFamily: 'inherit', opacity: locked ? 0.7 : 1 }}>
-              <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: locked ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg,#c8a727,#a8891f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900, color: locked ? 'rgba(255,255,255,0.4)' : '#1a1205' }}>{locked ? '🔒' : s.surah}</div>
+            <button key={s.id} onClick={function(){ onOpen(s); }} style={{ textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, background: locked ? 'linear-gradient(160deg,rgba(200,167,39,0.05),rgba(255,255,255,0.01))' : 'linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))', border: '1px solid ' + (locked ? 'rgba(200,167,39,0.18)' : 'rgba(200,167,39,0.3)'), borderRadius: 18, padding: '18px 20px', fontFamily: 'inherit', position: 'relative' }}>
+              <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: locked ? 'rgba(200,167,39,0.1)' : 'linear-gradient(135deg,#c8a727,#a8891f)', border: locked ? '1px solid rgba(200,167,39,0.3)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: locked ? 20 : 22, fontWeight: 900, color: locked ? GOLD : '#1a1205' }}>{locked ? '🔒' : s.surah}</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#f0ede6', fontFamily: 'Cinzel,serif' }}>{s.name}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 18, fontWeight: 800, color: '#f0ede6', fontFamily: 'Cinzel,serif' }}>{s.name}</span>
+                  {locked && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 8px', borderRadius: 999 }}>PRO</span>}
+                </div>
                 <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{s.fr} · {total} mots{best > 0 ? ' · record ' + best + '%' : ''}</div>
               </div>
-              <span style={{ color: locked ? 'rgba(255,255,255,0.3)' : '#e6c84a', fontSize: 22 }}>{locked ? '' : '›'}</span>
+              <span style={{ color: '#e6c84a', fontSize: 22 }}>›</span>
             </button>
           );
         })}
       </div>
+      {/* Bannière upsell (non-Pro) — cliquable */}
+      {!isPro && (
+        <button onClick={onPro} style={{ width: '100%', marginTop: 14, padding: '16px 18px', background: 'linear-gradient(135deg,rgba(200,167,39,0.16),rgba(200,167,39,0.06))', border: '1px solid rgba(200,167,39,0.45)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', boxShadow: '0 4px 24px rgba(200,167,39,0.12)' }}>
+          <span style={{ fontSize: 24 }}>🔓</span>
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates restantes</span>
+            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? '3,99€ le 1er mois · sans engagement' : '7,99€/mois · sans engagement'}</span>
+          </span>
+          <span style={{ color: GOLD, fontSize: 20 }}>›</span>
+        </button>
+      )}
       {/* Teaser nouvelles sourates */}
       <div style={{ marginTop: 14, padding: '14px 18px', background: 'linear-gradient(160deg,rgba(200,167,39,0.06),rgba(255,255,255,0.01))', border: '1px dashed rgba(200,167,39,0.28)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
         <span style={{ fontSize: 22 }}>✨</span>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13.5, color: '#f0ede6', fontWeight: 700 }}>D'autres sourates arrivent bientôt</div>
-          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>On enrichit le contenu chaque semaine — reste à l'affût.</div>
+          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>On enrichit le contenu chaque semaine — les membres Pro y ont accès en premier.</div>
         </div>
       </div>
-      {!isPro && <p style={{ textAlign: 'center', fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 18 }}>🔓 Débloque toutes les sourates avec Pro</p>}
     </div>
   );
 }
@@ -7668,7 +7731,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 }
 
 // ── RÉSULTAT ──
-function CmpResult({ res, sourate, st, pct, mastered, lvl, onReplay, onHub }) {
+function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHub, onPro }) {
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
   if (!res) { return <div style={{ padding: 100, textAlign: 'center', color: '#f0ede6' }}>—</div>; }
@@ -7711,6 +7774,18 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, onReplay, onHub }) {
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{mastered} mots appris · niveau {lvl.title}</div>
         </div>
       </div>
+
+      {/* Upsell au pic de dopamine — non-Pro uniquement */}
+      {!isPro && (
+        <button onClick={onPro} style={{ width: '100%', marginBottom: 14, padding: '18px 20px', background: 'linear-gradient(135deg,rgba(200,167,39,0.18),rgba(200,167,39,0.07))', border: '1px solid rgba(200,167,39,0.5)', borderRadius: 18, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 6px 28px rgba(200,167,39,0.15)' }}>
+          <span style={{ fontSize: 28 }}>📖</span>
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Continue sur ta lancée</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? 'dès 3,99€' : '7,99€/mois'}</span></span>
+          </span>
+          <span style={{ color: GOLD, fontSize: 22 }}>›</span>
+        </button>
+      )}
 
       {/* actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
