@@ -1577,7 +1577,7 @@ function Hero({ navigate }) {
 
       {/* Trust badges */}
       <div className="hero-trust-badges" style={{ marginTop: 16, display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {[['✓','Sans carte bancaire'],['✓','Résiliable à tout moment'],['✓','100% en français']].map(([icon,label]) => (
+        {[['✓','+130 membres'],['✓','Sans carte bancaire'],['✓','100% en français']].map(([icon,label]) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ color: '#4ade80', fontSize: 12, fontWeight: 800 }}>{icon}</span>
             <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.38)', fontWeight: 500 }}>{label}</span>
