@@ -1271,6 +1271,59 @@ function Navbar({ navigate }) {
 
 }
 
+/* ─── Démo vivante du hero — un verset s'anime mot à mot, en boucle ─── */
+function HeroLiveDemo({ navigate }) {
+  const WORDS = [
+    { ar: 'بِسْمِ', ph: 'bismi', fr: 'Au nom de' },
+    { ar: 'اللَّهِ', ph: 'Llâhi', fr: 'Allah' },
+    { ar: 'الرَّحْمَٰنِ', ph: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux' },
+    { ar: 'الرَّحِيمِ', ph: 'ar-Rahîm', fr: 'le Très-Miséricordieux' },
+  ];
+  const [tick, setTick] = React.useState(0);
+  React.useEffect(function () {
+    const id = setInterval(function () { setTick(function (t) { return t + 1; }); }, 1150);
+    return function () { clearInterval(id); };
+  }, []);
+  const cycle = WORDS.length + 1; // +1 tick de pause avant de reboucler
+  const active = tick % cycle;
+  const current = active < WORDS.length ? WORDS[active] : null;
+  return (
+    <button onClick={function () { navigate('comprendre'); }} className="fade-up-3" style={{
+      width: '100%', maxWidth: 460, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+      background: 'linear-gradient(160deg, rgba(200,167,39,0.09), rgba(255,255,255,0.02))',
+      border: '1px solid rgba(200,167,39,0.35)', borderRadius: 18, padding: '14px 16px 12px',
+      marginBottom: 18, textAlign: 'center', position: 'relative', overflow: 'hidden',
+      boxShadow: '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
+      WebkitTapHighlightColor: 'transparent', transition: 'border-color 0.25s, box-shadow 0.25s'
+    }}
+      onMouseEnter={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.7)'; e.currentTarget.style.boxShadow = '0 14px 50px rgba(200,167,39,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
+      onMouseLeave={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.35)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)'; }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#e6c84a', marginBottom: 10 }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', display: 'inline-block' }} />
+        Aperçu en direct — comprends ce que tu récites
+      </span>
+      {/* mots RTL */}
+      <span style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 8 }}>
+        {WORDS.map(function (w, i) {
+          const on = i === active;
+          const seen = active < WORDS.length ? i < active : true;
+          return (
+            <span key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, transition: 'all 0.45s cubic-bezier(0.34,1.56,0.64,1)', transform: on ? 'scale(1.12)' : 'scale(1)', opacity: on ? 1 : seen ? 0.75 : 0.3 }}>
+              <span style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 30, lineHeight: 1.15, color: on ? '#f5d76e' : '#e9e2c8', textShadow: on ? '0 0 18px rgba(230,200,74,0.7)' : 'none', direction: 'rtl' }}>{w.ar}</span>
+              <span style={{ fontSize: 9.5, fontStyle: 'italic', color: on || seen ? 'rgba(240,237,230,0.55)' : 'transparent', transition: 'color 0.4s' }}>{w.ph}</span>
+            </span>
+          );
+        })}
+      </span>
+      {/* traduction du mot actif — hauteur fixe pour éviter les sauts */}
+      <span style={{ display: 'block', height: 20, fontSize: 13.5, fontWeight: 700, color: '#e6c84a' }}>
+        {current ? current.fr : '« Au nom d’Allah, le Tout-Miséricordieux, le Très-Miséricordieux »'}
+      </span>
+      <span style={{ display: 'block', marginTop: 6, fontSize: 11.5, color: 'rgba(255,255,255,0.45)' }}>Essaie — c'est gratuit ›</span>
+    </button>
+  );
+}
+
 /* ─── Hero ─── */
 function Hero({ navigate }) {
   const { user, openAuth, isPro } = useAuth();
@@ -1528,8 +1581,12 @@ function Hero({ navigate }) {
           marginBottom: 30,
           letterSpacing: '0.01em',
           lineHeight: 1.5
-        }}>Blind test, quiz, et un studio pour <strong style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>créer tes vidéos du Coran en 1 min</strong>.</p>
-      {/* Cartes de jeu — accès direct, 1 tap = on joue. Studio en 1er (trafic TikTok). */}
+        }}>Fini les méthodes où tu abandonnes au bout de 3 jours. Ici tu apprends <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>en jouant</strong> — et ta progression monte chaque jour.</p>
+
+      {/* Démo vivante — le produit se montre tout seul */}
+      <HeroLiveDemo navigate={navigate} />
+
+      {/* Cartes de jeu — accès direct, 1 tap = on joue. */}
       <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
         {[
           { id: 'comprendre', emoji: '📖', title: 'Comprends le Coran', desc: 'Comprends enfin ce que tu récites', accent: '#e6c84a', glow: 'rgba(200,167,39,0.32)', badge: 'NOUVEAU' },
