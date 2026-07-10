@@ -1581,65 +1581,27 @@ function Hero({ navigate }) {
           marginBottom: 30,
           letterSpacing: '0.01em',
           lineHeight: 1.5
-        }}>Fini les méthodes où tu abandonnes — ici tu apprends <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>en jouant</strong>, et tu progresses chaque jour.</p>
+        }}>Apprends le Coran et ta religion <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>en jouant</strong> — quelques minutes par jour.</p>
 
       {/* Démo vivante — le produit se montre tout seul */}
       <HeroLiveDemo navigate={navigate} />
 
-      {/* CTA principal : Comprendre en vedette + 2 mini-cartes */}
-      <div className="fade-up-4 hero-cta-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'stretch', width: '100%', maxWidth: 460 }}>
-        <button onClick={() => navigate('comprendre')} className="hero-game-card" style={{
-            display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-            background: 'linear-gradient(135deg, rgba(200,167,39,0.14), rgba(200,167,39,0.05))',
-            border: '1px solid rgba(200,167,39,0.5)',
-            borderRadius: 16, padding: '15px 16px', cursor: 'pointer',
-            textAlign: 'left', transition: 'all 0.2s', WebkitTapHighlightColor: 'transparent',
-            boxShadow: '0 8px 30px rgba(200,167,39,0.14)'
+      {/* Un seul CTA */}
+      <div className="fade-up-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, width: '100%', maxWidth: 460 }}>
+        <button onClick={() => navigate('comprendre')} style={{
+            width: '100%', maxWidth: 340,
+            background: 'linear-gradient(135deg,#e6c84a,#a8891f)',
+            border: 'none', borderRadius: 100, padding: '17px 32px',
+            fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16.5, fontWeight: 800,
+            color: '#1a1205', cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
+            boxShadow: '0 10px 38px rgba(200,167,39,0.35)', transition: 'transform 0.2s, box-shadow 0.2s'
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(200,167,39,0.28)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(200,167,39,0.14)'; }}>
-          <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: 12, background: 'linear-gradient(135deg,#c8a727,#a8891f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📖</span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16.5, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>
-              Comprends le Coran
-              <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.08em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 7px', borderRadius: 999, textTransform: 'uppercase' }}>Nouveau</span>
-            </span>
-            <span style={{ display: 'block', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12.5, color: 'rgba(255,255,255,0.55)', marginTop: 3 }}>Mot à mot, avec audio & phonétique</span>
-          </span>
-          <span style={{ flexShrink: 0, color: '#e6c84a', fontSize: 22, fontWeight: 700 }}>›</span>
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 14px 48px rgba(200,167,39,0.5)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 10px 38px rgba(200,167,39,0.35)'; }}>
+          Commencer gratuitement →
         </button>
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[
-            { id: 'blind-test', title: 'Blind Test', accent: '#4ade80', glow: 'rgba(74,222,128,0.28)' },
-            { id: 'quiz', emoji: '🧠', title: 'Quiz Islam', accent: '#60a5fa', glow: 'rgba(96,165,250,0.28)' }
-          ].map((c) => (
-            <button key={c.id} onClick={() => navigate(c.id)} className="hero-game-card" style={{
-                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 14, padding: '13px 10px', cursor: 'pointer',
-                transition: 'all 0.2s', WebkitTapHighlightColor: 'transparent'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = c.accent; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 17 }}>
-                {c.id === 'blind-test'
-                  ? [0,1,2].map(function(n){ return <span key={n} style={{ width: 3, borderRadius: 2, background: c.accent, height: 9, animation: 'eqBar 0.9s ease-in-out infinite', animationDelay: (n*0.16)+'s', display: 'inline-block' }} />; })
-                  : c.emoji}
-              </span>
-              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13.5, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{c.title}</span>
-              <span style={{ color: c.accent, fontSize: 16, fontWeight: 700 }}>›</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Réassurance — une seule ligne compacte */}
-      <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        {!isPro && <OfferCountdown compact />}
-        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.45)', textAlign: 'center', lineHeight: 1.5 }}>
-          {!isPro && <><strong style={{ color: '#e6c84a', fontWeight: 800 }}>1er mois 3,99€</strong><span style={{ opacity: 0.6 }}> · </span></>}
-          Gratuit pour essayer, sans carte <span style={{ opacity: 0.6 }}>·</span> +130 membres
+        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+          Sans carte bancaire <span style={{ opacity: 0.5 }}>·</span> +130 membres
         </p>
       </div>
 
