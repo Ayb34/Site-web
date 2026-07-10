@@ -1298,9 +1298,8 @@ function HeroLiveDemo({ navigate }) {
     }}
       onMouseEnter={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.7)'; e.currentTarget.style.boxShadow = '0 14px 50px rgba(200,167,39,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
       onMouseLeave={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.35)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)'; }}>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#e6c84a', marginBottom: 10 }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', display: 'inline-block' }} />
-        Aperçu en direct — comprends ce que tu récites
+      <span style={{ display: 'block', fontFamily: 'Cormorant Garamond, Georgia, serif', fontStyle: 'italic', fontSize: 15.5, color: 'rgba(240,237,230,0.75)', marginBottom: 10, lineHeight: 1.4 }}>
+        Tu récites ces mots chaque jour… <span style={{ color: '#e6c84a', fontStyle: 'normal', fontWeight: 600 }}>les comprends-tu ?</span>
       </span>
       {/* mots RTL */}
       <span style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 8 }}>
