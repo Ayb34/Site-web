@@ -1298,34 +1298,33 @@ function HeroLiveDemo({ navigate }) {
     <button onClick={function () { navigate('comprendre'); }} className="fade-up-3" style={{
       width: '100%', maxWidth: 460, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
       background: 'linear-gradient(160deg, rgba(200,167,39,0.09), rgba(255,255,255,0.02))',
-      border: '1px solid rgba(200,167,39,0.35)', borderRadius: 18, padding: '14px 16px 12px',
-      marginBottom: 18, textAlign: 'center', position: 'relative', overflow: 'hidden',
+      border: '1px solid rgba(200,167,39,0.35)', borderRadius: 18, padding: '12px 16px 10px',
+      marginBottom: 14, textAlign: 'center', position: 'relative', overflow: 'hidden',
       boxShadow: '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
       WebkitTapHighlightColor: 'transparent', transition: 'border-color 0.25s, box-shadow 0.25s'
     }}
       onMouseEnter={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.7)'; e.currentTarget.style.boxShadow = '0 14px 50px rgba(200,167,39,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
       onMouseLeave={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.35)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)'; }}>
-      <span style={{ display: 'block', fontFamily: 'Cormorant Garamond, Georgia, serif', fontStyle: 'italic', fontSize: 15.5, color: 'rgba(240,237,230,0.75)', marginBottom: 10, lineHeight: 1.4 }}>
+      <span style={{ display: 'block', fontFamily: 'Cormorant Garamond, Georgia, serif', fontStyle: 'italic', fontSize: 15, color: 'rgba(240,237,230,0.75)', marginBottom: 8, lineHeight: 1.35 }}>
         Tu récites ces mots chaque jour… <span style={{ color: '#e6c84a', fontStyle: 'normal', fontWeight: 600 }}>les comprends-tu ?</span>
       </span>
       {/* mots RTL */}
-      <span style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 8 }}>
+      <span style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 6 }}>
         {WORDS.map(function (w, i) {
           const on = i === active;
           const seen = active < WORDS.length ? i < active : true;
           return (
-            <span key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, transition: 'all 0.45s cubic-bezier(0.34,1.56,0.64,1)', transform: on ? 'scale(1.12)' : 'scale(1)', opacity: on ? 1 : seen ? 0.75 : 0.3 }}>
-              <span style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 30, lineHeight: 1.15, color: on ? '#f5d76e' : '#e9e2c8', textShadow: on ? '0 0 18px rgba(230,200,74,0.7)' : 'none', direction: 'rtl' }}>{w.ar}</span>
-              <span style={{ fontSize: 9.5, fontStyle: 'italic', color: on || seen ? 'rgba(240,237,230,0.55)' : 'transparent', transition: 'color 0.4s' }}>{w.ph}</span>
+            <span key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, transition: 'all 0.45s cubic-bezier(0.34,1.56,0.64,1)', transform: on ? 'scale(1.12)' : 'scale(1)', opacity: on ? 1 : seen ? 0.75 : 0.3 }}>
+              <span style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 27, lineHeight: 1.1, color: on ? '#f5d76e' : '#e9e2c8', textShadow: on ? '0 0 18px rgba(230,200,74,0.7)' : 'none', direction: 'rtl' }}>{w.ar}</span>
+              <span style={{ fontSize: 9, fontStyle: 'italic', color: on || seen ? 'rgba(240,237,230,0.55)' : 'transparent', transition: 'color 0.4s' }}>{w.ph}</span>
             </span>
           );
         })}
       </span>
       {/* traduction du mot actif — hauteur fixe pour éviter les sauts */}
-      <span style={{ display: 'block', height: 20, fontSize: 13.5, fontWeight: 700, color: '#e6c84a' }}>
+      <span style={{ display: 'block', height: 18, fontSize: 13, fontWeight: 700, color: '#e6c84a' }}>
         {current ? current.fr : '« Au nom d’Allah, le Tout-Miséricordieux, le Très-Miséricordieux »'}
       </span>
-      <span style={{ display: 'block', marginTop: 6, fontSize: 11.5, color: 'rgba(255,255,255,0.45)' }}>Essaie — c'est gratuit ›</span>
     </button>
   );
 }
@@ -1340,7 +1339,7 @@ function Hero({ navigate }) {
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       textAlign: 'center',
-      padding: '120px 24px 70px',
+      padding: 'clamp(84px, 13vw, 120px) 24px 60px',
       position: 'relative', overflow: 'visible'
     }}>
       {/* Bottom fade */}
@@ -1555,7 +1554,7 @@ function Hero({ navigate }) {
       <div className="hero-text-wrap">
 
       {/* Kicker — marque */}
-      <div className="fade-up-2" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+      <div className="fade-up-2" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
         <span style={{ width: 24, height: 1, background: 'linear-gradient(90deg, transparent, rgba(200,167,39,0.6))' }} />
         <span style={{
             fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700,
@@ -1573,32 +1572,61 @@ function Hero({ navigate }) {
           color: '#fff',
           lineHeight: 1.0,
           letterSpacing: '-2px',
-          margin: '0 0 18px',
+          margin: '0 0 12px',
           fontVariationSettings: '"opsz" 144, "SOFT" 0, "WONK" 0',
-          fontSize: 'clamp(40px, 6vw, 84px)'
+          fontSize: 'clamp(36px, 6vw, 84px)'
         }}>L'islam comme tu l'as<br /><span style={{ color: '#e6c84a', fontStyle: 'italic', fontWeight: 400, fontVariationSettings: '"opsz" 144' }}>jamais appris.</span></h1>
 
       <p className="fade-up-3 hero-subtitle" style={{
           fontFamily: 'Plus Jakarta Sans, sans-serif',
           fontStyle: 'normal',
           fontWeight: 500,
-          fontSize: 'clamp(15px, 2.4vw, 20px)',
+          fontSize: 'clamp(14px, 2.4vw, 19px)',
           color: 'rgba(255,255,255,0.5)',
-          marginBottom: 30,
+          marginBottom: 16,
           letterSpacing: '0.01em',
-          lineHeight: 1.5
+          lineHeight: 1.45
         }}>Apprends le Coran et ta religion <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>en jouant</strong> — quelques minutes par jour.</p>
 
-      {/* Démo vivante — le produit se montre tout seul */}
-      <HeroLiveDemo navigate={navigate} />
+      {/* Les 4 activités — grille 2×2 (centre visuel du hero) */}
+      <div className="fade-up-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: '100%', maxWidth: 460, marginBottom: 20 }}>
+        {[
+          { id: 'comprendre', emoji: '📖', title: 'Comprends le Coran', desc: 'Mot à mot', accent: '#e6c84a', rgb: '230,200,74', badge: 'NOUVEAU' },
+          { id: 'blind-test', emoji: '🎧', title: 'Blind Test', desc: 'Devine la sourate', accent: '#4ade80', rgb: '74,222,128', eq: true },
+          { id: 'quiz', emoji: '🧠', title: 'Quiz Islam', desc: 'Tous niveaux', accent: '#60a5fa', rgb: '96,165,250' },
+          { id: 'studio', emoji: '🎬', title: 'Studio Vidéo', desc: 'Crée & partage', accent: '#a78bfa', rgb: '167,139,250' },
+        ].map((c) => (
+          <button key={c.id} onClick={() => navigate(c.id)} style={{
+              position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
+              padding: '15px 14px', borderRadius: 18, cursor: 'pointer', textAlign: 'left',
+              background: 'linear-gradient(155deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015))',
+              border: '1px solid rgba(' + c.rgb + ',0.28)', WebkitTapHighlightColor: 'transparent',
+              transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(' + c.rgb + ',0.7)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(' + c.rgb + ',0.18), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'rgba(' + c.rgb + ',0.28)'; e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)'; }}>
+            {c.badge && <span style={{ position: 'absolute', top: 10, right: 10, fontSize: 8, fontWeight: 900, letterSpacing: '0.06em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 6px', borderRadius: 999 }}>{c.badge}</span>}
+            <span style={{ width: 40, height: 40, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, fontSize: 20, background: 'rgba(' + c.rgb + ',0.14)', border: '1px solid rgba(' + c.rgb + ',0.3)' }}>
+              {c.eq
+                ? [0,1,2,3].map((n) => <span key={n} style={{ width: 3, borderRadius: 2, background: c.accent, height: 8 + (n%2)*8, animation: 'eqBar 0.9s ease-in-out infinite', animationDelay: (n*0.15)+'s', display: 'inline-block' }} />)
+                : c.emoji}
+            </span>
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14.5, fontWeight: 800, color: '#fff', lineHeight: 1.15 }}>{c.title}</span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11.5, color: 'rgba(255,255,255,0.45)' }}>{c.desc}</span>
+            </span>
+          </button>
+        ))}
+      </div>
 
-      {/* Un seul CTA */}
-      <div className="fade-up-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, width: '100%', maxWidth: 460 }}>
+      {/* CTA + réassurance */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, width: '100%', maxWidth: 460 }}>
         <button onClick={() => navigate('comprendre')} style={{
             width: '100%', maxWidth: 340,
             background: 'linear-gradient(135deg,#e6c84a,#a8891f)',
-            border: 'none', borderRadius: 100, padding: '17px 32px',
-            fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16.5, fontWeight: 800,
+            border: 'none', borderRadius: 100, padding: '16px 32px',
+            fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16, fontWeight: 800,
             color: '#1a1205', cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
             boxShadow: '0 10px 38px rgba(200,167,39,0.35)', transition: 'transform 0.2s, box-shadow 0.2s'
           }}
