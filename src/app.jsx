@@ -290,9 +290,11 @@ function ProGateModal({ onClose, navigate }) {
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
           {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "Passer à Pro — 3,99€ le 1er mois" : "Passer à Pro — 7,99€/mois"}
         </button>
-        <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+        <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
           <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.70)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.70)' }}>Annule quand tu veux</span>
+          <span style={{ color:'rgba(255,255,255,0.25)' }}>·</span>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.70)' }}>Remboursé sous 48h</span>
         </div>
         <button onClick={onClose}
           style={{ background:'none', border:'none', color:'rgba(240,237,230,0.3)', fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
@@ -466,12 +468,17 @@ function SubscriptionPage({ navigate }) {
           Accès Pro
         </h1>
         <div style={{ marginBottom: 10 }}>
-          
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.6)', marginLeft:6 }}>· offre lancement</span>
+          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
+            <OfferPrice big={30} />
+          ) : (
+            <>
+              <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+              <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.6)', marginLeft:6 }}>· offre lancement</span>
+            </>
+          )}
         </div>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Quiz illimités · Blind Test complet · Studio vidéo
+          Comprendre le Coran · Quiz illimités · Blind Test complet · Studio vidéo
         </p>
         <p style={{ color: 'rgba(200,167,39,0.7)', fontSize: 13, marginBottom: 32, fontStyle: 'italic', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Crée ton compte gratuitement pour continuer.
@@ -3090,6 +3097,7 @@ function SoftPaywall({ navigate }) {
         {/* Value stack */}
         <div className="soft-paywall-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 36, textAlign: 'left' }}>
           {[
+            { icon: '📖', title: 'Comprendre le Coran', desc: 'Toutes les sourates, mot à mot' },
             { icon: '🧠', title: 'Quiz illimités', desc: 'Tous niveaux, toutes catégories' },
             { icon: '🎵', title: 'Blind test complet', desc: '114 sourates à reconnaître' },
             { icon: '🎬', title: 'Studio vidéo', desc: 'Crée & télécharge tes clips' },
@@ -3134,9 +3142,11 @@ function SoftPaywall({ navigate }) {
           onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
             {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "🔓 Débloquer l'accès — 3,99€" : "🔓 Débloquer l'accès — 7,99€/mois"}
           </button>
-          <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+          <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux</span>
+            <span style={{ color:'rgba(255,255,255,0.3)' }}>·</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Remboursé sous 48h si non utilisé</span>
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8, textAlign:'center' }}>
             Moins d'un café par semaine pour enrichir ton Deen · 🔒 Paiement sécurisé
@@ -3164,7 +3174,15 @@ function StartPage({ navigate }) {
 
   const ACTS = [
     {
-      icon: '🎵', tag: 'POPULAIRE', tagColor: '#c8a727', tagRgb: '200,167,39',
+      icon: '📖', tag: 'NOUVEAU', tagColor: '#c8a727', tagRgb: '200,167,39',
+      title: 'Comprends le Coran',
+      desc: 'Apprends le Coran mot à mot, verset par verset, avec audio et phonétique. Quelques dizaines de mots suffisent à saisir une grande partie du Coran — comprends enfin ce que tu récites dans ta prière.',
+      free: ['Al-Fâtiha & Al-Ikhlâs — illimité', 'Audio & phonétique inclus', 'Progression sauvegardée'],
+      pro: ['Toutes les sourates débloquées', 'Nouvelles sourates chaque semaine', 'Suivi de progression complet'],
+      cta: '📖 Essayer Comprendre le Coran', page: 'comprendre',
+    },
+    {
+      icon: '🎵', tag: 'POPULAIRE', tagColor: '#4ade80', tagRgb: '74,222,128',
       title: 'Blind Test Coran',
       desc: 'Reconnais les sourates à l\'oreille. Un format addictif qui grave les versets dans ta mémoire — sans effort, en jouant.',
       free: ['Niveau Débutant illimité', 'Score en temps réel', 'Toutes les parties que tu veux'],
@@ -3180,7 +3198,7 @@ function StartPage({ navigate }) {
       cta: '🧠 Essayer le Quiz', page: 'quiz',
     },
     {
-      icon: '🎬', tag: 'NOUVEAU', tagColor: '#a78bfa', tagRgb: '167,139,250',
+      icon: '🎬', tag: null, tagColor: '#a78bfa', tagRgb: '167,139,250',
       title: 'Studio Vidéo',
       desc: 'Crée des vidéos de récitation avec sous-titres arabes & français. Chaque partage peut être une sadaqa jariya — une adoration qui perdure tant que la vidéo tourne.',
       free: ['Créer & prévisualiser', 'Personnalisation de base', 'Aperçu en direct'],
@@ -3302,7 +3320,7 @@ function StartPage({ navigate }) {
               <div style={{ position:'absolute', bottom:-30, left:-30, width:100, height:100, background:'radial-gradient(circle,rgba('+act.tagRgb+',0.07) 0%,transparent 70%)', pointerEvents:'none' }} />
 
               {/* Tag */}
-              <span style={{ display:'inline-block', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, letterSpacing:'0.13em', color:act.tagColor, background:'rgba('+act.tagRgb+',0.1)', border:'1px solid rgba('+act.tagRgb+',0.25)', borderRadius:6, padding:'3px 10px', marginBottom:22, alignSelf:'flex-start' }}>{act.tag}</span>
+              {act.tag && <span style={{ display:'inline-block', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, letterSpacing:'0.13em', color:act.tagColor, background:'rgba('+act.tagRgb+',0.1)', border:'1px solid rgba('+act.tagRgb+',0.25)', borderRadius:6, padding:'3px 10px', marginBottom:22, alignSelf:'flex-start' }}>{act.tag}</span>}
 
               {/* Icon */}
               <div style={{ fontSize:38, marginBottom:14, lineHeight:1 }}>{act.icon}</div>
@@ -7451,8 +7469,8 @@ function CmpProModal({ onClose, pct }) {
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 10px' }}>
           🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 12, fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
-          <span>✓ +130 membres</span><span>✓ Sans engagement</span><span>✓ Annulable en 1 clic</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 12, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
+          <span>✓ +130 membres</span><span>✓ Sans engagement</span><span>✓ Remboursé sous 48h</span>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.3)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
           Plus tard
