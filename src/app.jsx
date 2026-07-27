@@ -1685,7 +1685,7 @@ function ReassuranceBanner() {
 function StatsBar() {
   const stats = [
   { value: '3,99€', label: '1er mois · −50%' },
-  { value: '3', label: 'activités uniques' },
+  { value: '4', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
   { value: 'Sans', label: 'engagement' }];
 
@@ -8112,18 +8112,19 @@ function App() {
     <>
       <Navbar navigate={navigate} />
       <main>
+        {/* Ordre = du plus accrocheur au moins, avec l'offre en fin de parcours :
+            hook → produit → preuve sociale → pratique → motivation → comparaison → objections → prix */}
         <Hero navigate={navigate} />
         <ReassuranceBanner />
         <ComprendreSection navigate={navigate} />
         <FeatureCards navigate={navigate} />
-        <HowItWorksSection />
         <LearnPlaySection navigate={navigate} />
-        <ImportanceSection />
-
-        <ComparisonTable navigate={navigate} />
-        <ParcoursSection />
         <Testimonials />
         <StatsBar />
+        <HowItWorksSection />
+        <ParcoursSection />
+        <ImportanceSection />
+        <ComparisonTable navigate={navigate} />
         <FaqSection />
         <SoftPaywall navigate={navigate} />
       </main>
