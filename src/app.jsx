@@ -7440,9 +7440,16 @@ function ComprendrePage({ navigate }) {
     if (res.scorePct > prevBest) next.best[sourate.id] = res.scorePct;
     next.plays = (next.plays || 0) + 1;
     persist(next);
-    // Sauvegarde sur le compte (suivi + cross-device)
+    // Sauvegarde sur le compte (suivi + cross-device).
+    // NB: nécessite une règle Firestore autorisant l'écriture de son propre doc
+    // (hors champs Pro). Si elle est refusée, on le voit en console au lieu
+    // d'échouer silencieusement — la progression locale reste intacte.
     if (user && window._db) {
-      try { window._db.collection('users').doc(user.uid).set({ comprendre: next, comprendreUpdatedAt: Date.now() }, { merge: true }); } catch (e) {}
+      try {
+        window._db.collection('users').doc(user.uid)
+          .set({ comprendre: next, comprendreUpdatedAt: Date.now() }, { merge: true })
+          .catch(function (e) { console.warn('[comprendre] sauvegarde compte refusée:', e && e.code); });
+      } catch (e) { console.warn('[comprendre] sauvegarde compte impossible:', e); }
     }
   }
 
