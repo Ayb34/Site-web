@@ -304,6 +304,31 @@
     text-shadow: none !important;
   }
 
+  /* Paywall : la carte ne dépasse jamais l'écran, seul son contenu défile,
+     et le bouton d'achat reste collé en bas. Sur mobile (93% du trafic) un
+     CTA sous la ligne de flottaison oblige à scroller pour payer — c'est là
+     qu'on perd les gens. `dvh` gère la barre d'URL iOS qui se rétracte ;
+     `vh` reste en repli pour les Safari trop anciens. */
+  .pro-modal-card {
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .pro-modal-scroll {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .pro-modal-footer {
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, rgba(7,21,16,0) 0%, #071510 22%);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   /* Hero text backdrop */
   .hero-text-wrap {
     position: relative;

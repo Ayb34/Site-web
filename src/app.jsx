@@ -262,52 +262,61 @@ function ProGateModal({ onClose, navigate }) {
     };
   }, []);
   return (
-    <ModalPortal><div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
-      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'28px 26px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
-        {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
-        <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>✦</div>
+    <ModalPortal><div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', animation:'overlayFade 0.25s ease-out' }}>
+      <div className="pro-modal-card" onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, maxWidth:400, width:'100%', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
 
-        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>Tu es prêt pour la suite</h2>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 14px' }}>
-          Tu as fait le tour du niveau Débutant.<br/>Passe à <strong style={{color:'#c8a727'}}>Amateur & Avancé</strong> et débloque tout le site.
-        </p>
-        {/* Ce que ça change au quotidien. Remplace l'ancienne liste de features :
-            elle faisait doublon avec celle du bloc prix juste en dessous, et
-            décrivait ce qu'on achète plutôt que ce que ça change. */}
-        <div className="pro-gate-feat-list" style={{ margin:'0 0 18px' }}>
-          <ProWhyGrid columns={1} limit={2} />
-        </div>
+        {/* Zone défilante : l'argumentaire peut être long sans jamais repousser
+            le bouton d'achat hors de l'écran. */}
+        <div className="pro-modal-scroll" style={{ padding:'26px 24px 16px' }}>
+          {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
+          <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>✦</div>
 
-        {/* Price */}
-        <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
-          <div style={{ marginBottom:10 }}>
-            <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>{PRO_ANNUAL}</span>
+          <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>Tu es prêt pour la suite</h2>
+          <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 16px' }}>
+            Tu as fait le tour du niveau Débutant.<br/>Passe à <strong style={{color:'#c8a727'}}>Amateur & Avancé</strong> et débloque tout le site.
+          </p>
+
+          {/* Prix remonté au-dessus de l'argumentaire : c'est l'information que
+              l'utilisateur cherche en premier, la cacher plus bas donne
+              l'impression qu'on l'esquive. */}
+          <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'16px 18px', marginBottom:16 }}>
+            <span style={{ fontFamily:'Cinzel,serif', fontSize:34, fontWeight:700, color:'#c8a727' }}>{PRO_ANNUAL}</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / an</span>
             <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.45)', marginTop:2, marginBottom:8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
             <ProSavings />
           </div>
-          <ul style={{ listStyle:'none', padding:0, margin:0, textAlign:'left' }}>
+
+          <ul style={{ listStyle:'none', padding:0, margin:'0 0 16px', textAlign:'left' }}>
             {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Studio vidéo — téléchargement inclus'].map(function(item) {
               return <li key={item} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.65)', marginBottom:7 }}>{item}</li>;
             })}
           </ul>
+
+          {/* Ce que ça change au quotidien. Remplace l'ancienne liste de features :
+              elle faisait doublon avec celle ci-dessus, et décrivait ce qu'on
+              achète plutôt que ce que ça change. */}
+          <div className="pro-gate-feat-list">
+            <ProWhyGrid columns={1} limit={2} />
+          </div>
         </div>
 
-        {/* CTA */}
-        <button onClick={function(){ onClose(); openQuickCheckout(); }}
-          style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
-          Passer à Pro — {PRO_ANNUAL}/an
-        </button>
-        <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
-          <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.70)' }}>Annule quand tu veux</span>
-          <span style={{ color:'rgba(255,255,255,0.25)' }}>·</span>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.70)' }}>Remboursé sous 48h</span>
+        {/* Pied collant : prix et bouton restent visibles quel que soit le défilement. */}
+        <div className="pro-modal-footer" style={{ padding:'12px 24px 16px' }}>
+          <button onClick={function(){ onClose(); openQuickCheckout(); }}
+            style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
+            Passer à Pro — {PRO_ANNUAL}/an
+          </button>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap', marginBottom:8 }}>
+            <span style={{ color:'#4ade80', fontSize:12, flexShrink:0 }}>✓</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Annule quand tu veux</span>
+            <span style={{ color:'rgba(255,255,255,0.25)' }}>·</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Remboursé sous 48h</span>
+          </div>
+          <button onClick={onClose}
+            style={{ background:'none', border:'none', color:'rgba(240,237,230,0.32)', fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+            Continuer en gratuit
+          </button>
         </div>
-        <button onClick={onClose}
-          style={{ background:'none', border:'none', color:'rgba(240,237,230,0.3)', fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-          Continuer en gratuit
-        </button>
       </div>
     </div></ModalPortal>
   );
@@ -1633,8 +1642,11 @@ function Hero({ navigate }) {
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 10px 38px rgba(200,167,39,0.35)'; }}>
           Commencer gratuitement →
         </button>
-        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
-          Sans carte bancaire <span style={{ opacity: 0.5 }}>·</span> +130 membres
+        {/* Le bouton mène à « Comprendre » (l'activité vedette, jouable sans
+            compte). On le dit ici : un CTA générique qui atterrit sur une
+            activité précise passe pour une erreur de navigation. */}
+        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.5 }}>
+          Al-Fâtiha en entier, mot à mot <span style={{ opacity: 0.5 }}>·</span> sans compte <span style={{ opacity: 0.5 }}>·</span> sans carte bancaire
         </p>
       </div>
 
@@ -6917,10 +6929,14 @@ function ExitIntentPopup({ navigate }) {
 
   if (!show || isPro) return null;
 
+  // alignItems:center sur un overlay non défilable rognait le popup sur les
+  // écrans courts (bas hors de portée). flex-start + margin:auto centre quand
+  // ça tient et laisse défiler quand ça déborde.
+
   return (
     <ModalPortal><div onClick={function(e){ if(e.target===e.currentTarget) close(); }}
-      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(8px)', zIndex:10001, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-      <div className="pro-popup-inner" style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'40px 32px', maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
+      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(8px)', zIndex:10001, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:20, overflowY:'auto', WebkitOverflowScrolling:'touch' }}>
+      <div className="pro-popup-inner" style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'32px 28px', maxWidth:420, width:'100%', margin:'auto', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
         <button onClick={close} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', color:'rgba(255,255,255,0.3)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
         <div style={{ fontSize:44, marginBottom:16 }}>🕌</div>
         <h2 style={{ fontFamily:'Playfair Display,serif', fontWeight:900, fontSize:24, color:'#fff', marginBottom:10, lineHeight:1.2 }}>
@@ -7511,8 +7527,9 @@ function CmpProModal({ onClose, pct, mastered }) {
     return function () { document.body.style.overflow = ''; };
   }, []);
   return (
-    <ModalPortal><div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px 20px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', animation: 'overlayFade 0.25s ease-out' }}>
-      <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, padding: '34px 28px', maxWidth: 410, width: '100%', margin: '16px auto', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
+    <ModalPortal><div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'overlayFade 0.25s ease-out' }}>
+      <div className="pro-modal-card" onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, maxWidth: 410, width: '100%', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
+        <div className="pro-modal-scroll" style={{ padding: '30px 26px 14px' }}>
         <div style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
           {lockedCount} sourates<br /><span style={{ color: GOLD }}>t'attendent.</span>
@@ -7543,19 +7560,24 @@ function CmpProModal({ onClose, pct, mastered }) {
           <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: 'rgba(240,237,230,0.4)', marginTop: 2, marginBottom: 8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
           <ProSavings />
         </div>
-        <button onClick={function () { onClose(); openQuickCheckout(); }}
-          style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
-          Débloquer tout — {PRO_ANNUAL}/an
-        </button>
-        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 10px' }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 4px' }}>
           🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 12, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
-          <span>✓ +130 membres</span><span>✓ Sans engagement</span><span>✓ Remboursé sous 48h</span>
         </div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.3)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
-          Plus tard
-        </button>
+
+        {/* Pied collant : le bouton d'achat ne descend jamais sous l'écran. */}
+        <div className="pro-modal-footer" style={{ padding: '12px 26px 16px' }}>
+          <button onClick={function () { onClose(); openQuickCheckout(); }}
+            style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
+            Débloquer tout — {PRO_ANNUAL}/an
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
+            <span>✓ +130 membres</span><span>✓ Sans engagement</span><span>✓ Remboursé sous 48h</span>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.32)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+            Plus tard
+          </button>
+        </div>
       </div>
     </div></ModalPortal>
   );
