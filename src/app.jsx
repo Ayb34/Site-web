@@ -5,6 +5,66 @@
 
 const { useState, useEffect, useRef } = React;
 
+/* ═══ Offre Pro — argumentaire centralisé ═══
+   L'annuel est le plan par défaut (cf. api/create-checkout.js).
+   Mensuel sur 12 mois : 7,99 × 12 = 95,88€. L'annuel à 29,99€ économise donc
+   65,89€, soit −69%. Tous les chiffres vivent ici : un écart de prix entre deux
+   écrans détruit la confiance juste avant le paiement. */
+const PRO_ANNUAL = '29,99€';
+const PRO_MONTHLY = '7,99€';
+const PRO_YEAR_AT_MONTHLY = '95,88€'; // 7,99 × 12
+const PRO_SAVE = '65,89€';            // 95,88 − 29,99
+const PRO_DISCOUNT = '−69%';
+const PRO_EQ_MONTH = '2,50€';         // 29,99 / 12
+const PRO_PER_DAY = '0,08€';          // 29,99 / 365
+
+/* Ancre de prix. Seul, « 29,99€ » est un chiffre nu ; à côté des 95,88€ que
+   coûterait le mensuel sur la même année, c'est une remise. On barre l'ancre
+   plutôt que d'annoncer la remise en mots : le calcul se voit sans se lire. */
+function ProSavings({ align, dark }) {
+  const base = dark === false ? '0,0,0' : '255,255,255';
+  return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:align || 'center', gap:8, flexWrap:'wrap', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+      <span style={{ fontSize:12.5, color:'rgba(' + base + ',0.35)', textDecoration:'line-through' }}>{PRO_YEAR_AT_MONTHLY} au mois</span>
+      <span style={{ fontSize:11.5, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.12)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'3px 10px', whiteSpace:'nowrap' }}>
+        {PRO_DISCOUNT} · tu économises {PRO_SAVE}
+      </span>
+    </div>
+  );
+}
+
+/* Pourquoi le Pro sert au quotidien.
+   Une liste de fonctionnalités décrit ce qu'on achète, pas ce que ça change.
+   Chaque ligne relie donc un déblocage à un usage de tous les jours et à la
+   valeur du savoir en islam — c'est ce qui justifie la dépense, pas le prix. */
+const PRO_WHY = [
+  { icon:'🕌', title:'Comprends enfin ta prière', desc:'Tu récites déjà 5 fois par jour. Le mot-à-mot transforme chaque salât en un moment que tu comprends vraiment.' },
+  { icon:'⏱️', title:'5 minutes par jour suffisent', desc:'Dans les transports, après le fajr, avant de dormir. Le savoir se construit par petites doses régulières.' },
+  { icon:'🌱', title:'Une sadaqa jariya', desc:'Chaque vidéo de récitation que tu crées et partages continue de te rapporter, même après ta mort.' },
+  { icon:'📜', title:'Un devoir, pas un loisir', desc:'« La recherche du savoir est une obligation pour tout musulman. » — Ibn Majah' },
+];
+
+/* `limit` sert les modales : au-delà de 2 arguments, le bouton d'achat passe
+   sous la ligne de flottaison sur mobile et il faut scroller pour payer. */
+function ProWhyGrid({ columns, limit }) {
+  const items = limit ? PRO_WHY.slice(0, limit) : PRO_WHY;
+  return (
+    <div className="pro-why-grid" style={{ display:'grid', gridTemplateColumns: columns === 1 ? '1fr' : 'repeat(auto-fit,minmax(230px,1fr))', gap:10, textAlign:'left' }}>
+      {items.map(function(w) {
+        return (
+          <div key={w.title} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(200,167,39,0.16)', borderRadius:12, padding:'12px 14px', display:'flex', gap:10, alignItems:'flex-start' }}>
+            <span style={{ fontSize:18, flexShrink:0, lineHeight:1.2 }}>{w.icon}</span>
+            <div>
+              <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, fontWeight:800, color:'#f0ede6', marginBottom:3 }}>{w.title}</div>
+              <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.5)', lineHeight:1.55 }}>{w.desc}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ─── Plafond des relances Pro automatiques ───
    Une relance non sollicitée ne convertit qu'une fois : au-delà, l'utilisateur
    la ferme par réflexe. On limite donc les popups AUTOMATIQUES à 1 par session
@@ -192,31 +252,31 @@ function ProGateModal({ onClose, navigate }) {
   }, []);
   return (
     <div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
-      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'40px 32px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
+      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'28px 26px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
-        <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 20px' }}>✦</div>
+        <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>✦</div>
 
-        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>Tu es prêt pour la suite</h2>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 12px' }}>
+        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>Tu es prêt pour la suite</h2>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 14px' }}>
           Tu as fait le tour du niveau Débutant.<br/>Passe à <strong style={{color:'#c8a727'}}>Amateur & Avancé</strong> et débloque tout le site.
         </p>
-        <div className="pro-gate-feat-list" style={{ display:'flex', flexDirection:'column', gap:6, margin:'0 0 20px', textAlign:'left' }}>
-          {['📖 Comprendre le Coran — toutes les sourates mot à mot','🧠 Quiz illimités tous niveaux','🎵 Blind Test — 114 sourates','🎬 Studio vidéo & téléchargement','📅 Nouveau contenu chaque semaine'].map(function(f){
-            return React.createElement('div',{key:f,style:{fontFamily:'Plus Jakarta Sans,sans-serif',fontSize:12,color:'rgba(240,237,230,0.7)',display:'flex',alignItems:'center',gap:8}},
-              React.createElement('span',{style:{color:'#4ade80',fontWeight:800}},'✓'),f
-            );
-          })}
+        {/* Ce que ça change au quotidien. Remplace l'ancienne liste de features :
+            elle faisait doublon avec celle du bloc prix juste en dessous, et
+            décrivait ce qu'on achète plutôt que ce que ça change. */}
+        <div className="pro-gate-feat-list" style={{ margin:'0 0 18px' }}>
+          <ProWhyGrid columns={1} limit={2} />
         </div>
 
         {/* Price */}
         <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
-          <div style={{ marginBottom:8 }}>
-            <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>29,99€</span>
+          <div style={{ marginBottom:10 }}>
+            <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>{PRO_ANNUAL}</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / an</span>
-            <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.45)', marginTop:2 }}>soit 2,50€/mois</div>
+            <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.45)', marginTop:2, marginBottom:8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
+            <ProSavings />
           </div>
           <ul style={{ listStyle:'none', padding:0, margin:0, textAlign:'left' }}>
-            {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Studio vidéo — téléchargement inclus','✓ Résiliable à tout moment'].map(function(item) {
+            {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Studio vidéo — téléchargement inclus'].map(function(item) {
               return <li key={item} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.65)', marginBottom:7 }}>{item}</li>;
             })}
           </ul>
@@ -225,7 +285,7 @@ function ProGateModal({ onClose, navigate }) {
         {/* CTA */}
         <button onClick={function(){ onClose(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
-          "Passer à Pro — 29,99€/an"
+          Passer à Pro — {PRO_ANNUAL}/an
         </button>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
           <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
@@ -532,16 +592,17 @@ function SubscriptionPage({ navigate }) {
 
         {/* Price */}
         <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
-          <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>29,99€</span>
+          <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>{PRO_ANNUAL}</span>
           <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/an</span>
         </div>
-        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 6 }}>soit 2,50€/mois</div>
+        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 10 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
+        <div style={{ marginBottom: 12 }}><ProSavings /></div>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', marginBottom:20, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
           <span style={{ color:'#4ade80', fontSize:15, flexShrink:0 }}>✓</span>
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.78)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
-          Moins d'un café par semaine pour enrichir ton Deen.
+          {PRO_PER_DAY} par jour — moins qu'un café par mois, pour un savoir qui te suit toute ta vie.
         </p>
 
         {/* Features */}
@@ -573,7 +634,7 @@ function SubscriptionPage({ navigate }) {
           onMouseOver={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}
           onMouseOut={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 24px rgba(200,167,39,0.25)'; }}
         >
-          "🔓 Débloquer l'accès — 29,99€/an"
+          🔓 Débloquer l'accès — {PRO_ANNUAL}/an
         </button>
 
         {/* Séparateur */}
@@ -1098,7 +1159,7 @@ function Navbar({ navigate }) {
               }}
               onMouseEnter={(e) => {e.currentTarget.style.transform = 'scale(1.04)';}}
               onMouseLeave={(e) => {e.currentTarget.style.transform = 'scale(1)';}}>
-                "S'abonner 29,99€/an"
+                S'abonner {PRO_ANNUAL}/an
               </button>
             </>
           )}
@@ -1191,7 +1252,7 @@ function Navbar({ navigate }) {
               border: 'none', color: '#1c1200', padding: '15px', borderRadius: 12,
               fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
               letterSpacing: '-0.2px'
-            }}>"✦ S'abonner — 29,99€/an"</button>
+            }}>✦ S'abonner — {PRO_ANNUAL}/an</button>
             <button onClick={() => { setMenuOpen(false); openAuth(); }} style={{
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
               color: 'rgba(255,255,255,0.7)', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 600,
@@ -2196,10 +2257,11 @@ function ComparisonTable({ navigate }) {
                 
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-                <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>29,99€</p>
+                <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>{PRO_ANNUAL}</p>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/an</p>
               </div>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>soit 2,50€/mois</p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2, marginBottom: 8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</p>
+              <ProSavings align="flex-start" />
               <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginTop:4, display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
                 <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
@@ -2899,7 +2961,15 @@ function FaqSection() {
     },
     {
       q: 'Est-ce que je peux résilier quand je veux ?',
-      a: 'Oui, sans condition. L\'abonnement Pro est mensuel et résiliable en un clic depuis ton profil. Aucun engagement, aucune pénalité. Tu restes abonné jusqu\'à la fin du mois en cours, puis retour au compte gratuit.'
+      a: 'Oui, sans condition. Que tu sois en annuel ou en mensuel, l\'abonnement se résilie en un clic depuis ton profil. Aucun engagement, aucune pénalité : tu gardes l\'accès jusqu\'à la fin de la période déjà payée, puis retour au compte gratuit. Et si tu changes d\'avis dans les 48h sans avoir utilisé le contenu Pro, on te rembourse.'
+    },
+    {
+      q: 'Annuel ou mensuel — lequel choisir ?',
+      a: 'L\'annuel, sauf si tu veux vraiment tester mois par mois. Le mensuel à 7,99€ revient à 95,88€ sur une année complète ; l\'annuel est à 29,99€. Tu économises 65,89€, soit −69% — c\'est 2,50€ par mois, ou 0,08€ par jour. Concrètement : le prix d\'un café par mois pour tout le site, toute l\'année. Et apprendre sa religion ne se fait pas en trois semaines : le savoir se construit par petites doses régulières, l\'annuel est simplement le format honnête pour ça.'
+    },
+    {
+      q: 'Est-ce que ça vaut vraiment le coup au quotidien ?',
+      a: 'La vraie question n\'est pas le prix, c\'est l\'usage. Cinq minutes par jour — dans les transports, après le fajr, avant de dormir — suffisent à progresser. Le mot-à-mot change ta prière : tu récites déjà cinq fois par jour, autant comprendre ce que tu dis. Le Blind Test grave les sourates dans ta mémoire sans effort. Le Studio te permet de créer des vidéos de récitation à partager — et chaque partage peut devenir une sadaqa jariya, une aumône qui continue de te rapporter même après ta mort. « La recherche du savoir est une obligation pour tout musulman » (Ibn Majah) : ici, cette obligation devient une habitude qu\'on n\'a pas envie d\'arrêter.'
     },
     {
       q: 'Les vidéos générées sont-elles fiables islamiquement ?',
@@ -2907,7 +2977,7 @@ function FaqSection() {
     },
     {
       q: 'Combien ça coûte, et pourquoi pas gratuit à 100% ?',
-      a: 'L\'abonnement est à 29,99€/an (soit 2,50€/mois), sans engagement et résiliable en 1 clic. Une formule mensuelle à 7,99€/mois existe aussi. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par semaine — pour que l\'apprentissage islamique reste à la portée de tous.'
+      a: 'L\'abonnement est à 29,99€/an — soit 2,50€/mois, ou 0,08€ par jour — sans engagement et résiliable en 1 clic. Une formule mensuelle à 7,99€/mois existe aussi, mais elle revient à 95,88€ sur l\'année : l\'annuel te fait économiser 65,89€. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par mois — pour que l\'apprentissage islamique reste à la portée de tous.'
     },
   ];
 
@@ -3059,11 +3129,19 @@ function SoftPaywall({ navigate }) {
           ))}
         </div>
 
+        {/* Ce que l'abonnement change concrètement, avant d'annoncer le prix */}
+        <div style={{ marginBottom: 32 }}>
+          <ProWhyGrid />
+        </div>
+
         {/* Price anchor */}
-        <div className="soft-paywall-price-row" style={{ marginBottom: 24, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
-          <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>29,99€</span>
+        <div className="soft-paywall-price-row" style={{ marginBottom: 10, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
+          <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>{PRO_ANNUAL}</span>
           <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/an</span>
-          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.35)', flexBasis:'100%', textAlign:'center' }}>soit 2,50€/mois</span>
+          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.35)', flexBasis:'100%', textAlign:'center' }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</span>
+        </div>
+        <div style={{ marginBottom: 24 }}>
+          <ProSavings />
         </div>
 
         {/* CTA buttons */}
@@ -3081,7 +3159,7 @@ function SoftPaywall({ navigate }) {
           }}
           onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 8px 40px rgba(200,167,39,0.65)';e.currentTarget.style.transform='translateY(-2px)';}}
           onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
-            "🔓 Débloquer l'accès — 29,99€/an"
+            🔓 Débloquer l'accès — {PRO_ANNUAL}/an
           </button>
           <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
@@ -3090,7 +3168,7 @@ function SoftPaywall({ navigate }) {
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Remboursé sous 48h si non utilisé</span>
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8, textAlign:'center' }}>
-            Moins d'un café par semaine pour enrichir ton Deen · 🔒 Paiement sécurisé
+            {PRO_PER_DAY} par jour — moins qu'un café par mois, pour un savoir qui te suit toute ta vie · 🔒 Paiement sécurisé
           </div>
         </div>
       </div>
@@ -3305,7 +3383,7 @@ function StartPage({ navigate }) {
                   {/* Pro block */}
                   <div style={{ background:'rgba('+act.tagRgb+',0.05)', border:'1px solid rgba('+act.tagRgb+',0.15)', borderRadius:12, padding:'16px 18px', marginBottom:24 }}>
                     <div style={{ marginBottom:12, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>"✦ PRO — 29,99€/an"</span>
+                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>✦ PRO — {PRO_ANNUAL}/an</span>
                       
                     </div>
                     {act.pro.map(function(p) {
@@ -3365,11 +3443,12 @@ function StartPage({ navigate }) {
               {/* PRIX — gros, central, mis en valeur */}
               <div style={{ background:'linear-gradient(160deg,rgba(200,167,39,0.1) 0%,rgba(200,167,39,0.03) 100%)', border:'1.5px solid rgba(200,167,39,0.35)', borderRadius:24, padding:'36px 28px', maxWidth:480, margin:'0 auto 16px', boxShadow:'0 8px 50px rgba(200,167,39,0.12)' }}>
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
-                  <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
+                  <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>{PRO_ANNUAL}/an</span>
                 </div>
-                <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.55)', marginTop:8, fontWeight:700 }}>
-                  soit 2,50€/mois
+                <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.55)', marginTop:8, marginBottom:10, fontWeight:700 }}>
+                  soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour
                 </p>
+                <ProSavings />
                 <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.5)', marginTop:16, lineHeight:1.6 }}>
                   Moins cher qu'un kebab par mois — pour un savoir qui te suit toute ta vie.
                 </p>
@@ -6840,8 +6919,9 @@ function ExitIntentPopup({ navigate }) {
           Les niveaux <strong style={{color:'#fff'}}>Amateur & Avancé</strong>, le Blind Test complet et le Studio vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
-          <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
-          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>soit 2,50€/mois · sans engagement</div>
+          <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>{PRO_ANNUAL}/an</span>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2, marginBottom:8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour · sans engagement</div>
+          <ProSavings />
         </div>
         <button onClick={function(){ close(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
@@ -6895,8 +6975,9 @@ function StickyUpgradeBanner({ navigate }) {
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, fontWeight:800, color:'#fff', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
             Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span>
           </div>
-          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap' }}>
-            <span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>29,99€</span> /an
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6 }}>
+            <span><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>{PRO_ANNUAL}</span> /an</span>
+            <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{PRO_DISCOUNT}</span>
           </div>
         </div>
       </div>
@@ -7020,11 +7101,17 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
               {plan === 'annual' ? (
-                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>29,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/an</span></span>
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>{PRO_ANNUAL}<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/an</span></span>
               ) : (
-                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>{PRO_MONTHLY}<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
               )}
               <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#15803d', fontWeight: 700, background: 'rgba(22,163,74,0.12)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
+              {/* L'économie reste visible sur l'écran de paiement : c'est là que le doute revient. */}
+              {plan === 'annual' && (
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: '#15803d', fontWeight: 800, flexBasis: '100%' }}>
+                  Tu économises {PRO_SAVE} — {PRO_PER_DAY} par jour
+                </span>
+              )}
             </div>
           </div>
           <button onClick={handleClose} style={{ background: 'rgba(0,0,0,0.07)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
@@ -7035,13 +7122,13 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           <button onClick={() => switchPlan('annual')}
             style={{ flex: 1, position: 'relative', padding: '11px 8px', borderRadius: 12, border: plan === 'annual' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'annual' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
             <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 20, whiteSpace: 'nowrap' }}>−69%</span>
-            <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'annual' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>29,99€<span style={{ fontSize: 11, fontWeight: 700 }}>/an</span></span>
-            <span style={{ display: 'block', fontSize: 10.5, color: plan === 'annual' ? '#b8960a' : '#888', fontWeight: 700, marginTop: 2 }}>soit 2,50€/mois</span>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'annual' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>{PRO_ANNUAL}<span style={{ fontSize: 11, fontWeight: 700 }}>/an</span></span>
+            <span style={{ display: 'block', fontSize: 10.5, color: plan === 'annual' ? '#b8960a' : '#888', fontWeight: 700, marginTop: 2 }}>soit {PRO_EQ_MONTH}/mois</span>
           </button>
           <button onClick={() => switchPlan('monthly')}
             style={{ flex: 1, padding: '11px 8px', borderRadius: 12, border: plan === 'monthly' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'monthly' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
-            <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'monthly' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>7,99€<span style={{ fontSize: 11, fontWeight: 700 }}>/mois</span></span>
-            <span style={{ display: 'block', fontSize: 10.5, color: '#888', fontWeight: 600, marginTop: 2 }}>sans engagement</span>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'monthly' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>{PRO_MONTHLY}<span style={{ fontSize: 11, fontWeight: 700 }}>/mois</span></span>
+            <span style={{ display: 'block', fontSize: 10.5, color: '#888', fontWeight: 600, marginTop: 2 }}>{PRO_YEAR_AT_MONTHLY} sur un an</span>
           </button>
         </div>
 
@@ -7441,12 +7528,13 @@ function CmpProModal({ onClose, pct, mastered }) {
           })}
         </div>
         <div style={{ marginBottom: 14 }}>
-          <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>29,99€</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / an</span>
-          <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: 'rgba(240,237,230,0.4)', marginTop: 2 }}>soit 2,50€/mois</div>
+          <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>{PRO_ANNUAL}</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / an</span>
+          <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: 'rgba(240,237,230,0.4)', marginTop: 2, marginBottom: 8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
+          <ProSavings />
         </div>
         <button onClick={function () { onClose(); openQuickCheckout(); }}
           style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
-          'Débloquer tout — 29,99€/an'
+          Débloquer tout — {PRO_ANNUAL}/an
         </button>
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 10px' }}>
           🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
@@ -7526,7 +7614,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
           <span style={{ fontSize: 24 }}>🔓</span>
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates restantes</span>
-            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>'29,99€/an · sans engagement'</span>
+            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>{PRO_ANNUAL}/an · {PRO_PER_DAY} par jour · sans engagement</span>
           </span>
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
         </button>
@@ -7800,7 +7888,7 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
           <span style={{ fontSize: 28 }}>📖</span>
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Continue sur ta lancée</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>'29,99€/an'</span></span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>{PRO_ANNUAL}/an</span></span>
           </span>
           <span style={{ color: GOLD, fontSize: 22 }}>›</span>
         </button>
