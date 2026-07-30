@@ -211,8 +211,9 @@ function ProGateModal({ onClose, navigate }) {
         {/* Price */}
         <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
           <div style={{ marginBottom:8 }}>
-            <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>7,99€</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / mois</span>
+            <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>29,99€</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / an</span>
+            <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.45)', marginTop:2 }}>soit 2,50€/mois</div>
           </div>
           <ul style={{ listStyle:'none', padding:0, margin:0, textAlign:'left' }}>
             {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Studio vidéo — téléchargement inclus','✓ Résiliable à tout moment'].map(function(item) {
@@ -224,7 +225,7 @@ function ProGateModal({ onClose, navigate }) {
         {/* CTA */}
         <button onClick={function(){ onClose(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
-          "Passer à Pro — 7,99€/mois"
+          "Passer à Pro — 29,99€/an"
         </button>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
           <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
@@ -404,7 +405,7 @@ function SubscriptionPage({ navigate }) {
           Accès Pro
         </h1>
         <div style={{ marginBottom: 10 }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Comprendre le Coran · Quiz illimités · Blind Test complet · Studio vidéo
@@ -531,9 +532,10 @@ function SubscriptionPage({ navigate }) {
 
         {/* Price */}
         <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
-          <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/mois</span>
+          <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>29,99€</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/an</span>
         </div>
+        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 6 }}>soit 2,50€/mois</div>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', marginBottom:20, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
           <span style={{ color:'#4ade80', fontSize:15, flexShrink:0 }}>✓</span>
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.78)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
@@ -571,7 +573,7 @@ function SubscriptionPage({ navigate }) {
           onMouseOver={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}
           onMouseOut={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 24px rgba(200,167,39,0.25)'; }}
         >
-          "🔓 Débloquer l'accès — 7,99€/mois"
+          "🔓 Débloquer l'accès — 29,99€/an"
         </button>
 
         {/* Séparateur */}
@@ -784,7 +786,7 @@ function ProfilePage({ navigate }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: '#c8a727', textTransform: 'uppercase', letterSpacing: 1 }}>✦ Abonnement Pro actif</span>
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>7,99€/mois · Résiliable à tout moment</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>29,99€/an · Résiliable à tout moment</div>
               </div>
               {cancelState === 'idle' && (
                 <button onClick={handleCancel} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: 'rgba(239,68,68,0.7)', padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -1096,7 +1098,7 @@ function Navbar({ navigate }) {
               }}
               onMouseEnter={(e) => {e.currentTarget.style.transform = 'scale(1.04)';}}
               onMouseLeave={(e) => {e.currentTarget.style.transform = 'scale(1)';}}>
-                "S'abonner 7,99€/mois"
+                "S'abonner 29,99€/an"
               </button>
             </>
           )}
@@ -1189,7 +1191,7 @@ function Navbar({ navigate }) {
               border: 'none', color: '#1c1200', padding: '15px', borderRadius: 12,
               fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
               letterSpacing: '-0.2px'
-            }}>"✦ S'abonner — 7,99€/mois"</button>
+            }}>"✦ S'abonner — 29,99€/an"</button>
             <button onClick={() => { setMenuOpen(false); openAuth(); }} style={{
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
               color: 'rgba(255,255,255,0.7)', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 600,
@@ -1609,7 +1611,7 @@ function ReassuranceBanner() {
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
-  { value: '7,99€', label: 'par mois' },
+  { value: '29,99€', label: 'par an' },
   { value: '4', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
   { value: 'Sans', label: 'engagement' }];
@@ -2194,9 +2196,10 @@ function ComparisonTable({ navigate }) {
                 
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-                <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
+                <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>29,99€</p>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/an</p>
               </div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>soit 2,50€/mois</p>
               <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginTop:4, display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
                 <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
@@ -2847,7 +2850,7 @@ function StudioViralSection({ navigate }) {
               </div>
               <div style={{ flex: 1, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(200,167,39,0.05))', border: '1px solid rgba(200,167,39,0.4)', borderRadius: 14, padding: '14px 14px', position: 'relative' }}>
                 <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#e6c84a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Pro ✦</div>
-                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#e6c84a', fontWeight: 700, lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>/mois</span></div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#e6c84a', fontWeight: 700, lineHeight: 1 }}>29,99€<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>/an</span></div>
                 <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11.5, color: 'rgba(255,255,255,0.6)', margin: '8px 0 0', lineHeight: 1.6 }}>Vidéos <strong style={{ color: '#fff' }}>illimitées</strong> · tous les jeux Pro</p>
               </div>
             </div>
@@ -2904,7 +2907,7 @@ function FaqSection() {
     },
     {
       q: 'Combien ça coûte, et pourquoi pas gratuit à 100% ?',
-      a: 'L\'abonnement est à 7,99€/mois, sans engagement et résiliable en 1 clic. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par semaine — pour que l\'apprentissage islamique reste à la portée de tous.'
+      a: 'L\'abonnement est à 29,99€/an (soit 2,50€/mois), sans engagement et résiliable en 1 clic. Une formule mensuelle à 7,99€/mois existe aussi. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par semaine — pour que l\'apprentissage islamique reste à la portée de tous.'
     },
   ];
 
@@ -3058,8 +3061,9 @@ function SoftPaywall({ navigate }) {
 
         {/* Price anchor */}
         <div className="soft-paywall-price-row" style={{ marginBottom: 24, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
-          <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
-          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois</span>
+          <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>29,99€</span>
+          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/an</span>
+          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.35)', flexBasis:'100%', textAlign:'center' }}>soit 2,50€/mois</span>
         </div>
 
         {/* CTA buttons */}
@@ -3077,7 +3081,7 @@ function SoftPaywall({ navigate }) {
           }}
           onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 8px 40px rgba(200,167,39,0.65)';e.currentTarget.style.transform='translateY(-2px)';}}
           onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
-            "🔓 Débloquer l'accès — 7,99€/mois"
+            "🔓 Débloquer l'accès — 29,99€/an"
           </button>
           <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
@@ -3222,7 +3226,7 @@ function StartPage({ navigate }) {
                 {/* upsell discret — sous les boutons, jamais en barrage */}
                 <div onClick={function(){ openQuickCheckout(); }} style={{ cursor:'pointer', background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.22)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginTop:2 }}>
                   <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.6)' }}>
-                    🔓 Tous les niveaux, 114 sourates & le Studio — <strong style={{ color:'#e6c84a' }}>7,99€/mois</strong> →
+                    🔓 Tous les niveaux, 114 sourates & le Studio — <strong style={{ color:'#e6c84a' }}>29,99€/an</strong> →
                   </span>
                 </div>
               </>
@@ -3301,7 +3305,7 @@ function StartPage({ navigate }) {
                   {/* Pro block */}
                   <div style={{ background:'rgba('+act.tagRgb+',0.05)', border:'1px solid rgba('+act.tagRgb+',0.15)', borderRadius:12, padding:'16px 18px', marginBottom:24 }}>
                     <div style={{ marginBottom:12, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>"✦ PRO — 7,99€/mois"</span>
+                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>"✦ PRO — 29,99€/an"</span>
                       
                     </div>
                     {act.pro.map(function(p) {
@@ -3361,8 +3365,11 @@ function StartPage({ navigate }) {
               {/* PRIX — gros, central, mis en valeur */}
               <div style={{ background:'linear-gradient(160deg,rgba(200,167,39,0.1) 0%,rgba(200,167,39,0.03) 100%)', border:'1.5px solid rgba(200,167,39,0.35)', borderRadius:24, padding:'36px 28px', maxWidth:480, margin:'0 auto 16px', boxShadow:'0 8px 50px rgba(200,167,39,0.12)' }}>
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
-                  <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+                  <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
                 </div>
+                <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.55)', marginTop:8, fontWeight:700 }}>
+                  soit 2,50€/mois
+                </p>
                 <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.5)', marginTop:16, lineHeight:1.6 }}>
                   Moins cher qu'un kebab par mois — pour un savoir qui te suit toute ta vie.
                 </p>
@@ -6465,7 +6472,7 @@ function CguPage({ navigate }) {
 
       <h2 style={LS.h2}>Article 4 — Abonnement Pro et facturation</h2>
       <ul style={LS.ul}>
-        <li style={LS.li}><strong>Tarif :</strong> 7,99 € TTC par mois</li>
+        <li style={LS.li}><strong>Tarif :</strong> 29,99 € TTC par an (soit 2,50 €/mois) ou 7,99 € TTC par mois</li>
         <li style={LS.li}><strong>Facturation :</strong> mensuelle, automatique à la date anniversaire d'inscription</li>
         <li style={LS.li}><strong>Paiement :</strong> sécurisé via Stripe (carte bancaire)</li>
         <li style={LS.li}><strong>Résiliation :</strong> possible à tout moment depuis le profil utilisateur, sans frais. L'accès Pro reste actif jusqu'à la fin de la période en cours.</li>
@@ -6682,7 +6689,7 @@ function CGVPage({ navigate }) {
       <h2 style={LS.h2}>2. Produit et prix</h2>
       <p style={LS.p}>L'abonnement <strong>Héritage Pro</strong> donne accès à l'intégralité des fonctionnalités de la plateforme (tous niveaux de quiz, blind test illimité, studio vidéo HD).</p>
       <ul style={LS.ul}>
-        <li style={LS.li}><strong>Prix :</strong> 7,99 € TTC / mois</li>
+        <li style={LS.li}><strong>Prix :</strong> 29,99 € TTC / an (soit 2,50 €/mois) ou 7,99 € TTC / mois</li>
         <li style={LS.li}><strong>Facturation :</strong> mensuelle, reconduite automatiquement</li>
         <li style={LS.li}><strong>Paiement :</strong> carte bancaire via Stripe (sécurisé, certifié PCI DSS)</li>
         <li style={LS.li}><strong>TVA :</strong> non applicable — entrepreneur individuel (art. 293 B CGI)</li>
@@ -6833,8 +6840,8 @@ function ExitIntentPopup({ navigate }) {
           Les niveaux <strong style={{color:'#fff'}}>Amateur & Avancé</strong>, le Blind Test complet et le Studio vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
-          <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
-          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>sans engagement</div>
+          <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>soit 2,50€/mois · sans engagement</div>
         </div>
         <button onClick={function(){ close(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
@@ -6889,7 +6896,7 @@ function StickyUpgradeBanner({ navigate }) {
             Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span>
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap' }}>
-            <span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>7,99€</span> /mois
+            <span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>29,99€</span> /an
           </div>
         </div>
       </div>
@@ -7434,11 +7441,12 @@ function CmpProModal({ onClose, pct, mastered }) {
           })}
         </div>
         <div style={{ marginBottom: 14 }}>
-          <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>7,99€</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / mois</span>
+          <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>29,99€</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / an</span>
+          <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: 'rgba(240,237,230,0.4)', marginTop: 2 }}>soit 2,50€/mois</div>
         </div>
         <button onClick={function () { onClose(); openQuickCheckout(); }}
           style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
-          'Débloquer tout — 7,99€/mois'
+          'Débloquer tout — 29,99€/an'
         </button>
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 10px' }}>
           🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
@@ -7518,7 +7526,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
           <span style={{ fontSize: 24 }}>🔓</span>
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates restantes</span>
-            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>'7,99€/mois · sans engagement'</span>
+            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>'29,99€/an · sans engagement'</span>
           </span>
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
         </button>
@@ -7792,7 +7800,7 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
           <span style={{ fontSize: 28 }}>📖</span>
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Continue sur ta lancée</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>'7,99€/mois'</span></span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>'29,99€/an'</span></span>
           </span>
           <span style={{ color: GOLD, fontSize: 22 }}>›</span>
         </button>
