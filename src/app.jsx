@@ -5,6 +5,20 @@
 
 const { useState, useEffect, useRef } = React;
 
+/* ─── Plafond des relances Pro automatiques ───
+   Une relance non sollicitée ne convertit qu'une fois : au-delà, l'utilisateur
+   la ferme par réflexe. On limite donc les popups AUTOMATIQUES à 1 par session
+   de navigation (les clics volontaires sur un contenu verrouillé, eux, ouvrent
+   toujours le paywall). */
+function hmCanShowProGate(key) {
+  try {
+    const k = 'hm_progate_' + key;
+    if (sessionStorage.getItem(k)) return false;
+    sessionStorage.setItem(k, '1');
+    return true;
+  } catch (e) { return true; }
+}
+
 /* ─── Affichage prix offre lancement (cohérent partout) ─── */
 function OfferPrice({ big = 40, light = false }) {
   var priceColor = light ? '#1a1a1a' : '#f5d76e';
@@ -251,12 +265,12 @@ function ProGateModal({ onClose, navigate }) {
   return (
     <div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
       <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'40px 32px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
-        {/* Lock icon */}
-        <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 20px' }}>🔒</div>
+        {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
+        <div style={{ width:64, height:64, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 20px' }}>✦</div>
 
-        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>Fonctionnalité Pro</h2>
+        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 10px', lineHeight:1.2 }}>Tu es prêt pour la suite</h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.55)', lineHeight:1.7, margin:'0 0 12px' }}>
-          Ce contenu est réservé aux membres Pro.<br/>Débloque <strong style={{color:'#c8a727'}}>tout le site</strong> — Comprendre le Coran, quiz, blind test et studio vidéo.
+          Tu as fait le tour du niveau Débutant.<br/>Passe à <strong style={{color:'#c8a727'}}>Amateur & Avancé</strong> et débloque tout le site.
         </p>
         <div className="pro-gate-feat-list" style={{ display:'flex', flexDirection:'column', gap:6, margin:'0 0 20px', textAlign:'left' }}>
           {['📖 Comprendre le Coran — toutes les sourates mot à mot','🧠 Quiz illimités tous niveaux','🎵 Blind Test — 114 sourates','🎬 Studio vidéo & téléchargement','📅 Nouveau contenu chaque semaine'].map(function(f){
@@ -3803,8 +3817,10 @@ function BlindTestPage({ navigate }) {
         }
       }
       setState('bilan');
-      // Upsell au moment fort : la partie finie, on propose Pro aux non-abonnés
-      if (!isPro) {
+      // Upsell au moment fort : la partie finie, on propose Pro aux non-abonnés.
+      // Plafonné à 1 fois par session de navigation — au-delà, l'utilisateur
+      // ferme par réflexe et la relance ne convertit plus (cécité publicitaire).
+      if (!isPro && hmCanShowProGate('blindtest')) {
         setTimeout(function () {
           setShowProGate(true);
           window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
@@ -7285,6 +7301,15 @@ const CMP_WORD_INDEX = (function () {
   return map;
 })();
 const CMP_ALL_WORDS = Object.keys(CMP_WORD_INDEX).map(function (k) { return CMP_WORD_INDEX[k]; });
+// Nb de mots uniques enfermés derrière le Pro — sert à projeter la progression
+// réelle de l'utilisateur dans le paywall ("tu passerais de 13% à 45%").
+const CMP_LOCKED_WORDS = (function () {
+  const seen = {};
+  CMP_SOURATES.filter(function (s) { return !s.free; }).forEach(function (s) {
+    s.ayahs.forEach(function (a) { a.words.forEach(function (w) { seen[w.ar] = 1; }); });
+  });
+  return Object.keys(seen).length;
+})();
 const CMP_MASTER_THRESHOLD = 2; // bonnes réponses pour "maîtrisé"
 
 // Phonétique (translittération FR) par mot arabe — pour ceux qui ne lisent pas l'arabe.
@@ -7349,9 +7374,13 @@ function cmpLearnedCount(words) {
 function cmpMasteredCount(words) {
   return Object.keys(words || {}).filter(function (k) { return (words[k] || 0) >= CMP_MASTER_THRESHOLD; }).length;
 }
+// ~300 mots couvrent l'essentiel du texte coranique : la jauge mesure la
+// progression vers cette cible. Échelle volontairement honnête — un utilisateur
+// qui n'a fait que les 2 sourates gratuites doit voir qu'il reste du chemin,
+// sinon il n'a aucune raison de continuer (ni de passer Pro).
+const CMP_TARGET_WORDS = 300;
 function cmpComprehensionPct(words) {
-  // estimation motivante : ~ chaque mot appris ≈ 1,6%
-  return Math.min(99, Math.round(cmpLearnedCount(words) * 1.6));
+  return Math.min(99, Math.round((cmpLearnedCount(words) / CMP_TARGET_WORDS) * 100));
 }
 const CMP_LEVELS = ['Débutant', 'Apprenti', 'Étudiant', 'Connaisseur', 'Savant', 'Hâfiz'];
 function cmpLevel(xp) {
@@ -7416,8 +7445,10 @@ function ComprendrePage({ navigate }) {
   const guestBlocked = !user && (st.plays || 0) > 0;
 
   function openSourate(s) {
-    if (!s.free && !isPro) { setShowPro(true); return; }
-    if (guestBlocked) { setShowGate(true); return; }
+    const locked = !s.free && !isPro;
+    // Contenu Pro : on laisse DÉCOUVRIR (audio + mot-à-mot) pour donner le goût.
+    // Le jeu reste réservé — le mur arrive une fois l'envie créée, pas avant.
+    if (!locked && guestBlocked) { setShowGate(true); return; }
     setSourate(s); setMode('discover');
   }
 
@@ -7457,21 +7488,27 @@ function ComprendrePage({ navigate }) {
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 0%, #0a1f12 0%, #050f09 45%, #03070a 100%)', fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 60 }}>
       <Navbar navigate={navigate} />
       {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} />}
-      {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} onPlay={function(){ setMode('play'); }} onBack={function(){ setMode('hub'); }} />}
+      {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro} onPlay={function(){
+        if (!sourate.free && !isPro) { setShowPro(true); return; }
+        if (guestBlocked) { setShowGate(true); return; }
+        setMode('play');
+      }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'play' && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} />}
       {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
-      {showPro && <CmpProModal pct={pct} onClose={function(){ setShowPro(false); }} />}
+      {showPro && <CmpProModal pct={pct} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
     </div>
   );
 }
 
 // ── HUB ──
 // ── Modal Pro contextuel « Comprendre » — vendu sur le bénéfice, pas sur le verrou ──
-function CmpProModal({ onClose, pct }) {
+function CmpProModal({ onClose, pct, mastered }) {
   const { openQuickCheckout } = useAuth();
   const GOLD = '#e6c84a';
   const lockedCount = CMP_SOURATES.filter(function (s) { return !s.free; }).length;
+  // Projection concrète sur SA progression : plus convaincant qu'une liste de features
+  const projected = Math.min(99, Math.round((((mastered || 0) + CMP_LOCKED_WORDS) / CMP_TARGET_WORDS) * 100));
   React.useEffect(function () {
     document.body.style.overflow = 'hidden';
     return function () { document.body.style.overflow = ''; };
@@ -7483,10 +7520,22 @@ function CmpProModal({ onClose, pct }) {
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
           {lockedCount} sourates<br /><span style={{ color: GOLD }}>t'attendent.</span>
         </h2>
-        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 14, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7, margin: '0 0 18px' }}>
-          Tu comprends déjà <strong style={{ color: GOLD }}>{pct}%</strong> des mots fréquents.
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 14, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7, margin: '0 0 16px' }}>
           Ne t'arrête pas là — chaque sourate apprise te rapproche de <strong style={{ color: '#f0ede6' }}>comprendre ta prière</strong>.
         </p>
+
+        {/* Projection sur SA propre progression */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(74,222,128,0.08))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: 'rgba(240,237,230,0.55)', lineHeight: 1 }}>{pct}%</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.45)', marginTop: 3 }}>aujourd'hui</div>
+          </div>
+          <span style={{ color: GOLD, fontSize: 22, fontWeight: 900 }}>→</span>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 32, fontWeight: 900, color: '#4ade80', lineHeight: 1, textShadow: '0 0 16px rgba(74,222,128,0.4)' }}>{projected}%</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.55)', marginTop: 3 }}>avec les {lockedCount} sourates</div>
+          </div>
+        </div>
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 16, textAlign: 'left' }}>
           {['📖 Les ' + CMP_SOURATES.length + ' sourates mot à mot — et toutes celles à venir', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '🎬 Studio vidéo + téléchargement HD'].map(function (f) {
             return <div key={f} style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.7)', marginBottom: 7, display: 'flex', gap: 8 }}><span style={{ color: '#4ade80', fontWeight: 800 }}>✓</span>{f}</div>;
@@ -7536,7 +7585,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
       <div style={{ display: 'flex', gap: 14, alignItems: 'center', background: 'linear-gradient(160deg,rgba(200,167,39,0.08),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 22, padding: '22px 24px', marginBottom: 16 }}>
         <CmpRing pct={pct} size={104} stroke={10} color={GOLD}>
           <span style={{ fontSize: 28, fontWeight: 900, color: GOLD, lineHeight: 1 }}>{pct}<span style={{ fontSize: 15 }}>%</span></span>
-          <span style={{ fontSize: 9.5, color: 'rgba(240,237,230,0.5)', letterSpacing: '0.05em', marginTop: 2 }}>compris</span>
+          <span style={{ fontSize: 9, color: 'rgba(240,237,230,0.5)', letterSpacing: '0.03em', marginTop: 2, textAlign: 'center', lineHeight: 1.15 }}>des 300 mots<br />essentiels</span>
         </CmpRing>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.55)', marginBottom: 4 }}>Niveau {lvl.n} · <span style={{ color: GOLD, fontWeight: 700 }}>{lvl.title}</span></div>
@@ -7597,7 +7646,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
 }
 
 // ── DÉCOUVERTE (reveal mot-à-mot + audio) ──
-function CmpDiscover({ sourate, playAyah, onPlay, onBack }) {
+function CmpDiscover({ sourate, playAyah, onPlay, onBack, preview }) {
   const GOLD = '#e6c84a';
   const [ai, setAi] = React.useState(0);
   const [revealed, setRevealed] = React.useState(0); // nb de mots révélés sur l'ayah courant
@@ -7623,7 +7672,9 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack }) {
       </div>
 
       <div style={{ textAlign: 'center', margin: '10px 0 28px' }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD }}>Découverte · écoute & lis</p>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD }}>
+          {preview ? '✦ Aperçu Pro · découverte offerte' : 'Découverte · écoute & lis'}
+        </p>
       </div>
 
       {/* Mot-à-mot : RTL, chaque mot avec son sens dessous */}
@@ -7653,7 +7704,9 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack }) {
         {!last ? (
           <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
         ) : (
-          <button onClick={onPlay} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#4ade80,#22a35a)', color: '#04140a', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>🎮 Maintenant, joue →</button>
+          <button onClick={onPlay} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: preview ? 'linear-gradient(135deg,#c8a727,#a8891f)' : 'linear-gradient(135deg,#4ade80,#22a35a)', color: preview ? '#1a1205' : '#04140a', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+            {preview ? '🔓 Débloquer pour jouer →' : '🎮 Maintenant, joue →'}
+          </button>
         )}
       </div>
     </div>
@@ -7838,7 +7891,7 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
           <span style={{ fontSize: 22, fontWeight: 900, color: GOLD }}>{pct}%</span>
         </CmpRing>
         <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 15, color: '#f0ede6', fontWeight: 700 }}>Tu comprends ≈ {pct}% des mots fréquents</div>
+          <div style={{ fontSize: 15, color: '#f0ede6', fontWeight: 700 }}>Tu maîtrises {pct}% des 300 mots les plus fréquents</div>
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{mastered} mots appris · niveau {lvl.title}</div>
         </div>
       </div>
