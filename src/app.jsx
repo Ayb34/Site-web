@@ -65,6 +65,17 @@ function ProWhyGrid({ columns, limit }) {
   );
 }
 
+/* Toutes les modales passent par un portal sur document.body.
+   Sans ça, un ancêtre animé (.fade-up, .reveal-*) porte un `transform`, ce qui
+   en fait le bloc conteneur des descendants `position:fixed`. L'overlay se
+   dimensionne alors sur la section (souvent bien plus haute que l'écran) au
+   lieu du viewport : scrollHeight devient égal à clientHeight, la modale ne
+   défile plus, et son bas — dont le bouton d'achat — reste inatteignable
+   puisque le body est déjà verrouillé. */
+function ModalPortal({ children }) {
+  return ReactDOM.createPortal(children, document.body);
+}
+
 /* ─── Plafond des relances Pro automatiques ───
    Une relance non sollicitée ne convertit qu'une fois : au-delà, l'utilisateur
    la ferme par réflexe. On limite donc les popups AUTOMATIQUES à 1 par session
@@ -200,7 +211,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
     };
   }, []);
   return (
-    <div ref={overlayRef} onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
+    <ModalPortal><div ref={overlayRef} onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
       <div style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'36px 28px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div style={{ fontSize:44, marginBottom:14 }}>{copy.emoji}</div>
@@ -225,7 +236,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
           Continuer sans compte (progression non sauvegardée)
         </button>
       </div>
-    </div>
+    </div></ModalPortal>
   );
 }
 
@@ -251,7 +262,7 @@ function ProGateModal({ onClose, navigate }) {
     };
   }, []);
   return (
-    <div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
+    <ModalPortal><div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'24px 20px', overflowY:'auto', WebkitOverflowScrolling:'touch', animation:'overlayFade 0.25s ease-out' }}>
       <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, padding:'28px 26px', maxWidth:400, width:'100%', margin:'16px auto', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
         <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>✦</div>
@@ -298,7 +309,7 @@ function ProGateModal({ onClose, navigate }) {
           Continuer en gratuit
         </button>
       </div>
-    </div>
+    </div></ModalPortal>
   );
 }
 
@@ -679,7 +690,7 @@ function SubscriptionPage({ navigate }) {
 
       {/* ── Embedded Checkout Modal ── */}
       {showCheckout && (
-        <div onClick={function(e){ if(e.target===e.currentTarget) closeCheckout(); }} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', backdropFilter:'blur(12px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+        <ModalPortal><div onClick={function(e){ if(e.target===e.currentTarget) closeCheckout(); }} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', backdropFilter:'blur(12px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'#fff', borderRadius:20, width:'100%', maxWidth:520, maxHeight:'90vh', overflowY:'auto', position:'relative', boxShadow:'0 40px 80px rgba(0,0,0,0.6)' }}>
             {/* Close */}
             <button onClick={closeCheckout} style={{ position:'absolute', top:14, right:14, zIndex:10, background:'rgba(0,0,0,0.07)', border:'none', borderRadius:'50%', width:32, height:32, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif' }}>✕</button>
@@ -704,7 +715,7 @@ function SubscriptionPage({ navigate }) {
             {/* Checkout container */}
             {!checkoutLoading && !checkoutError && <div ref={containerRef} style={{ minHeight:200 }} />}
           </div>
-        </div>
+        </div></ModalPortal>
       )}
     </div>
   );
@@ -6907,7 +6918,7 @@ function ExitIntentPopup({ navigate }) {
   if (!show || isPro) return null;
 
   return (
-    <div onClick={function(e){ if(e.target===e.currentTarget) close(); }}
+    <ModalPortal><div onClick={function(e){ if(e.target===e.currentTarget) close(); }}
       style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(8px)', zIndex:10001, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
       <div className="pro-popup-inner" style={{ background:'linear-gradient(160deg,rgba(15,35,18,0.98),rgba(8,20,10,0.98))', border:'1px solid rgba(200,167,39,0.3)', borderRadius:24, padding:'40px 32px', maxWidth:420, width:'100%', textAlign:'center', boxShadow:'0 40px 80px rgba(0,0,0,0.7)', position:'relative' }}>
         <button onClick={close} style={{ position:'absolute', top:14, right:16, background:'none', border:'none', color:'rgba(255,255,255,0.3)', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
@@ -6936,7 +6947,7 @@ function ExitIntentPopup({ navigate }) {
           Pas maintenant
         </button>
       </div>
-    </div>
+    </div></ModalPortal>
   );
 }
 
@@ -7091,7 +7102,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
   }
 
   return (
-    <div onClick={function (e) { if (e.target === e.currentTarget) handleClose(); }}
+    <ModalPortal><div onClick={function (e) { if (e.target === e.currentTarget) handleClose(); }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(12px)', zIndex: 10000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '16px', overflowY: 'auto' }}>
       <div className="checkout-modal" style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 520, position: 'relative', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', marginTop: 'max(16px, env(safe-area-inset-top))', marginBottom: 16 }}>
 
@@ -7173,7 +7184,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           </div>
         )}
       </div>
-    </div>
+    </div></ModalPortal>
   );
 }
 
@@ -7500,7 +7511,7 @@ function CmpProModal({ onClose, pct, mastered }) {
     return function () { document.body.style.overflow = ''; };
   }, []);
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px 20px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', animation: 'overlayFade 0.25s ease-out' }}>
+    <ModalPortal><div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px 20px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', animation: 'overlayFade 0.25s ease-out' }}>
       <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, padding: '34px 28px', maxWidth: 410, width: '100%', margin: '16px auto', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
@@ -7546,7 +7557,7 @@ function CmpProModal({ onClose, pct, mastered }) {
           Plus tard
         </button>
       </div>
-    </div>
+    </div></ModalPortal>
   );
 }
 
