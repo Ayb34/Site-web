@@ -57,14 +57,17 @@ async function handler(req, res) {
           isPro: true,
           proSince: new Date().toISOString(),
         };
-        // PayPal one-time : stocker date d'expiry à J+30
+        // PayPal one-time : expiry selon la durée du plan acheté (30 j ou 365 j)
         if (session.metadata && session.metadata.payment_method === 'paypal') {
+          const days = parseInt((session.metadata && session.metadata.duration_days) || '30', 10) || 30;
           const expiry = new Date();
-          expiry.setDate(expiry.getDate() + 30);
+          expiry.setDate(expiry.getDate() + days);
           data.proExpiry = expiry.toISOString();
           data.proType = 'paypal_onetime';
+          data.proPlan = session.metadata.plan || 'monthly';
         } else {
           data.proType = 'stripe_subscription';
+          data.proPlan = (session.metadata && session.metadata.plan) || 'annual';
         }
         await db
           .collection('users')

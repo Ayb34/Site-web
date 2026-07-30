@@ -6916,6 +6916,9 @@ function StickyUpgradeBanner({ navigate }) {
 function QuickCheckoutModal({ onClose, initialMethod }) {
   const { user } = useAuth();
   const [activeMethod, setActiveMethod] = React.useState(initialMethod || 'card');
+  // L'annuel est pré-sélectionné : meilleur pour l'utilisateur (−69%) et pour
+  // la trésorerie (encaissé d'un coup, pas de churn mensuel).
+  const [plan, setPlan] = React.useState('annual');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const checkoutRef = React.useRef(null);
@@ -6942,7 +6945,8 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
     }
   }
 
-  async function startCheckout(method) {
+  async function startCheckout(method, planArg) {
+    var thePlan = planArg || plan;
     var myGen = ++genRef.current;          // invalide toute création précédente
     setLoading(true);
     setError(null);
@@ -6958,7 +6962,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method }),
+        body: JSON.stringify({ method: method, plan: thePlan }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -6989,7 +6993,13 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
   function switchMethod(m) {
     if (m === activeMethod && !error) return;
     setActiveMethod(m);
-    startCheckout(m);
+    startCheckout(m, plan);
+  }
+
+  function switchPlan(p) {
+    if (p === plan && !error) return;
+    setPlan(p);
+    startCheckout(activeMethod, p);
   }
 
   return (
@@ -7002,11 +7012,30 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           <div>
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
+              {plan === 'annual' ? (
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>29,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/an</span></span>
+              ) : (
+                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
+              )}
               <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#15803d', fontWeight: 700, background: 'rgba(22,163,74,0.12)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
             </div>
           </div>
           <button onClick={handleClose} style={{ background: 'rgba(0,0,0,0.07)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+        </div>
+
+        {/* Choix du plan — annuel mis en avant */}
+        <div style={{ padding: '12px 14px 0', display: 'flex', gap: 8 }}>
+          <button onClick={() => switchPlan('annual')}
+            style={{ flex: 1, position: 'relative', padding: '11px 8px', borderRadius: 12, border: plan === 'annual' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'annual' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
+            <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 20, whiteSpace: 'nowrap' }}>−69%</span>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'annual' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>29,99€<span style={{ fontSize: 11, fontWeight: 700 }}>/an</span></span>
+            <span style={{ display: 'block', fontSize: 10.5, color: plan === 'annual' ? '#b8960a' : '#888', fontWeight: 700, marginTop: 2 }}>soit 2,50€/mois</span>
+          </button>
+          <button onClick={() => switchPlan('monthly')}
+            style={{ flex: 1, padding: '11px 8px', borderRadius: 12, border: plan === 'monthly' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'monthly' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'monthly' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>7,99€<span style={{ fontSize: 11, fontWeight: 700 }}>/mois</span></span>
+            <span style={{ display: 'block', fontSize: 10.5, color: '#888', fontWeight: 600, marginTop: 2 }}>sans engagement</span>
+          </button>
         </div>
 
         {/* Tabs méthode de paiement */}

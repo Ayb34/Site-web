@@ -2,6 +2,16 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
 });
 
+// Tarifs Stripe (produit « Héritage Musulman — Abonnement Pro »)
+const PRICE_MONTHLY = 'price_1TXkOqCI24S0XReb1I9KiKuv'; //  7,99 € / mois
+const PRICE_ANNUAL  = 'price_1TyxGoCI24S0XRebIfNLuJFo'; // 29,99 € / an
+
+// Équivalents PayPal (paiement unique, pas d'abonnement)
+const PAYPAL_PLANS = {
+  monthly: { amount: 799,  days: 30,  label: 'Héritage Musulman Pro — 1 mois' },
+  annual:  { amount: 2999, days: 365, label: 'Héritage Musulman Pro — 1 an' },
+};
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,26 +24,29 @@ module.exports = async (req, res) => {
   try {
     const origin = req.headers.origin || 'https://heritage-musulman.com';
     const method = (req.body && req.body.method) || 'card';
+    // L'annuel est le plan mis en avant : c'est aussi le défaut côté serveur.
+    const plan = (req.body && req.body.plan) === 'monthly' ? 'monthly' : 'annual';
 
     let session;
 
     if (method === 'paypal') {
-      // Paiement unique PayPal — 7,99€ / 30 jours
+      // PayPal : paiement unique, l'accès Pro expire après `days` (voir webhook)
+      const p = PAYPAL_PLANS[plan];
       session = await stripe.checkout.sessions.create({
         mode: 'payment',
         payment_method_types: ['paypal'],
         line_items: [{
           price_data: {
             currency: 'eur',
-            unit_amount: 799,
+            unit_amount: p.amount,
             product_data: {
-              name: 'Héritage Musulman Pro — 1 mois',
-              description: 'Accès complet pendant 30 jours · renouvelable',
+              name: p.label,
+              description: 'Accès complet pendant ' + p.days + ' jours · renouvelable',
             },
           },
           quantity: 1,
         }],
-        metadata: { payment_method: 'paypal', duration_days: '30' },
+        metadata: { payment_method: 'paypal', duration_days: String(p.days), plan: plan },
         ui_mode: 'embedded',
         return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
@@ -42,11 +55,12 @@ module.exports = async (req, res) => {
       // Abonnement carte + Apple Pay / Google Pay — méthodes gérées via Dashboard Stripe
       session = await stripe.checkout.sessions.create({
         mode: 'subscription',
-        line_items: [{ price: 'price_1TXkOqCI24S0XReb1I9KiKuv', quantity: 1 }],
+        line_items: [{ price: plan === 'monthly' ? PRICE_MONTHLY : PRICE_ANNUAL, quantity: 1 }],
         payment_method_types: ['card'],
         ui_mode: 'embedded',
         return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
+        metadata: { plan: plan },
       });
     }
 
