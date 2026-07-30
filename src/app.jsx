@@ -19,78 +19,6 @@ function hmCanShowProGate(key) {
   } catch (e) { return true; }
 }
 
-/* ─── Affichage prix offre lancement (cohérent partout) ─── */
-function OfferPrice({ big = 40, light = false }) {
-  var priceColor = light ? '#1a1a1a' : '#f5d76e';
-  var subColor   = light ? 'rgba(0,0,0,0.6)' : '#ffffff';
-  var mutedColor = light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.88)';
-  return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7 }}>
-      <div style={{ display:'flex', alignItems:'baseline', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
-        <span style={{ fontFamily:"'Playfair Display', serif", fontWeight:900, fontSize:big, lineHeight:1, color:priceColor, letterSpacing:'-0.5px', textShadow: light ? 'none' : '0 2px 16px rgba(200,167,39,0.35)' }}>3,99€</span>
-        <span style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.36), fontWeight:700, color:subColor }}>le 1<sup style={{ fontSize:'0.6em' }}>er</sup> mois</span>
-        <span style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.3), fontWeight:800, color:'#ffffff', background:'linear-gradient(135deg,#6ee79a,#22c55e)', borderRadius:30, padding:'3px 11px', letterSpacing:'0.02em', boxShadow:'0 2px 12px rgba(34,197,94,0.35)' }}>−50%</span>
-      </div>
-      <div style={{ fontFamily:"'Plus Jakarta Sans', sans-serif", fontSize:Math.round(big*0.33), fontWeight:600, color:mutedColor }}>
-        puis <span style={{ textDecoration:'line-through', opacity:0.85 }}>7,99€</span>/mois · sans engagement
-      </div>
-    </div>
-  );
-}
-
-/* ─── Vrai compte à rebours offre (48h par utilisateur, persistant) ─── */
-function getOfferDeadline() {
-  try {
-    var k = 'hm_offer_deadline';
-    var v = localStorage.getItem(k);
-    var now = Date.now();
-    if (!v || isNaN(parseInt(v, 10)) || parseInt(v, 10) < now) {
-      var hours = 30 + Math.random() * 18; // départ aléatoire entre 30h et 48h
-      var dl = now + Math.round(hours * 3600 * 1000);
-      localStorage.setItem(k, String(dl));
-      return dl;
-    }
-    return parseInt(v, 10);
-  } catch (e) {
-    return Date.now() + 48 * 3600 * 1000;
-  }
-}
-
-function OfferCountdown({ compact = false }) {
-  var [deadline] = React.useState(getOfferDeadline);
-  var [now, setNow] = React.useState(Date.now());
-  React.useEffect(function () {
-    var id = setInterval(function () { setNow(Date.now()); }, 1000);
-    return function () { clearInterval(id); };
-  }, []);
-  var left = Math.max(0, deadline - now);
-  var h = Math.floor(left / 3600000);
-  var m = Math.floor((left % 3600000) / 60000);
-  var s = Math.floor((left % 60000) / 1000);
-  var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
-  var box = {
-    fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 900,
-    fontSize: compact ? 13 : 15, color: '#fff', background: 'rgba(0,0,0,0.28)',
-    borderRadius: 7, padding: compact ? '2px 7px' : '4px 9px', letterSpacing: '0.04em',
-    minWidth: compact ? 30 : 36, textAlign: 'center', display: 'inline-block'
-  };
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(220,50,50,0.12)', border: '1px solid rgba(220,50,50,0.32)', borderRadius: 30, padding: compact ? '5px 12px' : '7px 16px' }}>
-      <span style={{ fontSize: compact ? 12 : 13 }}>⏳</span>
-      <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: compact ? 11.5 : 12.5, fontWeight: 700, color: '#ff8a8a', letterSpacing: '0.04em' }}>
-        Offre −50% · fin dans
-      </span>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-        <span style={box}>{pad(h)}</span>
-        <span style={{ color: '#ff8a8a', fontWeight: 900 }}>:</span>
-        <span style={box}>{pad(m)}</span>
-        <span style={{ color: '#ff8a8a', fontWeight: 900 }}>:</span>
-        <span style={box}>{pad(s)}</span>
-      </span>
-    </div>
-  );
-}
-
 /* ─── Logo image ─── */
 function CrescentLogo({ size = 32 }) {
   return (
@@ -283,14 +211,8 @@ function ProGateModal({ onClose, navigate }) {
         {/* Price */}
         <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'18px 20px', marginBottom:24 }}>
           <div style={{ marginBottom:8 }}>
-            {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-              <OfferPrice big={38} />
-            ) : (
-              <>
-                <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>7,99€</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / mois</span>
-              </>
-            )}
+            <span style={{ fontFamily:'Cinzel,serif', fontSize:36, fontWeight:700, color:'#c8a727' }}>7,99€</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / mois</span>
           </div>
           <ul style={{ listStyle:'none', padding:0, margin:0, textAlign:'left' }}>
             {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Studio vidéo — téléchargement inclus','✓ Résiliable à tout moment'].map(function(item) {
@@ -302,7 +224,7 @@ function ProGateModal({ onClose, navigate }) {
         {/* CTA */}
         <button onClick={function(){ onClose(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "Passer à Pro — 3,99€ le 1er mois" : "Passer à Pro — 7,99€/mois"}
+          "Passer à Pro — 7,99€/mois"
         </button>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginBottom:12, display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
           <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
@@ -482,14 +404,7 @@ function SubscriptionPage({ navigate }) {
           Accès Pro
         </h1>
         <div style={{ marginBottom: 10 }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-            <OfferPrice big={30} />
-          ) : (
-            <>
-              <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
-              <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.6)', marginLeft:6 }}>· offre lancement</span>
-            </>
-          )}
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Comprendre le Coran · Quiz illimités · Blind Test complet · Studio vidéo
@@ -541,7 +456,7 @@ function SubscriptionPage({ navigate }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method || 'card', founder: window.HM_FOUNDER && window.HM_FOUNDER() }),
+        body: JSON.stringify({ method: method || 'card' }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -611,18 +526,14 @@ function SubscriptionPage({ navigate }) {
         <div style={{ display: 'inline-block', background: 'rgba(200,167,39,0.12)',
           border: '1px solid rgba(200,167,39,0.3)', borderRadius: 30, padding: '4px 14px',
           fontSize: 12, color: '#c8a727', fontWeight: 700, marginBottom: 20, letterSpacing: 0.5 }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? '🎉 OFFRE LANCEMENT · -50% LE 1ER MOIS' : '✦ ACCÈS COMPLET'}
+          ✦ ACCÈS COMPLET
         </div>
 
         {/* Price */}
-        {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-          <div style={{ marginBottom: 6 }}><OfferPrice big={52} /></div>
-        ) : (
-          <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
-            <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/mois</span>
-          </div>
-        )}
+        <div style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 4 }}>
+          <span className="sub-price" style={{ fontSize: 52, fontWeight: 900, color: '#c8a727', lineHeight: 1 }}>7,99€</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16, marginBottom: 8 }}>/mois</span>
+        </div>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', marginBottom:20, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
           <span style={{ color:'#4ade80', fontSize:15, flexShrink:0 }}>✓</span>
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.78)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
@@ -660,7 +571,7 @@ function SubscriptionPage({ navigate }) {
           onMouseOver={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(200,167,39,0.35)'; }}
           onMouseOut={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 24px rgba(200,167,39,0.25)'; }}
         >
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "🔓 1er mois à 3,99€ — puis 7,99€/mois" : "🔓 Débloquer l'accès — 7,99€/mois"}
+          "🔓 Débloquer l'accès — 7,99€/mois"
         </button>
 
         {/* Séparateur */}
@@ -1185,7 +1096,7 @@ function Navbar({ navigate }) {
               }}
               onMouseEnter={(e) => {e.currentTarget.style.transform = 'scale(1.04)';}}
               onMouseLeave={(e) => {e.currentTarget.style.transform = 'scale(1)';}}>
-                {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "S'abonner — 3,99€ le 1er mois" : "S'abonner 7,99€/mois"}
+                "S'abonner 7,99€/mois"
               </button>
             </>
           )}
@@ -1278,7 +1189,7 @@ function Navbar({ navigate }) {
               border: 'none', color: '#1c1200', padding: '15px', borderRadius: 12,
               fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
               letterSpacing: '-0.2px'
-            }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? "✦ S'abonner — 3,99€ le 1er mois" : "✦ S'abonner — 7,99€/mois"}</button>
+            }}>"✦ S'abonner — 7,99€/mois"</button>
             <button onClick={() => { setMenuOpen(false); openAuth(); }} style={{
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
               color: 'rgba(255,255,255,0.7)', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 600,
@@ -1698,7 +1609,7 @@ function ReassuranceBanner() {
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
-  { value: '3,99€', label: '1er mois · −50%' },
+  { value: '7,99€', label: 'par mois' },
   { value: '4', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
   { value: 'Sans', label: 'engagement' }];
@@ -2283,14 +2194,8 @@ function ComparisonTable({ navigate }) {
                 
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-                {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-                  <OfferPrice big={40} />
-                ) : (
-                  <>
-                    <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
-                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
-                  </>
-                )}
+                <p style={{ fontSize: 38, fontWeight: 800, color: '#c8a727' }}>7,99€</p>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>/mois</p>
               </div>
               <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', marginTop:4, display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ color:'#4ade80', fontSize:13, flexShrink:0 }}>✓</span>
@@ -2306,9 +2211,9 @@ function ComparisonTable({ navigate }) {
               )}
             </div>
             {!isPro && (
-              <div style={{ marginTop:24, display:'flex', alignItems:'center', justifyContent:'center', gap:7, background:'rgba(220,50,50,0.1)', border:'1px solid rgba(220,50,50,0.28)', borderRadius:20, padding:'5px 14px' }}>
-                <span style={{ fontSize:11 }}>⏳</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'#ff7070', letterSpacing:'0.05em' }}>⚡ Offre de lancement — expire bientôt</span>
+              <div style={{ marginTop:24, display:'flex', alignItems:'center', justifyContent:'center', gap:7, background:'rgba(74,222,128,0.1)', border:'1px solid rgba(74,222,128,0.28)', borderRadius:20, padding:'5px 14px' }}>
+                <span style={{ fontSize:11 }}>✓</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'#7bc99a', letterSpacing:'0.05em' }}>Sans engagement — résiliable en 1 clic</span>
               </div>
             )}
             <button onClick={() => isPro ? navigate('blind-test') : openQuickCheckout()} style={{
@@ -2999,7 +2904,7 @@ function FaqSection() {
     },
     {
       q: 'Combien ça coûte, et pourquoi pas gratuit à 100% ?',
-      a: 'L\'offre de lancement est à 3,99€ le 1er mois (−50%), puis 7,99€/mois, sans engagement et résiliable en 1 clic. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par semaine — pour que l\'apprentissage islamique reste à la portée de tous.'
+      a: 'L\'abonnement est à 7,99€/mois, sans engagement et résiliable en 1 clic. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par semaine — pour que l\'apprentissage islamique reste à la portée de tous.'
     },
   ];
 
@@ -3117,10 +3022,6 @@ function SoftPaywall({ navigate }) {
     }}>
       <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse, rgba(200,167,39,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="reveal-flip" style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        {/* Countdown live réel */}
-        <div className="soft-paywall-countdown" style={{ marginBottom: 24 }}>
-          <OfferCountdown />
-        </div>
 
         <h2 style={{
           fontFamily: 'Playfair Display, serif', fontWeight: 900,
@@ -3157,14 +3058,8 @@ function SoftPaywall({ navigate }) {
 
         {/* Price anchor */}
         <div className="soft-paywall-price-row" style={{ marginBottom: 24, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-            <OfferPrice big={42} />
-          ) : (
-            <>
-              <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
-              <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois · offre de lancement</span>
-            </>
-          )}
+          <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>7,99€</span>
+          <span className="price-strike-label" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mois</span>
         </div>
 
         {/* CTA buttons */}
@@ -3182,7 +3077,7 @@ function SoftPaywall({ navigate }) {
           }}
           onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 8px 40px rgba(200,167,39,0.65)';e.currentTarget.style.transform='translateY(-2px)';}}
           onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 6px 32px rgba(200,167,39,0.45)';e.currentTarget.style.transform='translateY(0)';}}>
-            {(window.HM_FOUNDER && window.HM_FOUNDER()) ? "🔓 Débloquer l'accès — 3,99€" : "🔓 Débloquer l'accès — 7,99€/mois"}
+            "🔓 Débloquer l'accès — 7,99€/mois"
           </button>
           <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap' }}>
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
@@ -3327,7 +3222,7 @@ function StartPage({ navigate }) {
                 {/* upsell discret — sous les boutons, jamais en barrage */}
                 <div onClick={function(){ openQuickCheckout(); }} style={{ cursor:'pointer', background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.22)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginTop:2 }}>
                   <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.6)' }}>
-                    🔓 Tous les niveaux, 114 sourates & le Studio — <strong style={{ color:'#e6c84a' }}>3,99€ le 1er mois</strong> →
+                    🔓 Tous les niveaux, 114 sourates & le Studio — <strong style={{ color:'#e6c84a' }}>7,99€/mois</strong> →
                   </span>
                 </div>
               </>
@@ -3406,7 +3301,7 @@ function StartPage({ navigate }) {
                   {/* Pro block */}
                   <div style={{ background:'rgba('+act.tagRgb+',0.05)', border:'1px solid rgba('+act.tagRgb+',0.15)', borderRadius:12, padding:'16px 18px', marginBottom:24 }}>
                     <div style={{ marginBottom:12, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? "✦ PRO — 3,99€ le 1er mois" : "✦ PRO — 7,99€/mois"}</span>
+                      <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, fontWeight:800, color:act.tagColor, letterSpacing:'0.12em', textTransform:'uppercase' }}>"✦ PRO — 7,99€/mois"</span>
                       
                     </div>
                     {act.pro.map(function(p) {
@@ -3465,14 +3360,9 @@ function StartPage({ navigate }) {
 
               {/* PRIX — gros, central, mis en valeur */}
               <div style={{ background:'linear-gradient(160deg,rgba(200,167,39,0.1) 0%,rgba(200,167,39,0.03) 100%)', border:'1.5px solid rgba(200,167,39,0.35)', borderRadius:24, padding:'36px 28px', maxWidth:480, margin:'0 auto 16px', boxShadow:'0 8px 50px rgba(200,167,39,0.12)' }}>
-                {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-                  <OfferPrice big={52} />
-                ) : (
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
-                    <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
-                    <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.25)', borderRadius:20, padding:'2px 10px' }}>offre lancement</span>
-                  </div>
-                )}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, flexWrap:'wrap' }}>
+                  <span style={{ fontFamily:'Playfair Display,serif', fontSize:40, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+                </div>
                 <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.5)', marginTop:16, lineHeight:1.6 }}>
                   Moins cher qu'un kebab par mois — pour un savoir qui te suit toute ta vie.
                 </p>
@@ -3507,9 +3397,9 @@ function StartPage({ navigate }) {
             </button>
           ) : (
             <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(220,50,50,0.12)', border:'1px solid rgba(220,50,50,0.35)', borderRadius:30, padding:'6px 18px', marginBottom:18, animation:'pulseUrgent 2.2s ease-in-out infinite' }}>
-                <span style={{ fontSize:13 }}>⏳</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, fontWeight:800, color:'#ff7070', letterSpacing:'0.06em' }}>⚡ Offre de lancement -50% — expire bientôt</span>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(74,222,128,0.1)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:30, padding:'6px 18px', marginBottom:18 }}>
+                <span style={{ fontSize:13 }}>✓</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, fontWeight:800, color:'#7bc99a', letterSpacing:'0.06em' }}>Sans engagement — résiliable en 1 clic</span>
               </div>
               <button onClick={function(){ openQuickCheckout(); }}
                 style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'20px 60px', borderRadius:16, fontSize:18, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 10px 44px rgba(200,167,39,0.55)', marginBottom:14, transition:'all 0.2s', display:'inline-block', maxWidth:'100%' }}
@@ -6943,14 +6833,8 @@ function ExitIntentPopup({ navigate }) {
           Les niveaux <strong style={{color:'#fff'}}>Amateur & Avancé</strong>, le Blind Test complet et le Studio vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? (
-            <OfferPrice big={34} />
-          ) : (
-            <>
-              <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
-              <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>offre de lancement — sans engagement</div>
-            </>
-          )}
+          <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>7,99€/mois</span>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(200,167,39,0.6)', marginTop:2 }}>sans engagement</div>
         </div>
         <button onClick={function(){ close(); openQuickCheckout(); }}
           style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
@@ -6986,7 +6870,6 @@ function StickyUpgradeBanner({ navigate }) {
 
   if (!user || isPro || dismissed || !visible) return null;
 
-  var founder = window.HM_FOUNDER && window.HM_FOUNDER();
   return (
     <div className="sticky-upgrade-banner" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
@@ -7001,26 +6884,12 @@ function StickyUpgradeBanner({ navigate }) {
       <div style={{ position:'absolute', top:-1, left:'10%', right:'10%', height:2, background:'linear-gradient(90deg,transparent,#e6c84a,transparent)', borderRadius:2 }} />
 
       <div style={{ display:'flex', alignItems:'center', gap:12, flex:1, minWidth:0 }}>
-        {/* badge -50% */}
-        {founder && (
-          <div style={{ flexShrink:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg,#6ee79a,#22c55e)', borderRadius:12, padding:'6px 10px', boxShadow:'0 2px 12px rgba(34,197,94,0.4)' }}>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:15, fontWeight:900, color:'#ffffff', lineHeight:1 }}>-50%</span>
-          </div>
-        )}
         <div style={{ minWidth:0 }}>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, fontWeight:800, color:'#fff', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
             Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span>
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap' }}>
-            {founder ? (
-              <>
-                <span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>3,99€</span>
-                <span style={{ textDecoration:'line-through', opacity:0.6, margin:'0 5px' }}>7,99€</span>
-                le 1<sup style={{ fontSize:'0.7em' }}>er</sup> mois
-              </>
-            ) : (
-              <><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>7,99€</span> /mois</>
-            )}
+            <span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>7,99€</span> /mois
           </div>
         </div>
       </div>
@@ -7089,7 +6958,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method, founder: window.HM_FOUNDER && window.HM_FOUNDER() }),
+        body: JSON.stringify({ method: method }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -7131,15 +7000,9 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
         {/* Header */}
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro · Offre Lancement</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, fontWeight: 700, color: '#c8a727', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>Héritage Pro</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-              {(window.HM_FOUNDER && window.HM_FOUNDER()) && (
-                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1, letterSpacing: '-0.5px' }}>3,99€<span style={{ fontSize: 13, fontWeight: 700, color: '#555' }}> le 1er mois</span></span>
-              )}
-              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: (window.HM_FOUNDER && window.HM_FOUNDER()) ? 14 : 26, fontWeight: (window.HM_FOUNDER && window.HM_FOUNDER()) ? 600 : 900, color: (window.HM_FOUNDER && window.HM_FOUNDER()) ? '#aaa' : '#1a1a1a', lineHeight: 1, textDecoration: (window.HM_FOUNDER && window.HM_FOUNDER()) ? 'line-through' : 'none' }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: (window.HM_FOUNDER && window.HM_FOUNDER()) ? '#aaa' : '#555' }}>/mois</span></span>
-              {(window.HM_FOUNDER && window.HM_FOUNDER()) && (
-                <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: '#fff', fontWeight: 800, background: 'linear-gradient(135deg,#22c55e,#16a34a)', padding: '3px 9px', borderRadius: 20, letterSpacing: '0.02em' }}>−50%</span>
-              )}
+              <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>7,99€<span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>/mois</span></span>
               <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10, color: '#15803d', fontWeight: 700, background: 'rgba(22,163,74,0.12)', padding: '2px 8px', borderRadius: 20 }}>✓ Sans engagement</span>
             </div>
           </div>
@@ -7542,13 +7405,11 @@ function CmpProModal({ onClose, pct, mastered }) {
           })}
         </div>
         <div style={{ marginBottom: 14 }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? <OfferPrice big={36} /> : (
-            <><span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>7,99€</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / mois</span></>
-          )}
+          <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>7,99€</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / mois</span>
         </div>
         <button onClick={function () { onClose(); openQuickCheckout(); }}
           style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
-          {(window.HM_FOUNDER && window.HM_FOUNDER()) ? 'Débloquer tout — 3,99€ le 1er mois' : 'Débloquer tout — 7,99€/mois'}
+          'Débloquer tout — 7,99€/mois'
         </button>
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 10px' }}>
           🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
@@ -7628,7 +7489,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
           <span style={{ fontSize: 24 }}>🔓</span>
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates restantes</span>
-            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? '3,99€ le 1er mois · sans engagement' : '7,99€/mois · sans engagement'}</span>
+            <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>'7,99€/mois · sans engagement'</span>
           </span>
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
         </button>
@@ -7902,7 +7763,7 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
           <span style={{ fontSize: 28 }}>📖</span>
           <span style={{ flex: 1 }}>
             <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Continue sur ta lancée</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>{(window.HM_FOUNDER && window.HM_FOUNDER()) ? 'dès 3,99€' : '7,99€/mois'}</span></span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>'7,99€/mois'</span></span>
           </span>
           <span style={{ color: GOLD, fontSize: 22 }}>›</span>
         </button>
