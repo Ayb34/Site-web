@@ -332,7 +332,7 @@ function AuthModal({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
-  const { onAuthSuccess } = useAuth();
+  const { onAuthSuccess, checkoutIntent } = useAuth();
 
   const sendReset = async () => {
     if (!email) { setError('Entre ton email pour réinitialiser.'); return; }
@@ -401,6 +401,13 @@ function AuthModal({ onClose }) {
             {tab === 'signup' ? 'Créer un compte' : 'Connexion'}
           </h2>
         </div>
+        {checkoutIntent && !forgotMode && (
+          <div style={{ background: 'rgba(200,167,39,0.08)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 12, padding: '10px 14px', marginBottom: 18, textAlign: 'center' }}>
+            <span style={{ color: 'rgba(240,237,230,0.75)', fontSize: 12.5, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+              🔒 Une dernière étape avant le paiement — pour retrouver ton accès Pro sur tous tes appareils.
+            </span>
+          </div>
+        )}
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 4, marginBottom: 24 }}>
           <button style={tabBtn(tab === 'signup')} onClick={() => { setTab('signup'); setError(''); }}>Créer un compte</button>
           <button style={tabBtn(tab === 'login')} onClick={() => { setTab('login'); setError(''); }}>Se connecter</button>
@@ -8009,6 +8016,12 @@ function App() {
   const [isPro, setIsPro] = React.useState(false);
   const [showAuth, setShowAuth] = React.useState(false);
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
+  // Méthode de paiement demandée par un visiteur non connecté : compte requis
+  // avant le paiement (plutôt que payer en invité puis réclamer le compte
+  // après coup — flux fragile, aucune relance si l'utilisateur ferme l'onglet
+  // avant de définir son mot de passe). Une fois le compte créé ou connecté,
+  // on enchaîne automatiquement sur le checkout mis en attente.
+  const [pendingCheckout, setPendingCheckout] = React.useState(null);
 
   // navigate wrapper — scroll to top even if page doesn't change (ex: logo click depuis home)
   const navigate = React.useCallback(function(p) {
@@ -8148,15 +8161,23 @@ function App() {
     isPro,
     logout: () => window._auth && window._auth.signOut(),
     openAuth: () => setShowAuth(true),
-    openQuickCheckout: (method) => setQuickCheckoutMethod(method || 'card'),
+    checkoutIntent: !!pendingCheckout,
+    openQuickCheckout: (method) => {
+      if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
+      setQuickCheckoutMethod(method || 'card');
+    },
     onAuthSuccess: () => {
       setShowAuth(false);
+      if (pendingCheckout) {
+        setQuickCheckoutMethod(pendingCheckout);
+        setPendingCheckout(null);
+      }
     }
   };
 
   const wrap = (children) => (
     <AuthContext.Provider value={authCtx}>
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      {showAuth && <AuthModal onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
       {children}
       <RgpdBanner />
