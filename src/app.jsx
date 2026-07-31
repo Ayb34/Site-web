@@ -497,11 +497,15 @@ function SubscriptionPage({ navigate }) {
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Comprendre le Coran · Quiz illimités · Blind Test complet · Studio vidéo
         </p>
+        {/* Cette page est la destination du bouton principal de l'email de
+            bienvenue : ses destinataires ONT déjà un compte, mais arrivent
+            souvent déconnectés (navigateur intégré de Gmail). Le texte doit
+            donc parler aux deux cas, pas seulement aux nouveaux venus. */}
         <p style={{ color: 'rgba(200,167,39,0.7)', fontSize: 13, marginBottom: 32, fontStyle: 'italic', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Crée ton compte gratuitement pour continuer.
+          Connecte-toi pour continuer — ou crée ton compte, c'est gratuit.
         </p>
         <button onClick={openAuth} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '16px 40px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 24px rgba(200,167,39,0.35)', marginBottom: 10 }}>
-          Créer mon compte — c'est gratuit
+          Se connecter ou créer un compte
         </button>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', marginBottom:14, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
           <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
@@ -8010,8 +8014,13 @@ function App() {
       return 'payment-success';
     }
     const h = window.location.hash.slice(1);
-    // Pages auth-only: ne pas restaurer depuis le hash sans session active
-    const AUTH_PAGES = ['subscription', 'profile'];
+    // Pages auth-only: ne pas restaurer depuis le hash sans session active.
+    // `subscription` en est volontairement exclu : c'est la page d'offre, donc
+    // la cible naturelle des liens d'email et des pubs. Elle gère déjà
+    // proprement le cas déconnecté (prix + « Se connecter ou créer un
+    // compte »). La rediriger vers l'accueil au chargement direct faisait
+    // atterrir tout ce trafic sur la home sans jamais montrer l'offre.
+    const AUTH_PAGES = ['profile'];
     if (AUTH_PAGES.includes(h)) {
       window.history.replaceState(null, '', window.location.pathname);
       return 'home';
