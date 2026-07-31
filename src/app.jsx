@@ -544,7 +544,9 @@ function SubscriptionPage({ navigate }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method || 'card' }),
+        // Même raison que dans QuickCheckoutModal : le paiement doit se rattacher
+        // au compte connecté, pas à l'adresse retapée dans le formulaire Stripe.
+        body: JSON.stringify({ method: method || 'card', email: (user && user.email) || undefined }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -7084,7 +7086,12 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: method, plan: thePlan }),
+        // L'email du compte connecté est transmis à Stripe pour être pré-rempli
+        // et verrouillé. Sans lui, le webhook accorde `isPro` à l'adresse saisie
+        // dans le formulaire Stripe : une faute de frappe créait un second
+        // compte Pro et laissait l'utilisateur connecté sans accès, paiement
+        // encaissé.
+        body: JSON.stringify({ method: method, plan: thePlan, email: (user && user.email) || undefined }),
       });
       var data = await res.json();
       if (data.error) throw new Error(data.error);

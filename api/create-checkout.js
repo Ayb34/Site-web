@@ -27,6 +27,15 @@ module.exports = async (req, res) => {
     // L'annuel est le plan mis en avant : c'est aussi le défaut côté serveur.
     const plan = (req.body && req.body.plan) === 'monthly' ? 'monthly' : 'annual';
 
+    // Email du compte connecté. Le webhook accorde `isPro` à l'adresse présente
+    // sur la session Stripe : en la pré-remplissant ici, le paiement se rattache
+    // au compte qui l'a lancé. Sans ça, une adresse différente saisie dans le
+    // formulaire créait un second compte Pro et laissait l'acheteur sans accès.
+    const rawEmail = req.body && req.body.email;
+    const email = typeof rawEmail === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(rawEmail)
+      ? rawEmail
+      : null;
+
     let session;
 
     if (method === 'paypal') {
@@ -50,6 +59,7 @@ module.exports = async (req, res) => {
         ui_mode: 'embedded',
         return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
+        ...(email ? { customer_email: email } : {}),
       });
     } else {
       // Abonnement carte + Apple Pay / Google Pay — méthodes gérées via Dashboard Stripe
@@ -61,6 +71,7 @@ module.exports = async (req, res) => {
         return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
         metadata: { plan: plan },
+        ...(email ? { customer_email: email } : {}),
       });
     }
 
