@@ -7227,11 +7227,26 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
    Apprentissage des mots du Coran (mot-à-mot) + jeu + progression.
    Donnée mot-à-mot vérifiée. Audio: everyayah (Alafasy).
 ═══════════════════════════════════════════════════════════ */
-const CMP_RECITER = 'Alafasy_128kbps';
+const CMP_RECITER = 'Alafasy_128kbps'; // défaut si aucune préférence enregistrée
 const cmpPad3 = function (n) { return String(n).padStart(3, '0'); };
-const cmpAyahAudio = function (surah, ayah) {
-  return 'https://everyayah.com/data/' + CMP_RECITER + '/' + cmpPad3(surah) + cmpPad3(ayah) + '.mp3';
+const cmpAyahAudio = function (surah, ayah, reciterId) {
+  return 'https://everyayah.com/data/' + (reciterId || CMP_RECITER) + '/' + cmpPad3(surah) + cmpPad3(ayah) + '.mp3';
 };
+
+/* Récitateur choisi pour « Comprendre ».
+   Clé localStorage distincte de la progression (hm_comprendre_v1) : c'est une
+   préférence d'écoute, pas un acquis. La mêler à l'état synchronisé sur
+   Firestore ferait passer un réglage d'appareil par la fusion cmpMerge, qui
+   est conçue pour ne jamais perdre de progression — deux logiques opposées. */
+const CMP_RECITER_KEY = 'hm_cmp_reciter';
+function cmpLoadReciter() {
+  try {
+    const saved = localStorage.getItem(CMP_RECITER_KEY);
+    if (saved && RECITERS.some(function (r) { return r.id === saved; })) return saved;
+  } catch (e) {}
+  return CMP_RECITER;
+}
+function cmpSaveReciter(id) { try { localStorage.setItem(CMP_RECITER_KEY, id); } catch (e) {} }
 
 // Sourates avec découpage mot-à-mot (arabe + sens FR). Traductions standard.
 const CMP_SOURATES = [
@@ -7440,9 +7455,22 @@ function ComprendrePage({ navigate }) {
   const [st, setSt] = React.useState(cmpLoad);
   const [mode, setMode] = React.useState('hub'); // hub | discover | play | result
   const [sourate, setSourate] = React.useState(CMP_SOURATES[0]);
+  const [reciter, setReciter] = React.useState(cmpLoadReciter);
   const audioRef = React.useRef(null);
+  // playAyah est mémorisé et passé aux écrans enfants : sans ref, il garderait
+  // le récitateur figé au montage et changer de voix n'aurait aucun effet.
+  const reciterRef = React.useRef(reciter);
+  React.useEffect(function () { reciterRef.current = reciter; }, [reciter]);
 
   const persist = React.useCallback(function (next) { setSt(next); cmpSave(next); }, []);
+
+  const chooseReciter = React.useCallback(function (id) {
+    setReciter(id);
+    cmpSaveReciter(id);
+    // Coupe la lecture en cours : la laisser finir dans l'ancienne voix juste
+    // après avoir choisi la nouvelle donne l'impression que le choix a échoué.
+    if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} }
+  }, []);
 
   React.useEffect(function () {
     audioRef.current = typeof Audio !== 'undefined' ? new Audio() : null;
@@ -7450,7 +7478,7 @@ function ComprendrePage({ navigate }) {
   }, []);
   const playAyah = React.useCallback(function (surah, ayah) {
     if (!audioRef.current) return;
-    try { audioRef.current.pause(); audioRef.current.src = cmpAyahAudio(surah, ayah); audioRef.current.currentTime = 0; const p = audioRef.current.play(); if (p && p.catch) p.catch(function(){}); } catch (e) {}
+    try { audioRef.current.pause(); audioRef.current.src = cmpAyahAudio(surah, ayah, reciterRef.current); audioRef.current.currentTime = 0; const p = audioRef.current.play(); if (p && p.catch) p.catch(function(){}); } catch (e) {}
   }, []);
 
   // Synchro compte : charge la progression Firestore et fusionne avec le local (suivi cross-device)
@@ -7518,7 +7546,7 @@ function ComprendrePage({ navigate }) {
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 0%, #0a1f12 0%, #050f09 45%, #03070a 100%)', fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 60 }}>
       <Navbar navigate={navigate} />
-      {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} />}
+      {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
       {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro} onPlay={function(){
         if (!sourate.free && !isPro) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
@@ -7601,8 +7629,10 @@ function CmpProModal({ onClose, pct, mastered }) {
   );
 }
 
-function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
+function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro, reciter, onReciter }) {
   const GOLD = '#e6c84a';
+  const [openReciter, setOpenReciter] = React.useState(false);
+  const current = RECITERS.find(function (r) { return r.id === reciter; }) || RECITERS[0];
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '90px 20px 0' }}>
       <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 20 }}>← Accueil</button>
@@ -7635,6 +7665,37 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro }) {
             <div><div style={{ fontSize: 20, fontWeight: 900, color: '#f0ede6' }}>{st.xp || 0}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>XP</div></div>
           </div>
         </div>
+      </div>
+
+      {/* Choix du récitateur — replié par défaut : c'est un réglage, il ne doit
+          pas concurrencer visuellement le choix de sourate qui est l'action
+          principale de cet écran. */}
+      <div style={{ marginTop: 4 }}>
+        <button onClick={function(){ setOpenReciter(function(v){ return !v; }); }}
+          aria-expanded={openReciter}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(200,167,39,0.22)', borderRadius: 14, padding: '13px 16px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+          <span style={{ fontSize: 18, flexShrink: 0 }}>🎙</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.42)' }}>Récitateur</span>
+            <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: '#f0ede6', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{current.name}</span>
+          </span>
+          <span style={{ color: GOLD, fontSize: 13, flexShrink: 0 }}>{openReciter ? 'Fermer ▲' : 'Changer ▼'}</span>
+        </button>
+
+        {openReciter && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 8, marginTop: 8 }}>
+            {RECITERS.map(function (r) {
+              const active = r.id === current.id;
+              return (
+                <button key={r.id} onClick={function(){ onReciter(r.id); setOpenReciter(false); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, background: active ? 'rgba(200,167,39,0.14)' : 'rgba(255,255,255,0.03)', border: '1px solid ' + (active ? 'rgba(200,167,39,0.55)' : 'rgba(255,255,255,0.09)'), borderRadius: 12, padding: '11px 13px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+                  <span style={{ width: 16, flexShrink: 0, color: GOLD, fontWeight: 900, fontSize: 13 }}>{active ? '✓' : ''}</span>
+                  <span style={{ fontSize: 13.5, fontWeight: active ? 800 : 600, color: active ? '#f0ede6' : 'rgba(240,237,230,0.75)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Liste des sourates */}
