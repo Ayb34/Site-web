@@ -6298,6 +6298,26 @@ function PaymentSuccessPage({ navigate }) {
       .catch(function(){});
   }, []);
 
+  // Conversion Purchase — avec le montant réel de la session Stripe.
+  // Dédoublonné par session_id : cette page est rechargeable et bookmarkable,
+  // sans ce garde-fou un simple F5 gonflerait les conversions déclarées.
+  React.useEffect(function () {
+    var psid = new URLSearchParams(window.location.search).get('psid');
+    if (!psid || !window.hmPixel) return;
+    var key = 'hm_purchase_tracked_' + psid;
+    try { if (sessionStorage.getItem(key)) return; } catch (e) {}
+    fetch('/api/session-email?sid=' + psid)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        try { sessionStorage.setItem(key, '1'); } catch (e) {}
+        window.hmPixel.track('Purchase', {
+          value: typeof d.amount === 'number' ? d.amount : 29.99,
+          currency: d.currency || 'EUR',
+        });
+      })
+      .catch(function () {});
+  }, []);
+
   // Pulse animation tick
   React.useEffect(function () {
     var t = setInterval(function () { setTick(function (n) { return n + 1; }); }, 40);
@@ -7063,6 +7083,12 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
   // Lancer checkout au montage
   React.useEffect(function () {
     startCheckout(initialMethod || 'card');
+    // Meilleur signal intermédiaire pour l'optimisation publicitaire : depuis
+    // qu'un compte est exigé avant le paiement, cet écran n'est atteignable
+    // que par un utilisateur connecté — donc à forte intention.
+    if (window.hmPixel) {
+      window.hmPixel.track('InitiateCheckout', { value: 29.99, currency: 'EUR' });
+    }
     return function () { genRef.current++; destroyCheckout(); };
   }, []);
 
@@ -8108,9 +8134,15 @@ function App() {
   }, []);
 
   // Write page to hash so refresh restores it + scroll to top on every navigation
+  const firstNavRef = React.useRef(true);
   React.useEffect(function () {
     window.location.hash = page === 'home' ? '' : page;
     window.scrollTo({ top: 0, behavior: 'instant' });
+    // PageView sur navigation interne : le site est une SPA, le pixel ne voit
+    // qu'un seul chargement. Le premier est déjà envoyé par le snippet, on ne
+    // compte donc que les changements de page pour éviter un doublon.
+    if (firstNavRef.current) { firstNavRef.current = false; return; }
+    if (window.hmPixel) window.hmPixel.track('PageView');
   }, [page, navKey]);
 
   // Handle browser back/forward
@@ -8243,8 +8275,10 @@ function App() {
       if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
       setQuickCheckoutMethod(method || 'card');
     },
-    onAuthSuccess: () => {
+    onAuthSuccess: (type) => {
       setShowAuth(false);
+      // Seule la création de compte est une conversion — pas une reconnexion.
+      if (type === 'signup' && window.hmPixel) window.hmPixel.track('CompleteRegistration');
       if (pendingCheckout) {
         setQuickCheckoutMethod(pendingCheckout);
         setPendingCheckout(null);
@@ -8257,7 +8291,8 @@ function App() {
       {showAuth && <AuthModal onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
       {children}
-      <RgpdBanner />
+      {/* Le pixel n'est chargé qu'ici, au clic sur « Accepter » — jamais avant. */}
+      <RgpdBanner onAccept={function(){ if (window.hmPixel) window.hmPixel.init(); }} />
     </AuthContext.Provider>
   );
 

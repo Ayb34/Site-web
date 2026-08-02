@@ -86,6 +86,58 @@
     };
   })();
 </script>
+<!-- ── Pixel publicitaire (Meta) ──
+     Chargé UNIQUEMENT après consentement explicite : en France, déposer un
+     cookie publicitaire avant l'accord de l'utilisateur est une infraction
+     (CNIL / ePrivacy). Le script n'est donc même pas téléchargé tant que
+     `hm_cookie_consent` ne vaut pas 'accepted'.
+
+     Pour activer : remplacer META_PIXEL_ID par l'identifiant du pixel
+     (Gestionnaire d'événements Meta > Sources de données). Tant que la
+     valeur reste le placeholder, tout est inerte — aucune requête réseau.
+
+     Pour ajouter TikTok plus tard : charger son snippet dans loadPixels()
+     et relayer l'événement dans track(). Le reste du site n'a pas à changer.
+-->
+<script>
+  (function () {
+    var META_PIXEL_ID = 'META_PIXEL_ID'; // ← remplacer par l'ID réel
+    var loaded = false;
+
+    function configured() {
+      return META_PIXEL_ID && META_PIXEL_ID !== 'META_PIXEL_ID';
+    }
+    function hasConsent() {
+      try { return localStorage.getItem('hm_cookie_consent') === 'accepted'; }
+      catch (e) { return false; }
+    }
+
+    function loadPixels() {
+      if (loaded || !configured() || !hasConsent()) return;
+      loaded = true;
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+      (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      window.fbq('init', META_PIXEL_ID);
+      window.fbq('track', 'PageView');
+    }
+
+    window.hmPixel = {
+      // Appelé au clic sur « Accepter » du bandeau RGPD, et au chargement si
+      // le consentement date d'une visite précédente.
+      init: loadPixels,
+      track: function (event, params) {
+        if (!hasConsent()) return;
+        loadPixels();
+        if (window.fbq) window.fbq('track', event, params || {});
+      }
+    };
+
+    loadPixels();
+  })();
+</script>
 <script>
   var _fbConfig = {
     apiKey: "AIzaSyB5EBPkPUOnC1wmF0Sr8kNmiLa5AhHc3bk",
