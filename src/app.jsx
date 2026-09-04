@@ -302,7 +302,7 @@ function ProGateModal({ onClose, navigate }) {
           </div>
 
           <ul style={{ listStyle:'none', padding:0, margin:'0 0 16px', textAlign:'left' }}>
-            {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Studio vidéo — téléchargement inclus'].map(function(item) {
+            {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Comprendre le Coran — le Juz \'Amma complet'].map(function(item) {
               return <li key={item} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.65)', marginBottom:7 }}>{item}</li>;
             })}
           </ul>
@@ -510,7 +510,7 @@ function SubscriptionPage({ navigate }) {
           <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Comprendre le Coran · Quiz illimités · Blind Test complet · Studio vidéo
+          Comprendre le Coran · Quiz illimités · Blind Test complet
         </p>
         {/* Cette page est la destination du bouton principal de l'email de
             bienvenue : ses destinataires ONT déjà un compte, mais arrivent
@@ -595,7 +595,6 @@ function SubscriptionPage({ navigate }) {
   const features = [
     { icon: '🕌', title: 'Quiz islamiques', desc: '740 questions — Coran, prophètes, piliers, histoire' },
     { icon: '🎵', title: 'Blind Test Coran', desc: 'Reconnais les sourates à l\'écoute' },
-    { icon: '🎬', title: 'Studio Vidéo', desc: 'Crée des clips avec des rappels audio' },
     { icon: '📅', title: 'Nouveau contenu', desc: 'Ajouts chaque semaine incha\'Allah' },
   ];
   return (
@@ -1098,8 +1097,11 @@ function Navbar({ navigate }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navLinks = ['Accueil', 'Blind test', 'Quiz', 'Studio'];
-  const pageMap = { 'Blind test': 'blind-test', 'Quiz': 'quiz', 'Studio': 'studio' };
+  /* Le Studio n'est plus mis en avant : la page reste joignable par #studio,
+     mais un site qui apprend l'islam n'a pas à vendre un éditeur vidéo en
+     navigation principale — ça disperse le message. */
+  const navLinks = ['Accueil', 'Comprendre', 'Blind test', 'Quiz'];
+  const pageMap = { 'Comprendre': 'comprendre', 'Blind test': 'blind-test', 'Quiz': 'quiz' };
 
   return (
     <nav style={{
@@ -1552,9 +1554,9 @@ function ReassuranceBanner() {
         textTransform: 'uppercase'
       }}>
         {isPro ? (
-          <>✦ <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>Quiz · Blind Test · Studio Vidéo</span> — accès complet ✦</>
+          <>✦ <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>Comprendre · Quiz · Blind Test</span> — accès complet ✦</>
         ) : (
-          <>✦ Accès gratuit —&nbsp;<span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>Quiz · Blind test · Studio vidéo&nbsp;</span><span style={{ color: '#e6c84a' }}>— sans carte bancaire ✦</span></>
+          <>✦ Accès gratuit —&nbsp;<span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>Comprendre · Quiz · Blind test&nbsp;</span><span style={{ color: '#e6c84a' }}>— sans carte bancaire ✦</span></>
         )}
       </p>
     </div>);
@@ -1654,16 +1656,6 @@ function FeatureCards({ navigate }) {
       pro: "Le Juz 'Amma complet — 38 sourates, 571 versets",
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'comprendre',
-    },
-    {
-      num: '04', icon: '🎬', tag: null, tagColor: '#a78bfa', tagRgb: '167,139,250',
-      title: 'Studio Vidéo',
-      hook: 'Crée tes vidéos de récitation à partager — chaque vue peut être une sadaqa jariya.',
-      desc: 'Sous-titres arabes et français, fonds, polices. Poste sur TikTok, Instagram et YouTube en quelques clics.',
-      free: 'Créer · Prévisualiser · Personnaliser',
-      pro: 'Téléchargement HD · Export illimité',
-      accent: { from:'rgba(18,14,30,0.97)', to:'rgba(5,4,10,0.99)', border:'rgba(167,139,250,0.28)', glow:'rgba(167,139,250,0.12)', line:'#a78bfa' },
-      page: 'studio',
     },
   ];
 
@@ -1858,7 +1850,6 @@ function HowItWorksSection() {
     var activities = [
       { icon:'🎵', name:'Blind Test', desc:'Reconnais les sourates', color:'#c8a727' },
       { icon:'❓', name:'Quiz Islam', desc:'Teste tes connaissances', color:'#60a5fa' },
-      { icon:'🎬', name:'Studio',    desc:'Crée des vidéos islamiques', color:'#a78bfa' },
     ];
     var selectedIdx = tick > 2800 ? 0 : null;
     return (
@@ -1923,7 +1914,7 @@ function HowItWorksSection() {
 
   var steps = [
     { num:'01', label:'Créer un compte',     sub:'30 secondes, c\'est tout' },
-    { num:'02', label:'Choisir une activité', sub:'Blind Test, Quiz ou Studio' },
+    { num:'02', label:'Choisir une activité', sub:'Comprendre, Blind Test ou Quiz' },
     { num:'03', label:'Jouer & progresser',  sub:'Apprends sans t\'en rendre compte' },
   ];
   var sceneLabels = ['Inscription','Choix d\'activité','Quiz en action'];
@@ -2042,14 +2033,12 @@ function ComparisonTable({ navigate }) {
   { text: 'Accès à 1 niveau de quiz', ok: true },
   { text: '🔒 Quiz illimités tous niveaux', ok: false },
   { text: '🔒 Blind test complet (114 sourates)', ok: false },
-  { text: '🔒 Studio vidéo & téléchargement', ok: false },
   { text: '🔒 Statistiques de progression', ok: false },
   { text: '🔒 Nouvelles sorties chaque semaine', ok: false }];
 
   const proItems = [
   { text: 'Quiz illimités · tous niveaux · toutes catégories', icon: '🧠' },
   { text: 'Blind test Coran complet — 114 sourates', icon: '🎵' },
-  { text: 'Studio vidéo — crée & télécharge tes vidéos', icon: '🎬' },
   { text: 'Statistiques de progression détaillées', icon: '📈' },
   { text: 'Nouvelles sorties chaque semaine', icon: '🆕' },
   { text: 'Accès sur mobile & tablette', icon: '📱' },
@@ -2848,10 +2837,6 @@ function FaqSection() {
       a: 'Absolument. Le Blind Test et le Quiz s\'adaptent à tous les niveaux. Les questions vont du très accessible au plus avancé. C\'est même là que le jeu est le plus utile : tu apprends sans pression, à ton rythme, en t\'amusant.'
     },
     {
-      q: 'Le Studio Vidéo, c\'est compliqué à utiliser ?',
-      a: 'Non, c\'est pensé pour être aussi simple que possible. Tu choisis une sourate et un récitateur (ou ton propre audio), un fond, et la vidéo se génère en quelques secondes avec les sous-titres arabe + traduction synchronisés et le format adapté aux Reels / TikTok / YouTube. Zéro compétence en montage requise. Et au-delà de la technique — chaque vidéo que tu partages peut être une sadaqa jariya : une bonne action qui continue de porter ses fruits tant que quelqu\'un la regarde ou la partage.'
-    },
-    {
       q: 'Est-ce que je peux résilier quand je veux ?',
       a: 'Oui, sans condition. Que tu sois en annuel ou en mensuel, l\'abonnement se résilie en un clic depuis ton profil. Aucun engagement, aucune pénalité : tu gardes l\'accès jusqu\'à la fin de la période déjà payée, puis retour au compte gratuit. Et si tu changes d\'avis dans les 48h sans avoir utilisé le contenu Pro, on te rembourse.'
     },
@@ -2998,8 +2983,8 @@ function SoftPaywall({ navigate }) {
         </h2>
 
         <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: 32, maxWidth: 540, margin: '0 auto 32px' }}>
-          Débloque tous les niveaux, les 114 sourates et le Studio.<br />
-          Et chaque vidéo de récitation que tu crées et partages devient une <strong style={{ color: '#c8a727' }}>sadaqa jariya</strong> — une aumône qui continue de te rapporter, même après ta mort.
+          Débloque tous les niveaux du Quiz, les 114 sourates du Blind Test
+          et le Juz 'Amma complet, mot à mot.
         </p>
 
         {/* Value stack */}
@@ -3008,7 +2993,6 @@ function SoftPaywall({ navigate }) {
             { icon: '📖', title: 'Comprendre le Coran', desc: "Le Juz 'Amma mot à mot — 38 sourates" },
             { icon: '🧠', title: 'Quiz illimités', desc: 'Tous niveaux, toutes catégories' },
             { icon: '🎵', title: 'Blind test complet', desc: '114 sourates à reconnaître' },
-            { icon: '🎬', title: 'Studio vidéo', desc: 'Crée & télécharge tes clips' },
             { icon: '📅', title: 'Nouveau contenu', desc: 'Chaque semaine incha\'Allah' },
           ].map((item) => (
             <div key={item.title} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.15)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
@@ -3108,14 +3092,6 @@ function StartPage({ navigate }) {
       pro: ['Niveaux Amateur & Avancé débloqués', 'Quiz illimités', 'Toutes catégories', 'Corrections détaillées'],
       cta: '🧠 Essayer le Quiz', page: 'quiz',
     },
-    {
-      icon: '🎬', tag: null, tagColor: '#a78bfa', tagRgb: '167,139,250',
-      title: 'Studio Vidéo',
-      desc: 'Crée des vidéos de récitation avec sous-titres arabes & français. Chaque partage peut être une sadaqa jariya — une adoration qui perdure tant que la vidéo tourne.',
-      free: ['Créer & prévisualiser', 'Personnalisation de base', 'Aperçu en direct'],
-      pro: ['Téléchargement HD sans watermark', 'Tous les styles visuels', 'Export illimité'],
-      cta: '🎬 Essayer le Studio', page: 'studio',
-    },
   ];
 
   return (
@@ -3161,7 +3137,7 @@ function StartPage({ navigate }) {
           </p>
         ) : (
           <p className="sp-3" style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:'clamp(15px,1.8vw,18px)', color:'rgba(240,237,230,0.48)', maxWidth:520, margin:'22px auto 40px', lineHeight:1.8 }}>
-            Blind Test · Quiz islamiques · Studio Vidéo — <strong style={{ color:'rgba(240,237,230,0.7)', fontWeight:600 }}>tout est gratuit pour commencer.</strong>
+            Comprendre le Coran · Blind Test · Quiz — <strong style={{ color:'rgba(240,237,230,0.7)', fontWeight:600 }}>tout est gratuit pour commencer.</strong>
           </p>
         )}
 
@@ -3181,12 +3157,6 @@ function StartPage({ navigate }) {
                 onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}>
                 🧠 Quiz
               </button>
-              <button onClick={function(){ navigate('studio'); }}
-                style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1.5px solid rgba(167,139,250,0.3)', color:'#fff', padding:'15px 16px', borderRadius:13, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', transition:'all 0.2s' }}
-                onMouseEnter={function(e){ e.currentTarget.style.background='rgba(167,139,250,0.12)'; }}
-                onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.05)'; }}>
-                🎬 Studio
-              </button>
             </div>
             {user ? (
               <>
@@ -3196,7 +3166,7 @@ function StartPage({ navigate }) {
                 {/* upsell discret — sous les boutons, jamais en barrage */}
                 <div onClick={function(){ openQuickCheckout(); }} style={{ cursor:'pointer', background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.22)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginTop:2 }}>
                   <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.6)' }}>
-                    🔓 Tous les niveaux, 114 sourates & le Studio — <strong style={{ color:'#e6c84a' }}>29,99€/an</strong> →
+                    🔓 Tous les niveaux, 114 sourates & le Juz 'Amma — <strong style={{ color:'#e6c84a' }}>29,99€/an</strong> →
                   </span>
                 </div>
               </>
@@ -3313,7 +3283,7 @@ function StartPage({ navigate }) {
                 <span style={{ color:'#c8a727' }}>Explore librement.</span>
               </h2>
               <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:16, color:'rgba(240,237,230,0.43)', lineHeight:1.8, maxWidth:420, margin:'0 auto' }}>
-                Quiz, Blind Test, Studio Vidéo — tout est à toi, sans limite.
+                Comprendre, Blind Test, Quiz — tout est à toi, sans limite.
               </p>
             </div>
           ) : (
@@ -3356,7 +3326,7 @@ function StartPage({ navigate }) {
           )}
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(155px,1fr))', gap:14, maxWidth:720, margin:'0 auto 52px' }}>
-            {[['🎵','Blind Test illimité'],['🧠','Quiz tous niveaux'],['🎬','Studio + téléchargement HD'],['📱','Mobile & tablette'],['🆕','Nouveautés chaque semaine'],['🕌','Soutien communauté FR']].map(function(item,i) {
+            {[['🎵','Blind Test illimité'],['🧠','Quiz tous niveaux'],['📖','Juz \'Amma complet mot à mot'],['📱','Mobile & tablette'],['🆕','Nouveautés chaque semaine'],['🕌','Soutien communauté FR']].map(function(item,i) {
               return (
                 <div key={item[1]} className="sp-feat" style={{ background:'rgba(200,167,39,0.05)', border:'1px solid rgba(200,167,39,0.14)', borderRadius:16, padding:'20px 12px', textAlign:'center', animation:'spCardIn 0.6s cubic-bezier(0.16,1,0.3,1) '+(bottomVis ? (0.05+i*0.08)+'s' : '9999s')+' both' }}>
                   <div style={{ fontSize:26, marginBottom:10 }}>{item[0]}</div>
@@ -3391,7 +3361,7 @@ function StartPage({ navigate }) {
             </div>
           )}
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.2)' }}>
-            {isPro ? 'Accès illimité · Quiz · Blind Test · Studio' : user ? 'Moins d\'un café par semaine · résiliable en 1 clic' : 'Sans carte bancaire pour démarrer · 100% en français'}
+            {isPro ? 'Accès illimité · Comprendre · Quiz · Blind Test' : user ? 'Moins d\'un café par semaine · résiliable en 1 clic' : 'Sans carte bancaire pour démarrer · 100% en français'}
           </p>
         </div>
       </div>
@@ -3464,7 +3434,7 @@ function Footer({ navigate }) {
           <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
             <div>
               <p style={{ color: '#fff', fontWeight: 700, fontSize: 13, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Contenu</p>
-              {['Blind test Coran', 'Quiz islamiques', 'Studio vidéo'].map((l) =>
+              {['Comprendre le Coran', 'Blind test Coran', 'Quiz islamiques'].map((l) =>
               <a key={l} href="#" style={{ display: 'block', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', fontSize: 14, marginBottom: 10, transition: 'color 0.2s' }}
               onMouseEnter={(e) => e.target.style.color = '#c8a727'}
               onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.55)'}>{l}</a>
@@ -6339,7 +6309,6 @@ function PaymentSuccessPage({ navigate }) {
   var perks = [
     { icon: '🎵', label: 'Blind Test — tous les niveaux' },
     { icon: '🧠', label: 'Quiz — Amateur & Avancé débloqués' },
-    { icon: '🎬', label: 'Studio Vidéo — export HD illimité' },
     { icon: '⚡', label: 'Nouvelles fonctionnalités en avant-première' },
   ];
 
@@ -6919,7 +6888,7 @@ function ExitIntentPopup({ navigate }) {
           Tu as vu l'aperçu gratuit.
         </h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.5)', lineHeight:1.7, marginBottom:8 }}>
-          Les niveaux <strong style={{color:'#fff'}}>Amateur & Avancé</strong>, le Blind Test complet et le Studio vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
+          Les niveaux <strong style={{color:'#fff'}}>Amateur & Avancé</strong>, le Blind Test complet et Comprendre vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
           <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>{PRO_ANNUAL}/an</span>
@@ -7613,7 +7582,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
           Calculé sur les 77 878 mots du Coran — pondéré par leur fréquence réelle.
         </p>
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 16, textAlign: 'left' }}>
-          {['📖 ' + lockedCount + ' sourates de plus — ' + lockedVerses + ' versets mot à mot', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '🎬 Studio vidéo + téléchargement HD'].map(function (f) {
+          {['📖 ' + lockedCount + ' sourates de plus — ' + lockedVerses + ' versets mot à mot', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '📈 Ta progression suivie sur tous tes appareils'].map(function (f) {
             return <div key={f} style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.7)', marginBottom: 7, display: 'flex', gap: 8 }}><span style={{ color: '#4ade80', fontWeight: 800 }}>✓</span>{f}</div>;
           })}
         </div>
