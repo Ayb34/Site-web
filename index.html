@@ -382,21 +382,193 @@
   }
 
   /* Hero text backdrop */
-  .hero-text-wrap {
+  /* ═══ Hero ═══
+     Conçu mobile d'abord : 92-94 % du trafic, et l'ancien hero plaçait son
+     bouton principal à 758 px sur un écran de 812, sous le bandeau cookies.
+     Plus de min-height:100vh — la hauteur suit le contenu, pour que le CTA
+     tienne dans le premier écran. */
+  .hero-section {
     position: relative;
-    z-index: 2;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    padding: 78px 20px 40px;
+    overflow: hidden;
   }
-  .hero-text-wrap::before {
-    content: '';
+  .hero-glow {
     position: absolute;
-    inset: -60px -120px;
-    background: radial-gradient(ellipse at center, rgba(2,10,5,0.88) 0%, rgba(2,10,5,0.55) 45%, transparent 78%);
+    top: -30%; left: 50%;
+    width: min(900px, 150%); aspect-ratio: 1;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(200,167,39,0.13) 0%, rgba(26,92,53,0.10) 38%, transparent 68%);
     pointer-events: none;
-    z-index: -1;
-    border-radius: 50%;
+  }
+  .hero-inner {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 560px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+
+  .hero-kicker {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase;
+    color: rgba(200,167,39,0.9);
+  }
+  .hk-rule { width: 22px; height: 1px; background: rgba(200,167,39,0.5); }
+
+  .hero-h1 {
+    font-family: Fraunces, Georgia, serif;
+    font-weight: 400; color: #fff;
+    font-size: clamp(31px, 8.4vw, 52px);
+    line-height: 1.06; letter-spacing: -0.02em;
+    margin: 0 0 16px; text-wrap: balance;
+  }
+  .hero-h1 em { font-style: italic; color: #e6c84a; }
+
+  /* ── Le verset interactif ── */
+  .hero-verse { width: 100%; margin-bottom: 20px; }
+  .hero-verse-q {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: 16px; line-height: 1.4;
+    color: rgba(240,237,230,0.62); margin: 0 0 14px;
+  }
+  .hero-verse-q strong { font-style: normal; font-weight: 600; color: #f0ede6; }
+
+  /* Grille 2x2 plutot que flex-wrap : a 375 px les quatre mots tombaient en
+     3 + 1, ce qui deséquilibre le bloc. La grille garde deux paires nettes, et
+     `direction: rtl` preserve l'ordre de lecture du verset. */
+  .hero-words {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 13px;
+  }
+  /* Un mot fermé n'annonce que l'arabe : c'est le geste qui livre le sens, et
+     ce délai fait toute la petite surprise. La hauteur est réservée d'avance
+     pour que rien ne saute quand la traduction apparaît. */
+  .hero-word {
+    flex: 0 1 auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; min-height: 82px;
+    padding: 9px 13px; border-radius: 14px; cursor: pointer;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(200,167,39,0.22);
+    -webkit-tap-highlight-color: transparent;
+    transition: background .35s, border-color .35s, transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .hero-word:hover { border-color: rgba(200,167,39,0.45); }
+  .hero-word:focus-visible { outline: 2px solid #e6c84a; outline-offset: 2px; }
+  .hero-word.is-open {
+    background: linear-gradient(165deg, rgba(200,167,39,0.16), rgba(200,167,39,0.05));
+    border-color: rgba(200,167,39,0.6);
+    transform: translateY(-2px);
+  }
+  .hw-ar {
+    font-family: Amiri, Georgia, serif; font-size: 27px; line-height: 1.25;
+    color: #f7eecb; direction: rtl;
+  }
+  .hero-word.is-open .hw-ar { text-shadow: 0 0 20px rgba(230,200,74,0.45); }
+  .hw-tr, .hw-fr {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    opacity: 0; transform: translateY(3px);
+    transition: opacity .4s ease .05s, transform .4s ease .05s;
+  }
+  .hw-tr { font-size: 10px; font-style: italic; color: rgba(240,237,230,0.5); }
+  .hw-fr { font-size: 12px; font-weight: 700; color: #e6c84a; max-width: 15ch; }
+  .hero-word.is-open .hw-tr,
+  .hero-word.is-open .hw-fr { opacity: 1; transform: none; }
+
+  /* ── Le compteur ── */
+  .hero-meter { width: 100%; max-width: 400px; margin: 0 auto; }
+  .hero-meter-bar {
+    height: 4px; border-radius: 3px; overflow: hidden;
+    background: rgba(255,255,255,0.09); margin-bottom: 8px;
+  }
+  .hero-meter-bar > span {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, #a8891f, #4ade80);
+    border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+  .hero-meter-txt {
+    margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; color: rgba(240,237,230,0.6); line-height: 1.4;
+  }
+  .hero-meter-txt strong {
+    font-size: 19px; font-weight: 900; color: #4ade80;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-meter.is-full .hero-meter-txt strong { text-shadow: 0 0 18px rgba(74,222,128,0.45); }
+  .hm-hint { font-size: 12.5px; color: rgba(240,237,230,0.42); }
+  .hm-note { color: rgba(240,237,230,0.45); }
+
+  /* ── Action principale ── */
+  .hero-cta {
+    width: 100%; max-width: 340px; margin-top: 18px;
+    background: linear-gradient(135deg, #e6c84a, #a8891f);
+    border: none; border-radius: 100px; padding: 16px 28px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800;
+    color: #1a1205; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 10px 34px rgba(200,167,39,0.32);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(200,167,39,0.46); }
+  .hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .hero-sub {
+    margin: 11px 0 0; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px; color: rgba(255,255,255,0.4);
+  }
+  .hero-sub span { opacity: 0.45; margin: 0 3px; }
+
+  /* ── Activités secondaires ──
+     Discrètes par construction : une seule action principale par écran. */
+  .hero-more {
+    display: flex; gap: 8px; margin-top: 26px; width: 100%;
+    justify-content: center; flex-wrap: wrap;
+  }
+  .hero-more-item {
+    flex: 1 1 0; min-width: 104px;
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 11px; border-radius: 13px; cursor: pointer; text-align: left;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.09);
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .2s, background .2s;
+  }
+  .hero-more-item:hover { border-color: rgba(200,167,39,0.4); background: rgba(255,255,255,0.06); }
+  .hero-more-item:focus-visible { outline: 2px solid #e6c84a; outline-offset: 2px; }
+  .hmi-ico {
+    width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; gap: 2px;
+    background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.24);
+    color: #4ade80;
+  }
+  .hmi-txt { display: flex; flex-direction: column; min-width: 0; }
+  .hmi-t {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 800;
+    color: #fff; line-height: 1.2;
+  }
+  .hmi-d {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px;
+    color: rgba(255,255,255,0.42); line-height: 1.25;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .eqbar {
+    width: 2.5px; border-radius: 2px; background: currentColor;
+    animation: eqBar 0.9s ease-in-out infinite; display: inline-block;
+  }
+
+  @media (min-width: 769px) {
+    .hero-section { padding: 120px 24px 72px; }
+    .hero-inner { max-width: 620px; }
+    .hero-words { grid-template-columns: repeat(4, 1fr); }
+    .hero-word { min-height: 96px; padding: 12px 14px; }
+    .hw-ar { font-size: 33px; }
+    .hw-tr { font-size: 11px; }
+    .hw-fr { font-size: 13px; }
+    .hero-verse-q { font-size: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-word, .hw-tr, .hw-fr, .hero-meter-bar > span, .hero-cta { transition: none; }
+    .eqbar { animation: none; height: 11px !important; }
   }
 
   /* Section text backdrop */
@@ -674,54 +846,6 @@
   /* Responsive */
   @media (max-width: 768px) {
     .hide-mobile { display: none !important; }
-    .hero-pillar-left,
-    .hero-pillar-right { display: none !important; }
-    /* ── Arch élargie + remontée ── */
-    .hero-arch-wrap { top: -120px !important; left: -120% !important; right: -120% !important; width: 340% !important; opacity: 0.7 !important; }
-    /* ── Section hero ── */
-    .hero-section {
-      padding: 96px 22px 40px !important;
-      align-items: center !important;
-      text-align: center !important;
-      min-height: 100svh !important;
-      justify-content: flex-start !important;
-    }
-    .hero-text-wrap {
-      width: 100% !important;
-      align-items: center !important;
-      margin-top: 0 !important;
-      gap: 0 !important;
-    }
-    .hero-text-wrap h1 {
-      font-size: clamp(34px, 10.7vw, 50px) !important;
-      letter-spacing: -1px !important;
-      line-height: 1.08 !important;
-      margin-bottom: 16px !important;
-    }
-    /* Sous-titre — aéré, pousse les cartes plus bas */
-    .hero-subtitle {
-      font-size: clamp(16px, 4.4vw, 21px) !important;
-      margin-bottom: 60px !important;
-      line-height: 1.4 !important;
-    }
-    /* Feature list cachée — redondante */
-    .hero-feature-list { display: none !important; }
-    /* CTA principal */
-    .hero-btn-primary { font-size: 16px !important; padding: 18px 24px !important; }
-    /* Bouton secondaire — visible mais discret */
-    .hero-btn-secondary { display: block !important; font-size: 14px !important; padding: 14px 24px !important; }
-    /* CTA wrapper aéré */
-    .hero-cta-wrap { gap: 10px !important; margin-bottom: 0 !important; }
-    /* Cartes de jeu — sur mobile */
-    .hero-game-card { padding: 15px 16px !important; gap: 13px !important; }
-    .hero-game-card > span:first-child { width: 50px !important; height: 50px !important; }
-    .hero-game-card > span:nth-child(2) > span:first-child { font-size: 18px !important; }
-    .hero-game-card > span:nth-child(2) > span:last-child { font-size: 13.5px !important; }
-    /* Trust badges et tagline cachés */
-    .hero-trust-badges { display: none !important; }
-    .hero-tagline-bottom { display: none !important; }
-    /* Social proof espacé */
-    .hero-social-proof { margin-top: 28px !important; }
 
     /* ── Navbar mobile layout ── */
     .navbar-inner { padding: 0 8px; }

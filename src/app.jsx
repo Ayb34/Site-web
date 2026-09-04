@@ -1315,372 +1315,176 @@ function Navbar({ navigate }) {
 }
 
 /* ─── Démo vivante du hero — un verset s'anime mot à mot, en boucle ─── */
-function HeroLiveDemo({ navigate }) {
-  const WORDS = [
-    { ar: 'بِسْمِ', ph: 'bismi', fr: 'Au nom de' },
-    { ar: 'اللَّهِ', ph: 'Llâhi', fr: 'Allah' },
-    { ar: 'الرَّحْمَٰنِ', ph: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux' },
-    { ar: 'الرَّحِيمِ', ph: 'ar-Rahîm', fr: 'le Très-Miséricordieux' },
-  ];
-  const [tick, setTick] = React.useState(0);
+/* ═══ Hero ═══
+
+   Le hero ne décrit plus le produit : il le fait vivre. Le visiteur touche les
+   mots d'un verset qu'il récite déjà, le sens apparaît, et un compteur lui dit
+   quelle part du Coran il vient de savoir lire.
+
+   Pourquoi ce parti pris :
+   - l'ancien hero ne montrait ni arabe, ni verset, ni Coran, alors que toute la
+     valeur du site est là — on lisait une promesse au lieu de l'éprouver ;
+   - son bouton principal tombait à 758 px sur un écran de 812, sous le bandeau
+     cookies : le premier écran mobile (92-94 % du trafic) n'offrait aucune
+     action visible ;
+   - 189 lignes de SVG dessinaient une arche invisible sur mobile.
+
+   Les pourcentages ne sont pas décoratifs : ce sont les occurrences réelles de
+   chaque mot dans les 77 878 mots du Coran, comptées sur le corpus Uthmani (les
+   mêmes chiffres que la jauge de « Comprendre »). اللَّهِ à lui seul revient
+   2 265 fois — d'où 3,4 % pour la seule Bismillah, qui est tout l'argument du
+   site en une interaction. */
+
+const HERO_TOTAL_WORDS = 77878; // mots du Coran (corpus Uthmani)
+const HERO_VERSE = [
+  { ar: 'بِسْمِ',        tr: 'bismi',      fr: 'Au nom de',              n: 115 },
+  { ar: 'ٱللَّهِ',        tr: 'Llâhi',      fr: 'Allah',                  n: 2265 },
+  { ar: 'ٱلرَّحْمَـٰنِ',   tr: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux', n: 157 },
+  { ar: 'ٱلرَّحِيمِ',     tr: 'ar-Rahîm',   fr: 'le Très-Miséricordieux', n: 146 },
+];
+
+function HeroVerse({ navigate }) {
+  const [opened, setOpened] = React.useState([]);
+  const doneRef = React.useRef(false);
+
+  const isOpen = function (i) { return opened.indexOf(i) >= 0; };
+  const open = React.useCallback(function (i) {
+    setOpened(function (prev) { return prev.indexOf(i) >= 0 ? prev : prev.concat([i]); });
+  }, []);
+
+  /* Révélation automatique si le visiteur ne touche rien : beaucoup scrollent
+     sans jamais interagir, et le hero doit fonctionner pour eux aussi. Le
+     premier geste de l'utilisateur reprend la main (voir stop plus bas). */
+  const autoRef = React.useRef(true);
   React.useEffect(function () {
-    const id = setInterval(function () { setTick(function (t) { return t + 1; }); }, 1150);
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { setOpened([0, 1, 2, 3]); return; }
+    let i = 0;
+    const id = setInterval(function () {
+      if (!autoRef.current) { clearInterval(id); return; }
+      i++;
+      if (i > HERO_VERSE.length) { clearInterval(id); return; }
+      setOpened(function (prev) { return prev.length >= i ? prev : prev.concat([i - 1]); });
+    }, 1100);
     return function () { clearInterval(id); };
   }, []);
-  const cycle = WORDS.length + 1; // +1 tick de pause avant de reboucler
-  const active = tick % cycle;
-  const current = active < WORDS.length ? WORDS[active] : null;
+
+  const pct = opened.reduce(function (s, i) { return s + HERO_VERSE[i].n; }, 0) / HERO_TOTAL_WORDS * 100;
+  const all = opened.length === HERO_VERSE.length;
+  if (all && !doneRef.current) doneRef.current = true;
+
+  const fmt = function (v) {
+    if (v <= 0) return '0';
+    return (v >= 1 ? v.toFixed(1) : v.toFixed(2)).replace(/\.0$/, '').replace('.', ',');
+  };
+
   return (
-    <button onClick={function () { navigate('comprendre'); }} className="fade-up-3" style={{
-      width: '100%', maxWidth: 460, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
-      background: 'linear-gradient(160deg, rgba(200,167,39,0.09), rgba(255,255,255,0.02))',
-      border: '1px solid rgba(200,167,39,0.35)', borderRadius: 18, padding: '12px 16px 10px',
-      marginBottom: 14, textAlign: 'center', position: 'relative', overflow: 'hidden',
-      boxShadow: '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
-      WebkitTapHighlightColor: 'transparent', transition: 'border-color 0.25s, box-shadow 0.25s'
-    }}
-      onMouseEnter={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.7)'; e.currentTarget.style.boxShadow = '0 14px 50px rgba(200,167,39,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
-      onMouseLeave={function (e) { e.currentTarget.style.borderColor = 'rgba(200,167,39,0.35)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(200,167,39,0.1), inset 0 1px 0 rgba(255,255,255,0.06)'; }}>
-      <span style={{ display: 'block', fontFamily: 'Cormorant Garamond, Georgia, serif', fontStyle: 'italic', fontSize: 15, color: 'rgba(240,237,230,0.75)', marginBottom: 8, lineHeight: 1.35 }}>
-        Tu récites ces mots chaque jour… <span style={{ color: '#e6c84a', fontStyle: 'normal', fontWeight: 600 }}>les comprends-tu ?</span>
-      </span>
-      {/* mots RTL */}
-      <span style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 6 }}>
-        {WORDS.map(function (w, i) {
-          const on = i === active;
-          const seen = active < WORDS.length ? i < active : true;
+    <div className="hero-verse">
+      <p className="hero-verse-q">
+        Tu récites ces mots chaque jour.<br />
+        <strong>Les comprends-tu&nbsp;?</strong>
+      </p>
+
+      {/* Verset : RTL, un bouton par mot. Le sens n'apparaît qu'après le geste —
+          c'est ce délai qui crée la petite surprise, et l'envie de continuer. */}
+      <div className="hero-words" dir="rtl">
+        {HERO_VERSE.map(function (w, i) {
+          const on = isOpen(i);
           return (
-            <span key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, transition: 'all 0.45s cubic-bezier(0.34,1.56,0.64,1)', transform: on ? 'scale(1.12)' : 'scale(1)', opacity: on ? 1 : seen ? 0.75 : 0.3 }}>
-              <span style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 27, lineHeight: 1.1, color: on ? '#f5d76e' : '#e9e2c8', textShadow: on ? '0 0 18px rgba(230,200,74,0.7)' : 'none', direction: 'rtl' }}>{w.ar}</span>
-              <span style={{ fontSize: 9, fontStyle: 'italic', color: on || seen ? 'rgba(240,237,230,0.55)' : 'transparent', transition: 'color 0.4s' }}>{w.ph}</span>
-            </span>
+            <button key={i} type="button"
+              className={'hero-word' + (on ? ' is-open' : '')}
+              aria-pressed={on}
+              aria-label={on ? w.ar + ' — ' + w.fr : w.ar + ' — toucher pour révéler le sens'}
+              onClick={function () { autoRef.current = false; open(i); }}
+              onMouseEnter={function () { if (!on) { autoRef.current = false; open(i); } }}>
+              <span className="hw-ar">{w.ar}</span>
+              <span className="hw-tr">{w.tr}</span>
+              <span className="hw-fr">{w.fr}</span>
+            </button>
           );
         })}
-      </span>
-      {/* traduction du mot actif — hauteur fixe pour éviter les sauts */}
-      <span style={{ display: 'block', height: 18, fontSize: 13, fontWeight: 700, color: '#e6c84a' }}>
-        {current ? current.fr : '« Au nom d’Allah, le Tout-Miséricordieux, le Très-Miséricordieux »'}
-      </span>
-    </button>
+      </div>
+
+      {/* Compteur : la découverte devient un chiffre, et le chiffre devient un
+          manque. C'est le même calcul que la jauge de « Comprendre ». */}
+      <div className={'hero-meter' + (all ? ' is-full' : '')} aria-live="polite">
+        <div className="hero-meter-bar">
+          <span style={{ width: Math.min(100, pct / 3.44 * 100) + '%' }} />
+        </div>
+        <p className="hero-meter-txt">
+          {opened.length === 0 ? (
+            <span className="hm-hint">Touche un mot pour en découvrir le sens</span>
+          ) : (
+            <>
+              <strong>{fmt(pct)}&nbsp;%</strong> des mots du Coran
+              {all ? <span className="hm-note"> — rien qu'avec ces 4 mots</span>
+                   : <span className="hm-note"> · continue</span>}
+            </>
+          )}
+        </p>
+      </div>
+    </div>
   );
 }
 
-/* ─── Hero ─── */
 function Hero({ navigate }) {
-  const { user, openAuth, isPro } = useAuth();
+  const { isPro } = useAuth();
   return (
-    <section className="hero-section" style={{
-      background: 'transparent',
-      minHeight: '100vh',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      textAlign: 'center',
-      padding: 'clamp(84px, 13vw, 120px) 24px 60px',
-      position: 'relative', overflow: 'visible'
-    }}>
-      {/* Bottom fade */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(to bottom, transparent, rgba(5,15,8,0.6))', pointerEvents: 'none', zIndex: 2 }} />
-
-
-      {/* Secondary glow bottom-left */}
-      <div style={{
-        position: 'absolute', bottom: '-10%', left: '-5%',
-        width: 500, height: 500,
-        background: 'radial-gradient(circle, rgba(26,92,53,0.8) 0%, transparent 70%)',
-        pointerEvents: 'none'
-      }} />
-      {/* Vignette edges */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(5,20,10,0.65) 100%)'
-      }} />
-
-      {/* === Grande arche islamique (mihrab) — inspirée du logo === */}
-      <div className="hero-arch-wrap" style={{
-        position: 'absolute', top: -90, left: 0, right: 0, bottom: 0,
-        pointerEvents: 'none', zIndex: 0, overflow: 'visible'
-      }}>
-        <svg viewBox="0 0 1000 890" preserveAspectRatio="xMidYMid slice"
-        className="hero-arch-svg"
-        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}>
-          <defs>
-            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#f0d060" stopOpacity="0.95" />
-              <stop offset="50%" stopColor="#c8a727" stopOpacity="1" />
-              <stop offset="100%" stopColor="#9a7010" stopOpacity="0.9" />
-            </linearGradient>
-            <linearGradient id="goldGradV" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#e6c84a" stopOpacity="1" />
-              <stop offset="100%" stopColor="#a07b10" stopOpacity="0.8" />
-            </linearGradient>
-            <linearGradient id="pillarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#051a0c" stopOpacity="1" />
-              <stop offset="35%" stopColor="#0f3d20" stopOpacity="0.92" />
-              <stop offset="65%" stopColor="#0f3d20" stopOpacity="0.92" />
-              <stop offset="100%" stopColor="#051a0c" stopOpacity="1" />
-            </linearGradient>
-            <pattern id="zelligePillar" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
-              <rect width="28" height="28" fill="none" />
-              <polygon points="14,1 20,8 27,8 27,20 20,20 14,27 8,20 1,20 1,8 8,8" fill="none" stroke="rgba(200,167,39,0.55)" strokeWidth="0.9" />
-              <circle cx="14" cy="14" r="3.5" fill="none" stroke="rgba(200,167,39,0.4)" strokeWidth="0.7" />
-              <line x1="0" y1="14" x2="28" y2="14" stroke="rgba(200,167,39,0.18)" strokeWidth="0.4" />
-              <line x1="14" y1="0" x2="14" y2="28" stroke="rgba(200,167,39,0.18)" strokeWidth="0.4" />
-              <line x1="0" y1="0" x2="28" y2="28" stroke="rgba(200,167,39,0.1)" strokeWidth="0.3" />
-              <line x1="28" y1="0" x2="0" y2="28" stroke="rgba(200,167,39,0.1)" strokeWidth="0.3" />
-            </pattern>
-            <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-            <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-          </defs>
-
-
-
-          {/* ══════════════════════════════════════
-                  ARCHE CENTRALE — style logo (large)
-                  Porte islamique : ogive + dôme + finiale
-               ══════════════════════════════════════ */}
-
-
-          {/* ── Bordure extérieure principale (ogee arch arabe avec épaules) ── */}
-          <path d="M 270 800 L 270 500
-            C 270 380 330 220 500 60
-            C 670 220 730 380 730 500
-            L 730 800"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          fill="none" stroke="url(#goldGrad)" strokeWidth="4.5" />
-
-          {/* ── Bordure intérieure 1 ── */}
-          <path d="M 284 800 L 284 503
-            C 284 383 342 228 500 78
-            C 658 228 716 383 716 503
-            L 716 800"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          fill="none" stroke="rgba(200,167,39,0.5)" strokeWidth="1.8" />
-
-          {/* ── Bordure intérieure 2 (fine) ── */}
-          <path d="M 298 800 L 298 506
-            C 298 386 354 236 500 96
-            C 646 236 702 386 702 506
-            L 702 800"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          fill="none" stroke="rgba(200,167,39,0.22)" strokeWidth="1" />
-
-          {/* ── DÔME / FINIALE inspiré logo ──
-                   Forme : ogive pointue avec bulbe au sommet */}
-
-          {/* Bulbe principal (dôme du logo) */}
-          <path d="
-            M 452 34
-            C 445 28, 436 18, 436 8
-            C 436 0, 442 -5, 500 -5
-            C 558 -5, 564 0, 564 8
-            C 564 18, 555 28, 548 34
-            C 536 42, 520 48, 500 48
-            C 480 48, 464 42, 452 34 Z"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          fill="url(#goldGrad)" opacity="0.9" />
-
-          {/* Arche interne du dôme (comme le mihrab dans le logo) */}
-          <path d="M 468 46 C 468 34 480 26 500 24 C 520 26 532 34 532 46"
-          fill="none" stroke="rgba(3,14,8,0.6)" strokeWidth="3" />
-          <path d="M 472 46 C 472 36 483 29 500 27 C 517 29 528 36 528 46"
-          fill="none" stroke="rgba(200,167,39,0.4)" strokeWidth="1" />
-
-          {/* Finiale au sommet */}
-          <ellipse cx="500" cy="-5" rx="6" ry="9" fill="url(#goldGrad)" opacity="0.95" />
-          <circle cx="500" cy="-14" r="3.5" fill="url(#goldGrad)" opacity="0.85" />
-          <circle cx="500" cy="-20" r="1.8" fill="rgba(230,200,74,0.9)" />
-
-
-          {/* Ligne de base horizontale (seuil de la porte) */}
-          <line x1="270" y1="799" x2="730" y2="799"
-          stroke="url(#goldGrad)" strokeWidth="3" opacity="0.6" />
-        </svg>
-      </div>
-
-      <div className="hero-text-wrap">
-
-      {/* Kicker — marque */}
-      <div className="fade-up-2" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-        <span style={{ width: 24, height: 1, background: 'linear-gradient(90deg, transparent, rgba(200,167,39,0.6))' }} />
-        <span style={{
-            fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700,
-            fontSize: 'clamp(10px, 2.4vw, 12.5px)', color: 'rgba(200,167,39,0.85)',
-            letterSpacing: '0.32em', textTransform: 'uppercase'
-          }}>Explore l'islam autrement</span>
-        <span style={{ width: 24, height: 1, background: 'linear-gradient(90deg, rgba(200,167,39,0.6), transparent)' }} />
-      </div>
-
-      {/* Title — promesse concrète */}
-      <h1 className="fade-up-2 hero-h1" style={{
-          fontFamily: 'Fraunces, serif',
-          fontWeight: 400,
-          fontStyle: 'normal',
-          color: '#fff',
-          lineHeight: 1.0,
-          letterSpacing: '-2px',
-          margin: '0 0 12px',
-          fontVariationSettings: '"opsz" 144, "SOFT" 0, "WONK" 0',
-          fontSize: 'clamp(36px, 6vw, 84px)'
-        }}>L'islam comme tu l'as<br /><span style={{ color: '#e6c84a', fontStyle: 'italic', fontWeight: 400, fontVariationSettings: '"opsz" 144' }}>jamais appris.</span></h1>
-
-      <p className="fade-up-3 hero-subtitle" style={{
-          fontFamily: 'Plus Jakarta Sans, sans-serif',
-          fontStyle: 'normal',
-          fontWeight: 500,
-          fontSize: 'clamp(14px, 2.4vw, 19px)',
-          color: 'rgba(255,255,255,0.5)',
-          marginBottom: 16,
-          letterSpacing: '0.01em',
-          lineHeight: 1.45
-        }}>Apprends le Coran et ta religion <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>en jouant</strong> — quelques minutes par jour.</p>
-
-      {/* Les 4 activités — grille 2×2 (centre visuel du hero) */}
-      <div className="fade-up-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: '100%', maxWidth: 460, marginBottom: 20 }}>
-        {[
-          { id: 'comprendre', emoji: '📖', title: 'Comprends le Coran', desc: 'Mot à mot', accent: '#e6c84a', rgb: '230,200,74', badge: 'NOUVEAU' },
-          { id: 'blind-test', emoji: '🎧', title: 'Blind Test', desc: 'Devine la sourate', accent: '#4ade80', rgb: '74,222,128', eq: true },
-          { id: 'quiz', emoji: '🧠', title: 'Quiz Islam', desc: 'Tous niveaux', accent: '#60a5fa', rgb: '96,165,250' },
-          { id: 'studio', emoji: '🎬', title: 'Studio Vidéo', desc: 'Crée & partage', accent: '#a78bfa', rgb: '167,139,250' },
-        ].map((c) => (
-          <button key={c.id} onClick={() => navigate(c.id)} style={{
-              position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
-              padding: '15px 14px', borderRadius: 18, cursor: 'pointer', textAlign: 'left',
-              background: 'linear-gradient(155deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015))',
-              border: '1px solid rgba(' + c.rgb + ',0.28)', WebkitTapHighlightColor: 'transparent',
-              transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(' + c.rgb + ',0.7)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(' + c.rgb + ',0.18), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'rgba(' + c.rgb + ',0.28)'; e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)'; }}>
-            {c.badge && <span style={{ position: 'absolute', top: 10, right: 10, fontSize: 8, fontWeight: 900, letterSpacing: '0.06em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 6px', borderRadius: 999 }}>{c.badge}</span>}
-            <span style={{ width: 40, height: 40, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, fontSize: 20, background: 'rgba(' + c.rgb + ',0.14)', border: '1px solid rgba(' + c.rgb + ',0.3)' }}>
-              {c.eq
-                ? [0,1,2,3].map((n) => <span key={n} style={{ width: 3, borderRadius: 2, background: c.accent, height: 8 + (n%2)*8, animation: 'eqBar 0.9s ease-in-out infinite', animationDelay: (n*0.15)+'s', display: 'inline-block' }} />)
-                : c.emoji}
-            </span>
-            <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14.5, fontWeight: 800, color: '#fff', lineHeight: 1.15 }}>{c.title}</span>
-              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11.5, color: 'rgba(255,255,255,0.45)' }}>{c.desc}</span>
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* CTA + réassurance */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, width: '100%', maxWidth: 460 }}>
-        <button onClick={() => navigate('comprendre')} style={{
-            width: '100%', maxWidth: 340,
-            background: 'linear-gradient(135deg,#e6c84a,#a8891f)',
-            border: 'none', borderRadius: 100, padding: '16px 32px',
-            fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16, fontWeight: 800,
-            color: '#1a1205', cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
-            boxShadow: '0 10px 38px rgba(200,167,39,0.35)', transition: 'transform 0.2s, box-shadow 0.2s'
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 14px 48px rgba(200,167,39,0.5)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 10px 38px rgba(200,167,39,0.35)'; }}>
-          Commencer gratuitement →
-        </button>
-        {/* Le bouton mène à « Comprendre » (l'activité vedette, jouable sans
-            compte). On le dit ici : un CTA générique qui atterrit sur une
-            activité précise passe pour une erreur de navigation. */}
-        <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.5 }}>
-          5 sourates offertes, mot à mot <span style={{ opacity: 0.5 }}>·</span> sans compte <span style={{ opacity: 0.5 }}>·</span> sans carte bancaire
+    <section className="hero-section">
+      <div className="hero-glow" aria-hidden="true" />
+
+      <div className="hero-inner">
+        <p className="hero-kicker">
+          <span className="hk-rule" />
+          Comprendre le Coran, mot à mot
+          <span className="hk-rule" />
         </p>
+
+        <h1 className="hero-h1">
+          Tu pries en arabe.<br />
+          <em>Et si tu comprenais&nbsp;?</em>
+        </h1>
+
+        <HeroVerse navigate={navigate} />
+
+        <button className="hero-cta" onClick={function () { navigate('comprendre'); }}>
+          {isPro ? 'Continuer mon apprentissage →' : 'Commencer — gratuitement →'}
+        </button>
+        <p className="hero-sub">
+          5 sourates offertes <span>·</span> sans compte <span>·</span> sans carte bancaire
+        </p>
+
+        {/* Les trois autres activités, volontairement secondaires : une seule
+            action principale par écran, sinon le visiteur choisit de ne pas
+            choisir. L'ancien hero les mettait à égalité avec le bouton. */}
+        <nav className="hero-more" aria-label="Autres activités">
+          {[
+            { id: 'blind-test', t: 'Blind Test', d: 'Devine la sourate', eq: true },
+            { id: 'quiz', t: 'Quiz', d: '740 questions' },
+            { id: 'studio', t: 'Studio', d: 'Crée une vidéo' },
+          ].map(function (a) {
+            return (
+              <button key={a.id} onClick={function () { navigate(a.id); }} className="hero-more-item">
+                <span className="hmi-ico" aria-hidden="true">
+                  {a.eq
+                    ? [0, 1, 2, 3].map(function (n) {
+                        return <i key={n} className="eqbar" style={{ animationDelay: (n * 0.15) + 's', height: (7 + (n % 2) * 7) + 'px' }} />;
+                      })
+                    : (a.id === 'quiz'
+                        ? <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" /><circle cx="12" cy="17.5" r=".9" fill="currentColor" stroke="none" /></svg>
+                        : <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round"><path d="M3 6.5h13v11H3z" /><path d="m16 11 5-3v8l-5-3z" /></svg>)}
+                </span>
+                <span className="hmi-txt">
+                  <span className="hmi-t">{a.t}</span>
+                  <span className="hmi-d">{a.d}</span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
-
-      </div>{/* /hero-text-wrap */}
-    </section>);
-
+    </section>
+  );
 }
 
 /* ─── Reassurance Banner ─── */
