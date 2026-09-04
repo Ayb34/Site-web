@@ -1317,171 +1317,208 @@ function Navbar({ navigate }) {
 /* ─── Démo vivante du hero — un verset s'anime mot à mot, en boucle ─── */
 /* ═══ Hero ═══
 
-   Le hero ne décrit plus le produit : il le fait vivre. Le visiteur touche les
-   mots d'un verset qu'il récite déjà, le sens apparaît, et un compteur lui dit
-   quelle part du Coran il vient de savoir lire.
+   Le hero fait le tour du site, parce que c'est ce qui marche déjà : la créative
+   publicitaire la plus performante est celle qui présente les activités une par
+   une. Un visiteur doit savoir en un écran ce qu'il va trouver ici.
 
-   Pourquoi ce parti pris :
-   - l'ancien hero ne montrait ni arabe, ni verset, ni Coran, alors que toute la
-     valeur du site est là — on lisait une promesse au lieu de l'éprouver ;
-   - son bouton principal tombait à 758 px sur un écran de 812, sous le bandeau
-     cookies : le premier écran mobile (92-94 % du trafic) n'offrait aucune
-     action visible ;
-   - 189 lignes de SVG dessinaient une arche invisible sur mobile.
+   Trois onglets, et chacun montre l'activité réelle plutôt qu'une description :
+   un vrai verset qu'on décompose, un vrai extrait à reconnaître, une vraie
+   question du quiz. Le panneau tourne tout seul pour ceux qui ne touchent rien ;
+   le premier geste rend la main au visiteur.
 
-   Les pourcentages ne sont pas décoratifs : ce sont les occurrences réelles de
-   chaque mot dans les 77 878 mots du Coran, comptées sur le corpus Uthmani (les
-   mêmes chiffres que la jauge de « Comprendre »). اللَّهِ à lui seul revient
-   2 265 fois — d'où 3,4 % pour la seule Bismillah, qui est tout l'argument du
-   site en une interaction. */
+   La version précédente ne vendait que « Comprendre » — le site paraissait
+   mono-produit alors qu'il en compte trois. */
 
 const HERO_TOTAL_WORDS = 77878; // mots du Coran (corpus Uthmani)
 const HERO_VERSE = [
-  { ar: 'بِسْمِ',        tr: 'bismi',      fr: 'Au nom de',              n: 115 },
-  { ar: 'ٱللَّهِ',        tr: 'Llâhi',      fr: 'Allah',                  n: 2265 },
-  { ar: 'ٱلرَّحْمَـٰنِ',   tr: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux', n: 157 },
-  { ar: 'ٱلرَّحِيمِ',     tr: 'ar-Rahîm',   fr: 'le Très-Miséricordieux', n: 146 },
+  { ar: 'بِسْمِ',      tr: 'bismi',      fr: 'Au nom de',              n: 115 },
+  { ar: 'ٱللَّهِ',      tr: 'Llâhi',      fr: 'Allah',                  n: 2265 },
+  { ar: 'ٱلرَّحْمَـٰنِ', tr: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux', n: 157 },
+  { ar: 'ٱلرَّحِيمِ',   tr: 'ar-Rahîm',   fr: 'le Très-Miséricordieux', n: 146 },
+];
+// Question réellement tirée de questions.json (catégorie Prophètes, niveau Débutant).
+const HERO_QUIZ = {
+  q: 'Combien de prophètes sont mentionnés nommément dans le Coran ?',
+  choices: ['20', '25', '30', '35'],
+  correct: 1,
+};
+const HERO_BT = {
+  options: ['Al-Kahf', 'Ar-Rahman', 'Ya-Sin', 'Al-Mulk'],
+  correct: 1,
+};
+
+const HERO_TABS = [
+  { id: 'comprendre', label: 'Comprendre', tag: 'Le Coran mot à mot', color: '#e6c84a', rgb: '230,200,74', cta: 'Comprendre le Coran' },
+  { id: 'blind-test', label: 'Blind Test', tag: 'Reconnais la sourate', color: '#4ade80', rgb: '74,222,128', cta: 'Lancer un Blind Test' },
+  { id: 'quiz',       label: 'Quiz',       tag: '740 questions',       color: '#60a5fa', rgb: '96,165,250', cta: 'Commencer le Quiz' },
 ];
 
-function HeroVerse({ navigate }) {
-  const [opened, setOpened] = React.useState([]);
-  const doneRef = React.useRef(false);
+function HeroIcon({ id, color }) {
+  if (id === 'blind-test') {
+    return <span className="hero-eq" aria-hidden="true">
+      {[0, 1, 2, 3].map(function (n) {
+        return <i key={n} style={{ background: color, animationDelay: (n * 0.14) + 's', height: (6 + (n % 2) * 7) + 'px' }} />;
+      })}
+    </span>;
+  }
+  if (id === 'quiz') {
+    return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M9.1 9.2a3 3 0 0 1 5.8 1c0 2-2.9 2.9-2.9 2.9" /><circle cx="12" cy="17.6" r="1" fill={color} stroke="none" />
+    </svg>;
+  }
+  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 5.5h6a2 2 0 0 1 2 2v11a1.6 1.6 0 0 0-1.6-1.6H4z" /><path d="M20 5.5h-6a2 2 0 0 0-2 2v11a1.6 1.6 0 0 1 1.6-1.6H20z" />
+  </svg>;
+}
 
-  const isOpen = function (i) { return opened.indexOf(i) >= 0; };
-  const open = React.useCallback(function (i) {
-    setOpened(function (prev) { return prev.indexOf(i) >= 0 ? prev : prev.concat([i]); });
-  }, []);
-
-  /* Révélation automatique si le visiteur ne touche rien : beaucoup scrollent
-     sans jamais interagir, et le hero doit fonctionner pour eux aussi. Le
-     premier geste de l'utilisateur reprend la main (voir stop plus bas). */
-  const autoRef = React.useRef(true);
+/* ── Aperçu 1 : Comprendre ──
+   Les pourcentages sont les occurrences réelles des mots dans les 77 878 mots
+   du Coran (اللَّهِ revient 2 265 fois) : c'est l'argument du site, démontré
+   plutôt qu'annoncé. */
+function HeroPeekComprendre({ live }) {
+  const [n, setN] = React.useState(0);
   React.useEffect(function () {
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setOpened([0, 1, 2, 3]); return; }
-    let i = 0;
+    if (!live) { setN(0); return; }
+    setN(0);
     const id = setInterval(function () {
-      if (!autoRef.current) { clearInterval(id); return; }
-      i++;
-      if (i > HERO_VERSE.length) { clearInterval(id); return; }
-      setOpened(function (prev) { return prev.length >= i ? prev : prev.concat([i - 1]); });
-    }, 1100);
+      setN(function (v) { return v >= HERO_VERSE.length ? v : v + 1; });
+    }, 620);
     return function () { clearInterval(id); };
-  }, []);
-
-  const pct = opened.reduce(function (s, i) { return s + HERO_VERSE[i].n; }, 0) / HERO_TOTAL_WORDS * 100;
-  const all = opened.length === HERO_VERSE.length;
-  if (all && !doneRef.current) doneRef.current = true;
-
-  const fmt = function (v) {
-    if (v <= 0) return '0';
-    return (v >= 1 ? v.toFixed(1) : v.toFixed(2)).replace(/\.0$/, '').replace('.', ',');
-  };
-
+  }, [live]);
+  const pct = HERO_VERSE.slice(0, n).reduce(function (s, w) { return s + w.n; }, 0) / HERO_TOTAL_WORDS * 100;
   return (
-    <div className="hero-verse">
-      <p className="hero-verse-q">
-        Tu récites ces mots chaque jour.<br />
-        <strong>Les comprends-tu&nbsp;?</strong>
-      </p>
-
-      {/* Verset : RTL, un bouton par mot. Le sens n'apparaît qu'après le geste —
-          c'est ce délai qui crée la petite surprise, et l'envie de continuer. */}
-      <div className="hero-words" dir="rtl">
+    <div className="peek peek-cmp">
+      <p className="peek-q">Tu récites ces mots chaque jour. Les comprends-tu&nbsp;?</p>
+      <div className="peek-words" dir="rtl">
         {HERO_VERSE.map(function (w, i) {
-          const on = isOpen(i);
           return (
-            <button key={i} type="button"
-              className={'hero-word' + (on ? ' is-open' : '')}
-              aria-pressed={on}
-              aria-label={on ? w.ar + ' — ' + w.fr : w.ar + ' — toucher pour révéler le sens'}
-              onClick={function () { autoRef.current = false; open(i); }}
-              onMouseEnter={function () { if (!on) { autoRef.current = false; open(i); } }}>
-              <span className="hw-ar">{w.ar}</span>
-              <span className="hw-tr">{w.tr}</span>
-              <span className="hw-fr">{w.fr}</span>
-            </button>
+            <span key={i} className={'peek-word' + (i < n ? ' on' : '')}>
+              <span className="pw-ar">{w.ar}</span>
+              <span className="pw-fr">{w.fr}</span>
+            </span>
           );
         })}
       </div>
+      <p className="peek-foot">
+        <strong>{(pct >= 1 ? pct.toFixed(1) : pct.toFixed(2)).replace(/\.0$/, '').replace('.', ',')}&nbsp;%</strong>
+        <span> des mots du Coran, rien qu'avec ces 4 mots</span>
+      </p>
+    </div>
+  );
+}
 
-      {/* Compteur : la découverte devient un chiffre, et le chiffre devient un
-          manque. C'est le même calcul que la jauge de « Comprendre ». */}
-      <div className={'hero-meter' + (all ? ' is-full' : '')} aria-live="polite">
-        <div className="hero-meter-bar">
-          <span style={{ width: Math.min(100, pct / 3.44 * 100) + '%' }} />
-        </div>
-        <p className="hero-meter-txt">
-          {opened.length === 0 ? (
-            <span className="hm-hint">Touche un mot pour en découvrir le sens</span>
-          ) : (
-            <>
-              <strong>{fmt(pct)}&nbsp;%</strong> des mots du Coran
-              {all ? <span className="hm-note"> — rien qu'avec ces 4 mots</span>
-                   : <span className="hm-note"> · continue</span>}
-            </>
-          )}
-        </p>
+/* ── Aperçu 2 : Blind Test ── */
+function HeroPeekBlindTest({ live }) {
+  const [reveal, setReveal] = React.useState(false);
+  React.useEffect(function () {
+    if (!live) { setReveal(false); return; }
+    setReveal(false);
+    const t = setTimeout(function () { setReveal(true); }, 1700);
+    return function () { clearTimeout(t); };
+  }, [live]);
+  return (
+    <div className="peek peek-bt">
+      <div className="bt-wave" aria-hidden="true">
+        {[0,1,2,3,4,5,6,7,8,9,10,11].map(function (i) {
+          return <i key={i} style={{ animationDelay: (i * 0.08) + 's', height: (8 + ((i * 7) % 17)) + 'px' }} />;
+        })}
       </div>
+      <p className="peek-q">Quelle sourate écoutes-tu&nbsp;?</p>
+      <div className="peek-grid">
+        {HERO_BT.options.map(function (o, i) {
+          const ok = reveal && i === HERO_BT.correct;
+          return <span key={o} className={'peek-opt' + (ok ? ' good' : '')}>{o}{ok ? <b>✓</b> : null}</span>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── Aperçu 3 : Quiz ── */
+function HeroPeekQuiz({ live }) {
+  const [reveal, setReveal] = React.useState(false);
+  React.useEffect(function () {
+    if (!live) { setReveal(false); return; }
+    setReveal(false);
+    const t = setTimeout(function () { setReveal(true); }, 1700);
+    return function () { clearTimeout(t); };
+  }, [live]);
+  return (
+    <div className="peek peek-quiz">
+      <p className="peek-q peek-q-lg">{HERO_QUIZ.q}</p>
+      <div className="peek-grid">
+        {HERO_QUIZ.choices.map(function (c, i) {
+          const ok = reveal && i === HERO_QUIZ.correct;
+          return <span key={c} className={'peek-opt' + (ok ? ' good' : '')}>{c}{ok ? <b>✓</b> : null}</span>;
+        })}
+      </div>
+      <p className="peek-foot"><span>740 questions · 9 thèmes · 3 niveaux</span></p>
     </div>
   );
 }
 
 function Hero({ navigate }) {
   const { isPro } = useAuth();
+  const [tab, setTab] = React.useState(0);
+  const autoRef = React.useRef(true);
+
+  /* Rotation automatique : beaucoup de visiteurs ne touchent rien, et le hero
+     doit leur montrer les trois activités quand même. Le premier geste coupe
+     définitivement la rotation — rien de plus agaçant qu'un carrousel qui
+     reprend la main pendant qu'on lit. */
+  React.useEffect(function () {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    const id = setInterval(function () {
+      if (!autoRef.current) { clearInterval(id); return; }
+      setTab(function (t) { return (t + 1) % HERO_TABS.length; });
+    }, 4600);
+    return function () { clearInterval(id); };
+  }, []);
+
+  const take = function (i) { autoRef.current = false; setTab(i); };
+  const active = HERO_TABS[tab];
+
   return (
     <section className="hero-section">
-      <div className="hero-glow" aria-hidden="true" />
+      <div className="hero-glow" style={{ background: 'radial-gradient(circle, rgba(' + active.rgb + ',0.13) 0%, rgba(26,92,53,0.10) 40%, transparent 68%)' }} aria-hidden="true" />
 
       <div className="hero-inner">
-        <p className="hero-kicker">
-          <span className="hk-rule" />
-          Comprendre le Coran, mot à mot
-          <span className="hk-rule" />
-        </p>
+        <p className="hero-kicker"><span className="hk-rule" />Apprendre l'islam autrement<span className="hk-rule" /></p>
 
         <h1 className="hero-h1">
-          Tu pries en arabe.<br />
-          <em>Et si tu comprenais&nbsp;?</em>
+          Trois façons d'apprendre —<br />
+          <em>aucune ne ressemble à un cours.</em>
         </h1>
 
-        <HeroVerse navigate={navigate} />
-
-        <button className="hero-cta" onClick={function () { navigate('comprendre'); }}>
-          {isPro ? 'Continuer mon apprentissage →' : 'Commencer — gratuitement →'}
-        </button>
-        <p className="hero-sub">
-          5 sourates offertes <span>·</span> sans compte <span>·</span> sans carte bancaire
-        </p>
-
-        {/* Les trois autres activités, volontairement secondaires : une seule
-            action principale par écran, sinon le visiteur choisit de ne pas
-            choisir. L'ancien hero les mettait à égalité avec le bouton. */}
-        <nav className="hero-more" aria-label="Autres activités">
-          {[
-            { id: 'blind-test', t: 'Blind Test', d: 'Devine la sourate', eq: true },
-            { id: 'quiz', t: 'Quiz', d: '740 questions' },
-            { id: 'studio', t: 'Studio', d: 'Crée une vidéo' },
-          ].map(function (a) {
+        {/* Onglets : le visiteur voit d'un coup d'œil tout ce que contient le site */}
+        <div className="hero-tabs" role="tablist" aria-label="Les activités du site">
+          {HERO_TABS.map(function (t, i) {
+            const on = i === tab;
             return (
-              <button key={a.id} onClick={function () { navigate(a.id); }} className="hero-more-item">
-                <span className="hmi-ico" aria-hidden="true">
-                  {a.eq
-                    ? [0, 1, 2, 3].map(function (n) {
-                        return <i key={n} className="eqbar" style={{ animationDelay: (n * 0.15) + 's', height: (7 + (n % 2) * 7) + 'px' }} />;
-                      })
-                    : (a.id === 'quiz'
-                        ? <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" /><circle cx="12" cy="17.5" r=".9" fill="currentColor" stroke="none" /></svg>
-                        : <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round"><path d="M3 6.5h13v11H3z" /><path d="m16 11 5-3v8l-5-3z" /></svg>)}
-                </span>
-                <span className="hmi-txt">
-                  <span className="hmi-t">{a.t}</span>
-                  <span className="hmi-d">{a.d}</span>
-                </span>
+              <button key={t.id} role="tab" aria-selected={on} type="button"
+                className={'hero-tab' + (on ? ' on' : '')}
+                style={on ? { borderColor: 'rgba(' + t.rgb + ',0.65)', background: 'rgba(' + t.rgb + ',0.12)' } : null}
+                onClick={function () { take(i); }}>
+                <HeroIcon id={t.id} color={on ? t.color : 'rgba(255,255,255,0.5)'} />
+                <span style={on ? { color: t.color } : null}>{t.label}</span>
               </button>
             );
           })}
-        </nav>
+        </div>
+
+        <div className="hero-panel" style={{ borderColor: 'rgba(' + active.rgb + ',0.32)' }}>
+          <p className="hero-panel-tag" style={{ color: active.color }}>{active.tag}</p>
+          {tab === 0 && <HeroPeekComprendre live={tab === 0} />}
+          {tab === 1 && <HeroPeekBlindTest live={tab === 1} />}
+          {tab === 2 && <HeroPeekQuiz live={tab === 2} />}
+        </div>
+
+        <button className="hero-cta" onClick={function () { navigate(active.id); }}
+          style={{ background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)' }}>
+          {isPro ? active.cta + ' →' : active.cta + ' — gratuitement →'}
+        </button>
+        <p className="hero-sub">Sans compte <span>·</span> sans carte bancaire <span>·</span> 100&nbsp;% en français</p>
       </div>
     </section>
   );
