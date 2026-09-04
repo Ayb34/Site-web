@@ -593,7 +593,7 @@ function SubscriptionPage({ navigate }) {
     setCheckoutError(null);
   };
   const features = [
-    { icon: '🕌', title: 'Quiz islamiques', desc: '200+ questions sur les piliers, prophètes, histoire' },
+    { icon: '🕌', title: 'Quiz islamiques', desc: '740 questions — Coran, prophètes, piliers, histoire' },
     { icon: '🎵', title: 'Blind Test Coran', desc: 'Reconnais les sourates à l\'écoute' },
     { icon: '🎬', title: 'Studio Vidéo', desc: 'Crée des clips avec des rappels audio' },
     { icon: '📅', title: 'Nouveau contenu', desc: 'Ajouts chaque semaine incha\'Allah' },
@@ -1798,7 +1798,7 @@ function FeatureCards({ navigate }) {
       num: '02', icon: '🧠', tag: null, tagColor: '#7bc99a', tagRgb: '123,201,154',
       title: 'Quiz Islamiques',
       hook: 'Teste tes connaissances. Surprends-toi toi-même.',
-      desc: 'Histoire, prophètes ﷺ, jurisprudence, Coran. Des centaines de questions vérifiées, structurées par niveau.',
+      desc: '740 questions vérifiées sur 9 thèmes — Coran, prophètes ﷺ, histoire, jurisprudence. Trois niveaux, et un mode Mélange qui pioche partout.',
       free: 'Niveau Débutant · illimité',
       pro: 'Tous niveaux · Toutes catégories · Illimité',
       accent: { from:'rgba(6,22,13,0.97)', to:'rgba(2,8,4,0.99)', border:'rgba(100,180,130,0.28)', glow:'rgba(100,180,130,0.12)', line:'#4ade80' },
@@ -3262,7 +3262,7 @@ function StartPage({ navigate }) {
     {
       icon: '🧠', tag: 'ENRICHISSANT', tagColor: '#4ade80', tagRgb: '74,222,128',
       title: 'Quiz Islamiques',
-      desc: 'Prophètes, histoire, jurisprudence, Coran. Des centaines de questions vérifiées, structurées par niveau de connaissance.',
+      desc: '740 questions vérifiées sur 9 thèmes — dont une catégorie Coran entière. Trois niveaux, et un mode Mélange qui ne repose jamais deux fois la même question.',
       free: ['Niveau Débutant illimité', 'Tous les thèmes en aperçu', 'Score sauvegardé'],
       pro: ['Niveaux Amateur & Avancé débloqués', 'Quiz illimités', 'Toutes catégories', 'Corrections détaillées'],
       cta: '🧠 Essayer le Quiz', page: 'quiz',
@@ -4194,7 +4194,8 @@ function QuizPage({ navigate }) {
   const { user, openAuth, isPro } = useAuth();
 
   React.useEffect(() => {
-    fetch('./questions.json').then(r => r.json()).then(data => {
+    fetch('./questions.json').then(r => r.json()).then(raw => {
+      const data = quizWithMelange(raw);
       setCats(data);
       const stored = {};
       Object.keys(data).forEach(k => {
@@ -4243,7 +4244,7 @@ function QuizPage({ navigate }) {
           Teste tes <span style={{ color: '#c8a727' }}>connaissances</span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, margin: '0 0 16px', lineHeight: 1.6 }}>
-          7 catégories · 3 niveaux
+          {cats ? Object.keys(cats).length : 8} catégories · 3 niveaux
         </p>
         {isPro ? (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(200,167,39,0.08)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 12, padding: '8px 18px' }}>
@@ -4399,6 +4400,84 @@ function QuizPage({ navigate }) {
 }
 
 /* ─── Quiz Category Page ─── */
+/* Catégorie « Mélange » — assemblée à la volée, absente de questions.json.
+
+   Les catégories thématiques plafonnent à une vingtaine de questions par niveau ;
+   à 10 questions par partie, la deuxième partie en répétait déjà la moitié, et
+   mémoriser les questions déjà vues n'y change rien quand le stock est trop
+   petit. En puisant dans toutes les catégories à la fois, le même contenu offre
+   un réservoir de plusieurs centaines de questions par niveau — sans qu'il
+   faille en écrire une seule de plus.
+
+   Les identifiants sont déjà uniques d'une catégorie à l'autre (voir la
+   normalisation `<catégorie>-<niveau>-<n>`), donc le suivi des questions vues
+   fonctionne sans préfixe supplémentaire. */
+const QUIZ_MELANGE_KEY = 'melange';
+function quizBuildMelange(data) {
+  const all = [];
+  Object.keys(data).forEach(function (k) {
+    if (k === QUIZ_MELANGE_KEY) return;
+    (data[k].questions || []).forEach(function (q) { all.push(q); });
+  });
+  return { title: 'Mélange', icon: '🎲', color: '#e6c84a', free: false, questions: all };
+}
+// Place le Mélange en tête : c'est le mode au réservoir le plus profond.
+function quizWithMelange(data) {
+  const out = {};
+  out[QUIZ_MELANGE_KEY] = quizBuildMelange(data);
+  Object.keys(data).forEach(function (k) { if (k !== QUIZ_MELANGE_KEY) out[k] = data[k]; });
+  return out;
+}
+
+/* Mélange de Fisher-Yates.
+   `sort(() => Math.random() - 0.5)` — utilisé ici auparavant — n'est pas un
+   mélange uniforme : le comparateur est incohérent, et les implémentations de
+   tri laissent une partie des éléments proches de leur position d'origine. Les
+   mêmes questions revenaient donc plus souvent que le hasard ne l'exige. */
+function quizShuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+/* Tire `size` questions en évitant celles déjà posées.
+   Avant, chaque partie retirait au hasard dans tout le niveau : avec ~20
+   questions par catégorie et 10 par partie, la deuxième partie en répétait la
+   moitié — le contenu paraissait épuisé bien avant de l'être. On mémorise donc
+   les identifiants déjà vus et on puise d'abord dans le reste. Quand le stock
+   est épuisé, on repart à zéro : un nouveau tour complet plutôt qu'un blocage. */
+function quizPickQuestions(pool, size, seenKey) {
+  if (!pool.length) return [];
+  let seen = [];
+  try {
+    const raw = localStorage.getItem(seenKey);
+    if (raw) seen = JSON.parse(raw) || [];
+  } catch (e) {}
+  const seenSet = {};
+  seen.forEach(function (id) { seenSet[id] = 1; });
+
+  let fresh = pool.filter(function (q) { return !seenSet[q.id]; });
+  let picked;
+  if (fresh.length >= size) {
+    picked = quizShuffle(fresh).slice(0, size);
+  } else {
+    // Reste moins d'une partie complète : on prend tout l'inédit, on complète
+    // avec du déjà-vu, et on remet le compteur à zéro pour le tour suivant.
+    const filler = quizShuffle(pool.filter(function (q) { return seenSet[q.id]; }))
+      .slice(0, size - fresh.length);
+    picked = quizShuffle(fresh.concat(filler));
+    seen = [];
+  }
+  try {
+    const next = seen.concat(picked.map(function (q) { return q.id; }));
+    localStorage.setItem(seenKey, JSON.stringify(next));
+  } catch (e) {}
+  return picked;
+}
+
 function QuizCategoryPage({ catKey, level, navigate }) {
   const { user, openAuth } = useAuth();
   const QUIZ_SIZE = 10;
@@ -4411,6 +4490,8 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   };
   const lvMeta     = LEVEL_META[level] || LEVEL_META.debutant;
   const storageKey = 'quiz_score_' + catKey + '_' + (level || 'debutant');
+  // Questions déjà posées dans cette catégorie/niveau — cf. quizPickQuestions.
+  const seenKey    = 'quiz_seen_' + catKey + '_' + (level || 'debutant');
 
   const [cat, setCat]         = React.useState(null);
   const [questions, setQs]    = React.useState([]);
@@ -4421,12 +4502,13 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   const [done, setDone]       = React.useState(false);
 
   React.useEffect(() => {
-    fetch('./questions.json').then(r => r.json()).then(data => {
+    fetch('./questions.json').then(r => r.json()).then(raw => {
+      const data = quizWithMelange(raw);
       const c = data[catKey];
       if (!c) { navigate('quiz'); return; }
       setCat(c);
       const filtered = (c.questions || []).filter(q => q.level === (level || 'debutant'));
-      setQs([...filtered].sort(() => Math.random() - 0.5).slice(0, QUIZ_SIZE));
+      setQs(quizPickQuestions(filtered, QUIZ_SIZE, seenKey));
     });
   }, [catKey, level]);
 
