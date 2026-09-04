@@ -447,8 +447,11 @@
     margin: 0 0 9px; font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 9.5px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
   }
-  .peek { animation: peekIn .45s ease-out both; }
-  @keyframes peekIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  /* L'aperçu ne part jamais de l'invisible : a opacity 0, le panneau paraissait
+     vide pendant un tiers de seconde a chaque rotation, ce qui se lit comme un
+     bug. On demarre a 0.45 et on raccourcit. */
+  .peek { animation: peekIn .26s ease-out both; }
+  @keyframes peekIn { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
   .peek-q {
     margin: 0 0 10px; font-family: 'Cormorant Garamond', Georgia, serif;
@@ -457,7 +460,10 @@
   .peek-q-lg { font-size: 15.5px; font-style: normal; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; color: #f0ede6; }
 
   /* Comprendre */
-  .peek-words { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 10px; }
+  /* Grille 2x2 en mobile : en flex-wrap les quatre mots tombaient en 3 + 1,
+     ce qui deséquilibre le panneau. Quatre colonnes des que la largeur le
+     permet (voir la requete desktop). */
+  .peek-words { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
   .peek-word {
     display: flex; flex-direction: column; align-items: center; gap: 1px;
     min-width: 68px; padding: 6px 8px; border-radius: 10px;
@@ -524,6 +530,32 @@
   }
   .hero-sub span { opacity: 0.45; margin: 0 2px; }
 
+  /* Ecrans courts (iPhone SE/8 : 667 px, encore tres repandus).
+     Sans cela le bouton tombait a 495 px et le bandeau cookies, qui demarre a
+     497 px, le recouvrait entierement — le premier ecran n'offrait aucune
+     action cliquable. On resserre plutot que de rogner du contenu. */
+  @media (max-height: 720px) {
+    .hero-section { padding: 66px 18px 28px; }
+    .hero-kicker { margin-bottom: 9px; font-size: 9.5px; }
+    .hero-h1 { font-size: clamp(23px, 6.4vw, 34px); margin-bottom: 13px; }
+    .hero-tabs { margin-bottom: 8px; }
+    .hero-tab { padding: 7px 5px; font-size: 11.5px; }
+    .hero-panel { height: 188px; padding: 10px 12px 12px; margin-bottom: 12px; }
+    .hero-panel-tag { margin-bottom: 6px; }
+    .peek-q { font-size: 12.5px; margin-bottom: 7px; }
+    .peek-q-lg { font-size: 13.5px; }
+    .peek-words { gap: 5px; margin-bottom: 7px; }
+    .peek-word { padding: 4px 6px; }
+    .pw-ar { font-size: 18px; }
+    .pw-fr { font-size: 8.5px; }
+    .peek-opt { padding: 7px 5px; font-size: 11.5px; }
+    .bt-wave { height: 20px; margin-bottom: 6px; }
+    .peek-foot { font-size: 10px; }
+    .peek-foot strong { font-size: 14px; }
+    .hero-cta { padding: 13px 22px; font-size: 14.5px; }
+    .hero-sub { font-size: 10.5px; margin-top: 8px; }
+  }
+
   @media (min-width: 769px) {
     .hero-section { padding: 116px 24px 68px; }
     .hero-inner { max-width: 620px; }
@@ -534,7 +566,8 @@
     .peek-q-lg { font-size: 17px; }
     .pw-ar { font-size: 25px; }
     .pw-fr { font-size: 10.5px; }
-    .peek-word { min-width: 86px; padding: 8px 11px; }
+    .peek-words { grid-template-columns: repeat(4, 1fr); }
+    .peek-word { padding: 8px 11px; }
     .peek-opt { font-size: 13.5px; padding: 10px; }
     .peek-foot { font-size: 12px; }
     .peek-foot strong { font-size: 18px; }

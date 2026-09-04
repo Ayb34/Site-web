@@ -6817,21 +6817,26 @@ function RgpdBanner({ onAccept, onDecline }) {
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99998,
       background: 'rgba(3,12,7,0.97)', backdropFilter: 'blur(16px)',
       borderTop: '1px solid rgba(200,167,39,0.2)',
-      padding: '16px 24px',
-      display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+      padding: '12px 18px',
+      display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
       boxShadow: '0 -4px 32px rgba(0,0,0,0.5)',
       fontFamily: 'Plus Jakarta Sans, sans-serif',
     }}>
       <div style={{ flex: 1, minWidth: 240 }}>
-        <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
-          🍪 Nous utilisons des cookies strictement nécessaires au fonctionnement du site (session, paiement).
+        {/* Formulation resserrée : la version longue tenait sur quatre lignes en
+            mobile et le bandeau montait à 170 px, soit un quart d'un iPhone SE —
+            il recouvrait le bouton principal du hero. Le fond juridique est
+            conservé : cookies strictement nécessaires, rien de publicitaire sans
+            accord. */}
+        <p style={{ margin: 0, fontSize: 12.5, color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+          🍪 Cookies strictement nécessaires au fonctionnement du site (session, paiement).
           {' '}<span style={{ color: 'rgba(255,255,255,0.45)' }}>Aucun cookie publicitaire sans votre accord.</span>
         </p>
       </div>
       <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
         <button onClick={decline} style={{
           background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
-          color: 'rgba(255,255,255,0.55)', padding: '8px 18px', borderRadius: 8,
+          color: 'rgba(255,255,255,0.55)', padding: '9px 16px', borderRadius: 8,
           fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
           transition: 'all 0.2s'
         }}
