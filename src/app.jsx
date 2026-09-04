@@ -18,6 +18,16 @@ const PRO_DISCOUNT = '−69%';
 const PRO_EQ_MONTH = '2,50€';         // 29,99 / 12
 const PRO_PER_DAY = '0,08€';          // 29,99 / 365
 
+/* Nombre de membres — une seule source, comme les prix.
+   Le site affichait « +90 » sur les avis et « +130 » dans la modale Pro alors
+   que Firebase en comptait 183 : trois chiffres pour une même réalité, sur des
+   écrans que le même visiteur enchaîne. Un compteur qui se contredit décrédibilise
+   tout le reste de la page, y compris le prix.
+   Volontairement arrondi EN DESSOUS du réel (183 comptes vérifiés au 31/07/2026,
+   +20 issus de la campagne Meta d'août) : une preuve sociale doit rester vraie
+   même sans être remise à jour chaque semaine. */
+const MEMBERS_COUNT = '+180';
+
 /* Ancre de prix. Seul, « 29,99€ » est un chiffre nu ; à côté des 95,88€ que
    coûterait le mensuel sur la même année, c'est une remise. On barre l'ancre
    plutôt que d'annoncer la remise en mots : le calcul se voit sans se lire. */
@@ -189,7 +199,12 @@ function GuestGateModal({ onClose, context = 'default' }) {
       emoji: '📖',
       title: 'Continue ton apprentissage',
       sub: <>Crée ton compte gratuit pour continuer<br/>et sauvegarder ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
-      feats: ['✓ Toutes les sourates débloquées*','✓ Ta progression sauvegardée','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+      // Ne jamais promettre ici ce que le compte gratuit ne donne pas.
+      // L'ancienne ligne « Toutes les sourates débloquées* » (astérisque sans
+      // note) annonçait le contenu Pro au moment de l'inscription : l'utilisateur
+      // créait son compte, tombait sur le mur Pro juste après, et lisait la
+      // promesse comme un piège. On ne vend plus que ce que le gratuit tient.
+      feats: ['✓ Ta progression sauvegardée sur tous tes appareils','✓ Rejoue les sourates gratuites autant que tu veux','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
     },
   };
   const copy = GATE_COPY[context] || GATE_COPY.default;
@@ -1659,7 +1674,7 @@ function Hero({ navigate }) {
             compte). On le dit ici : un CTA générique qui atterrit sur une
             activité précise passe pour une erreur de navigation. */}
         <p style={{ margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center', lineHeight: 1.5 }}>
-          Al-Fâtiha en entier, mot à mot <span style={{ opacity: 0.5 }}>·</span> sans compte <span style={{ opacity: 0.5 }}>·</span> sans carte bancaire
+          5 sourates offertes, mot à mot <span style={{ opacity: 0.5 }}>·</span> sans compte <span style={{ opacity: 0.5 }}>·</span> sans carte bancaire
         </p>
       </div>
 
@@ -1793,9 +1808,9 @@ function FeatureCards({ navigate }) {
       num: '03', icon: '📖', tag: 'NOUVEAU', tagColor: '#c8a727', tagRgb: '200,167,39',
       title: 'Comprends le Coran',
       hook: 'Tu pries en arabe depuis des années — sans vraiment comprendre les mots.',
-      desc: 'Apprends le Coran mot à mot. ~50 mots suffisent à saisir près de la moitié du Coran. Écoute, comprends, joue — et un jour, tu comprends ta prière.',
-      free: 'Al-Fâtiha · mot à mot · illimité',
-      pro: 'Toutes les sourates · progression complète',
+      desc: "Apprends le Coran mot à mot. Le Juz 'Amma seul te donne plus de la moitié des mots du Coran — ils reviennent partout. Écoute, comprends, joue, et un jour tu comprends ta prière.",
+      free: '5 sourates offertes · mot à mot · illimité',
+      pro: "Le Juz 'Amma complet — 38 sourates, 571 versets",
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'comprendre',
     },
@@ -3099,7 +3114,7 @@ function Testimonials() {
           Ils apprennent déjà avec <span style={{ color: '#c8a727' }}>Héritage Musulman</span>
         </h2>
         <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 40 }}>
-          Rejoins <strong style={{ color: '#e6c84a' }}>+90 musulmans</strong> qui révisent leur Deen en s'amusant.
+          Rejoins <strong style={{ color: '#e6c84a' }}>{MEMBERS_COUNT} musulmans</strong> qui révisent leur Deen en s'amusant.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, textAlign: 'left' }}>
           {reviews.map((r, i) => (
@@ -3149,7 +3164,7 @@ function SoftPaywall({ navigate }) {
         {/* Value stack */}
         <div className="soft-paywall-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 36, textAlign: 'left' }}>
           {[
-            { icon: '📖', title: 'Comprendre le Coran', desc: 'Toutes les sourates, mot à mot' },
+            { icon: '📖', title: 'Comprendre le Coran', desc: "Le Juz 'Amma mot à mot — 38 sourates" },
             { icon: '🧠', title: 'Quiz illimités', desc: 'Tous niveaux, toutes catégories' },
             { icon: '🎵', title: 'Blind test complet', desc: '114 sourates à reconnaître' },
             { icon: '🎬', title: 'Studio vidéo', desc: 'Crée & télécharge tes clips' },
@@ -3233,7 +3248,7 @@ function StartPage({ navigate }) {
       title: 'Comprends le Coran',
       desc: 'Apprends le Coran mot à mot, verset par verset, avec audio et phonétique. Quelques dizaines de mots suffisent à saisir une grande partie du Coran — comprends enfin ce que tu récites dans ta prière.',
       free: ['Al-Fâtiha & Al-Ikhlâs — illimité', 'Audio & phonétique inclus', 'Progression sauvegardée'],
-      pro: ['Toutes les sourates débloquées', 'Nouvelles sourates chaque semaine', 'Suivi de progression complet'],
+      pro: ["Le Juz 'Amma en entier — 38 sourates, 571 versets", 'Nouvelles sourates régulièrement', 'Suivi de progression complet'],
       cta: '📖 Essayer Comprendre le Coran', page: 'comprendre',
     },
     {
@@ -7274,138 +7289,64 @@ function cmpLoadReciter() {
 }
 function cmpSaveReciter(id) { try { localStorage.setItem(CMP_RECITER_KEY, id); } catch (e) {} }
 
-// Sourates avec découpage mot-à-mot (arabe + sens FR). Traductions standard.
-const CMP_SOURATES = [
-  {
-    id: 'fatiha', surah: 1, name: 'Al-Fâtiha', fr: "L'Ouverture", free: true,
-    ayahs: [
-      { n: 1, words: [ {ar:'بِسْمِ',fr:'Au nom de'}, {ar:'اللَّهِ',fr:'Allah'}, {ar:'الرَّحْمَٰنِ',fr:'le Tout-Miséricordieux'}, {ar:'الرَّحِيمِ',fr:'le Très-Miséricordieux'} ] },
-      { n: 2, words: [ {ar:'الْحَمْدُ',fr:'La louange'}, {ar:'لِلَّهِ',fr:'à Allah'}, {ar:'رَبِّ',fr:'Seigneur'}, {ar:'الْعَالَمِينَ',fr:"de l'univers"} ] },
-      { n: 3, words: [ {ar:'الرَّحْمَٰنِ',fr:'le Tout-Miséricordieux'}, {ar:'الرَّحِيمِ',fr:'le Très-Miséricordieux'} ] },
-      { n: 4, words: [ {ar:'مَالِكِ',fr:'Maître'}, {ar:'يَوْمِ',fr:'du Jour'}, {ar:'الدِّينِ',fr:'de la rétribution'} ] },
-      { n: 5, words: [ {ar:'إِيَّاكَ',fr:"C'est Toi que"}, {ar:'نَعْبُدُ',fr:'nous adorons'}, {ar:'وَإِيَّاكَ',fr:"et c'est Toi que"}, {ar:'نَسْتَعِينُ',fr:"nous implorons l'aide"} ] },
-      { n: 6, words: [ {ar:'اهْدِنَا',fr:'Guide-nous'}, {ar:'الصِّرَاطَ',fr:'le chemin'}, {ar:'الْمُسْتَقِيمَ',fr:'droit'} ] },
-      { n: 7, words: [ {ar:'صِرَاطَ',fr:'le chemin de'}, {ar:'الَّذِينَ',fr:'ceux'}, {ar:'أَنْعَمْتَ',fr:'Tu as comblés'}, {ar:'عَلَيْهِمْ',fr:'sur eux'}, {ar:'غَيْرِ',fr:'non pas'}, {ar:'الْمَغْضُوبِ',fr:'des réprouvés'}, {ar:'وَلَا',fr:'ni'}, {ar:'الضَّالِّينَ',fr:'des égarés'} ] },
-    ],
-  },
-  {
-    id: 'ikhlas', surah: 112, name: 'Al-Ikhlâs', fr: 'Le Monothéisme pur', free: true,
-    ayahs: [
-      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'هُوَ',fr:'Il est'}, {ar:'اللَّهُ',fr:'Allah'}, {ar:'أَحَدٌ',fr:'Unique'} ] },
-      { n: 2, words: [ {ar:'اللَّهُ',fr:'Allah'}, {ar:'الصَّمَدُ',fr:"l'Absolu"} ] },
-      { n: 3, words: [ {ar:'لَمْ',fr:'ne pas'}, {ar:'يَلِدْ',fr:'a engendré'}, {ar:'وَلَمْ',fr:'et ne pas'}, {ar:'يُولَدْ',fr:'a été engendré'} ] },
-      { n: 4, words: [ {ar:'وَلَمْ',fr:'et ne pas'}, {ar:'يَكُن',fr:'est'}, {ar:'لَّهُ',fr:'à Lui'}, {ar:'كُفُوًا',fr:'égal'}, {ar:'أَحَدٌ',fr:'quiconque'} ] },
-    ],
-  },
-  {
-    id: 'falaq', surah: 113, name: 'Al-Falaq', fr: "L'Aube naissante", free: false,
-    ayahs: [
-      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'أَعُوذُ',fr:'je cherche refuge'}, {ar:'بِرَبِّ',fr:'auprès du Seigneur'}, {ar:'الْفَلَقِ',fr:"de l'aube"} ] },
-      { n: 2, words: [ {ar:'مِن',fr:'contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'مَا',fr:'de ce'}, {ar:'خَلَقَ',fr:"qu'Il a créé"} ] },
-      { n: 3, words: [ {ar:'وَمِن',fr:'et contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'غَاسِقٍ',fr:"de l'obscurité"}, {ar:'إِذَا',fr:'quand'}, {ar:'وَقَبَ',fr:'elle s\'étend'} ] },
-      { n: 4, words: [ {ar:'وَمِن',fr:'et contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'النَّفَّاثَاتِ',fr:'des souffleuses'}, {ar:'فِي',fr:'sur'}, {ar:'الْعُقَدِ',fr:'les nœuds'} ] },
-      { n: 5, words: [ {ar:'وَمِن',fr:'et contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'حَاسِدٍ',fr:"de l'envieux"}, {ar:'إِذَا',fr:'quand'}, {ar:'حَسَدَ',fr:'il envie'} ] },
-    ],
-  },
-  {
-    id: 'nas', surah: 114, name: 'An-Nâs', fr: 'Les Hommes', free: false,
-    ayahs: [
-      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'أَعُوذُ',fr:'je cherche refuge'}, {ar:'بِرَبِّ',fr:'auprès du Seigneur'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
-      { n: 2, words: [ {ar:'مَلِكِ',fr:'le Roi'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
-      { n: 3, words: [ {ar:'إِلَٰهِ',fr:'le Dieu'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
-      { n: 4, words: [ {ar:'مِن',fr:'contre'}, {ar:'شَرِّ',fr:'le mal'}, {ar:'الْوَسْوَاسِ',fr:'du souffleur'}, {ar:'الْخَنَّاسِ',fr:'sournois'} ] },
-      { n: 5, words: [ {ar:'الَّذِي',fr:'qui'}, {ar:'يُوَسْوِسُ',fr:'souffle'}, {ar:'فِي',fr:'dans'}, {ar:'صُدُورِ',fr:'les poitrines'}, {ar:'النَّاسِ',fr:'des hommes'} ] },
-      { n: 6, words: [ {ar:'مِنَ',fr:'parmi'}, {ar:'الْجِنَّةِ',fr:'les djinns'}, {ar:'وَالنَّاسِ',fr:'et les hommes'} ] },
-    ],
-  },
-  {
-    id: 'asr', surah: 103, name: "Al-'Asr", fr: 'Le Temps', free: false,
-    ayahs: [
-      { n: 1, words: [ {ar:'وَالْعَصْرِ',fr:'Par le Temps'} ] },
-      { n: 2, words: [ {ar:'إِنَّ',fr:'Certes'}, {ar:'الْإِنسَانَ',fr:"l'être humain"}, {ar:'لَفِي',fr:'est bien dans'}, {ar:'خُسْرٍ',fr:'la perte'} ] },
-      { n: 3, words: [ {ar:'إِلَّا',fr:'sauf'}, {ar:'الَّذِينَ',fr:'ceux qui'}, {ar:'آمَنُوا',fr:'ont cru'}, {ar:'وَعَمِلُوا',fr:'et ont accompli'}, {ar:'الصَّالِحَاتِ',fr:'les bonnes œuvres'}, {ar:'وَتَوَاصَوْا',fr:'et se sont enjoint'}, {ar:'بِالْحَقِّ',fr:'la vérité'}, {ar:'وَتَوَاصَوْا',fr:'et se sont enjoint'}, {ar:'بِالصَّبْرِ',fr:"l'endurance"} ] },
-    ],
-  },
-  {
-    id: 'kawthar', surah: 108, name: 'Al-Kawthar', fr: "L'Abondance", free: false,
-    ayahs: [
-      { n: 1, words: [ {ar:'إِنَّا',fr:'Certes Nous'}, {ar:'أَعْطَيْنَاكَ',fr:"t'avons accordé"}, {ar:'الْكَوْثَرَ',fr:"l'abondance"} ] },
-      { n: 2, words: [ {ar:'فَصَلِّ',fr:'Accomplis la prière'}, {ar:'لِرَبِّكَ',fr:'pour ton Seigneur'}, {ar:'وَانْحَرْ',fr:'et sacrifie'} ] },
-      { n: 3, words: [ {ar:'إِنَّ',fr:'Certes'}, {ar:'شَانِئَكَ',fr:'celui qui te déteste'}, {ar:'هُوَ',fr:'est celui'}, {ar:'الْأَبْتَرُ',fr:'sans postérité'} ] },
-    ],
-  },
-  {
-    id: 'kafirun', surah: 109, name: 'Al-Kâfirûn', fr: 'Les Mécréants', free: false,
-    ayahs: [
-      { n: 1, words: [ {ar:'قُلْ',fr:'Dis'}, {ar:'يَا',fr:'Ô'}, {ar:'أَيُّهَا',fr:'vous'}, {ar:'الْكَافِرُونَ',fr:'les mécréants'} ] },
-      { n: 2, words: [ {ar:'لَا',fr:'ne pas'}, {ar:'أَعْبُدُ',fr:"j'adore"}, {ar:'مَا',fr:'ce que'}, {ar:'تَعْبُدُونَ',fr:'vous adorez'} ] },
-      { n: 3, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'أَنتُمْ',fr:'vous'}, {ar:'عَابِدُونَ',fr:'adorez'}, {ar:'مَا',fr:'ce que'}, {ar:'أَعْبُدُ',fr:"j'adore"} ] },
-      { n: 4, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'أَنَا',fr:'je suis'}, {ar:'عَابِدٌ',fr:'adorateur'}, {ar:'مَّا',fr:'de ce que'}, {ar:'عَبَدتُّمْ',fr:'vous avez adoré'} ] },
-      { n: 5, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'أَنتُمْ',fr:'vous'}, {ar:'عَابِدُونَ',fr:'adorez'}, {ar:'مَا',fr:'ce que'}, {ar:'أَعْبُدُ',fr:"j'adore"} ] },
-      { n: 6, words: [ {ar:'لَكُمْ',fr:'à vous'}, {ar:'دِينُكُمْ',fr:'votre religion'}, {ar:'وَلِيَ',fr:'et à moi'}, {ar:'دِينِ',fr:'ma religion'} ] },
-    ],
-  },
-  {
-    id: 'maun', surah: 107, name: "Al-Mâ'ûn", fr: "L'Ustensile", free: false,
-    ayahs: [
-      { n: 1, words: [ {ar:'أَرَأَيْتَ',fr:'As-tu vu'}, {ar:'الَّذِي',fr:'celui qui'}, {ar:'يُكَذِّبُ',fr:'traite de mensonge'}, {ar:'بِالدِّينِ',fr:'la religion'} ] },
-      { n: 2, words: [ {ar:'فَذَٰلِكَ',fr:"C'est celui"}, {ar:'الَّذِي',fr:'qui'}, {ar:'يَدُعُّ',fr:'repousse'}, {ar:'الْيَتِيمَ',fr:"l'orphelin"} ] },
-      { n: 3, words: [ {ar:'وَلَا',fr:'et ne pas'}, {ar:'يَحُضُّ',fr:'incite'}, {ar:'عَلَىٰ',fr:'à'}, {ar:'طَعَامِ',fr:'nourrir'}, {ar:'الْمِسْكِينِ',fr:'le pauvre'} ] },
-      { n: 4, words: [ {ar:'فَوَيْلٌ',fr:'Malheur'}, {ar:'لِّلْمُصَلِّينَ',fr:'à ceux qui prient'} ] },
-      { n: 5, words: [ {ar:'الَّذِينَ',fr:'qui'}, {ar:'هُمْ',fr:'sont'}, {ar:'عَن',fr:'de'}, {ar:'صَلَاتِهِمْ',fr:'leur prière'}, {ar:'سَاهُونَ',fr:'distraits'} ] },
-      { n: 6, words: [ {ar:'الَّذِينَ',fr:'qui'}, {ar:'هُمْ',fr:'sont'}, {ar:'يُرَاءُونَ',fr:"de l'ostentation"} ] },
-      { n: 7, words: [ {ar:'وَيَمْنَعُونَ',fr:'et refusent'}, {ar:'الْمَاعُونَ',fr:'la menue assistance'} ] },
-    ],
-  },
-];
+/* ═══ Données « Comprendre » — chargées à la demande ═══
+   Le corpus (38 sourates, 2 337 mots, ~200 Ko — 54 Ko gzippés) vit dans
+   /comprendre.json au lieu d'être inliné ici. Deux raisons :
+   1. 92-94 % du trafic est mobile. Inliner 200 Ko dans app.js retarderait le
+      premier rendu de l'ACCUEIL pour une donnée que seule la page #comprendre
+      utilise — exactement le problème que la précompilation esbuild avait résolu.
+   2. Ajouter des sourates redevient une modification de données : pas de
+      recompilation, pas de bundle qui gonfle à chaque ajout de contenu.
+   Sources : texte Uthmani + translittération (quran.com API v4), traduction du
+   verset (Hamidullah, via alquran.cloud), fréquences = occurrences réelles
+   comptées sur les 77 878 mots du Coran. Aucune donnée saisie de mémoire. */
+const CMP_DATA_URL = '/comprendre.json';
+let cmpDataCache = null;
+let cmpDataPromise = null;
+let cmpPhonMap = null;
+let cmpVocabSet = null;
 
-// Index global des mots uniques (clé = arabe). Sert au jeu + à la progression.
-const CMP_WORD_INDEX = (function () {
-  const map = {};
-  CMP_SOURATES.forEach(function (s) {
-    s.ayahs.forEach(function (a) {
-      a.words.forEach(function (w) {
-        if (!map[w.ar]) map[w.ar] = { ar: w.ar, fr: w.fr, sourates: [] };
-        if (map[w.ar].sourates.indexOf(s.id) < 0) map[w.ar].sourates.push(s.id);
+function cmpLoadData() {
+  if (cmpDataCache) return Promise.resolve(cmpDataCache);
+  if (cmpDataPromise) return cmpDataPromise;
+  cmpDataPromise = fetch(CMP_DATA_URL)
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) {
+      // Index construits une seule fois : refaits à chaque rendu, ils
+      // reparcourraient 806 mots pour afficher une jauge.
+      const phon = {}, vocab = {};
+      d.surahs.forEach(function (s) {
+        s.ayahs.forEach(function (a) {
+          a.words.forEach(function (w) {
+            const n = cmpNorm(w.ar);
+            if (w.tr) phon[n] = w.tr;
+            vocab[n] = 1;
+          });
+        });
       });
-    });
-  });
-  return map;
-})();
-const CMP_ALL_WORDS = Object.keys(CMP_WORD_INDEX).map(function (k) { return CMP_WORD_INDEX[k]; });
-// Nb de mots uniques enfermés derrière le Pro — sert à projeter la progression
-// réelle de l'utilisateur dans le paywall ("tu passerais de 13% à 45%").
-const CMP_LOCKED_WORDS = (function () {
-  const seen = {};
-  CMP_SOURATES.filter(function (s) { return !s.free; }).forEach(function (s) {
-    s.ayahs.forEach(function (a) { a.words.forEach(function (w) { seen[w.ar] = 1; }); });
-  });
-  return Object.keys(seen).length;
-})();
+      cmpPhonMap = phon;
+      cmpVocabSet = vocab;
+      cmpDataCache = d;
+      return d;
+    })
+    .catch(function (e) { cmpDataPromise = null; throw e; });
+  return cmpDataPromise;
+}
+
 const CMP_MASTER_THRESHOLD = 2; // bonnes réponses pour "maîtrisé"
 
-// Phonétique (translittération FR) par mot arabe — pour ceux qui ne lisent pas l'arabe.
-const CMP_PHON = {
-  'بِسْمِ':'bismi','اللَّهِ':'Llâhi','الرَّحْمَٰنِ':'ar-Rahmâni','الرَّحِيمِ':'ar-Rahîm',
-  'الْحَمْدُ':'al-hamdu','لِلَّهِ':'lillâhi','رَبِّ':'rabbi','الْعَالَمِينَ':"al-'âlamîn",
-  'مَالِكِ':'mâliki','يَوْمِ':'yawmi','الدِّينِ':'ad-dîn',
-  'إِيَّاكَ':'iyyâka','نَعْبُدُ':"na'budu",'وَإِيَّاكَ':'wa iyyâka','نَسْتَعِينُ':"nasta'în",
-  'اهْدِنَا':'ihdinâ','الصِّرَاطَ':'as-sirâta','الْمُسْتَقِيمَ':'al-mustaqîm',
-  'صِرَاطَ':'sirâta','الَّذِينَ':'alladhîna','أَنْعَمْتَ':"an'amta",'عَلَيْهِمْ':"'alayhim",'غَيْرِ':'ghayri','الْمَغْضُوبِ':'al-maghdûbi','وَلَا':'wa lâ','الضَّالِّينَ':'ad-dâllîn',
-  'قُلْ':'qoul','هُوَ':'huwa','اللَّهُ':'Allâhu','أَحَدٌ':'ahad','الصَّمَدُ':'as-Samad',
-  'لَمْ':'lam','يَلِدْ':'yalid','وَلَمْ':'wa lam','يُولَدْ':'yûlad','يَكُن':'yakun','لَّهُ':'lahû','كُفُوًا':'koufouwan',
-  'أَعُوذُ':"a'oûdhou",'بِرَبِّ':'bi-rabbi','الْفَلَقِ':'al-falaq','مِن':'min','شَرِّ':'charri','مَا':'mâ','خَلَقَ':'khalaqa',
-  'وَمِن':'wa min','غَاسِقٍ':'ghâsiqin','إِذَا':'idhâ','وَقَبَ':'waqaba','النَّفَّاثَاتِ':'an-naffâthâti','فِي':'fî','الْعُقَدِ':"al-'uqad",'حَاسِدٍ':'hâsidin','حَسَدَ':'hasada',
-  'النَّاسِ':'an-nâs','مَلِكِ':'maliki','إِلَٰهِ':'ilâhi','الْوَسْوَاسِ':'al-waswâsi','الْخَنَّاسِ':'al-khannâs','الَّذِي':'alladhî','يُوَسْوِسُ':'youwaswisu','صُدُورِ':'sudûri','مِنَ':'mina','الْجِنَّةِ':'al-jinnati','وَالنَّاسِ':'wan-nâs',
-  'وَالْعَصْرِ':"wal-'asr",'إِنَّ':'inna','الْإِنسَانَ':'al-insâna','لَفِي':'lafî','خُسْرٍ':'khousr','إِلَّا':'illâ','آمَنُوا':'âmanû','وَعَمِلُوا':"wa 'amilû",'الصَّالِحَاتِ':'as-sâlihâti','وَتَوَاصَوْا':'wa tawâsaw','بِالْحَقِّ':'bil-haqqi','بِالصَّبْرِ':'bis-sabr',
-  'إِنَّا':'innâ','أَعْطَيْنَاكَ':"a'taynâka",'الْكَوْثَرَ':'al-kawthar','فَصَلِّ':'fa-salli','لِرَبِّكَ':'li-rabbika','وَانْحَرْ':'wanhar','شَانِئَكَ':'châni-aka','الْأَبْتَرُ':'al-abtar',
-  'يَا':'yâ','أَيُّهَا':'ayyuhâ','الْكَافِرُونَ':'al-kâfirûn','لَا':'lâ','أَعْبُدُ':"a'budu",'تَعْبُدُونَ':"ta'budûn",'وَلَا ':'wa lâ','أَنتُمْ':'antum','عَابِدُونَ':"'âbidûn",'أَنَا':'anâ','عَابِدٌ':"'âbidun",'مَّا':'mâ','عَبَدتُّمْ':"'abadtum",'لَكُمْ':'lakum','دِينُكُمْ':'dînukum','وَلِيَ':'wa liya','دِينِ':'dîn',
-  'أَرَأَيْتَ':'a-ra-ayta','يُكَذِّبُ':'youkadhdhibu','بِالدِّينِ':'bid-dîn','فَذَٰلِكَ':'fa-dhâlika','يَدُعُّ':"yadu''u",'الْيَتِيمَ':'al-yatîm','يَحُضُّ':'yahuddu','عَلَىٰ':"'alâ",'طَعَامِ':"ta'âmi",'الْمِسْكِينِ':'al-miskîn','فَوَيْلٌ':'fa-waylun','لِّلْمُصَلِّينَ':'lil-musallîn','هُمْ':'hum','عَن':"'an",'صَلَاتِهِمْ':'salâtihim','سَاهُونَ':'sâhûn','يُرَاءُونَ':'yurâ-ûn','وَيَمْنَعُونَ':"wa yamna'ûna",'الْمَاعُونَ':"al-mâ'ûn",
-};
-// Normalise (retire les diacritiques) pour une recherche robuste malgré les variations de harakat.
-function cmpNorm(s) { return (s || '').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ]/g, ''); }
-const CMP_PHON_NORM = (function () { var m = {}; Object.keys(CMP_PHON).forEach(function (k) { m[cmpNorm(k)] = CMP_PHON[k]; }); return m; })();
-function cmpPhon(ar) { return CMP_PHON[ar] || CMP_PHON_NORM[cmpNorm(ar)] || ''; }
+/* Normalisation. Retire les diacritiques (les harakat varient d'une source à
+   l'autre) et ramène l'alif wasla « ٱ » à l'alif simple « ا » : le corpus
+   Uthmani écrit ٱلْحَمْدُ là où une saisie manuelle donne الْحَمْدُ, et sans cette
+   passe les deux formes ne se reconnaissaient pas. Écrit en séquences \u :
+   les mêmes plages tapées en caractères arabes littéraux se relisent mal. */
+const CMP_DIAC = new RegExp('[ؐ-ًؚ-ٰٟۖ-ۭـ]', 'g');
+function cmpNorm(s) {
+  return (s || '').replace(CMP_DIAC, '').replace(new RegExp('ٱ', 'g'), 'ا').trim();
+}
+// La translittération est désormais portée par la donnée (champ `tr` de chaque
+// mot) au lieu d'une table écrite à la main qui ne couvrait que ~120 mots.
+function cmpPhon(ar) { return (cmpPhonMap && cmpPhonMap[cmpNorm(ar)]) || ''; }
 
 // ── Persistance (localStorage) ──
 const CMP_KEY = 'hm_comprendre_v1';
@@ -7446,13 +7387,81 @@ function cmpLearnedCount(words) {
 function cmpMasteredCount(words) {
   return Object.keys(words || {}).filter(function (k) { return (words[k] || 0) >= CMP_MASTER_THRESHOLD; }).length;
 }
-// ~300 mots couvrent l'essentiel du texte coranique : la jauge mesure la
-// progression vers cette cible. Échelle volontairement honnête — un utilisateur
-// qui n'a fait que les 2 sourates gratuites doit voir qu'il reste du chemin,
-// sinon il n'a aucune raison de continuer (ni de passer Pro).
-const CMP_TARGET_WORDS = 300;
-function cmpComprehensionPct(words) {
-  return Math.min(99, Math.round((cmpLearnedCount(words) / CMP_TARGET_WORDS) * 100));
+/* ═══ Deux jauges, deux rôles ═══
+
+   L'ancienne jauge visait 300 mots que même un abonné ne pouvait pas atteindre
+   (plafond réel : 40 %). Elle annonçait donc au client, à l'instant précis où on
+   lui demandait 29,99 €, qu'il resterait à 60 % du chemin. C'était l'argument le
+   plus fort du site… contre l'achat.
+
+   `cmpCollectionPct` — avancement dans le corpus proposé. C'est l'OBJECTIF, et
+   il est atteignable : un abonné peut terminer le Juz 'Amma. Un but qu'on peut
+   finir se paie ; un but plafonné à 40 % ne se paie pas.
+
+   `cmpQuranPct` — part réelle des mots du Coran que l'utilisateur sait lire,
+   pondérée par les occurrences réelles (apprendre مِن, 2 763 occurrences, vaut
+   bien plus qu'un mot rare — c'est la vérité linguistique). C'est la PREUVE DE
+   RENTABILITÉ : elle est calculée sur le corpus, pas promise par le marketing. */
+
+// Ensemble des formes normalisées déjà connues (dédoublonné : deux graphies
+// d'un même mot ne doivent pas compter deux fois dans la couverture).
+function cmpKnownForms(words) {
+  const seen = {};
+  Object.keys(words || {}).forEach(function (k) {
+    if ((words[k] || 0) >= 1) seen[cmpNorm(k)] = 1;
+  });
+  return seen;
+}
+
+/* Part des mots du Coran entier que l'utilisateur sait lire.
+   On garde 2 décimales : les premiers mots appris sont souvent rares (يُولَدْ
+   n'apparaît qu'une fois dans tout le Coran), et arrondir à 0,1 affichait
+   « tu lis 0 % » juste après une partie gagnée — le joueur en conclut que le
+   jeu ne compte pas. cmpFmt se charge de n'afficher les décimales que
+   lorsqu'elles apportent quelque chose. */
+function cmpQuranPct(words, data) {
+  if (!data || !data.freq || !data.quranTotal) return 0;
+  const seen = cmpKnownForms(words);
+  let hit = 0;
+  Object.keys(seen).forEach(function (n) { hit += data.freq[n] || 0; });
+  return Math.round(hit / data.quranTotal * 10000) / 100;
+}
+
+// Avancement dans le vocabulaire du corpus proposé (0 → 100, atteignable).
+function cmpCollectionPct(words) {
+  if (!cmpVocabSet) return 0;
+  const total = Object.keys(cmpVocabSet).length;
+  if (!total) return 0;
+  const seen = cmpKnownForms(words);
+  let known = 0;
+  Object.keys(seen).forEach(function (n) { if (cmpVocabSet[n]) known++; });
+  return Math.min(100, Math.round(known / total * 100));
+}
+
+/* Affichage d'un pourcentage.
+   - séparateur décimal français : « 18.9 % » trahit un chiffre non relu, juste
+     à l'endroit où l'on demande de la confiance (et de l'argent) ;
+   - précision adaptative : au-dessus de 1 % une décimale suffit (50,9 %), en
+     dessous il en faut deux, sinon les débuts de progression s'affichent « 0 % »
+     alors que le joueur vient justement de gagner des mots. */
+function cmpFmt(n) {
+  const v = Number(n) || 0;
+  if (v <= 0) return '0';
+  // Une progression réelle mais minuscule (un mot qui n'apparaît qu'une fois
+  // dans le Coran) ne doit pas s'afficher « 0,00 » : on dit qu'elle est
+  // inférieure au seuil plutôt que de la nier.
+  if (v < 0.01) return '< 0,01';
+  const s = v >= 1 ? v.toFixed(1) : v.toFixed(2);
+  return s.replace(/\.0$/, '').replace('.', ',');
+}
+
+// Couverture du Coran atteignable en terminant TOUT le corpus — sert à projeter
+// « tu es à X %, tu peux atteindre Y % » dans le paywall, avec de vrais chiffres.
+function cmpMaxQuranPct(data) {
+  if (!data || !data.freq || !data.quranTotal) return 0;
+  let tot = 0;
+  Object.keys(data.freq).forEach(function (n) { tot += data.freq[n] || 0; });
+  return Math.round(tot / data.quranTotal * 1000) / 10;
 }
 const CMP_LEVELS = ['Débutant', 'Apprenti', 'Étudiant', 'Connaisseur', 'Savant', 'Hâfiz'];
 function cmpLevel(xp) {
@@ -7480,8 +7489,19 @@ function ComprendrePage({ navigate }) {
   const { isPro, openAuth, user, openQuickCheckout } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
   const [mode, setMode] = React.useState('hub'); // hub | discover | play | result
-  const [sourate, setSourate] = React.useState(CMP_SOURATES[0]);
+  const [sourate, setSourate] = React.useState(null);
   const [reciter, setReciter] = React.useState(cmpLoadReciter);
+  // Corpus chargé à la demande (cf. cmpLoadData). `null` = en cours,
+  // `false` = échec réseau — les deux méritent un écran distinct, sinon la page
+  // reste vide sans que l'utilisateur sache s'il doit attendre ou réessayer.
+  const [data, setData] = React.useState(cmpDataCache);
+  const [dataErr, setDataErr] = React.useState(false);
+  React.useEffect(function () {
+    let cancelled = false;
+    cmpLoadData().then(function (d) { if (!cancelled) setData(d); })
+      .catch(function () { if (!cancelled) setDataErr(true); });
+    return function () { cancelled = true; };
+  }, []);
   const audioRef = React.useRef(null);
   // playAyah est mémorisé et passé aux écrans enfants : sans ref, il garderait
   // le récitateur figé au montage et changer de voix n'aurait aucun effet.
@@ -7520,8 +7540,11 @@ function ComprendrePage({ navigate }) {
     return function () { cancelled = true; };
   }, [user]);
 
+  const sourates = (data && data.surahs) || [];
   const mastered = cmpLearnedCount(st.words);
-  const pct = cmpComprehensionPct(st.words);
+  const pct = cmpCollectionPct(st.words);          // avancement dans le corpus (atteignable)
+  const quranPct = cmpQuranPct(st.words, data);    // part réelle du Coran lisible
+  const maxQuranPct = cmpMaxQuranPct(data);        // plafond réel en terminant tout
   const lvl = cmpLevel(st.xp);
 
   const [showGate, setShowGate] = React.useState(false);
@@ -7569,31 +7592,65 @@ function ComprendrePage({ navigate }) {
     }
   }
 
-  return (
-    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 0%, #0a1f12 0%, #050f09 45%, #03070a 100%)', fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 60 }}>
-      <Navbar navigate={navigate} />
-      {mode === 'hub' && <CmpHub st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
-      {mode === 'discover' && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro} onPlay={function(){
+  const shell = function (children) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 0%, #0a1f12 0%, #050f09 45%, #03070a 100%)', fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 60 }}>
+        <Navbar navigate={navigate} />
+        {children}
+      </div>
+    );
+  };
+
+  if (dataErr) {
+    return shell(
+      <div style={{ maxWidth: 460, margin: '0 auto', padding: '140px 24px 0', textAlign: 'center', color: '#f0ede6' }}>
+        <div style={{ fontSize: 40, marginBottom: 14 }}>📖</div>
+        <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, margin: '0 0 10px' }}>Contenu indisponible</h2>
+        <p style={{ fontSize: 14, color: 'rgba(240,237,230,0.55)', lineHeight: 1.7, marginBottom: 22 }}>
+          Les sourates n'ont pas pu être chargées. Vérifie ta connexion et réessaie.
+        </p>
+        <button onClick={function(){ setDataErr(false); cmpLoadData().then(setData).catch(function(){ setDataErr(true); }); }}
+          style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '13px 28px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+          Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return shell(
+      <div style={{ maxWidth: 460, margin: '0 auto', padding: '150px 24px 0', textAlign: 'center' }}>
+        <div style={{ width: 40, height: 40, border: '3px solid rgba(200,167,39,0.2)', borderTopColor: '#c8a727', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
+        <p style={{ fontSize: 14, color: 'rgba(240,237,230,0.5)', fontFamily: 'inherit' }}>Chargement des sourates…</p>
+      </div>
+    );
+  }
+
+  return shell(
+    <>
+      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
+      {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro} onPlay={function(){
         if (!sourate.free && !isPro) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
         setMode('play');
       }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'play' && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'result' && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} />}
+      {mode === 'play' && sourate && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
+      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} />}
       {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
-      {showPro && <CmpProModal pct={pct} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
-    </div>
+      {showPro && <CmpProModal quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
+    </>
   );
 }
 
 // ── HUB ──
 // ── Modal Pro contextuel « Comprendre » — vendu sur le bénéfice, pas sur le verrou ──
-function CmpProModal({ onClose, pct, mastered }) {
+function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
   const { openQuickCheckout } = useAuth();
   const GOLD = '#e6c84a';
-  const lockedCount = CMP_SOURATES.filter(function (s) { return !s.free; }).length;
-  // Projection concrète sur SA progression : plus convaincant qu'une liste de features
-  const projected = Math.min(99, Math.round((((mastered || 0) + CMP_LOCKED_WORDS) / CMP_TARGET_WORDS) * 100));
+  const list = sourates || [];
+  const lockedCount = list.filter(function (s) { return !s.free; }).length;
+  const lockedVerses = list.filter(function (s) { return !s.free; })
+    .reduce(function (n, s) { return n + s.ayahs.length; }, 0);
   React.useEffect(function () {
     document.body.style.overflow = 'hidden';
     return function () { document.body.style.overflow = ''; };
@@ -7604,26 +7661,31 @@ function CmpProModal({ onClose, pct, mastered }) {
         <div className="pro-modal-scroll" style={{ padding: '30px 26px 14px' }}>
         <div style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
-          {lockedCount} sourates<br /><span style={{ color: GOLD }}>t'attendent.</span>
+          Lis <span style={{ color: GOLD }}>{cmpFmt(maxQuranPct)}% des mots</span><br />du Coran.
         </h2>
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 14, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7, margin: '0 0 16px' }}>
-          Ne t'arrête pas là — chaque sourate apprise te rapproche de <strong style={{ color: '#f0ede6' }}>comprendre ta prière</strong>.
+          Pas une promesse : les mots du Juz 'Amma reviennent partout dans le Coran. En le terminant, <strong style={{ color: '#f0ede6' }}>plus d'un mot sur deux</strong> te sera familier — où que tu ouvres.
         </p>
 
-        {/* Projection sur SA propre progression */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(74,222,128,0.08))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 14, padding: '14px 16px', marginBottom: 16 }}>
+        {/* Progression réelle → plafond réel. Les deux chiffres sont calculés sur
+            les 77 878 mots du Coran, pas sur une cible arbitraire : c'est ce qui
+            rend la promesse vérifiable au lieu d'être un argument de vente. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(74,222,128,0.08))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 14, padding: '14px 16px', marginBottom: 6 }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: 'rgba(240,237,230,0.55)', lineHeight: 1 }}>{pct}%</div>
-            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.45)', marginTop: 3 }}>aujourd'hui</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: 'rgba(240,237,230,0.55)', lineHeight: 1 }}>{cmpFmt(quranPct)}%</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.45)', marginTop: 3 }}>tu lis aujourd'hui</div>
           </div>
           <span style={{ color: GOLD, fontSize: 22, fontWeight: 900 }}>→</span>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 32, fontWeight: 900, color: '#4ade80', lineHeight: 1, textShadow: '0 0 16px rgba(74,222,128,0.4)' }}>{projected}%</div>
-            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.55)', marginTop: 3 }}>avec les {lockedCount} sourates</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 32, fontWeight: 900, color: '#4ade80', lineHeight: 1, textShadow: '0 0 16px rgba(74,222,128,0.4)' }}>{cmpFmt(maxQuranPct)}%</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.55)', marginTop: 3 }}>en terminant le Juz 'Amma</div>
           </div>
         </div>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.35)', margin: '0 0 16px' }}>
+          Calculé sur les 77 878 mots du Coran — pondéré par leur fréquence réelle.
+        </p>
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 16, textAlign: 'left' }}>
-          {['📖 Les ' + CMP_SOURATES.length + ' sourates mot à mot — et toutes celles à venir', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '🎬 Studio vidéo + téléchargement HD'].map(function (f) {
+          {['📖 ' + lockedCount + ' sourates de plus — ' + lockedVerses + ' versets mot à mot', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '🎬 Studio vidéo + téléchargement HD'].map(function (f) {
             return <div key={f} style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.7)', marginBottom: 7, display: 'flex', gap: 8 }}><span style={{ color: '#4ade80', fontWeight: 800 }}>✓</span>{f}</div>;
           })}
         </div>
@@ -7644,7 +7706,7 @@ function CmpProModal({ onClose, pct, mastered }) {
             Débloquer tout — {PRO_ANNUAL}/an
           </button>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
-            <span>✓ +130 membres</span><span>✓ Sans engagement</span><span>✓ Remboursé sous 48h</span>
+            <span>✓ {MEMBERS_COUNT} membres</span><span>✓ Sans engagement</span><span>✓ Remboursé sous 48h</span>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.32)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
             Plus tard
@@ -7655,8 +7717,9 @@ function CmpProModal({ onClose, pct, mastered }) {
   );
 }
 
-function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro, reciter, onReciter }) {
+function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onOpen, onBack, onPro, reciter, onReciter }) {
   const GOLD = '#e6c84a';
+  const list = sourates || [];
   const [openReciter, setOpenReciter] = React.useState(false);
   const current = RECITERS.find(function (r) { return r.id === reciter; }) || RECITERS[0];
   return (
@@ -7670,15 +7733,32 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro, reciter,
           Comprends ce que<br/><span style={{ color: GOLD }}>tu récites.</span>
         </h1>
         <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', lineHeight: 1.7, maxWidth: 460, margin: '0 auto' }}>
-          Tu pries en arabe sans tout comprendre ? <strong style={{ color: '#f0ede6' }}>50 mots suffisent à saisir près de la moitié du Coran.</strong> Apprends-les, un verset à la fois.
+          Tu pries en arabe sans tout comprendre ? <strong style={{ color: '#f0ede6' }}>Les mots du Juz 'Amma reviennent dans tout le Coran.</strong> Apprends-les, un verset à la fois.
         </p>
+      </div>
+
+      {/* ── Ce que tu sais déjà lire du Coran ──
+          Mis AVANT la progression dans le corpus : c'est le chiffre qui donne du
+          sens à l'effort. « J'ai appris 40 mots » ne veut rien dire ; « je lis
+          22% des mots du Coran » se comprend immédiatement. */}
+      <div style={{ background: 'linear-gradient(135deg,rgba(74,222,128,0.10),rgba(200,167,39,0.06))', border: '1px solid rgba(74,222,128,0.28)', borderRadius: 20, padding: '18px 22px', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 34, fontWeight: 900, color: '#4ade80', lineHeight: 1 }}>{cmpFmt(quranPct)}%</span>
+          <span style={{ fontSize: 14, color: '#f0ede6', fontWeight: 700 }}>des mots du Coran, tu les lis déjà</span>
+        </div>
+        <div style={{ height: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 5, overflow: 'hidden', margin: '12px 0 8px' }}>
+          <div style={{ height: '100%', width: Math.min(100, (quranPct / (maxQuranPct || 100)) * 100) + '%', background: 'linear-gradient(90deg,#22a35a,#4ade80)', borderRadius: 5, transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)' }} />
+        </div>
+        <div style={{ fontSize: 11.5, color: 'rgba(240,237,230,0.5)' }}>
+          Objectif en terminant les {list.length} sourates : <strong style={{ color: '#4ade80' }}>{cmpFmt(maxQuranPct)}%</strong> · calculé sur les 77 878 mots du Coran
+        </div>
       </div>
 
       {/* Tableau de progression */}
       <div style={{ display: 'flex', gap: 14, alignItems: 'center', background: 'linear-gradient(160deg,rgba(200,167,39,0.08),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 22, padding: '22px 24px', marginBottom: 16 }}>
         <CmpRing pct={pct} size={104} stroke={10} color={GOLD}>
           <span style={{ fontSize: 28, fontWeight: 900, color: GOLD, lineHeight: 1 }}>{pct}<span style={{ fontSize: 15 }}>%</span></span>
-          <span style={{ fontSize: 9, color: 'rgba(240,237,230,0.5)', letterSpacing: '0.03em', marginTop: 2, textAlign: 'center', lineHeight: 1.15 }}>des 300 mots<br />essentiels</span>
+          <span style={{ fontSize: 9, color: 'rgba(240,237,230,0.5)', letterSpacing: '0.03em', marginTop: 2, textAlign: 'center', lineHeight: 1.15 }}>du vocabulaire<br />Juz 'Amma</span>
         </CmpRing>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.55)', marginBottom: 4 }}>Niveau {lvl.n} · <span style={{ color: GOLD, fontWeight: 700 }}>{lvl.title}</span></div>
@@ -7727,7 +7807,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro, reciter,
       {/* Liste des sourates */}
       <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.4)', margin: '24px 0 12px' }}>Choisis une sourate</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {CMP_SOURATES.map(function (s) {
+        {list.map(function (s) {
           const locked = !s.free && !isPro;
           const total = s.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0);
           const best = st.best[s.id] || 0;
@@ -7751,7 +7831,7 @@ function CmpHub({ st, pct, mastered, lvl, isPro, onOpen, onBack, onPro, reciter,
         <button onClick={onPro} style={{ width: '100%', marginTop: 14, padding: '16px 18px', background: 'linear-gradient(135deg,rgba(200,167,39,0.16),rgba(200,167,39,0.06))', border: '1px solid rgba(200,167,39,0.45)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', boxShadow: '0 4px 24px rgba(200,167,39,0.12)' }}>
           <span style={{ fontSize: 24 }}>🔓</span>
           <span style={{ flex: 1 }}>
-            <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates restantes</span>
+            <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {list.filter(function(s){return !s.free;}).length} sourates restantes — jusqu'à {cmpFmt(maxQuranPct)}% du Coran</span>
             <span style={{ display: 'block', fontSize: 12, color: GOLD, fontWeight: 700 }}>{PRO_ANNUAL}/an · {PRO_PER_DAY} par jour · sans engagement</span>
           </span>
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
@@ -7808,18 +7888,23 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack, preview }) {
           return (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', borderRadius: 16, background: show ? 'rgba(200,167,39,0.10)' : 'rgba(255,255,255,0.03)', border: '1px solid ' + (show ? 'rgba(200,167,39,0.4)' : 'rgba(255,255,255,0.06)'), opacity: show ? 1 : 0.35, transform: show ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)', transition: 'all 0.5s cubic-bezier(0.34,1.56,0.64,1)' }}>
               <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 40, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
-              <span style={{ fontSize: 12.5, color: show ? 'rgba(240,237,230,0.55)' : 'transparent', fontStyle: 'italic', fontWeight: 500, transition: 'color 0.4s' }}>{cmpPhon(w.ar)}</span>
+              <span style={{ fontSize: 12.5, color: show ? 'rgba(240,237,230,0.55)' : 'transparent', fontStyle: 'italic', fontWeight: 500, transition: 'color 0.4s' }}>{w.tr || cmpPhon(w.ar)}</span>
               <span style={{ fontSize: 14, color: show ? GOLD : 'transparent', fontWeight: 600, transition: 'color 0.4s' }}>{w.fr}</span>
             </div>
           );
         })}
       </div>
 
-      {/* Traduction complète quand tout révélé */}
+      {/* Traduction complète quand tout révélé.
+          On affiche la traduction publiée du verset (Muhammad Hamidullah), pas
+          un recollage des gloses mot-à-mot : celles-ci servent à décomposer, pas
+          à traduire — mises bout à bout elles donnent une phrase bancale. Le sens
+          du verset vient donc toujours d'une traduction reconnue. */}
       <div style={{ minHeight: 50, textAlign: 'center', opacity: allRevealed ? 1 : 0, transition: 'opacity 0.5s', marginBottom: 18 }}>
-        <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 20, fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.5 }}>
-          « {ayah.words.map(function (w) { return w.fr; }).join(' ')} »
+        <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 20, fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.5, margin: 0 }}>
+          « {ayah.t || ayah.words.map(function (w) { return w.fr; }).join(' ')} »
         </p>
+        {ayah.t && <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.3)', margin: '6px 0 0' }}>Traduction Muhammad Hamidullah</p>}
       </div>
 
       {/* Contrôles */}
@@ -7843,7 +7928,18 @@ function cmpBuildQuestions(sourate) {
   const seen = {};
   const words = [];
   sourate.ayahs.forEach(function (a) { a.words.forEach(function (w) { if (!seen[w.ar]) { seen[w.ar] = 1; words.push(w); } }); });
-  const pool = words.length >= 4 ? words : CMP_ALL_WORDS;
+  /* Les distracteurs viennent de la sourate elle-même quand elle est assez
+     riche (plus exigeant : les mots se ressemblent). Les sourates très courtes
+     (Al-Kawthar : 10 mots) n'offrent pas 3 mauvaises réponses crédibles — on
+     puise alors dans tout le corpus chargé. */
+  const fallback = [];
+  if (words.length < 4 && cmpDataCache) {
+    const fseen = {};
+    cmpDataCache.surahs.forEach(function (s) {
+      s.ayahs.forEach(function (a) { a.words.forEach(function (w) { if (!fseen[w.fr]) { fseen[w.fr] = 1; fallback.push(w); } }); });
+    });
+  }
+  const pool = words.length >= 4 ? words : fallback;
   const qs = cmpShuffle(words).slice(0, Math.min(8, words.length)).map(function (w, idx) {
     const type = idx % 3; // 0: ar→fr, 1: fr→ar, 2: complète (ar→fr aussi mais présenté en verset)
     const distract = cmpShuffle(pool.filter(function (x) { return x.fr !== w.fr; })).slice(0, 3);
@@ -7976,15 +8072,18 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 }
 
 // ── RÉSULTAT ──
-function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHub, onPro }) {
+function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onReplay, onHub, onPro }) {
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
+  const list = sourates || [];
   if (!res) { return <div style={{ padding: 100, textAlign: 'center', color: '#f0ede6' }}>—</div>; }
   const perfect = res.scorePct === 100;
   const newlyMastered = res.wordResults.filter(function (wr) { return wr.correct && (st.words[wr.ar] || 0) >= CMP_MASTER_THRESHOLD; });
 
   function share() {
-    const txt = "Je viens de comprendre des versets du Coran mot à mot sur Héritage Musulman ! Je comprends déjà " + pct + "% des mots. 🌙";
+    // On partage la couverture réelle du Coran, pas un score interne : c'est le
+    // seul chiffre qui veut dire quelque chose pour celui qui reçoit le message.
+    const txt = "J'apprends le Coran mot à mot sur Héritage Musulman — je lis déjà " + quranPct + "% des mots du Coran. 🌙";
     if (navigator.share) { navigator.share({ text: txt, url: 'https://heritage-musulman.com' }).catch(function(){}); }
     else if (navigator.clipboard) { navigator.clipboard.writeText(txt + ' heritage-musulman.com'); }
   }
@@ -8009,13 +8108,14 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
         </div>
       </div>
 
-      {/* jauge compréhension */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 20, padding: '20px', marginBottom: 26 }}>
-        <CmpRing pct={pct} size={84} stroke={9} color={GOLD}>
-          <span style={{ fontSize: 22, fontWeight: 900, color: GOLD }}>{pct}%</span>
+      {/* Jauge : ce que ça change vraiment. Le pourcentage de mots du Coran
+          lisibles parle de lui-même — « 40 mots appris » ne dit rien. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(74,222,128,0.09),rgba(255,255,255,0.015))', border: '1px solid rgba(74,222,128,0.28)', borderRadius: 20, padding: '20px', marginBottom: 26 }}>
+        <CmpRing pct={Math.min(100, (quranPct / (maxQuranPct || 100)) * 100)} size={84} stroke={9} color={GREEN}>
+          <span style={{ fontSize: 20, fontWeight: 900, color: GREEN }}>{cmpFmt(quranPct)}%</span>
         </CmpRing>
         <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: 15, color: '#f0ede6', fontWeight: 700 }}>Tu maîtrises {pct}% des 300 mots les plus fréquents</div>
+          <div style={{ fontSize: 15, color: '#f0ede6', fontWeight: 700 }}>Tu lis {cmpFmt(quranPct)}% des mots du Coran</div>
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{mastered} mots appris · niveau {lvl.title}</div>
         </div>
       </div>
@@ -8025,8 +8125,8 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
         <button onClick={onPro} style={{ width: '100%', marginBottom: 14, padding: '18px 20px', background: 'linear-gradient(135deg,rgba(200,167,39,0.18),rgba(200,167,39,0.07))', border: '1px solid rgba(200,167,39,0.5)', borderRadius: 18, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 6px 28px rgba(200,167,39,0.15)' }}>
           <span style={{ fontSize: 28 }}>📖</span>
           <span style={{ flex: 1 }}>
-            <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Continue sur ta lancée</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{CMP_SOURATES.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>{PRO_ANNUAL}/an</span></span>
+            <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Passe de {cmpFmt(quranPct)}% à {cmpFmt(maxQuranPct)}% du Coran</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{list.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>{PRO_ANNUAL}/an</span></span>
           </span>
           <span style={{ color: GOLD, fontSize: 22 }}>›</span>
         </button>
@@ -8045,7 +8145,15 @@ function CmpResult({ res, sourate, st, pct, mastered, lvl, isPro, onReplay, onHu
 // ── Section accueil : promo « Comprendre le Coran » ──
 function ComprendreSection({ navigate }) {
   const GOLD = '#e6c84a';
-  const demo = [ {ar:'بِسْمِ',fr:'Au nom de'}, {ar:'اللَّهِ',fr:'Allah'}, {ar:'الرَّحْمَٰنِ',fr:'le Tout-Miséricordieux'}, {ar:'الرَّحِيمِ',fr:'le Très-Miséricordieux'} ];
+  /* Translittérations en dur : cette vitrine s'affiche sur l'ACCUEIL, où le
+     corpus (72 Ko) n'est pas chargé — le faire pour quatre mots décoratifs
+     annulerait le bénéfice du chargement à la demande. */
+  const demo = [
+    { ar: 'بِسْمِ', tr: 'bismi', fr: 'Au nom de' },
+    { ar: 'اللَّهِ', tr: 'Llâhi', fr: 'Allah' },
+    { ar: 'الرَّحْمَٰنِ', tr: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux' },
+    { ar: 'الرَّحِيمِ', tr: 'ar-Rahîm', fr: 'le Très-Miséricordieux' },
+  ];
   return (
     <section style={{ padding: '80px 24px', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: '10%', left: '-10%', width: 520, height: 520, background: 'radial-gradient(circle,rgba(200,167,39,0.12) 0%,transparent 70%)', pointerEvents: 'none' }} />
@@ -8055,7 +8163,7 @@ function ComprendreSection({ navigate }) {
           Tu récites l'arabe…<br/><span style={{ color: GOLD }}>sans le comprendre ?</span>
         </h2>
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 'clamp(15px,1.9vw,18px)', color: 'rgba(240,237,230,0.55)', maxWidth: 560, margin: '0 auto 30px', lineHeight: 1.8 }}>
-          Des millions de musulmans prient sans saisir les mots. Pourtant <strong style={{ color: '#f0ede6' }}>~50 mots suffisent à comprendre près de la moitié du Coran.</strong> Apprends-les, un verset à la fois.
+          Des millions de musulmans prient sans saisir les mots. Pourtant les <strong style={{ color: '#f0ede6' }}>1 277 mots du Juz 'Amma couvrent plus de la moitié de tout le Coran</strong> — ils reviennent, page après page. Apprends-les, un verset à la fois.
         </p>
 
         {/* Aperçu mot-à-mot Al-Fâtiha */}
@@ -8064,7 +8172,7 @@ function ComprendreSection({ navigate }) {
             return (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 18px', borderRadius: 16, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)' }}>
                 <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 38, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
-                <span style={{ fontSize: 12, color: 'rgba(240,237,230,0.55)', fontStyle: 'italic', fontWeight: 500 }}>{cmpPhon(w.ar)}</span>
+                <span style={{ fontSize: 12, color: 'rgba(240,237,230,0.55)', fontStyle: 'italic', fontWeight: 500 }}>{w.tr}</span>
                 <span style={{ fontSize: 13, color: GOLD, fontWeight: 600 }}>{w.fr}</span>
               </div>
             );
@@ -8086,7 +8194,7 @@ function ComprendreSection({ navigate }) {
         <button onClick={function(){ if (navigate) navigate('comprendre'); }} style={{ padding: '16px 40px', borderRadius: 100, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', boxShadow: '0 8px 30px rgba(200,167,39,0.35)' }}>
           Comprends le Coran →
         </button>
-        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>Al-Fâtiha gratuite · sans inscription pour essayer</p>
+        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>5 sourates gratuites · sans inscription pour essayer</p>
       </div>
     </section>
   );
