@@ -1479,7 +1479,7 @@ function Reveal({ children }) {
     const safety = setTimeout(function () { setSeen(true); }, 4000);
     return function () { io.disconnect(); clearTimeout(safety); };
   }, []);
-  return <div ref={ref} id="apres-hero" className={'reveal' + (seen ? ' in' : '')}>{children}</div>;
+  return <div ref={ref} id="apres-hero" className={'hero-next' + (seen ? ' in' : '')}>{children}</div>;
 }
 
 function Hero({ navigate }) {
@@ -8394,7 +8394,7 @@ function App() {
         {/* Tout ce qui suit le hero attend le premier scroll : le hero remplit
            l'ecran, et rien ne doit depasser dessous pour le contredire. */}
         <Reveal>
-          <span className="reveal-sep" aria-hidden="true" />
+          <span className="hero-next-sep" aria-hidden="true" />
           <ComprendreSection navigate={navigate} />
           <FeatureCards navigate={navigate} />
           <LearnPlaySection navigate={navigate} />
