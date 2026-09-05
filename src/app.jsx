@@ -1552,43 +1552,6 @@ function Hero({ navigate }) {
   );
 }
 
-/* ─── Reassurance Banner ─── */
-function ReassuranceBanner() {
-  const { isPro } = useAuth();
-  return (
-    <div style={{
-      background: 'linear-gradient(90deg, transparent 0%, rgba(4,14,8,0.72) 20%, rgba(4,14,8,0.72) 80%, transparent 100%)',
-      borderTop: '1px solid rgba(200,167,39,0.2)',
-      borderBottom: '1px solid rgba(200,167,39,0.2)',
-      padding: '16px 24px',
-      textAlign: 'center',
-      position: 'relative'
-    }}>
-      {/* zellige-inspired side ornaments */}
-      <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: '100%', pointerEvents: 'none', overflow: 'hidden', height: '100%' }}>
-        <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-          <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(200,167,39,0.07)" strokeWidth="40" />
-        </svg>
-      </div>
-      <p style={{
-        fontFamily: 'Cinzel, serif',
-        fontWeight: 400,
-        fontSize: 'clamp(12px, 1.6vw, 15px)',
-        letterSpacing: '0.12em',
-        color: '#e6c84a',
-        position: 'relative', zIndex: 1,
-        textTransform: 'uppercase'
-      }}>
-        {isPro ? (
-          <>✦ <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>Comprendre · Quiz · Blind Test</span> — accès complet ✦</>
-        ) : (
-          <>✦ Accès gratuit —&nbsp;<span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 400 }}>Comprendre · Quiz · Blind test&nbsp;</span><span style={{ color: '#e6c84a' }}>— sans carte bancaire ✦</span></>
-        )}
-      </p>
-    </div>);
-
-}
-
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
@@ -8358,7 +8321,6 @@ function App() {
         {/* Ordre = du plus accrocheur au moins, avec l'offre en fin de parcours :
             hook → produit → preuve sociale → pratique → motivation → comparaison → objections → prix */}
         <Hero navigate={navigate} />
-        <ReassuranceBanner />
         <ComprendreSection navigate={navigate} />
         <FeatureCards navigate={navigate} />
         <LearnPlaySection navigate={navigate} />

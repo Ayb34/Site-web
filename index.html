@@ -526,9 +526,9 @@
   .hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
   .hero-sub {
     display: flex; flex-wrap: wrap; justify-content: center; gap: 3px 13px;
-    margin: 11px 0 0; padding: 0; list-style: none;
+    margin: 14px 0 0; padding: 0; list-style: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.52);
+    font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
   }
   .hero-sub li { display: inline-flex; align-items: center; gap: 4px; }
 
@@ -536,8 +536,8 @@
      Discret par construction : il doit accompagner le bouton, jamais lui
      disputer le regard. D'ou l'or a 62 % d'opacite et le filet degrade. */
   .hero-hadith {
-    margin: 12px 0 0; max-width: 400px;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    margin: 24px 0 0; max-width: 430px;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
   }
   .hh-rule {
     width: 170px; height: 1px;
@@ -545,16 +545,16 @@
   }
   .hh-ar {
     margin: 0; font-family: Amiri, Georgia, serif;
-    font-size: 15px; line-height: 1.7; color: rgba(247,238,203,0.6);
+    font-size: 17px; line-height: 1.8; color: rgba(247,238,203,0.66);
   }
   .hh-fr {
     margin: 0; font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic; font-size: 14.5px; line-height: 1.45;
-    color: rgba(240,237,230,0.72);
+    font-style: italic; font-size: 16.5px; line-height: 1.45;
+    color: rgba(240,237,230,0.8);
   }
   .hh-src {
-    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 9px; font-weight: 800;
-    letter-spacing: 0.15em; text-transform: uppercase; color: rgba(200,167,39,0.68);
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 800;
+    letter-spacing: 0.15em; text-transform: uppercase; color: rgba(200,167,39,0.75);
   }
 
   /* Ecrans courts (iPhone SE/8 : 667 px, encore tres repandus).
@@ -578,10 +578,11 @@
     .peek-foot { font-size: 10px; }
     .peek-foot strong { font-size: 14px; }
     .hero-cta { padding: 12px 22px; font-size: 14.5px; }
-    .hero-sub { font-size: 10.5px; margin-top: 6px; gap: 2px 10px; }
-    .hero-hadith { margin-top: 5px; gap: 4px; }
+    .hero-sub { font-size: 11.5px; margin-top: 9px; gap: 2px 11px; }
+    .hero-hadith { margin-top: 12px; gap: 6px; }
     .hh-ar { display: none; }
-    .hh-fr { font-size: 12.5px; line-height: 1.35; }
+    .hh-fr { font-size: 14px; line-height: 1.4; }
+    .hh-src { font-size: 9px; }
   }
 
   /* Allegement mobile.
@@ -596,8 +597,8 @@
     /* Le kicker faisait office de respiration sous la barre de navigation
        (69 px de haut) : sans lui, le titre se retrouvait a 7 px du header,
        colle. On rend cet espace au padding plutot qu'au texte. */
-    .hero-section { padding-top: 112px; }
-    .hero-h1 { margin-bottom: 20px; }
+    .hero-section { padding-top: 102px; }
+    .hero-h1 { margin-bottom: 15px; }
     .hero-panel { padding-top: 16px; }
     .peek-q { font-size: 13.5px; margin-bottom: 12px; }
   }
@@ -622,11 +623,11 @@
     .peek-opt { font-size: 13.5px; padding: 10px; }
     .peek-foot { font-size: 12px; }
     .peek-foot strong { font-size: 18px; }
-    .hero-sub { font-size: 12.5px; gap: 4px 18px; }
-    .hero-hadith { margin-top: 28px; max-width: 470px; }
-    .hh-ar { font-size: 18px; }
-    .hh-fr { font-size: 16.5px; }
-    .hh-src { font-size: 9.5px; }
+    .hero-sub { font-size: 14px; gap: 4px 20px; margin-top: 16px; }
+    .hero-hadith { margin-top: 34px; max-width: 500px; }
+    .hh-ar { font-size: 21px; }
+    .hh-fr { font-size: 18.5px; }
+    .hh-src { font-size: 10.5px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .peek { animation: none; }
