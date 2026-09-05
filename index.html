@@ -563,9 +563,18 @@
   @media (max-width: 768px) {
     .hero-kicker { display: none; }
     .hero-panel-tag { display: none; }
+    /* Le kicker faisait office de respiration sous la barre de navigation
+       (69 px de haut) : sans lui, le titre se retrouvait a 7 px du header,
+       colle. On rend cet espace au padding plutot qu'au texte. */
+    .hero-section { padding-top: 112px; }
     .hero-h1 { margin-bottom: 20px; }
     .hero-panel { padding-top: 16px; }
     .peek-q { font-size: 13.5px; margin-bottom: 12px; }
+  }
+  /* Ecrans courts : meme respiration, mais mesuree — le bandeau cookies
+     occupe deja le bas sur un iPhone SE. */
+  @media (max-width: 768px) and (max-height: 720px) {
+    .hero-section { padding-top: 92px; }
   }
 
   @media (min-width: 769px) {
