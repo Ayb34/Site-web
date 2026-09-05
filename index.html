@@ -383,12 +383,21 @@
 
   /* Hero text backdrop */
   /* ═══ Hero ═══
-     Mobile d'abord : 92-94 % du trafic, et le bandeau cookies mange le tiers bas
-     de l'écran. Le panneau a une hauteur fixe pour que rien ne saute quand on
-     change d'onglet, et le bouton reste au-dessus de la ligne de flottaison. */
+     Mobile d'abord : 92-94 % du trafic.
+
+     Le hero occupe tout l'ecran (100svh) et rien ne depasse dessous : la
+     section suivante attend le premier scroll. Deux contraintes fixent la
+     hauteur utile — la barre de navigation (69 px) et, a la premiere visite
+     seulement, le bandeau de consentement. Ce dernier publie sa hauteur reelle
+     dans --cookiebar et le hero lui reserve exactement cette place, au lieu
+     d'etre rapetisse en permanence pour un bandeau qui disparait au premier
+     clic. */
+  :root { --cookiebar: 0px; }
   .hero-section {
-    position: relative; display: flex; justify-content: center;
-    padding: 76px 18px 40px; overflow: hidden;
+    position: relative; display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; min-height: 100svh;
+    padding: 84px 18px calc(26px + var(--cookiebar));
+    overflow: hidden;
   }
   .hero-glow {
     position: absolute; top: -28%; left: 50%;
@@ -397,76 +406,76 @@
     transition: background .6s ease;
   }
   .hero-inner {
-    position: relative; z-index: 1; width: 100%; max-width: 560px;
+    position: relative; z-index: 1; width: 100%; max-width: 580px;
     display: flex; flex-direction: column; align-items: center; text-align: center;
   }
 
   .hero-kicker {
-    display: flex; align-items: center; gap: 9px; margin: 0 0 12px;
+    display: flex; align-items: center; gap: 9px; margin: 0 0 14px;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
     color: rgba(200,167,39,0.9);
   }
-  .hk-rule { width: 20px; height: 1px; background: rgba(200,167,39,0.5); }
+  .hk-rule { width: 22px; height: 1px; background: rgba(200,167,39,0.5); }
 
   .hero-h1 {
     font-family: Fraunces, Georgia, serif; font-weight: 400; color: #fff;
-    font-size: clamp(26px, 7.2vw, 44px); line-height: 1.1; letter-spacing: -0.02em;
-    margin: 0 0 18px; text-wrap: balance;
+    font-size: clamp(29px, 8.2vw, 52px); line-height: 1.08; letter-spacing: -0.02em;
+    margin: 0 0 16px; text-wrap: balance;
   }
   .hero-h1 em { font-style: italic; color: #e6c84a; }
 
   /* ── Onglets ── */
-  .hero-tabs { display: flex; gap: 6px; width: 100%; margin-bottom: 10px; }
+  .hero-tabs { display: flex; gap: 7px; width: 100%; margin-bottom: 11px; }
   .hero-tab {
     flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 9px 6px; border-radius: 11px; cursor: pointer;
+    padding: 11px 6px; border-radius: 13px; cursor: pointer;
     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
-    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 700;
     color: rgba(255,255,255,0.55); -webkit-tap-highlight-color: transparent;
     transition: background .3s, border-color .3s, color .3s;
   }
   .hero-tab:focus-visible { outline: 2px solid #e6c84a; outline-offset: 2px; }
   .hero-tab.on { color: #fff; }
-  .hero-eq { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 14px; }
+  .hero-eq { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 15px; }
   .hero-eq i { width: 2.5px; border-radius: 2px; animation: eqBar .9s ease-in-out infinite; }
 
-  /* ── Panneau d'aperçu ── */
+  /* ── Panneau d'apercu ── */
   .hero-panel {
-    /* Hauteur figée sur le plus haut des trois aperçus (Comprendre, dont les
+    /* Hauteur figee sur le plus haut des trois apercus (Comprendre, dont les
        mots passent sur deux lignes) : sinon le bouton remonte de 48 px a
        chaque rotation, et l'oeil suit un CTA qui bouge tout seul. */
-    width: 100%; height: 252px; margin-bottom: 16px;
+    width: 100%; height: 274px; margin-bottom: 18px;
     display: flex; flex-direction: column; justify-content: center;
-    padding: 13px 14px 15px; border-radius: 18px;
+    padding: 15px 15px 17px; border-radius: 20px;
     background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
     border: 1px solid rgba(255,255,255,0.1);
     transition: border-color .5s ease;
   }
   .hero-panel-tag {
-    margin: 0 0 9px; font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 9.5px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+    margin: 0 0 10px; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
   }
-  /* L'aperçu ne part jamais de l'invisible : a opacity 0, le panneau paraissait
+  /* L'apercu ne part jamais de l'invisible : a opacity 0, le panneau paraissait
      vide pendant un tiers de seconde a chaque rotation, ce qui se lit comme un
      bug. On demarre a 0.45 et on raccourcit. */
   .peek { animation: peekIn .26s ease-out both; }
   @keyframes peekIn { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
   .peek-q {
-    margin: 0 0 10px; font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic; font-size: 14px; line-height: 1.35; color: rgba(240,237,230,0.72);
+    margin: 0 0 12px; font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: 15.5px; line-height: 1.35; color: rgba(240,237,230,0.74);
   }
-  .peek-q-lg { font-size: 15.5px; font-style: normal; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; color: #f0ede6; }
+  .peek-q-lg { font-size: 17px; font-style: normal; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; color: #f0ede6; }
 
   /* Comprendre */
   /* Grille 2x2 en mobile : en flex-wrap les quatre mots tombaient en 3 + 1,
-     ce qui deséquilibre le panneau. Quatre colonnes des que la largeur le
+     ce qui desequilibre le panneau. Quatre colonnes des que la largeur le
      permet (voir la requete desktop). */
-  .peek-words { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .peek-words { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 12px; }
   .peek-word {
-    display: flex; flex-direction: column; align-items: center; gap: 1px;
-    min-width: 68px; padding: 6px 8px; border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    min-width: 68px; padding: 8px 9px; border-radius: 12px;
     background: rgba(255,255,255,0.03); border: 1px solid rgba(230,200,74,0.18);
     transition: background .4s, border-color .4s, transform .4s cubic-bezier(.34,1.56,.64,1);
   }
@@ -474,165 +483,234 @@
     background: rgba(230,200,74,0.13); border-color: rgba(230,200,74,0.55);
     transform: translateY(-1px);
   }
-  .pw-ar { font-family: Amiri, Georgia, serif; font-size: 21px; line-height: 1.3; color: #f7eecb; direction: rtl; }
+  .pw-ar { font-family: Amiri, Georgia, serif; font-size: 24px; line-height: 1.3; color: #f7eecb; direction: rtl; }
   .pw-fr {
-    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 9.5px; font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; font-weight: 700;
     color: #e6c84a; opacity: 0; transition: opacity .35s; max-width: 13ch; line-height: 1.2;
   }
   .peek-word.on .pw-fr { opacity: 1; }
 
   .peek-foot {
     margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11px; color: rgba(240,237,230,0.5); line-height: 1.4;
+    font-size: 12.5px; color: rgba(240,237,230,0.55); line-height: 1.4;
   }
   .peek-foot strong {
-    font-size: 16px; font-weight: 900; color: #4ade80;
-    font-variant-numeric: tabular-nums; margin-right: 5px;
+    font-size: 19px; font-weight: 900; color: #4ade80;
+    font-variant-numeric: tabular-nums; margin-right: 6px;
   }
 
   /* Blind Test */
-  .bt-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 26px; margin-bottom: 9px; }
+  .bt-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 30px; margin-bottom: 11px; }
   .bt-wave i {
-    width: 3px; border-radius: 2px; background: #4ade80;
+    width: 3.5px; border-radius: 2px; background: #4ade80;
     animation: eqBar 1s ease-in-out infinite; opacity: .85;
   }
 
   /* Options (Blind Test + Quiz) */
-  .peek-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .peek-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
   .peek-opt {
     display: flex; align-items: center; justify-content: center; gap: 5px;
-    padding: 9px 6px; border-radius: 10px;
+    padding: 11px 6px; border-radius: 12px;
     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 700;
-    color: rgba(255,255,255,0.72);
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700;
+    color: rgba(255,255,255,0.74);
     transition: background .4s, border-color .4s, color .4s;
   }
   .peek-opt.good {
     background: rgba(74,222,128,0.16); border-color: rgba(74,222,128,0.6); color: #eafff1;
   }
-  .peek-opt b { color: #4ade80; font-size: 12px; }
-  .peek-quiz .peek-foot { margin-top: 9px; }
+  .peek-opt b { color: #4ade80; font-size: 13px; }
+  .peek-quiz .peek-foot { margin-top: 11px; }
 
-  /* ── Action ── */
+  /* ── Action ──
+     Un seul bouton pour trois activites : il prend la couleur de l'onglet actif
+     jusque dans son ombre. Le reflet qui le traverse toutes les 3,4 s est la
+     seule chose qui bouge a cet endroit — sur mobile, sans survol, rien d'autre
+     ne dit qu'un rectangle est cliquable. */
   .hero-cta {
-    width: 100%; max-width: 340px; border: none; border-radius: 100px;
-    padding: 15px 24px; font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 15.5px; font-weight: 800; color: #10180f; cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-    transition: transform .2s, box-shadow .2s, background .5s ease;
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; max-width: 380px; border: none; border-radius: 100px;
+    padding: 18px 26px; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17.5px; font-weight: 800; letter-spacing: -0.01em; color: #10180f;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: transform .2s, filter .2s, background .5s ease, box-shadow .5s ease;
   }
-  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 38px rgba(0,0,0,0.45); }
+  .hero-cta:hover { transform: translateY(-2px); filter: brightness(1.07); }
+  .hero-cta:active { transform: translateY(0) scale(0.985); }
   .hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-  .hero-sub {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 3px 13px;
-    margin: 12px 0 0; padding: 0; list-style: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
+  .cta-txt, .cta-arrow { position: relative; z-index: 1; }
+  .cta-arrow { font-size: 1.05em; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+  .hero-cta:hover .cta-arrow { transform: translateX(4px); }
+  .cta-shine {
+    position: absolute; top: 0; bottom: 0; left: -60%; width: 42%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform: skewX(-18deg); pointer-events: none;
+    animation: ctaShine 3.4s ease-in-out infinite;
   }
-  .hero-sub li { display: inline-flex; align-items: center; gap: 4px; }
+  @keyframes ctaShine { 0%, 62% { left: -60%; } 88%, 100% { left: 120%; } }
+
+  .hero-sub {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 3px 14px;
+    margin: 15px 0 0; padding: 0; list-style: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.62);
+  }
+  .hero-sub li { display: inline-flex; align-items: center; gap: 5px; }
 
   /* ── Hadith de cloture ──
-     Discret par construction : il doit accompagner le bouton, jamais lui
-     disputer le regard. D'ou l'or a 62 % d'opacite et le filet degrade. */
+     Discret par construction : il accompagne le bouton, il ne lui dispute pas
+     le regard. D'ou l'or a 70 % d'opacite et le filet degrade. */
   .hero-hadith {
-    margin: 16px 0 0; max-width: 430px;
-    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    margin: 28px 0 0; max-width: 460px;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
   }
   .hh-rule {
-    width: 170px; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(200,167,39,0.4), transparent);
+    width: 190px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,167,39,0.42), transparent);
   }
   .hh-ar {
     margin: 0; font-family: Amiri, Georgia, serif;
-    font-size: 17px; line-height: 1.65; color: rgba(247,238,203,0.66);
+    font-size: 19px; line-height: 1.7; color: rgba(247,238,203,0.7);
   }
   .hh-fr {
     margin: 0; font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic; font-size: 16.5px; line-height: 1.45;
-    color: rgba(240,237,230,0.8);
+    font-style: italic; font-size: 18px; line-height: 1.45;
+    color: rgba(240,237,230,0.82);
   }
   .hh-src {
-    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 800;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; font-weight: 800;
     letter-spacing: 0.15em; text-transform: uppercase; color: rgba(200,167,39,0.75);
   }
 
+  /* ── Invite a descendre ──
+     Le hero remplit l'ecran : sans repere, rien ne dit qu'il y a une suite. */
+  .hero-scroll {
+    margin-top: 26px; padding: 6px 12px; background: none; border: none;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .hero-scroll:focus-visible { outline: 2px solid #e6c84a; outline-offset: 3px; border-radius: 8px; }
+  .hs-txt {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.4);
+    transition: color .25s;
+  }
+  .hero-scroll:hover .hs-txt { color: rgba(230,200,74,0.9); }
+  .hs-line {
+    position: relative; display: block; width: 1px; height: 36px;
+    background: rgba(200,167,39,0.16); overflow: hidden;
+  }
+  .hs-line i {
+    position: absolute; left: 0; width: 1px; height: 60%;
+    background: linear-gradient(180deg, transparent, #e6c84a);
+    animation: hsFall 1.9s ease-in-out infinite;
+  }
+  @keyframes hsFall {
+    0% { top: -60%; opacity: 0; } 18% { opacity: 1; }
+    78% { opacity: 1; } 100% { top: 100%; opacity: 0; }
+  }
+
+  /* ── Ce qui suit le hero ──
+     Ne se devoile qu'au premier scroll, sinon le hero ne remplirait l'ecran
+     qu'en apparence. Le filet se trace au passage : la separation est le
+     mouvement lui-meme, pas une barre de plus. */
+  .reveal {
+    opacity: 0; transform: translateY(34px);
+    transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1);
+  }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal-sep {
+    display: block; height: 1px; width: 0; max-width: 420px; margin: 0 auto;
+    background: linear-gradient(90deg, transparent, rgba(200,167,39,0.8), transparent);
+    transition: width 1.1s cubic-bezier(.22,1,.36,1) .18s;
+  }
+  .reveal.in .reveal-sep { width: 86%; }
+
   /* Ecrans courts (iPhone SE/8 : 667 px, encore tres repandus).
-     Sans cela le bouton tombait a 495 px et le bandeau cookies, qui demarre a
-     497 px, le recouvrait entierement — le premier ecran n'offrait aucune
-     action cliquable. On resserre plutot que de rogner du contenu. */
+     Tout se resserre, mais rien ne disparait tant que le bandeau cookies n'est
+     pas la — voir la regle .has-cookiebar plus bas. */
   @media (max-height: 720px) {
-    .hero-section { padding: 66px 18px 28px; }
-    .hero-h1 { font-size: clamp(23px, 6.4vw, 34px); margin-bottom: 10px; }
-    .hero-tabs { margin-bottom: 8px; }
-    .hero-tab { padding: 7px 5px; font-size: 11.5px; }
-    .hero-panel { height: 182px; padding: 10px 12px 12px; margin-bottom: 8px; }
-    .peek-q { font-size: 12.5px; margin-bottom: 7px; }
-    .peek-q-lg { font-size: 13.5px; }
-    .peek-words { gap: 5px; margin-bottom: 7px; }
-    .peek-word { padding: 4px 6px; }
-    .pw-ar { font-size: 18px; }
-    .pw-fr { font-size: 8.5px; }
-    .peek-opt { padding: 7px 5px; font-size: 11.5px; }
-    .bt-wave { height: 20px; margin-bottom: 6px; }
-    .peek-foot { font-size: 10px; }
-    .peek-foot strong { font-size: 14px; }
-    .hero-cta { padding: 12px 22px; font-size: 14.5px; }
-    .hero-sub { font-size: 11.5px; margin-top: 7px; gap: 2px 11px; }
-    .hero-hadith { margin-top: 6px; gap: 5px; }
-    .hh-ar { display: none; }
-    .hh-fr { font-size: 13.5px; line-height: 1.35; }
+    .hero-section { padding: 76px 18px calc(20px + var(--cookiebar)); }
+    .hero-h1 { font-size: clamp(25px, 6.9vw, 36px); margin-bottom: 12px; }
+    .hero-tabs { margin-bottom: 9px; }
+    .hero-tab { padding: 8px 5px; font-size: 12.5px; }
+    .hero-panel { height: 208px; padding: 11px 13px 13px; margin-bottom: 12px; }
+    .peek-q { font-size: 13.5px; margin-bottom: 9px; }
+    .peek-q-lg { font-size: 15px; }
+    .peek-words { gap: 6px; margin-bottom: 9px; }
+    .peek-word { padding: 5px 7px; }
+    .pw-ar { font-size: 20px; }
+    .pw-fr { font-size: 9px; }
+    .peek-opt { padding: 8px 5px; font-size: 12.5px; }
+    .bt-wave { height: 23px; margin-bottom: 8px; }
+    .peek-foot { font-size: 11px; }
+    .peek-foot strong { font-size: 16px; }
+    .hero-cta { padding: 14px 22px; font-size: 15.5px; }
+    .hero-sub { font-size: 12px; margin-top: 10px; gap: 2px 11px; }
+    .hero-hadith { margin-top: 16px; gap: 6px; }
+    .hh-ar { font-size: 16px; line-height: 1.6; }
+    .hh-fr { font-size: 14.5px; line-height: 1.4; }
     .hh-src { font-size: 9px; }
+    .hero-scroll { margin-top: 14px; gap: 6px; }
+    .hs-line { height: 24px; }
   }
 
   /* Allegement mobile.
      Sur 375 px le hero empilait une vingtaine de fragments de texte. Deux
      etaient de pures redites : le kicker repete le titre, et le tag du panneau
-     (« LE CORAN MOT A MOT ») repete l'onglet deja surligne juste au-dessus.
-     On les retire du mobile et on rend l'espace gagne aux elements qui portent
-     vraiment : le titre, la demonstration, le bouton. */
+     (« LE CORAN MOT A MOT ») repete l'onglet deja surligne juste au-dessus. */
   @media (max-width: 768px) {
     .hero-kicker { display: none; }
     .hero-panel-tag { display: none; }
-    /* Le kicker faisait office de respiration sous la barre de navigation
-       (69 px de haut) : sans lui, le titre se retrouvait a 7 px du header,
-       colle. On rend cet espace au padding plutot qu'au texte. */
-    .hero-section { padding-top: 96px; }
-    .hero-h1 { margin-bottom: 15px; }
-    .hero-panel { padding-top: 16px; }
-    .peek-q { font-size: 13.5px; margin-bottom: 12px; }
+    .hero-panel { padding-top: 17px; }
   }
-  /* Ecrans courts : meme respiration, mais mesuree — le bandeau cookies
-     occupe deja le bas sur un iPhone SE. */
+
+  /* Premiere visite uniquement : le bandeau de consentement prend ~130 px en
+     bas de l'ecran. On lui rend la place en repliant le decoratif — la ligne
+     arabe redit le francais juste dessous — plutot qu'en laissant le texte
+     passer sous le bandeau. Des le consentement donne, tout revient. */
+  @media (max-width: 768px) {
+    html.has-cookiebar .hh-ar { display: none; }
+    html.has-cookiebar .hero-hadith { margin-top: 16px; gap: 7px; }
+    html.has-cookiebar .hero-panel { height: 248px; }
+    html.has-cookiebar .hero-scroll { display: none; }
+  }
   @media (max-width: 768px) and (max-height: 720px) {
-    .hero-section { padding-top: 92px; }
+    html.has-cookiebar .hero-hadith { display: none; }
+    html.has-cookiebar .hero-panel { height: 196px; }
   }
 
   @media (min-width: 769px) {
-    .hero-section { padding: 116px 24px 68px; }
-    .hero-inner { max-width: 620px; }
-    .hero-tabs { gap: 8px; margin-bottom: 12px; }
-    .hero-tab { font-size: 13.5px; padding: 11px 8px; }
-    .hero-panel { height: 262px; padding: 16px 20px 18px; }
-    .peek-q { font-size: 16px; }
-    .peek-q-lg { font-size: 17px; }
-    .pw-ar { font-size: 25px; }
-    .pw-fr { font-size: 10.5px; }
+    .hero-section { padding: 108px 24px 56px; }
+    .hero-inner { max-width: 640px; }
+    .hero-tabs { gap: 9px; margin-bottom: 13px; }
+    .hero-tab { font-size: 14.5px; padding: 12px 8px; }
+    .hero-panel { height: 286px; padding: 18px 22px 20px; }
+    .peek-q { font-size: 17px; }
+    .peek-q-lg { font-size: 18px; }
+    .pw-ar { font-size: 27px; }
+    .pw-fr { font-size: 11px; }
     .peek-words { grid-template-columns: repeat(4, 1fr); }
-    .peek-word { padding: 8px 11px; }
-    .peek-opt { font-size: 13.5px; padding: 10px; }
-    .peek-foot { font-size: 12px; }
-    .peek-foot strong { font-size: 18px; }
-    .hero-sub { font-size: 14px; gap: 4px 20px; margin-top: 16px; }
-    .hero-hadith { margin-top: 34px; max-width: 500px; }
-    .hh-ar { font-size: 21px; }
-    .hh-fr { font-size: 18.5px; }
-    .hh-src { font-size: 10.5px; }
+    .peek-word { padding: 9px 11px; }
+    .peek-opt { font-size: 14.5px; padding: 11px; }
+    .peek-foot { font-size: 13px; }
+    .peek-foot strong { font-size: 20px; }
+    .hero-cta { max-width: 420px; padding: 20px 30px; font-size: 19px; }
+    .hero-sub { font-size: 14.5px; gap: 4px 20px; margin-top: 18px; }
+    .hero-hadith { margin-top: 34px; max-width: 520px; }
+    .hh-ar { font-size: 22px; }
+    .hh-fr { font-size: 19px; }
+    .hh-src { font-size: 11px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .peek { animation: none; }
     .hero-eq i, .bt-wave i { animation: none; height: 11px !important; }
     .peek-word, .peek-opt, .hero-cta, .hero-tab { transition: none; }
+    .cta-shine { display: none; }
+    .hs-line i { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .reveal-sep { width: 86%; transition: none; }
   }
 
   /* Section text backdrop */

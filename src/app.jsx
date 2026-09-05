@@ -1459,6 +1459,29 @@ function HeroPeekQuiz({ live }) {
   );
 }
 
+/* Devoile son contenu quand il entre dans l'ecran.
+
+   Le hero tient desormais tout l'ecran : la section suivante ne doit pas se
+   deviner avant qu'on ait decide de descendre. Filet de securite volontaire —
+   si IntersectionObserver manque ou n'emet jamais, le contenu s'affiche quand
+   meme au bout de 4 s : une page vide est un bug bien pire qu'une animation
+   ratee. */
+function Reveal({ children }) {
+  const ref = React.useRef(null);
+  const [seen, setSeen] = React.useState(false);
+  React.useEffect(function () {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') { setSeen(true); return; }
+    const io = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { setSeen(true); io.disconnect(); }
+    }, { rootMargin: '0px 0px -10% 0px' });
+    io.observe(el);
+    const safety = setTimeout(function () { setSeen(true); }, 4000);
+    return function () { io.disconnect(); clearTimeout(safety); };
+  }, []);
+  return <div ref={ref} id="apres-hero" className={'reveal' + (seen ? ' in' : '')}>{children}</div>;
+}
+
 function Hero({ navigate }) {
   const { isPro } = useAuth();
   const [tab, setTab] = React.useState(0);
@@ -1516,9 +1539,18 @@ function Hero({ navigate }) {
           {tab === 2 && <HeroPeekQuiz live={tab === 2} />}
         </div>
 
+        {/* Le bouton emprunte la couleur de l'onglet actif jusque dans son ombre
+           et son halo : trois activites, un seul bouton, mais qui change de peau
+           avec ce qu'il promet. Le reflet qui passe dessus signale qu'il est
+           vivant — sur mobile, rien d'autre ne le distingue d'une image. */}
         <button className="hero-cta" onClick={function () { navigate(active.id); }}
-          style={{ background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)' }}>
-          {active.cta} →
+          style={{
+            background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)',
+            boxShadow: '0 10px 34px rgba(' + active.rgb + ',0.34), 0 2px 0 rgba(255,255,255,0.25) inset',
+          }}>
+          <span className="cta-txt">{active.cta}</span>
+          <span className="cta-arrow" aria-hidden="true">→</span>
+          <span className="cta-shine" aria-hidden="true" />
         </button>
         {/* Trois acquis coches plutot qu'une phrase grise : ce qui leve le
            frein doit se lire, pas se parcourir. */}
@@ -1547,6 +1579,17 @@ function Hero({ navigate }) {
           </blockquote>
           <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
         </figure>
+
+        {/* Le hero occupe tout l'ecran : sans repere, rien ne dit qu'il y a une
+           suite. Le trait se remplit en boucle vers le bas — un geste, pas un mot. */}
+        <button type="button" className="hero-scroll" aria-label="Voir la suite"
+          onClick={function () {
+            const el = document.getElementById('apres-hero');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}>
+          <span className="hs-txt">Découvrir</span>
+          <span className="hs-line" aria-hidden="true"><i /></span>
+        </button>
       </div>
     </section>
   );
@@ -6751,11 +6794,38 @@ function CGVPage({ navigate }) {
 /* ─── Bannière RGPD ─── */
 function RgpdBanner({ onAccept, onDecline }) {
   const [visible, setVisible] = React.useState(false);
+  const barRef = React.useRef(null);
 
   React.useEffect(function() {
     var consent = localStorage.getItem('hm_cookie_consent');
     if (!consent) setVisible(true);
   }, []);
+
+  /* Le bandeau publie sa hauteur reelle, et le hero lui reserve exactement
+     cette place — le temps qu'il soit la. Avant, le hero etait rapetisse en
+     permanence pour un bandeau qui disparait au premier clic, sur toutes les
+     visites suivantes comprises. */
+  React.useEffect(function () {
+    const root = document.documentElement;
+    if (!visible) {
+      root.classList.remove('has-cookiebar');
+      root.style.removeProperty('--cookiebar');
+      return;
+    }
+    const measure = function () {
+      const el = barRef.current;
+      if (!el) return;
+      root.style.setProperty('--cookiebar', Math.ceil(el.getBoundingClientRect().height) + 'px');
+      root.classList.add('has-cookiebar');
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return function () {
+      window.removeEventListener('resize', measure);
+      root.classList.remove('has-cookiebar');
+      root.style.removeProperty('--cookiebar');
+    };
+  }, [visible]);
 
   if (!visible) return null;
 
@@ -6771,7 +6841,7 @@ function RgpdBanner({ onAccept, onDecline }) {
   }
 
   return (
-    <div style={{
+    <div ref={barRef} style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99998,
       background: 'rgba(3,12,7,0.97)', backdropFilter: 'blur(16px)',
       borderTop: '1px solid rgba(200,167,39,0.2)',
@@ -8321,17 +8391,22 @@ function App() {
         {/* Ordre = du plus accrocheur au moins, avec l'offre en fin de parcours :
             hook → produit → preuve sociale → pratique → motivation → comparaison → objections → prix */}
         <Hero navigate={navigate} />
-        <ComprendreSection navigate={navigate} />
-        <FeatureCards navigate={navigate} />
-        <LearnPlaySection navigate={navigate} />
-        <Testimonials />
-        <StatsBar />
-        <HowItWorksSection />
-        <ParcoursSection />
-        <ImportanceSection />
-        <ComparisonTable navigate={navigate} />
-        <FaqSection />
-        <SoftPaywall navigate={navigate} />
+        {/* Tout ce qui suit le hero attend le premier scroll : le hero remplit
+           l'ecran, et rien ne doit depasser dessous pour le contredire. */}
+        <Reveal>
+          <span className="reveal-sep" aria-hidden="true" />
+          <ComprendreSection navigate={navigate} />
+          <FeatureCards navigate={navigate} />
+          <LearnPlaySection navigate={navigate} />
+          <Testimonials />
+          <StatsBar />
+          <HowItWorksSection />
+          <ParcoursSection />
+          <ImportanceSection />
+          <ComparisonTable navigate={navigate} />
+          <FaqSection />
+          <SoftPaywall navigate={navigate} />
+        </Reveal>
       </main>
       <Footer navigate={navigate} />
       <StickyUpgradeBanner navigate={navigate} />
