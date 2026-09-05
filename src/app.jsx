@@ -1523,9 +1523,12 @@ function Hero({ navigate }) {
       <div className="hero-inner">
         <p className="hero-kicker"><span className="hk-rule" />Apprendre l'islam autrement<span className="hk-rule" /></p>
 
+        {/* « Trois façons d'apprendre » comptait les activités que les onglets
+            montrent deja juste dessous. Le titre dit maintenant a qui on parle :
+            quelqu'un qui veut apprendre l'islam sans passer par l'ecole. */}
         <h1 className="hero-h1">
-          Trois façons d'apprendre —<br />
-          <em>aucune ne ressemble à un cours.</em>
+          L'islam s'apprend.<br />
+          <em>Pas forcément à l'école.</em>
         </h1>
 
         {/* Onglets : le visiteur voit d'un coup d'œil tout ce que contient le site */}
