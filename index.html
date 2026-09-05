@@ -525,10 +525,37 @@
   .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 38px rgba(0,0,0,0.45); }
   .hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
   .hero-sub {
-    margin: 10px 0 0; font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 11.5px; color: rgba(255,255,255,0.4);
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 3px 13px;
+    margin: 11px 0 0; padding: 0; list-style: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.52);
   }
-  .hero-sub span { opacity: 0.45; margin: 0 2px; }
+  .hero-sub li { display: inline-flex; align-items: center; gap: 4px; }
+
+  /* ── Hadith de cloture ──
+     Discret par construction : il doit accompagner le bouton, jamais lui
+     disputer le regard. D'ou l'or a 62 % d'opacite et le filet degrade. */
+  .hero-hadith {
+    margin: 22px 0 0; max-width: 400px;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+  }
+  .hh-rule {
+    width: 170px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,167,39,0.4), transparent);
+  }
+  .hh-ar {
+    margin: 0; font-family: Amiri, Georgia, serif;
+    font-size: 15px; line-height: 1.9; color: rgba(247,238,203,0.6);
+  }
+  .hh-fr {
+    margin: 0; font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: 14.5px; line-height: 1.45;
+    color: rgba(240,237,230,0.72);
+  }
+  .hh-src {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 9px; font-weight: 800;
+    letter-spacing: 0.15em; text-transform: uppercase; color: rgba(200,167,39,0.68);
+  }
 
   /* Ecrans courts (iPhone SE/8 : 667 px, encore tres repandus).
      Sans cela le bouton tombait a 495 px et le bandeau cookies, qui demarre a
@@ -551,7 +578,10 @@
     .peek-foot { font-size: 10px; }
     .peek-foot strong { font-size: 14px; }
     .hero-cta { padding: 13px 22px; font-size: 14.5px; }
-    .hero-sub { font-size: 10.5px; margin-top: 8px; }
+    .hero-sub { font-size: 10.5px; margin-top: 8px; gap: 2px 10px; }
+    .hero-hadith { margin-top: 14px; gap: 6px; }
+    .hh-ar { display: none; }
+    .hh-fr { font-size: 13px; }
   }
 
   /* Allegement mobile.
@@ -592,6 +622,11 @@
     .peek-opt { font-size: 13.5px; padding: 10px; }
     .peek-foot { font-size: 12px; }
     .peek-foot strong { font-size: 18px; }
+    .hero-sub { font-size: 12.5px; gap: 4px 18px; }
+    .hero-hadith { margin-top: 28px; max-width: 470px; }
+    .hh-ar { font-size: 18px; }
+    .hh-fr { font-size: 16.5px; }
+    .hh-src { font-size: 9.5px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .peek { animation: none; }

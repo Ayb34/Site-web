@@ -1520,7 +1520,33 @@ function Hero({ navigate }) {
           style={{ background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)' }}>
           {active.cta} →
         </button>
-        <p className="hero-sub">Gratuit, sans compte ni carte bancaire</p>
+        {/* Trois acquis coches plutot qu'une phrase grise : ce qui leve le
+           frein doit se lire, pas se parcourir. */}
+        <ul className="hero-sub">
+          {['Gratuit', 'Sans compte', 'Sans carte bancaire'].map(function (t) {
+            return (
+              <li key={t}>
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#4ade80" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 12.6l5.2 5.2L20 6.6" />
+                </svg>
+                {t}
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Le hero se ferme sur le pourquoi, pas sur le produit : on ne demande
+           pas un clic pour un site, mais pour un chemin. Sahih Muslim 2699 —
+           chaine authentique, et son image du « chemin » decrit exactement le
+           geste qu'on demande juste au-dessus. */}
+        <figure className="hero-hadith">
+          <span className="hh-rule" aria-hidden="true" />
+          <p className="hh-ar" dir="rtl" lang="ar">مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ</p>
+          <blockquote className="hh-fr">
+            « Quiconque emprunte un chemin en quête de science, Allah lui facilite par cela un chemin vers le Paradis. »
+          </blockquote>
+          <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
+        </figure>
       </div>
     </section>
   );
