@@ -521,6 +521,10 @@
   }
   .peek-opt b { color: #4ade80; font-size: 13px; }
   .peek-quiz .peek-foot { margin-top: 11px; }
+  /* Le compteur « 740 questions » argumente ; le pourcentage de Comprendre,
+     lui, EST la demonstration (il monte a mesure que les mots s'allument). Seul
+     le premier sort du mobile. */
+  @media (max-width: 768px) { .peek-quiz .peek-foot { display: none; } }
 
   /* ── Action ──
      Un seul bouton pour trois activites : il prend la couleur de l'onglet actif
@@ -557,17 +561,17 @@
     font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.62);
   }
   .hero-sub li { display: inline-flex; align-items: center; gap: 5px; }
+  @media (max-width: 768px) { .hero-sub .sub-wide { display: none; } }
 
-  /* ── Hadith de cloture ──
-     Discret par construction : il accompagne le bouton, il ne lui dispute pas
-     le regard. D'ou l'or a 70 % d'opacite et le filet degrade. */
+  /* ── Hadith d'ouverture ──
+     Il a quitte le hero : sur mobile il pesait 4 fragments sur 7 dans le
+     premier ecran, pour un propos qui n'est pas une demonstration mais un
+     pourquoi. Il ouvre maintenant ce que le premier scroll devoile — juste
+     sous le trait, qui lui sert de filet. */
   .hero-hadith {
-    margin: 20px 0 0; max-width: 460px;
+    margin: 26px auto 34px; max-width: 460px; padding: 0 18px;
     display: flex; flex-direction: column; align-items: center; gap: 8px;
-  }
-  .hh-rule {
-    width: 190px; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(200,167,39,0.42), transparent);
+    text-align: center;
   }
   .hh-ar {
     margin: 0; font-family: Amiri, Georgia, serif;
@@ -586,7 +590,7 @@
   /* ── Invite a descendre ──
      Le hero remplit l'ecran : sans repere, rien ne dit qu'il y a une suite. */
   .hero-scroll {
-    margin-top: 14px; padding: 6px 12px; background: none; border: none;
+    margin-top: 34px; padding: 6px 12px; background: none; border: none;
     display: flex; flex-direction: column; align-items: center; gap: 9px;
     cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
@@ -654,11 +658,10 @@
     .peek-foot strong { font-size: 16px; }
     .hero-cta { padding: 14px 22px; font-size: 15.5px; }
     .hero-sub { font-size: 12px; margin-top: 10px; gap: 2px 11px; }
-    .hero-hadith { margin-top: 16px; gap: 6px; }
     .hh-ar { font-size: 16px; line-height: 1.6; }
     .hh-fr { font-size: 14.5px; line-height: 1.4; }
     .hh-src { font-size: 9px; }
-    .hero-scroll { margin-top: 14px; gap: 6px; }
+    .hero-scroll { margin-top: 22px; gap: 6px; }
     .hs-line { height: 24px; }
   }
 
@@ -677,13 +680,9 @@
      arabe redit le francais juste dessous — plutot qu'en laissant le texte
      passer sous le bandeau. Des le consentement donne, tout revient. */
   @media (max-width: 768px) {
-    html.has-cookiebar .hh-ar { display: none; }
-    html.has-cookiebar .hero-hadith { margin-top: 16px; gap: 7px; }
-    html.has-cookiebar .hero-panel { height: 240px; }
     html.has-cookiebar .hero-scroll { display: none; }
   }
   @media (max-width: 768px) and (max-height: 720px) {
-    html.has-cookiebar .hero-hadith { display: none; }
     html.has-cookiebar .hero-panel { height: 196px; }
   }
 
@@ -704,7 +703,7 @@
     .peek-foot strong { font-size: 20px; }
     .hero-cta { max-width: 420px; padding: 20px 30px; font-size: 19px; }
     .hero-sub { font-size: 14.5px; gap: 4px 20px; margin-top: 18px; }
-    .hero-hadith { margin-top: 34px; max-width: 520px; }
+    .hero-hadith { margin: 40px auto 46px; max-width: 520px; }
     .hh-ar { font-size: 22px; }
     .hh-fr { font-size: 19px; }
     .hh-src { font-size: 11px; }

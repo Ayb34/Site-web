@@ -1570,9 +1570,16 @@ function Hero({ navigate }) {
         {/* Trois acquis coches plutot qu'une phrase grise : ce qui leve le
            frein doit se lire, pas se parcourir. */}
         <ul className="hero-sub">
-          {['Gratuit', 'Sans compte', 'Sans carte bancaire'].map(function (t) {
+          {[
+            { t: 'Gratuit', small: false },
+            { t: 'Sans compte', small: false },
+            /* Masque en mobile : « gratuit » le dit deja, et le premier ecran
+               compte plus de lignes qu'il n'en faut. */
+            { t: 'Sans carte bancaire', small: true },
+          ].map(function (o) {
+            const t = o.t;
             return (
-              <li key={t}>
+              <li key={t} className={o.small ? 'sub-wide' : null}>
                 <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#4ade80" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4 12.6l5.2 5.2L20 6.6" />
                 </svg>
@@ -1581,19 +1588,6 @@ function Hero({ navigate }) {
             );
           })}
         </ul>
-
-        {/* Le hero se ferme sur le pourquoi, pas sur le produit : on ne demande
-           pas un clic pour un site, mais pour un chemin. Sahih Muslim 2699 —
-           chaine authentique, et son image du « chemin » decrit exactement le
-           geste qu'on demande juste au-dessus. */}
-        <figure className="hero-hadith">
-          <span className="hh-rule" aria-hidden="true" />
-          <p className="hh-ar" dir="rtl" lang="ar">مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ</p>
-          <blockquote className="hh-fr">
-            « Quiconque emprunte un chemin en quête de science, Allah lui facilite par cela un chemin vers le Paradis. »
-          </blockquote>
-          <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
-        </figure>
 
         {/* Le hero occupe tout l'ecran : sans repere, rien ne dit qu'il y a une
            suite. Le trait se remplit en boucle vers le bas — un geste, pas un mot. */}
@@ -8410,6 +8404,18 @@ function App() {
            l'ecran, et rien ne doit depasser dessous pour le contredire. */}
         <Reveal>
           <span className="hero-next-sep" aria-hidden="true" />
+          {/* Le hadith ouvre desormais ce qui se devoile, au lieu d'alourdir le
+              premier ecran : c'est un « pourquoi », pas une demonstration, et il
+              recompense le premier scroll au lieu de le retarder. Sahih Muslim
+              2699 — chaine authentique, et son image du « chemin » decrit
+              exactement le geste qu'on vient de faire. */}
+          <figure className="hero-hadith">
+            <p className="hh-ar" dir="rtl" lang="ar">مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ</p>
+            <blockquote className="hh-fr">
+              « Quiconque emprunte un chemin en quête de science, Allah lui facilite par cela un chemin vers le Paradis. »
+            </blockquote>
+            <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
+          </figure>
           <ComprendreSection navigate={navigate} />
           <FeatureCards navigate={navigate} />
           <LearnPlaySection navigate={navigate} />
