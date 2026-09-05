@@ -1472,12 +1472,24 @@ function Reveal({ children }) {
   React.useEffect(function () {
     const el = ref.current;
     if (!el || typeof IntersectionObserver === 'undefined') { setSeen(true); return; }
+    const show = function () { setSeen(true); cleanup(); };
     const io = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting) { setSeen(true); io.disconnect(); }
+      if (entries[0].isIntersecting) show();
     }, { rootMargin: '0px 0px -10% 0px' });
+    /* Filet de securite : si l'observateur n'emet jamais, le premier scroll
+       suffit a devoiler. Pas de minuterie aveugle — elle afficherait la section
+       toute seule au bout de quelques secondes, et l'animation serait deja
+       jouee quand le visiteur descend enfin. */
+    const onScroll = function () {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) show();
+    };
+    function cleanup() {
+      io.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    }
     io.observe(el);
-    const safety = setTimeout(function () { setSeen(true); }, 4000);
-    return function () { io.disconnect(); clearTimeout(safety); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return cleanup;
   }, []);
   return <div ref={ref} id="apres-hero" className={'hero-next' + (seen ? ' in' : '')}>{children}</div>;
 }
