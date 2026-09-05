@@ -1340,7 +1340,8 @@ const HERO_VERSE = [
 ];
 // Question réellement tirée de questions.json (catégorie Prophètes, niveau Débutant).
 const HERO_QUIZ = {
-  q: 'Combien de prophètes sont mentionnés nommément dans le Coran ?',
+  /* Espace insecable : sans elle le « ? » tombait seul sur une troisieme ligne. */
+  q: 'Combien de prophètes sont mentionnés nommément dans le Coran ?',
   choices: ['20', '25', '30', '35'],
   correct: 1,
 };
