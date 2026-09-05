@@ -1390,7 +1390,7 @@ function HeroPeekComprendre({ live }) {
   const pct = HERO_VERSE.slice(0, n).reduce(function (s, w) { return s + w.n; }, 0) / HERO_TOTAL_WORDS * 100;
   return (
     <div className="peek peek-cmp">
-      <p className="peek-q">Tu récites ces mots chaque jour. Les comprends-tu&nbsp;?</p>
+      <p className="peek-q">Tu les récites chaque jour. Les comprends-tu&nbsp;?</p>
       <div className="peek-words" dir="rtl">
         {HERO_VERSE.map(function (w, i) {
           return (
@@ -1403,7 +1403,7 @@ function HeroPeekComprendre({ live }) {
       </div>
       <p className="peek-foot">
         <strong>{(pct >= 1 ? pct.toFixed(1) : pct.toFixed(2)).replace(/\.0$/, '').replace('.', ',')}&nbsp;%</strong>
-        <span> des mots du Coran, rien qu'avec ces 4 mots</span>
+        <span> des mots du Coran</span>
       </p>
     </div>
   );
@@ -1454,7 +1454,7 @@ function HeroPeekQuiz({ live }) {
           return <span key={c} className={'peek-opt' + (ok ? ' good' : '')}>{c}{ok ? <b>✓</b> : null}</span>;
         })}
       </div>
-      <p className="peek-foot"><span>740 questions · 9 thèmes · 3 niveaux</span></p>
+      <p className="peek-foot"><span>740 questions · 3 niveaux</span></p>
     </div>
   );
 }
@@ -1518,9 +1518,9 @@ function Hero({ navigate }) {
 
         <button className="hero-cta" onClick={function () { navigate(active.id); }}
           style={{ background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)' }}>
-          {isPro ? active.cta + ' →' : active.cta + ' — gratuitement →'}
+          {active.cta} →
         </button>
-        <p className="hero-sub">Sans compte <span>·</span> sans carte bancaire <span>·</span> 100&nbsp;% en français</p>
+        <p className="hero-sub">Gratuit, sans compte ni carte bancaire</p>
       </div>
     </section>
   );

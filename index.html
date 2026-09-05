@@ -536,12 +536,10 @@
      action cliquable. On resserre plutot que de rogner du contenu. */
   @media (max-height: 720px) {
     .hero-section { padding: 66px 18px 28px; }
-    .hero-kicker { margin-bottom: 9px; font-size: 9.5px; }
     .hero-h1 { font-size: clamp(23px, 6.4vw, 34px); margin-bottom: 13px; }
     .hero-tabs { margin-bottom: 8px; }
     .hero-tab { padding: 7px 5px; font-size: 11.5px; }
     .hero-panel { height: 188px; padding: 10px 12px 12px; margin-bottom: 12px; }
-    .hero-panel-tag { margin-bottom: 6px; }
     .peek-q { font-size: 12.5px; margin-bottom: 7px; }
     .peek-q-lg { font-size: 13.5px; }
     .peek-words { gap: 5px; margin-bottom: 7px; }
@@ -554,6 +552,20 @@
     .peek-foot strong { font-size: 14px; }
     .hero-cta { padding: 13px 22px; font-size: 14.5px; }
     .hero-sub { font-size: 10.5px; margin-top: 8px; }
+  }
+
+  /* Allegement mobile.
+     Sur 375 px le hero empilait une vingtaine de fragments de texte. Deux
+     etaient de pures redites : le kicker repete le titre, et le tag du panneau
+     (« LE CORAN MOT A MOT ») repete l'onglet deja surligne juste au-dessus.
+     On les retire du mobile et on rend l'espace gagne aux elements qui portent
+     vraiment : le titre, la demonstration, le bouton. */
+  @media (max-width: 768px) {
+    .hero-kicker { display: none; }
+    .hero-panel-tag { display: none; }
+    .hero-h1 { margin-bottom: 20px; }
+    .hero-panel { padding-top: 16px; }
+    .peek-q { font-size: 13.5px; margin-bottom: 12px; }
   }
 
   @media (min-width: 769px) {
