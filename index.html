@@ -396,7 +396,7 @@
   .hero-section {
     position: relative; display: flex; align-items: center; justify-content: center;
     min-height: 100vh; min-height: 100svh;
-    padding: 84px 18px calc(26px + var(--cookiebar));
+    padding: 84px 18px calc(18px + var(--cookiebar));
     overflow: hidden;
   }
   .hero-glow {
@@ -421,7 +421,7 @@
   .hero-h1 {
     font-family: Fraunces, Georgia, serif; font-weight: 400; color: #fff;
     font-size: clamp(29px, 8.2vw, 52px); line-height: 1.08; letter-spacing: -0.02em;
-    margin: 0 0 16px; text-wrap: balance;
+    margin: 0 0 12px; text-wrap: balance;
   }
   .hero-h1 em { font-style: italic; color: #e6c84a; }
 
@@ -445,7 +445,7 @@
     /* Hauteur figee sur le plus haut des trois apercus (Comprendre, dont les
        mots passent sur deux lignes) : sinon le bouton remonte de 48 px a
        chaque rotation, et l'oeil suit un CTA qui bouge tout seul. */
-    width: 100%; height: 274px; margin-bottom: 18px;
+    width: 100%; height: 252px; margin-bottom: 18px;
     display: flex; flex-direction: column; justify-content: center;
     padding: 15px 15px 17px; border-radius: 20px;
     background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
@@ -552,7 +552,7 @@
 
   .hero-sub {
     display: flex; flex-wrap: wrap; justify-content: center; gap: 3px 14px;
-    margin: 15px 0 0; padding: 0; list-style: none;
+    margin: 13px 0 0; padding: 0; list-style: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.62);
   }
@@ -562,8 +562,8 @@
      Discret par construction : il accompagne le bouton, il ne lui dispute pas
      le regard. D'ou l'or a 70 % d'opacite et le filet degrade. */
   .hero-hadith {
-    margin: 28px 0 0; max-width: 460px;
-    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    margin: 20px 0 0; max-width: 460px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
   }
   .hh-rule {
     width: 190px; height: 1px;
@@ -571,7 +571,7 @@
   }
   .hh-ar {
     margin: 0; font-family: Amiri, Georgia, serif;
-    font-size: 19px; line-height: 1.7; color: rgba(247,238,203,0.7);
+    font-size: 19px; line-height: 1.5; color: rgba(247,238,203,0.7);
   }
   .hh-fr {
     margin: 0; font-family: 'Cormorant Garamond', Georgia, serif;
@@ -586,7 +586,7 @@
   /* ── Invite a descendre ──
      Le hero remplit l'ecran : sans repere, rien ne dit qu'il y a une suite. */
   .hero-scroll {
-    margin-top: 26px; padding: 6px 12px; background: none; border: none;
+    margin-top: 14px; padding: 6px 12px; background: none; border: none;
     display: flex; flex-direction: column; align-items: center; gap: 9px;
     cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
@@ -598,7 +598,7 @@
   }
   .hero-scroll:hover .hs-txt { color: rgba(230,200,74,0.9); }
   .hs-line {
-    position: relative; display: block; width: 1px; height: 36px;
+    position: relative; display: block; width: 1px; height: 26px;
     background: rgba(200,167,39,0.16); overflow: hidden;
   }
   .hs-line i {
@@ -673,7 +673,7 @@
   @media (max-width: 768px) {
     html.has-cookiebar .hh-ar { display: none; }
     html.has-cookiebar .hero-hadith { margin-top: 16px; gap: 7px; }
-    html.has-cookiebar .hero-panel { height: 248px; }
+    html.has-cookiebar .hero-panel { height: 240px; }
     html.has-cookiebar .hero-scroll { display: none; }
   }
   @media (max-width: 768px) and (max-height: 720px) {
