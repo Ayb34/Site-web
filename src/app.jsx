@@ -8867,6 +8867,24 @@ function App() {
     return unsub;
   }, [user]);
 
+  /* L'origine du visiteur suit son compte.
+     Les paramètres UTM étaient rangés dans le navigateur et n'allaient nulle
+     part : impossible de savoir quel compte TikTok, quelle vidéo ou quelle
+     campagne avait amené un inscrit. On les recopie donc sur le document
+     utilisateur, une seule fois — la PREMIÈRE source gagne, celle qui a fait
+     découvrir le site, et non la dernière visite avant l'inscription. */
+  React.useEffect(function () {
+    if (!user || !window._db) return;
+    var attr = null;
+    try { attr = JSON.parse(localStorage.getItem('hm_attribution')); } catch (e) { return; }
+    if (!attr) return;
+    var ref = window._db.collection('users').doc(user.uid);
+    ref.get().then(function (doc) {
+      if (doc.exists && doc.data().source) return;
+      return ref.set({ source: attr }, { merge: true });
+    }).catch(function () {});
+  }, [user]);
+
   /* Essai de 2 jours, ouvert dès qu'un compte existe. Recompté chaque minute :
      sinon un onglet resté ouvert affiche encore « 1 jour » longtemps après la
      fin, et la relance tombe à côté. */
