@@ -1252,6 +1252,12 @@
   .sticky-upgrade-banner {
     padding: 11px 13px calc(11px + env(safe-area-inset-bottom, 0px)) !important;
     gap: 8px !important;
+    /* Le bandeau reste dans l'ecran quoi qu'il contienne : sans ces bornes, un
+       libelle un peu long le poussait au-dela du viewport et le bouton se
+       retrouvait hors champ. */
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
   .sticky-upgrade-banner-btn {
     font-size: 13px !important;

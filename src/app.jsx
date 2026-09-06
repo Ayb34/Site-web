@@ -81,6 +81,40 @@ function ProWhyGrid({ columns, limit }) {
    lieu du viewport : scrollHeight devient égal à clientHeight, la modale ne
    défile plus, et son bas — dont le bouton d'achat — reste inatteignable
    puisque le body est déjà verrouillé. */
+/* ─── Verrou de défilement, partagé et compté ───
+
+   Chaque modale figeait le corps de page pour son compte : `position: fixed` +
+   `top: -scrollY`, restauré à la fermeture. Ça marche pour UNE modale. Dès que
+   deux se superposent — la porte invité ouvre l'inscription, l'inscription
+   ouvre la bienvenue — la seconde lit `window.scrollY` alors que le corps est
+   DÉJÀ figé : elle lit donc 0, et restaure 0 en refermant. D'où la page qui
+   remonte brutalement en haut après « Commencer ».
+
+   Un seul verrou, compté : seule la première prise mémorise la position, seule
+   la dernière libération la rend. */
+let hmLockDepth = 0;
+let hmLockY = 0;
+function hmLockScroll() {
+  if (hmLockDepth === 0) {
+    hmLockY = window.scrollY || window.pageYOffset || 0;
+    const b = document.body.style;
+    b.position = 'fixed';
+    b.top = '-' + hmLockY + 'px';
+    b.left = '0';
+    b.right = '0';
+    b.width = '100%';
+  }
+  hmLockDepth += 1;
+}
+function hmUnlockScroll() {
+  hmLockDepth -= 1;
+  if (hmLockDepth > 0) return;
+  hmLockDepth = 0;
+  const b = document.body.style;
+  b.position = ''; b.top = ''; b.left = ''; b.right = ''; b.width = '';
+  window.scrollTo(0, hmLockY);
+}
+
 function ModalPortal({ children }) {
   return ReactDOM.createPortal(children, document.body);
 }
@@ -354,21 +388,9 @@ function GuestGateModal({ onClose, context = 'default' }) {
   };
   const copy = GATE_COPY[context] || GATE_COPY.default;
   React.useEffect(function () {
-    const scrollY = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = '-' + scrollY + 'px';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
+    hmLockScroll();
     if (overlayRef.current) overlayRef.current.scrollTop = 0;
-    return function () {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
+    return hmUnlockScroll;
   }, []);
   return (
     <ModalPortal><div ref={overlayRef} onClick={function(e){ if(e.target===e.currentTarget) onClose(); }}
@@ -401,63 +423,64 @@ function GuestGateModal({ onClose, context = 'default' }) {
 }
 
 /* ─── Pro Gate Modal ─── */
-/* ─── Bienvenue : l'essai s'annonce ───
-
-   Sans cet écran, l'essai était muet : l'utilisateur recevait trois jours
-   d'accès complet sans le savoir, et les perdait sans avoir su qu'il les avait.
-   Toute la mécanique repose sur la perte ressentie — un cadeau ignoré ne se
-   perd pas, il ne fait que rendre le site plus restrictif sans raison
-   apparente. C'était pire que pas d'essai du tout.
-
-   On nomme donc ce qui est ouvert, et surtout on dit d'avance ce qui se
-   referme. Annoncer la fin dès le début n'est pas un aveu : c'est ce qui donne
-   sa valeur aux trois jours. */
-function TrialWelcomeModal({ onClose, navigate }) {
-  const { openQuickCheckout } = useAuth();
-  return (
-    <ModalPortal><div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.84)', backdropFilter:'blur(10px)', zIndex:10002, display:'flex', alignItems:'center', justifyContent:'center', padding:16, animation:'overlayFade 0.25s ease-out' }}>
-      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(150deg,#0c2415,#07160e)', border:'1px solid rgba(200,167,39,0.4)', borderRadius:24, maxWidth:400, width:'100%', padding:'32px 26px 24px', textAlign:'center', boxShadow:'0 0 90px rgba(200,167,39,0.14), 0 40px 70px rgba(0,0,0,0.65)', animation:'proPop 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
-
-        <div style={{ width:58, height:58, borderRadius:'50%', margin:'0 auto 16px', background:'rgba(200,167,39,0.12)', border:'1.5px solid rgba(200,167,39,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>✦</div>
-
-        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:21, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.25 }}>
-          Tes 3 jours commencent
-        </h2>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 20px' }}>
-          Accès complet, sans carte bancaire.<br />Tout le site est ouvert jusqu'au {hmTrialEndDate()}.
-        </p>
-
-        <ul style={{ listStyle:'none', padding:0, margin:'0 0 20px', textAlign:'left' }}>
-          {[
-            ['∞', 'Quiz et Blind Test sans limite'],
-            ['📖', "Les 38 sourates de Comprendre"],
-            ['🔥', 'Les niveaux Amateur et Avancé'],
-          ].map(function (it) {
-            return (
-              <li key={it[1]} style={{ display:'flex', alignItems:'center', gap:11, marginBottom:11 }}>
-                <span style={{ width:30, height:30, flexShrink:0, borderRadius:9, background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>{it[0]}</span>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.8)' }}>{it[1]}</span>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
-            aux trois jours, et ça évite que le jour 4 passe pour une panne. */}
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
-          Après ces 3 jours, tu gardes une partie par jour et une sourate par semaine.
-        </p>
-
-        <button onClick={onClose} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
-          Commencer
-        </button>
-        <button onClick={function(){ onClose(); openQuickCheckout(); }} style={{ background:'none', border:'none', color:'rgba(240,237,230,0.35)', fontSize:12.5, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-          Passer directement à Pro — {PRO_ANNUAL}/an
-        </button>
-      </div>
-    </div></ModalPortal>
-  );
-}
+/* ─── Bienvenue : l'essai s'annonce ───
+
+   Sans cet écran, l'essai était muet : l'utilisateur recevait trois jours
+   d'accès complet sans le savoir, et les perdait sans avoir su qu'il les avait.
+   Toute la mécanique repose sur la perte ressentie — un cadeau ignoré ne se
+   perd pas, il ne fait que rendre le site plus restrictif sans raison
+   apparente. C'était pire que pas d'essai du tout.
+
+   On nomme donc ce qui est ouvert, et surtout on dit d'avance ce qui se
+   referme. Annoncer la fin dès le début n'est pas un aveu : c'est ce qui donne
+   sa valeur aux trois jours. */
+function TrialWelcomeModal({ onClose, navigate }) {
+  const { openQuickCheckout } = useAuth();
+  React.useEffect(function () { hmLockScroll(); return hmUnlockScroll; }, []);
+  return (
+    <ModalPortal><div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.84)', backdropFilter:'blur(10px)', zIndex:10002, display:'flex', alignItems:'center', justifyContent:'center', padding:16, animation:'overlayFade 0.25s ease-out' }}>
+      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(150deg,#0c2415,#07160e)', border:'1px solid rgba(200,167,39,0.4)', borderRadius:24, maxWidth:400, width:'100%', padding:'32px 26px 24px', textAlign:'center', boxShadow:'0 0 90px rgba(200,167,39,0.14), 0 40px 70px rgba(0,0,0,0.65)', animation:'proPop 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
+
+        <div style={{ width:58, height:58, borderRadius:'50%', margin:'0 auto 16px', background:'rgba(200,167,39,0.12)', border:'1.5px solid rgba(200,167,39,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>✦</div>
+
+        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:21, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.25 }}>
+          Tes 3 jours commencent
+        </h2>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 20px' }}>
+          Accès complet, sans carte bancaire.<br />Tout le site est ouvert jusqu'au {hmTrialEndDate()}.
+        </p>
+
+        <ul style={{ listStyle:'none', padding:0, margin:'0 0 20px', textAlign:'left' }}>
+          {[
+            ['∞', 'Quiz et Blind Test sans limite'],
+            ['📖', "Les 38 sourates de Comprendre"],
+            ['🔥', 'Les niveaux Amateur et Avancé'],
+          ].map(function (it) {
+            return (
+              <li key={it[1]} style={{ display:'flex', alignItems:'center', gap:11, marginBottom:11 }}>
+                <span style={{ width:30, height:30, flexShrink:0, borderRadius:9, background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>{it[0]}</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.8)' }}>{it[1]}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
+            aux trois jours, et ça évite que le jour 4 passe pour une panne. */}
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
+          Après ces 3 jours, tu gardes une partie par jour et une sourate par semaine.
+        </p>
+
+        <button onClick={onClose} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
+          Commencer
+        </button>
+        <button onClick={function(){ onClose(); openQuickCheckout(); }} style={{ background:'none', border:'none', color:'rgba(240,237,230,0.35)', fontSize:12.5, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+          Passer directement à Pro — {PRO_ANNUAL}/an
+        </button>
+      </div>
+    </div></ModalPortal>
+  );
+}
 
 /* `reason` dit CE QUI vient de bloquer. Une modale qui parle du mur qu'on vient
    de heurter convertit mieux qu'un argumentaire général : l'utilisateur sait
@@ -497,21 +520,9 @@ function ProGateModal({ onClose, navigate, reason }) {
   const delay = effective === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
   const overlayRef = React.useRef(null);
   React.useEffect(function () {
-    const scrollY = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = '-' + scrollY + 'px';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
+    hmLockScroll();
     if (overlayRef.current) overlayRef.current.scrollTop = 0;
-    return function () {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
+    return hmUnlockScroll;
   }, []);
   return (
     <ModalPortal><div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', animation:'overlayFade 0.25s ease-out' }}>
@@ -7430,7 +7441,8 @@ function StickyUpgradeBanner({ navigate }) {
       borderRadius: '18px 18px 0 0',
       padding: '13px 16px calc(13px + env(safe-area-inset-bottom, 0px))',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-      boxShadow: '0 -10px 48px rgba(0,0,0,0.7)'
+      boxShadow: '0 -10px 48px rgba(0,0,0,0.7)',
+      maxWidth: '100vw', boxSizing: 'border-box', overflow: 'hidden'
     }}>
       {/* liseré doré lumineux en haut */}
       <div style={{ position:'absolute', top:-1, left:'10%', right:'10%', height:2, background:'linear-gradient(90deg,transparent,#e6c84a,transparent)', borderRadius:2 }} />
@@ -7444,9 +7456,9 @@ function StickyUpgradeBanner({ navigate }) {
                   : <>Essai — <span style={{ color:'#f5d76e' }}>{trialLeft} jours restants</span></>)
               : <>Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span></>}
           </div>
-          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6 }}>
+          <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6, overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>
             {urgent
-              ? <span style={{ color:'rgba(255,255,255,0.72)' }}>Demain : 1 partie par jour</span>
+              ? <span style={{ color:'rgba(255,255,255,0.72)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>Demain : 1 partie par jour</span>
               : <>
                   <span><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>{PRO_ANNUAL}</span> /an</span>
                   <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{trialing ? 'pour garder' : PRO_DISCOUNT}</span>
