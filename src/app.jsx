@@ -139,6 +139,122 @@ function ArabesqueDivider({ color = 'rgba(200,167,39,0.25)' }) {
 const AuthContext = React.createContext(null);
 function useAuth() { return React.useContext(AuthContext); }
 
+/* ═══ Accès : ce qui est offert, à qui, et jusqu'à quand ═══
+
+   L'ancien modèle donnait UN TIERS du contenu SANS LIMITE : 285 questions de
+   niveau Débutant, le Blind Test Débutant illimité, 5 sourates sur 38. Six mois
+   d'usage avant de rencontrer le moindre mur — donc, pour l'immense majorité,
+   jamais. 225 inscrits et zéro achat : les gens n'étaient pas bloqués, donc ils
+   ne payaient pas.
+
+   Le nouveau modèle inverse exactement ça : TOUT le contenu, mais une fois par
+   jour. Le visiteur goûte le niveau Avancé et les 114 sourates au lieu d'ignorer
+   qu'ils existent, et il rencontre la limite dès le premier jour. Il sait ce
+   qu'il achète, et il le sait tout de suite.
+
+   Trois règles, et c'est tout :
+   1. Quiz et Blind Test : tous les niveaux, une partie par jour.
+   2. Comprendre : les 5 sourates gratuites sans limite, plus une sourate Pro
+      qui change chaque semaine. On n'« absorbe » pas une sourate en une séance
+      — le rythme hebdomadaire colle à l'activité, et il crée un rendez-vous.
+   3. La progression, les statistiques et la série sont gratuites pour tous.
+      Les cacher derrière le Pro supprimait le mécanisme même qui donne envie de
+      payer : on ne s'attache pas à ce qu'on ne voit pas grandir.
+
+   Tout est vérifié côté client, comme l'était déjà l'ancien verrouillage. Ce
+   n'est pas un coffre-fort, c'est une règle du jeu — quelqu'un qui la contourne
+   n'aurait pas payé de toute façon. */
+
+/* Comptes créés avant cette date : ils gardent leur Débutant illimité. Ils sont
+   225, c'est toute la communauté, et leur retirer ce qu'ils avaient serait payer
+   la refonte avec la seule chose qui a de la valeur aujourd'hui. Ils gagnent en
+   plus l'accès quotidien aux niveaux supérieurs. */
+const HM_CUTOVER = Date.UTC(2026, 8, 6);
+const HM_TRIAL_DAYS = 3;
+const HM_QUOTA_KEY = 'hm_quota_v1';
+const HM_TRIAL_KEY = 'hm_trial_v1';
+
+function hmToday() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function hmRead(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch (e) { return fallback; }
+}
+function hmWrite(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+}
+
+/* ── Quota quotidien (Quiz, Blind Test) ── */
+function hmQuotaState() {
+  const s = hmRead(HM_QUOTA_KEY, null);
+  if (!s || s.day !== hmToday()) return { day: hmToday(), used: {} };
+  return s;
+}
+function hmQuotaUsed(kind) {
+  return (hmQuotaState().used || {})[kind] || 0;
+}
+function hmQuotaTake(kind) {
+  const s = hmQuotaState();
+  s.used = s.used || {};
+  s.used[kind] = (s.used[kind] || 0) + 1;
+  hmWrite(HM_QUOTA_KEY, s);
+  window.dispatchEvent(new CustomEvent('heritage:quota'));
+}
+/* Heure à laquelle la limite se lève — « demain » est vague, un horaire ne l'est
+   pas, et savoir quand on récupère quelque chose fait revenir. */
+function hmQuotaResetIn() {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+  const mins = Math.max(1, Math.round((midnight - now) / 60000));
+  if (mins < 60) return mins + ' min';
+  const h = Math.floor(mins / 60);
+  return h + ' h' + (mins % 60 ? ' ' + (mins % 60) + ' min' : '');
+}
+
+/* ── Essai de 3 jours, offert à la création du compte ──
+   Sans carte et sans Stripe : le but n'est pas d'encaisser, c'est que la
+   personne vive l'accès complet puis le perde. Ce qu'on a eu puis perdu pèse
+   bien plus lourd que ce qu'on nous promet. */
+function hmTrialStart(uid) {
+  if (!uid) return;
+  const t = hmRead(HM_TRIAL_KEY, {});
+  if (t[uid]) return;
+  t[uid] = Date.now();
+  hmWrite(HM_TRIAL_KEY, t);
+}
+function hmTrialLeft(uid) {
+  if (!uid) return 0;
+  const started = hmRead(HM_TRIAL_KEY, {})[uid];
+  if (!started) return 0;
+  const left = HM_TRIAL_DAYS * 86400000 - (Date.now() - started);
+  return left > 0 ? Math.ceil(left / 86400000) : 0;
+}
+
+/* ── Régime hérité ── */
+function hmIsLegacy(user) {
+  if (!user || !user.metadata || !user.metadata.creationTime) return false;
+  const created = Date.parse(user.metadata.creationTime);
+  return !isNaN(created) && created < HM_CUTOVER;
+}
+
+/* ── Sourate Pro de la semaine (Comprendre) ──
+   Déterministe : tout le monde a la même, et elle change le lundi. Un tirage
+   aléatoire par visiteur aurait rendu la chose impossible à annoncer. */
+function hmWeekIndex() {
+  return Math.floor((Date.now() - Date.UTC(2026, 0, 5)) / (7 * 86400000));
+}
+function hmWeeklyPick(lockedIds) {
+  if (!lockedIds || !lockedIds.length) return null;
+  return lockedIds[((hmWeekIndex() % lockedIds.length) + lockedIds.length) % lockedIds.length];
+}
+function hmWeeklyResetIn() {
+  const ms = (hmWeekIndex() + 1) * 7 * 86400000 + Date.UTC(2026, 0, 5) - Date.now();
+  const days = Math.ceil(ms / 86400000);
+  return days <= 1 ? 'demain' : 'dans ' + days + ' jours';
+}
+
 /* ── Countdown 48h — expire depuis la première visite ── */
 function useLaunchCountdown() {
   function getDeadline() {
@@ -8332,6 +8448,10 @@ function App() {
   const [navKey, setNavKey] = React.useState(0);
   const [user, setUser] = React.useState(undefined);
   const [isPro, setIsPro] = React.useState(false);
+  /* Jours d'essai restants. Compté séparément de `isPro` pour que l'interface
+     puisse dire « il te reste 2 jours » — un accès qui s'épuise sans le montrer
+     ne pousse personne à s'abonner. */
+  const [trialLeft, setTrialLeft] = React.useState(0);
   const [showAuth, setShowAuth] = React.useState(false);
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
   // Méthode de paiement demandée par un visiteur non connecté : compte requis
@@ -8480,9 +8600,29 @@ function App() {
     return unsub;
   }, [user]);
 
+  /* Essai de 3 jours, ouvert dès qu'un compte existe. Recompté chaque minute :
+     sinon un onglet resté ouvert affiche encore « 1 jour » longtemps après la
+     fin, et la relance tombe à côté. */
+  React.useEffect(function () {
+    if (!user) { setTrialLeft(0); return; }
+    hmTrialStart(user.uid);
+    var tick = function () { setTrialLeft(hmTrialLeft(user.uid)); };
+    tick();
+    var id = setInterval(tick, 60000);
+    return function () { clearInterval(id); };
+  }, [user]);
+
+  /* `isPro` vu par toute l'interface = abonné OU en essai. Un seul drapeau à
+     tester partout, donc aucun endroit ne peut oublier l'essai. `paidPro` reste
+     disponible pour ce qui doit distinguer les deux. */
+  const trialing = !isPro && trialLeft > 0;
   const authCtx = {
     user,
-    isPro,
+    isPro: isPro || trialing,
+    paidPro: isPro,
+    trialing,
+    trialLeft,
+    legacy: hmIsLegacy(user),
     logout: () => window._auth && window._auth.signOut(),
     openAuth: () => setShowAuth(true),
     checkoutIntent: !!pendingCheckout,
