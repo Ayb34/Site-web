@@ -1350,10 +1350,14 @@ const HERO_BT = {
   correct: 1,
 };
 
+/* `ink` = la couleur du texte du bouton. Un fond clair impose un texte sombre
+   (le blanc sur ce vert plafonne a 2:1, illisible au soleil), mais le noir pur
+   avait l'air d'un texte par defaut pose la par erreur. Chaque encre est donc
+   la teinte tres foncee de sa propre couleur : ca se lit comme un choix. */
 const HERO_TABS = [
-  { id: 'comprendre', label: 'Comprendre', tag: 'Le Coran mot à mot', color: '#e6c84a', rgb: '230,200,74', cta: 'Comprendre le Coran' },
-  { id: 'blind-test', label: 'Blind Test', tag: 'Reconnais la sourate', color: '#4ade80', rgb: '74,222,128', cta: 'Lancer un Blind Test' },
-  { id: 'quiz',       label: 'Quiz',       tag: '740 questions',       color: '#60a5fa', rgb: '96,165,250', cta: 'Commencer le Quiz' },
+  { id: 'comprendre', label: 'Comprendre', tag: 'Le Coran mot à mot', color: '#e6c84a', rgb: '230,200,74', ink: '#3d2c00', cta: 'Comprendre le Coran' },
+  { id: 'blind-test', label: 'Blind Test', tag: 'Reconnais la sourate', color: '#4ade80', rgb: '74,222,128', ink: '#04301c', cta: 'Lancer un Blind Test' },
+  { id: 'quiz',       label: 'Quiz',       tag: '740 questions',       color: '#60a5fa', rgb: '96,165,250', ink: '#082647', cta: 'Commencer le Quiz' },
 ];
 
 function HeroIcon({ id, color }) {
@@ -1519,7 +1523,15 @@ function Hero({ navigate }) {
 
   return (
     <section className="hero-section">
-      <div className="hero-glow" style={{ background: 'radial-gradient(circle, rgba(' + active.rgb + ',0.13) 0%, rgba(26,92,53,0.10) 40%, transparent 68%)' }} aria-hidden="true" />
+      {/* Un halo par activite, empiles, et seule l'opacite change : le fondu
+          se fait sur le compositeur. Transitionner `background` faisait
+          repeindre 880 px de degrade pendant 600 ms a chaque rotation — c'est
+          ce qui rendait le hero saccade sur mobile. */}
+      {HERO_TABS.map(function (t, i) {
+        return <div key={t.id} className={'hero-glow' + (i === tab ? ' on' : '')}
+          style={{ background: 'radial-gradient(circle, rgba(' + t.rgb + ',0.13) 0%, rgba(26,92,53,0.10) 40%, transparent 68%)' }}
+          aria-hidden="true" />;
+      })}
 
       <div className="hero-inner">
         <p className="hero-kicker"><span className="hk-rule" />Apprendre l'islam autrement<span className="hk-rule" /></p>
@@ -1563,6 +1575,7 @@ function Hero({ navigate }) {
           style={{
             background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)',
             boxShadow: '0 10px 34px rgba(' + active.rgb + ',0.34), 0 2px 0 rgba(255,255,255,0.25) inset',
+            color: active.ink,
           }}>
           <span className="cta-txt">{active.cta}</span>
           <span className="cta-arrow" aria-hidden="true">→</span>
@@ -8403,6 +8416,11 @@ function App() {
         <Hero navigate={navigate} />
         {/* Tout ce qui suit le hero attend le premier scroll : le hero remplit
            l'ecran, et rien ne doit depasser dessous pour le contredire. */}
+        {/* Le reveal n'enveloppe que le hadith et la premiere section. Il
+            portait toute la page (18 000 px) : animer opacite + translation
+            la-dessus forcait un calque geant, et c'est le scroll entier qui
+            saccadait. Le reste suit normalement — il est de toute facon deux
+            ecrans plus bas. */}
         <Reveal>
           <span className="hero-next-sep" aria-hidden="true" />
           {/* Le hadith ouvre desormais ce qui se devoile, au lieu d'alourdir le
@@ -8418,17 +8436,17 @@ function App() {
             <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
           </figure>
           <ComprendreSection navigate={navigate} />
-          <FeatureCards navigate={navigate} />
-          <LearnPlaySection navigate={navigate} />
-          <Testimonials />
-          <StatsBar />
-          <HowItWorksSection />
-          <ParcoursSection />
-          <ImportanceSection />
-          <ComparisonTable navigate={navigate} />
-          <FaqSection />
-          <SoftPaywall navigate={navigate} />
         </Reveal>
+        <FeatureCards navigate={navigate} />
+        <LearnPlaySection navigate={navigate} />
+        <Testimonials />
+        <StatsBar />
+        <HowItWorksSection />
+        <ParcoursSection />
+        <ImportanceSection />
+        <ComparisonTable navigate={navigate} />
+        <FaqSection />
+        <SoftPaywall navigate={navigate} />
       </main>
       <Footer navigate={navigate} />
       <StickyUpgradeBanner navigate={navigate} />
