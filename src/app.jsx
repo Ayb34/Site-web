@@ -1503,23 +1503,41 @@ function Reveal({ children }) {
 function Hero({ navigate }) {
   const { isPro } = useAuth();
   const [tab, setTab] = React.useState(0);
-  const autoRef = React.useRef(true);
+  const stopRef = React.useRef(null);
 
-  /* Rotation automatique : beaucoup de visiteurs ne touchent rien, et le hero
-     doit leur montrer les trois activités quand même. Le premier geste coupe
-     définitivement la rotation — rien de plus agaçant qu'un carrousel qui
-     reprend la main pendant qu'on lit. */
+  /* Rotation automatique, mais UN SEUL TOUR.
+     Beaucoup de visiteurs ne touchent rien : le hero doit leur montrer les trois
+     activités quand même. Passé ce tour, il se fige sur Comprendre.
+
+     Une rotation sans fin faisait changer le libellé du bouton sous le pouce :
+     quelqu'un qui lisait « Comprendre le Coran » et levait le doigt pour appuyer
+     pouvait atterrir sur « Lancer un Blind Test ». C'est le clic qui paie ce
+     site — il ne doit jamais bouger au moment où on le vise.
+
+     D'où le second garde-fou : le moindre signe de vie (doigt posé, molette,
+     touche, défilement) arrête la rotation sur-le-champ. `pointerdown` se
+     déclenche avant le `click`, donc un doigt qui descend fige l'affichage
+     avant même que le clic ne parte. */
   React.useEffect(function () {
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return;
+    const events = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'];
+    let steps = 0;
     const id = setInterval(function () {
-      if (!autoRef.current) { clearInterval(id); return; }
+      steps += 1;
       setTab(function (t) { return (t + 1) % HERO_TABS.length; });
+      if (steps >= HERO_TABS.length) stop();
     }, 4600);
-    return function () { clearInterval(id); };
+    function stop() {
+      clearInterval(id);
+      events.forEach(function (e) { window.removeEventListener(e, stop); });
+    }
+    events.forEach(function (e) { window.addEventListener(e, stop, { passive: true }); });
+    stopRef.current = stop;
+    return stop;
   }, []);
 
-  const take = function (i) { autoRef.current = false; setTab(i); };
+  const take = function (i) { if (stopRef.current) stopRef.current(); setTab(i); };
   const active = HERO_TABS[tab];
 
   return (
