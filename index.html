@@ -478,6 +478,7 @@
   .peek-word {
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     min-width: 68px; padding: 8px 9px; border-radius: 12px;
+    font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
     background: rgba(255,255,255,0.03); border: 1px solid rgba(230,200,74,0.18);
     transition: background .4s, border-color .4s, transform .4s cubic-bezier(.34,1.56,.64,1);
   }
@@ -502,7 +503,7 @@
   }
 
   /* Blind Test */
-  .bt-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 30px; margin-bottom: 11px; }
+  .bt-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 30px; }
   .bt-wave i {
     width: 3.5px; border-radius: 2px; background: #4ade80;
     animation: eqBar 1s ease-in-out infinite; opacity: .85;
@@ -513,15 +514,47 @@
   .peek-opt {
     display: flex; align-items: center; justify-content: center; gap: 5px;
     padding: 11px 6px; border-radius: 12px;
+    font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
     font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700;
     color: rgba(255,255,255,0.74);
     transition: background .4s, border-color .4s, color .4s;
   }
+  .peek-opt:disabled { cursor: default; }
   .peek-opt.good {
     background: rgba(74,222,128,0.16); border-color: rgba(74,222,128,0.6); color: #eafff1;
+    animation: optPop .32s cubic-bezier(.34,1.56,.64,1);
   }
+  .peek-opt.bad {
+    background: rgba(248,113,113,0.14); border-color: rgba(248,113,113,0.5); color: #ffe9e9;
+  }
+  @keyframes optPop { from { transform: scale(.94); } to { transform: none; } }
   .peek-opt b { color: #4ade80; font-size: 13px; }
+  .peek-opt b.ko { color: #f87171; }
+
+  /* Retour apres reponse. Le vert felicite, le rouge n'accuse pas : il redonne
+     la bonne reponse et rouvre sur ce qui reste a jouer. */
+  .peek-win { color: #86efac; font-style: normal; font-weight: 700; }
+  .peek-lose { color: #fca5a5; font-style: normal; font-weight: 700; }
+
+  /* Bouton d'ecoute du Blind Test : sans son, on demandait de reconnaitre une
+     recitation qu'on n'entendait pas. L'onde reste, elle devient la surface
+     tactile. */
+  .bt-play {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    width: 100%; margin: 0 0 10px; padding: 4px 0;
+    background: none; border: none; font: inherit; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-play-txt {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 800;
+    letter-spacing: 0.08em; color: rgba(74,222,128,0.9);
+  }
+  .bt-play:focus-visible { outline: 2px solid #4ade80; outline-offset: 3px; border-radius: 10px; }
+  /* Au repos l'onde est figee : une onde qui s'agite sans qu'aucun son ne sorte
+     ment sur ce qui se passe. Elle ne bouge que pendant l'ecoute. */
+  .bt-wave i { animation-play-state: paused; }
+  .bt-play.on .bt-wave i { animation-play-state: running; }
   .peek-quiz .peek-foot { margin-top: 11px; }
   /* Le compteur « 740 questions » argumente ; le pourcentage de Comprendre,
      lui, EST la demonstration (il monte a mesure que les mots s'allument). Seul
@@ -679,7 +712,9 @@
     .pw-ar { font-size: 20px; }
     .pw-fr { font-size: 9px; }
     .peek-opt { padding: 8px 5px; font-size: 12.5px; }
-    .bt-wave { height: 23px; margin-bottom: 8px; }
+    .bt-wave { height: 23px; }
+    .bt-play { margin-bottom: 7px; }
+    .bt-play-txt { font-size: 11px; }
     .peek-foot { font-size: 11px; }
     .peek-foot strong { font-size: 16px; }
     .hero-cta { padding: 14px 22px; font-size: 15.5px; }

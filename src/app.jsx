@@ -1378,31 +1378,66 @@ function HeroIcon({ id, color }) {
   </svg>;
 }
 
-/* ── Aperçu 1 : Comprendre ──
-   Les pourcentages sont les occurrences réelles des mots dans les 77 878 mots
-   du Coran (اللَّهِ revient 2 265 fois) : c'est l'argument du site, démontré
-   plutôt qu'annoncé. */
+/* ── Les trois aperçus, jouables ──
+
+   Ils se regardaient : les mots s'allumaient seuls, la bonne réponse
+   s'illuminait au bout de 1,7 s. Le visiteur restait spectateur jusqu'au clic,
+   et le clic est justement ce qu'on lui demande de risquer en premier.
+
+   Ils se touchent maintenant. Répondre juste dans le hero, avant même d'avoir
+   cliqué sur quoi que ce soit, c'est le premier engagement — et un visiteur qui
+   a déjà agi une fois clique bien plus volontiers la seconde.
+
+   L'animation automatique reste, mais uniquement pour Comprendre et seulement
+   tant que personne n'a touché : elle montre le principe à qui ne fait rien.
+   Les deux autres n'ont plus de révélation automatique — dévoiler la réponse
+   tout seul, c'est retirer le jeu à celui qui allait jouer. */
+
 function HeroPeekComprendre({ live }) {
-  const [n, setN] = React.useState(0);
+  const [open, setOpen] = React.useState({});
+  const touchedRef = React.useRef(false);
+
   React.useEffect(function () {
-    if (!live) { setN(0); return; }
-    setN(0);
+    if (!live) { setOpen({}); touchedRef.current = false; return; }
+    setOpen({});
+    touchedRef.current = false;
+    /* Démonstration automatique après 2,2 s d'inaction seulement : celui qui
+       touche garde la main, celui qui regarde voit quand même le principe. */
+    let i = 0;
     const id = setInterval(function () {
-      setN(function (v) { return v >= HERO_VERSE.length ? v : v + 1; });
+      if (touchedRef.current || i >= HERO_VERSE.length) { clearInterval(id); return; }
+      const k = i;
+      setOpen(function (o) { const c = Object.assign({}, o); c[k] = 1; return c; });
+      i += 1;
     }, 620);
     return function () { clearInterval(id); };
   }, [live]);
-  const pct = HERO_VERSE.slice(0, n).reduce(function (s, w) { return s + w.n; }, 0) / HERO_TOTAL_WORDS * 100;
+
+  const reveal = function (i) {
+    touchedRef.current = true;
+    setOpen(function (o) { const c = Object.assign({}, o); c[i] = 1; return c; });
+  };
+
+  const done = HERO_VERSE.filter(function (w, i) { return open[i]; });
+  const pct = done.reduce(function (s, w) { return s + w.n; }, 0) / HERO_TOTAL_WORDS * 100;
+  const all = done.length === HERO_VERSE.length;
+
   return (
     <div className="peek peek-cmp">
-      <p className="peek-q">Tu les récites chaque jour. Les comprends-tu&nbsp;?</p>
+      <p className="peek-q">
+        {all ? <span className="peek-win">Ces 4 mots reviennent 2 683 fois dans le Coran.</span>
+             : 'Touche un mot pour le comprendre.'}
+      </p>
       <div className="peek-words" dir="rtl">
         {HERO_VERSE.map(function (w, i) {
+          const on = !!open[i];
           return (
-            <span key={i} className={'peek-word' + (i < n ? ' on' : '')}>
+            <button key={i} type="button" className={'peek-word' + (on ? ' on' : '')}
+              aria-label={w.ar + ' — ' + (on ? w.fr : 'toucher pour traduire')}
+              onClick={function () { reveal(i); }}>
               <span className="pw-ar">{w.ar}</span>
               <span className="pw-fr">{w.fr}</span>
-            </span>
+            </button>
           );
         })}
       </div>
@@ -1414,27 +1449,78 @@ function HeroPeekComprendre({ live }) {
   );
 }
 
-/* ── Aperçu 2 : Blind Test ── */
+/* ── Aperçu 2 : Blind Test ──
+   Sans son, on demandait de reconnaître une récitation qu'on n'entendait pas.
+   Le vrai extrait se charge au premier toucher — jamais avant, pour ne rien
+   coûter à qui ne joue pas, et parce qu'un navigateur mobile refuse de toute
+   façon de démarrer un son sans geste. Ar-Rahmân v13, le refrain le plus
+   reconnaissable du Coran : le but est qu'il trouve, pas qu'il échoue. */
+const HERO_BT_AUDIO = 'https://everyayah.com/data/Alafasy_128kbps/055013.mp3';
+
 function HeroPeekBlindTest({ live }) {
-  const [reveal, setReveal] = React.useState(false);
+  const [pick, setPick] = React.useState(-1);
+  const [playing, setPlaying] = React.useState(false);
+  const audioRef = React.useRef(null);
+
+  const stop = React.useCallback(function () {
+    const a = audioRef.current;
+    if (a) { a.pause(); a.currentTime = 0; }
+    setPlaying(false);
+  }, []);
+
   React.useEffect(function () {
-    if (!live) { setReveal(false); return; }
-    setReveal(false);
-    const t = setTimeout(function () { setReveal(true); }, 1700);
-    return function () { clearTimeout(t); };
-  }, [live]);
+    if (!live) { setPick(-1); stop(); }
+    return stop;
+  }, [live, stop]);
+
+  const play = function () {
+    let a = audioRef.current;
+    if (!a) {
+      a = new Audio(HERO_BT_AUDIO);
+      a.preload = 'none';
+      a.addEventListener('ended', function () { setPlaying(false); });
+      a.addEventListener('error', function () { setPlaying(false); });
+      audioRef.current = a;
+    }
+    if (playing) { stop(); return; }
+    a.currentTime = 0;
+    const p = a.play();
+    if (p && p.then) p.then(function () { setPlaying(true); }).catch(function () { setPlaying(false); });
+    else setPlaying(true);
+  };
+
+  const answered = pick >= 0;
+  const won = pick === HERO_BT.correct;
+
   return (
     <div className="peek peek-bt">
-      <div className="bt-wave" aria-hidden="true">
-        {[0,1,2,3,4,5,6,7,8,9,10,11].map(function (i) {
-          return <i key={i} style={{ animationDelay: (i * 0.08) + 's', height: (8 + ((i * 7) % 17)) + 'px' }} />;
-        })}
-      </div>
-      <p className="peek-q">Quelle sourate écoutes-tu&nbsp;?</p>
+      <button type="button" className={'bt-play' + (playing ? ' on' : '')} onClick={play}
+        aria-label={playing ? 'Arrêter la récitation' : 'Écouter la récitation'}>
+        <span className="bt-wave" aria-hidden="true">
+          {[0,1,2,3,4,5,6,7,8,9,10,11].map(function (i) {
+            return <i key={i} style={{ animationDelay: (i * 0.08) + 's', height: (8 + ((i * 7) % 17)) + 'px' }} />;
+          })}
+        </span>
+        <span className="bt-play-txt">{playing ? 'En écoute…' : '▶ Écouter'}</span>
+      </button>
+      <p className="peek-q">
+        {answered
+          ? <span className={won ? 'peek-win' : 'peek-lose'}>
+              {won ? 'Bien vu — c’était Ar-Rahmân.' : 'C’était Ar-Rahmân. 113 autres t’attendent.'}
+            </span>
+          : 'Quelle sourate écoutes-tu ?'}
+      </p>
       <div className="peek-grid">
         {HERO_BT.options.map(function (o, i) {
-          const ok = reveal && i === HERO_BT.correct;
-          return <span key={o} className={'peek-opt' + (ok ? ' good' : '')}>{o}{ok ? <b>✓</b> : null}</span>;
+          const good = answered && i === HERO_BT.correct;
+          const bad = answered && i === pick && !won;
+          return (
+            <button key={o} type="button" disabled={answered}
+              className={'peek-opt' + (good ? ' good' : '') + (bad ? ' bad' : '')}
+              onClick={function () { setPick(i); }}>
+              {o}{good ? <b>✓</b> : null}{bad ? <b className="ko">✕</b> : null}
+            </button>
+          );
         })}
       </div>
     </div>
@@ -1443,23 +1529,35 @@ function HeroPeekBlindTest({ live }) {
 
 /* ── Aperçu 3 : Quiz ── */
 function HeroPeekQuiz({ live }) {
-  const [reveal, setReveal] = React.useState(false);
-  React.useEffect(function () {
-    if (!live) { setReveal(false); return; }
-    setReveal(false);
-    const t = setTimeout(function () { setReveal(true); }, 1700);
-    return function () { clearTimeout(t); };
-  }, [live]);
+  const [pick, setPick] = React.useState(-1);
+  React.useEffect(function () { if (!live) setPick(-1); }, [live]);
+
+  const answered = pick >= 0;
+  const won = pick === HERO_QUIZ.correct;
+
   return (
     <div className="peek peek-quiz">
       <p className="peek-q peek-q-lg">{HERO_QUIZ.q}</p>
       <div className="peek-grid">
         {HERO_QUIZ.choices.map(function (c, i) {
-          const ok = reveal && i === HERO_QUIZ.correct;
-          return <span key={c} className={'peek-opt' + (ok ? ' good' : '')}>{c}{ok ? <b>✓</b> : null}</span>;
+          const good = answered && i === HERO_QUIZ.correct;
+          const bad = answered && i === pick && !won;
+          return (
+            <button key={c} type="button" disabled={answered}
+              className={'peek-opt' + (good ? ' good' : '') + (bad ? ' bad' : '')}
+              onClick={function () { setPick(i); }}>
+              {c}{good ? <b>✓</b> : null}{bad ? <b className="ko">✕</b> : null}
+            </button>
+          );
         })}
       </div>
-      <p className="peek-foot"><span>740 questions · 3 niveaux</span></p>
+      <p className="peek-foot">
+        {answered
+          ? <span className={won ? 'peek-win' : 'peek-lose'}>
+              {won ? 'Juste. Il en reste 739.' : '25 prophètes. Il en reste 739 à tenter.'}
+            </span>
+          : <span>740 questions · 3 niveaux</span>}
+      </p>
     </div>
   );
 }
