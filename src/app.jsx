@@ -211,7 +211,7 @@ function useAuth() { return React.useContext(AuthContext); }
    la refonte avec la seule chose qui a de la valeur aujourd'hui. Ils gagnent en
    plus l'accès quotidien aux niveaux supérieurs. */
 const HM_CUTOVER = Date.UTC(2026, 8, 6);
-const HM_TRIAL_DAYS = 3;
+const HM_TRIAL_DAYS = 2;
 const HM_QUOTA_KEY = 'hm_quota_v1';
 const HM_TRIAL_KEY = 'hm_trial_v1';
 
@@ -254,7 +254,7 @@ function hmQuotaResetIn() {
   return h + ' h' + (mins % 60 ? ' ' + (mins % 60) + ' min' : '');
 }
 
-/* ── Essai de 3 jours, offert à la création du compte ──
+/* ── Essai de 2 jours, offert à la création du compte ──
    Sans carte et sans Stripe : le but n'est pas d'encaisser, c'est que la
    personne vive l'accès complet puis le perde. Ce qu'on a eu puis perdu pèse
    bien plus lourd que ce qu'on nous promet. */
@@ -432,7 +432,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
 /* ─── Pro Gate Modal ─── */
 /* ─── Bienvenue : l'essai s'annonce ───
 
-   Sans cet écran, l'essai était muet : l'utilisateur recevait trois jours
+   Sans cet écran, l'essai était muet : l'utilisateur recevait deux jours
    d'accès complet sans le savoir, et les perdait sans avoir su qu'il les avait.
    Toute la mécanique repose sur la perte ressentie — un cadeau ignoré ne se
    perd pas, il ne fait que rendre le site plus restrictif sans raison
@@ -440,7 +440,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
 
    On nomme donc ce qui est ouvert, et surtout on dit d'avance ce qui se
    referme. Annoncer la fin dès le début n'est pas un aveu : c'est ce qui donne
-   sa valeur aux trois jours. */
+   sa valeur aux deux jours. */
 function TrialWelcomeModal({ onClose, navigate }) {
   const { openQuickCheckout } = useAuth();
   React.useEffect(function () { hmLockScroll(); return hmUnlockScroll; }, []);
@@ -451,7 +451,7 @@ function TrialWelcomeModal({ onClose, navigate }) {
         <div style={{ width:58, height:58, borderRadius:'50%', margin:'0 auto 16px', background:'rgba(200,167,39,0.12)', border:'1.5px solid rgba(200,167,39,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>✦</div>
 
         <h2 style={{ fontFamily:'Cinzel,serif', fontSize:21, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.25 }}>
-          Tes 3 jours commencent
+          Tes 2 jours commencent
         </h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 20px' }}>
           Accès complet, sans carte bancaire.<br />Tout le site est ouvert jusqu'au {hmTrialEndDate()}.
@@ -473,9 +473,9 @@ function TrialWelcomeModal({ onClose, navigate }) {
         </ul>
 
         {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
-            aux trois jours, et ça évite que le jour 4 passe pour une panne. */}
+            aux deux jours, et ça évite que le jour 3 passe pour une panne. */}
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
-          Après ces 3 jours, tu gardes une partie par jour et une sourate par semaine.
+          Après ces 2 jours, tu gardes une partie par jour et une sourate par semaine.
         </p>
 
         <button onClick={onClose} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
@@ -510,7 +510,7 @@ const PRO_GATE_COPY = {
   },
   'trial-over': {
     icon: '✦',
-    title: 'Tes 3 jours sont terminés',
+    title: 'Tes 2 jours sont terminés',
     body: function () { return <>Tu as vu tout ce que contient Héritage.<br />Garde-le pour <strong style={{ color: '#c8a727' }}>{PRO_PER_DAY} par jour</strong>.</>; },
   },
 };
@@ -518,7 +518,7 @@ const PRO_GATE_COPY = {
 function ProGateModal({ onClose, navigate, reason }) {
   const { openQuickCheckout, user } = useAuth();
   /* Au premier mur qui suit la fin de l'essai, on explique la perte avant de
-     parler du quota : sans ça, le jour 4 ressemble à un site qui s'est mis à
+     parler du quota : sans ça, le jour 3 ressemble à un site qui s'est mis à
      mal fonctionner. Une seule fois — ensuite les motifs normaux reprennent. */
   const endPending = user && hmTrialEndPending(user.uid);
   const effective = endPending ? 'trial-over' : reason;
@@ -1029,10 +1029,13 @@ function ProfilePage({ navigate }) {
     if (cancelState === 'confirm') {
       setCancelState('loading');
       try {
+        /* Le serveur ne fait plus confiance à l'adresse envoyée : il résilie
+           l'abonnement de l'utilisateur prouvé par ce jeton. */
+        var idToken = await window._auth.currentUser.getIdToken();
         var res = await fetch('/api/cancel-subscription', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: user.email }),
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+          body: JSON.stringify({}),
         });
         var data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -4651,7 +4654,8 @@ function QuizPage({ navigate }) {
                   <button key={lv.id}
                     onClick={function() {
                       if (locked) { setLevelModal(null); setShowProGate(true); return; }
-                      if (!isPro && !freeByLegacy) hmQuotaTake('quiz');
+                      /* Le prélèvement se fait dans QuizCategoryPage, la page
+                         qui joue : sinon un lien direct le contournait. */
                       setLevelModal(null);
                       navigate('quiz-' + levelModal.key + '-' + lv.id);
                     }}
@@ -4765,7 +4769,19 @@ function quizPickQuestions(pool, size, seenKey) {
 }
 
 function QuizCategoryPage({ catKey, level, navigate }) {
-  const { user, openAuth } = useAuth();
+  const { user, openAuth, isPro, legacy } = useAuth();
+  const [quotaGate, setQuotaGate] = React.useState(false);
+  /* La limite quotidienne se prélève ICI, dans la page qui joue réellement.
+     Elle était prélevée dans la modale de choix du niveau : il suffisait donc
+     d'ouvrir #quiz-coran-avance directement, ou de cliquer « Rejouer » en fin
+     de partie, pour jouer sans limite. La limite était en pratique fictive. */
+  const quizFreeByLegacy = legacy && (level || 'debutant') === 'debutant';
+  const quizTake = React.useCallback(function () {
+    if (isPro || quizFreeByLegacy) return true;
+    if (hmQuotaUsed('quiz') >= 1) { setQuotaGate(true); return false; }
+    hmQuotaTake('quiz');
+    return true;
+  }, [isPro, quizFreeByLegacy]);
   const QUIZ_SIZE = 10;
   const LABELS = ['A', 'B', 'C', 'D'];
   const [showGuestGate, setShowGuestGate] = React.useState(false);
@@ -4778,6 +4794,13 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   const storageKey = 'quiz_score_' + catKey + '_' + (level || 'debutant');
   // Questions déjà posées dans cette catégorie/niveau — cf. quizPickQuestions.
   const seenKey    = 'quiz_seen_' + catKey + '_' + (level || 'debutant');
+
+  const started = React.useRef(false);
+  React.useEffect(function () {
+    if (started.current) return;
+    started.current = true;
+    quizTake();
+  }, [quizTake]);
 
   const [cat, setCat]         = React.useState(null);
   const [questions, setQs]    = React.useState([]);
@@ -4829,6 +4852,14 @@ function QuizCategoryPage({ catKey, level, navigate }) {
     }
   };
 
+  /* Quota épuisé : on n'affiche pas la partie du tout. Laisser jouer puis
+     bloquer à la fin serait pire que de bloquer tout de suite. */
+  if (quotaGate) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <ProGateModal reason="quota-quiz" navigate={navigate} onClose={function () { navigate('quiz'); }} />
+    </div>
+  );
+
   if (!cat || questions.length === 0) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)' }}>Chargement…</div>
   );
@@ -4842,6 +4873,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
     const sub   = pct >= 80 ? 'Excellent résultat, tu maîtrises bien ce sujet.' : pct >= 50 ? 'Tu progresses, continue comme ça !' : 'Chaque question te rapproche de la maîtrise.';
     const glowColor = pct >= 80 ? '#4ade80' : pct >= 50 ? '#60a5fa' : '#fb923c';
     const replay = () => {
+      if (!quizTake()) return;
       setCurrent(0); setChosen(null); setAnswered(false); setScore(0); setDone(false);
       const filtered = (cat.questions || []).filter(q => q.level === (level || 'debutant'));
       setQs([...filtered].sort(() => Math.random() - 0.5).slice(0, QUIZ_SIZE));
@@ -8817,7 +8849,7 @@ function App() {
     return unsub;
   }, [user]);
 
-  /* Essai de 3 jours, ouvert dès qu'un compte existe. Recompté chaque minute :
+  /* Essai de 2 jours, ouvert dès qu'un compte existe. Recompté chaque minute :
      sinon un onglet resté ouvert affiche encore « 1 jour » longtemps après la
      fin, et la relance tombe à côté. */
   React.useEffect(function () {

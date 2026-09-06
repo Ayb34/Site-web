@@ -1,4 +1,16 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const admin = require('firebase-admin');
+
+/* L'ancienne version résiliait sur simple envoi d'une adresse e-mail, sans
+   aucune preuve d'identité : n'importe qui connaissant l'adresse d'un abonné
+   pouvait annuler son abonnement. On exige désormais un jeton Firebase signé,
+   et on résilie l'abonnement de l'adresse CONTENUE DANS LE JETON — jamais celle
+   envoyée dans le corps de la requête. */
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
+  });
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -10,8 +22,19 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email requis' });
+    const header = req.headers.authorization || '';
+    const idToken = header.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!idToken) return res.status(401).json({ error: 'Authentification requise' });
+
+    let decoded;
+    try {
+      decoded = await admin.auth().verifyIdToken(idToken);
+    } catch (e) {
+      return res.status(401).json({ error: 'Session expirée, reconnecte-toi' });
+    }
+
+    const email = decoded.email;
+    if (!email) return res.status(400).json({ error: 'Compte sans adresse e-mail' });
 
     // Find customer by email
     const customers = await stripe.customers.list({ email, limit: 1 });
