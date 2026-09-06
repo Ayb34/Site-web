@@ -28,3 +28,9 @@ serviceAccount.json
 contacts.csv
 questions.json.bak
 fix.py
+
+# Exports Firebase Auth : contiennent les empreintes de mots de passe.
+# Ne doivent jamais entrer dans l'historique Git.
+users.json
+users.csv
+brevo-*.csv
