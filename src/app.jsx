@@ -371,8 +371,36 @@ function GuestGateModal({ onClose, context = 'default' }) {
 }
 
 /* ─── Pro Gate Modal ─── */
-function ProGateModal({ onClose, navigate }) {
+/* `reason` dit CE QUI vient de bloquer. Une modale qui parle du mur qu'on vient
+   de heurter convertit mieux qu'un argumentaire général : l'utilisateur sait
+   déjà ce qu'il veut, il faut le lui vendre, pas lui présenter le site. */
+const PRO_GATE_COPY = {
+  'quota-quiz': {
+    icon: '✓',
+    title: 'Ta partie du jour est faite',
+    body: function (t) { return <>Elle revient dans <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Avec Pro, elle ne s'arrête jamais.</>; },
+  },
+  'quota-blindtest': {
+    icon: '✓',
+    title: 'Ta partie du jour est faite',
+    body: function (t) { return <>Elle revient dans <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Avec Pro, tu enchaînes les 114 sourates.</>; },
+  },
+  'weekly': {
+    icon: '✦',
+    title: 'Cette sourate est pour plus tard',
+    body: function (t) { return <>Une nouvelle sourate s'ouvre <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Avec Pro, les 38 sont là maintenant.</>; },
+  },
+  'trial-over': {
+    icon: '✦',
+    title: 'Tes 3 jours sont terminés',
+    body: function () { return <>Tu as vu tout ce que contient Héritage.<br />Garde-le pour <strong style={{ color: '#c8a727' }}>{PRO_PER_DAY} par jour</strong>.</>; },
+  },
+};
+
+function ProGateModal({ onClose, navigate, reason }) {
   const { openQuickCheckout } = useAuth();
+  const copy = PRO_GATE_COPY[reason] || null;
+  const delay = reason === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
   const overlayRef = React.useRef(null);
   React.useEffect(function () {
     const scrollY = window.scrollY;
@@ -399,11 +427,11 @@ function ProGateModal({ onClose, navigate }) {
             le bouton d'achat hors de l'écran. */}
         <div className="pro-modal-scroll" style={{ padding:'26px 24px 16px' }}>
           {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
-          <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>✦</div>
+          <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>{copy ? copy.icon : '✦'}</div>
 
-          <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>Tu es prêt pour la suite</h2>
+          <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>{copy ? copy.title : 'Tu es prêt pour la suite'}</h2>
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 16px' }}>
-            Tu as fait le tour du niveau Débutant.<br/>Passe à <strong style={{color:'#c8a727'}}>Amateur & Avancé</strong> et débloque tout le site.
+            {copy ? copy.body(delay) : <>Tu as fait le tour du contenu du jour.<br/>Avec <strong style={{color:'#c8a727'}}>Pro</strong>, plus aucune limite.</>}
           </p>
 
           {/* Prix remonté au-dessus de l'argumentaire : c'est l'information que
@@ -417,7 +445,7 @@ function ProGateModal({ onClose, navigate }) {
           </div>
 
           <ul style={{ listStyle:'none', padding:0, margin:'0 0 16px', textAlign:'left' }}>
-            {['✓ Blind Test illimité — tous niveaux','✓ Quiz illimité — Amateur & Avancé','✓ Comprendre le Coran — le Juz \'Amma complet'].map(function(item) {
+            {['✓ Quiz et Blind Test sans limite quotidienne','✓ Les 38 sourates de Comprendre, tout de suite','✓ 740 questions · 114 sourates · 3 niveaux'].map(function(item) {
               return <li key={item} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.65)', marginBottom:7 }}>{item}</li>;
             })}
           </ul>
@@ -710,7 +738,7 @@ function SubscriptionPage({ navigate }) {
   const features = [
     { icon: '🕌', title: 'Quiz islamiques', desc: '740 questions — Coran, prophètes, piliers, histoire' },
     { icon: '🎵', title: 'Blind Test Coran', desc: 'Reconnais les sourates à l\'écoute' },
-    { icon: '📅', title: 'Nouveau contenu', desc: 'Ajouts chaque semaine incha\'Allah' },
+    { icon: '📅', title: 'Nouveau contenu', desc: 'Enrichi régulièrement incha\'Allah' },
   ];
   return (
     <div className="fade-up sub-page-wrap" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column',
@@ -2327,19 +2355,27 @@ function HowItWorksSection() {
 function ComparisonTable({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
   const freeItems = [
-  { text: 'Niveau Débutant · parties illimitées', ok: true },
-  { text: 'Blind Test Débutant illimité', ok: true },
-  { text: 'Accès à 1 niveau de quiz', ok: true },
+  { text: 'Tous les niveaux, tous les thèmes', ok: true },
+  { text: 'Une partie de Quiz par jour', ok: true },
+  { text: 'Une partie de Blind Test par jour', ok: true },
+  { text: 'Une sourate Pro offerte chaque semaine', ok: true },
   { text: '🔒 Quiz illimités tous niveaux', ok: false },
   { text: '🔒 Blind test complet (114 sourates)', ok: false },
-  { text: '🔒 Statistiques de progression', ok: false },
-  { text: '🔒 Nouvelles sorties chaque semaine', ok: false }];
+  /* La progression passe au gratuit. La cacher supprimait le mécanisme même
+     qui donne envie de payer : on ne s'attache pas à ce qu'on ne voit pas
+     grandir, et on ne paie pas pour ce à quoi on ne s'est pas attaché. */
+  { text: 'Progression, statistiques et série', ok: true },
+  { text: '🔒 Sans limite quotidienne', ok: false },
+  { text: '🔒 Les 38 sourates de Comprendre', ok: false }];
 
   const proItems = [
   { text: 'Quiz illimités · tous niveaux · toutes catégories', icon: '🧠' },
   { text: 'Blind test Coran complet — 114 sourates', icon: '🎵' },
-  { text: 'Statistiques de progression détaillées', icon: '📈' },
-  { text: 'Nouvelles sorties chaque semaine', icon: '🆕' },
+  { text: 'Aucune limite quotidienne', icon: '∞' },
+  /* « chaque semaine » était faux : 5 ajouts de contenu en 6 mois. Une cadence
+     chiffrée qu'on ne tient pas dans un argumentaire d'abonnement, c'est une
+     promesse vendue et non rendue. */
+  { text: 'Du contenu ajouté régulièrement', icon: '🆕' },
   { text: 'Accès sur mobile & tablette', icon: '📱' },
   { text: 'Soutien à la communauté islamique FR 🤍', icon: '🕌' }];
 
@@ -3153,7 +3189,7 @@ function FaqSection() {
     },
     {
       q: 'Combien ça coûte, et pourquoi pas gratuit à 100% ?',
-      a: 'L\'abonnement est à 29,99€/an — soit 2,50€/mois, ou 0,08€ par jour — sans engagement et résiliable en 1 clic. Une formule mensuelle à 7,99€/mois existe aussi, mais elle revient à 95,88€ sur l\'année : l\'annuel te fait économiser 65,89€. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu chaque semaine et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par mois — pour que l\'apprentissage islamique reste à la portée de tous.'
+      a: 'L\'abonnement est à 29,99€/an — soit 2,50€/mois, ou 0,08€ par jour — sans engagement et résiliable en 1 clic. Une formule mensuelle à 7,99€/mois existe aussi, mais elle revient à 95,88€ sur l\'année : l\'annuel te fait économiser 65,89€. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu régulièrement et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par mois — pour que l\'apprentissage islamique reste à la portée de tous.'
     },
   ];
 
@@ -3625,7 +3661,7 @@ function StartPage({ navigate }) {
           )}
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(155px,1fr))', gap:14, maxWidth:720, margin:'0 auto 52px' }}>
-            {[['🎵','Blind Test illimité'],['🧠','Quiz tous niveaux'],['📖','Juz \'Amma complet mot à mot'],['📱','Mobile & tablette'],['🆕','Nouveautés chaque semaine'],['🕌','Soutien communauté FR']].map(function(item,i) {
+            {[['🎵','Blind Test illimité'],['🧠','Quiz tous niveaux'],['📖','Juz \'Amma complet mot à mot'],['📱','Mobile & tablette'],['🆕','Nouveautés régulières'],['🕌','Soutien communauté FR']].map(function(item,i) {
               return (
                 <div key={item[1]} className="sp-feat" style={{ background:'rgba(200,167,39,0.05)', border:'1px solid rgba(200,167,39,0.14)', borderRadius:16, padding:'20px 12px', textAlign:'center', animation:'spCardIn 0.6s cubic-bezier(0.16,1,0.3,1) '+(bottomVis ? (0.05+i*0.08)+'s' : '9999s')+' both' }}>
                   <div style={{ fontSize:26, marginBottom:10 }}>{item[0]}</div>
@@ -3844,7 +3880,7 @@ const DIFF_POOLS = {
 };
 
 function BlindTestPage({ navigate }) {
-  const { user, isPro } = useAuth();
+  const { user, isPro, legacy } = useAuth();
   const [state, setState] = React.useState('idle');
   const [difficulty, setDifficulty] = React.useState(null);
   const [question, setQuestion] = React.useState(null);
@@ -3859,6 +3895,12 @@ function BlindTestPage({ navigate }) {
   const [showProGate, setShowProGate] = React.useState(false);
   const [showGuestGate, setShowGuestGate] = React.useState(false);
   const audioRef = React.useRef(null);
+
+  /* Une partie par jour pour qui ne paie pas — mais sur les 114 sourates et les
+     trois niveaux. Les comptes d'avant la refonte gardent leur Débutant
+     illimité : c'est ce qu'ils avaient, on ne le leur reprend pas. */
+  const btLegacyFree = legacy && difficulty === 'debutant';
+  const btQuotaSpent = !isPro && !btLegacyFree && hmQuotaUsed('blindtest') >= 1;
 
   const SESSION_SIZE = 10;
   const NEXT_DIFF = { debutant: 'amateur', amateur: 'avance', avance: null };
@@ -3969,6 +4011,8 @@ function BlindTestPage({ navigate }) {
   }
 
   function continueLevel() {
+    if (btQuotaSpent) { setShowProGate(true); return; }
+    if (!isPro && !btLegacyFree) hmQuotaTake('blindtest');
     setSessionCount(0);setSessionOk(0);
     setState('loading');
     launch();
@@ -3976,6 +4020,10 @@ function BlindTestPage({ navigate }) {
 
   function goNextLevel() {
     const next = NEXT_DIFF[difficulty];
+    /* Le niveau suivant n'est jamais du Débutant : le régime hérité ne
+       s'applique pas, la partie est décomptée. */
+    if (!isPro && hmQuotaUsed('blindtest') >= 1) { setShowProGate(true); return; }
+    if (!isPro) hmQuotaTake('blindtest');
     setDifficulty(next);
     setSessionCount(0);setSessionOk(0);
     setState('loading');
@@ -4008,7 +4056,7 @@ function BlindTestPage({ navigate }) {
   return (
     <div className="fade-up" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '90px 20px 80px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
 
-      {showProGate && <ProGateModal onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
+      {showProGate && <ProGateModal reason={btQuotaSpent ? 'quota-blindtest' : null} onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
       {showGuestGate && <GuestGateModal context="blindtest" onClose={function(){ setShowGuestGate(false); launch(); }} />}
 
       {/* ── Bouton Retour ── */}
@@ -4068,7 +4116,10 @@ function BlindTestPage({ navigate }) {
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Choisir ton niveau</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
               {Object.entries(DIFF_LABELS).map(([key, val]) => {
-                const locked = !isPro && key !== 'debutant';
+                /* Plus aucun niveau verrouillé : on montre l'Avancé au lieu de
+                   laisser deviner qu'il existe. C'est la partie du jour qui est
+                   comptée, pas le niveau. */
+                const locked = false;
                 return (
                 <button key={key} onClick={() => { if (locked) { setShowProGate(true); return; } setDifficulty(key); }} style={{
                   width: '100%', padding: '16px 20px', borderRadius: 14,
@@ -4110,7 +4161,7 @@ function BlindTestPage({ navigate }) {
               ))}
             </div>
 
-            <button onClick={() => difficulty && (!isPro && difficulty !== 'debutant' ? setShowProGate(true) : launch())} style={{
+            <button onClick={() => { if (!difficulty) return; if (btQuotaSpent) { setShowProGate(true); return; } if (!isPro && !btLegacyFree) hmQuotaTake('blindtest'); launch(); }} style={{
               width: '100%', padding: '18px', borderRadius: 14, fontSize: 17, fontWeight: 800,
               background: difficulty ? 'linear-gradient(135deg,#a8891f,#c4a83a)' : 'rgba(255,255,255,0.06)',
               border: 'none', color: difficulty ? '#1c1200' : 'rgba(255,255,255,0.25)',
@@ -4301,7 +4352,10 @@ function QuizPage({ navigate }) {
   const [scores, setScores]       = React.useState({});
   const [levelModal, setLevelModal] = React.useState(null);
   const [showProGate, setShowProGate] = React.useState(false);
-  const { user, openAuth, isPro } = useAuth();
+  const { user, openAuth, isPro, legacy } = useAuth();
+  /* Une partie par jour, tous niveaux. Avant, le Débutant était illimité et le
+     reste invisible : personne ne touchait le mur, donc personne ne payait. */
+  const quizQuotaSpent = !isPro && hmQuotaUsed('quiz') >= 1;
 
   React.useEffect(() => {
     fetch('./questions.json').then(r => r.json()).then(raw => {
@@ -4459,7 +4513,7 @@ function QuizPage({ navigate }) {
 
     </div>
       {/* ── Level modal — outside fade-up to avoid transform breaking position:fixed ── */}
-      {showProGate && <ProGateModal onClose={function(){ setShowProGate(false); setLevelModal(null); }} navigate={navigate} />}
+      {showProGate && <ProGateModal reason={quizQuotaSpent ? 'quota-quiz' : null} onClose={function(){ setShowProGate(false); setLevelModal(null); }} navigate={navigate} />}
       {levelModal && cats && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setLevelModal(null)}>
           <div style={{ background: 'linear-gradient(160deg,#0d1f13 0%,#060f08 100%)', border: `1.5px solid ${levelModal.cat.color}44`, borderRadius: 24, padding: '36px 28px', maxWidth: 420, width: '100%' }} onClick={e => e.stopPropagation()}>
@@ -4471,11 +4525,16 @@ function QuizPage({ navigate }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
               {LEVELS.map(lv => {
                 const sc = (scores[levelModal.key] || {})[lv.id];
-                const locked = !isPro && lv.id !== 'debutant';
+                /* Les comptes d'avant la refonte gardent leur Débutant
+                   illimité ; pour tous, les niveaux supérieurs s'ouvrent dans
+                   la limite d'une partie par jour. */
+                const freeByLegacy = legacy && lv.id === 'debutant';
+                const locked = quizQuotaSpent && !freeByLegacy;
                 return (
                   <button key={lv.id}
                     onClick={function() {
                       if (locked) { setLevelModal(null); setShowProGate(true); return; }
+                      if (!isPro && !freeByLegacy) hmQuotaTake('quiz');
                       setLevelModal(null);
                       navigate('quiz-' + levelModal.key + '-' + lv.id);
                     }}
@@ -4485,7 +4544,7 @@ function QuizPage({ navigate }) {
                     <div style={{ width: 40, height: 40, borderRadius: 10, background: `${lv.color}18`, border: `1px solid ${lv.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{locked ? '🔒' : lv.icon}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ color: locked ? 'rgba(255,255,255,0.4)' : lv.color, fontWeight: 800, fontSize: 15, marginBottom: 2 }}>{lv.label}</div>
-                      <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{locked ? 'Réservé aux abonnés Pro' : lv.desc + ' · 10 questions'}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{locked ? 'Ta partie du jour est faite — revient dans ' + hmQuotaResetIn() : lv.desc + ' · 10 questions'}</div>
                     </div>
                     {locked
                       ? <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 8, padding: '3px 8px', color: 'rgba(200,167,39,0.7)', flexShrink: 0 }}>Pro</span>
@@ -7492,6 +7551,21 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
    Donnée mot-à-mot vérifiée. Audio: everyayah (Alafasy).
 ═══════════════════════════════════════════════════════════ */
 const CMP_RECITER = 'Alafasy_128kbps'; // défaut si aucune préférence enregistrée
+
+/* Sourate de la semaine.
+   Les 5 sourates gratuites restent jouables sans limite. À elles s'ajoute une
+   sourate Pro, la même pour tout le monde, qui change chaque lundi. Un quota
+   quotidien n'aurait pas convenu ici : on n'« absorbe » pas une sourate en une
+   séance, ses mots s'apprennent sur plusieurs passages. Le rythme hebdomadaire
+   colle à l'activité, et il crée un rendez-vous — chaque semaine, quelque chose
+   s'ouvre.
+   Au passage, il faut 8 mois pour parcourir les 33 sourates ainsi, contre 38
+   jours si on en offrait une par jour. */
+function cmpWeeklyId(data) {
+  if (!data || !data.surahs) return null;
+  const locked = data.surahs.filter(function (s) { return !s.free; }).map(function (s) { return s.id; });
+  return hmWeeklyPick(locked);
+}
 const cmpPad3 = function (n) { return String(n).padStart(3, '0'); };
 const cmpAyahAudio = function (surah, ayah, reciterId) {
   return 'https://everyayah.com/data/' + (reciterId || CMP_RECITER) + '/' + cmpPad3(surah) + cmpPad3(ayah) + '.mp3';
@@ -7772,11 +7846,12 @@ function ComprendrePage({ navigate }) {
 
   const [showGate, setShowGate] = React.useState(false);
   const [showPro, setShowPro] = React.useState(false);
+  const weeklyId = cmpWeeklyId(data);
   // Invité : 1 sourate offerte. Ensuite (autre sourate OU rejouer) → compte requis.
   const guestBlocked = !user && (st.plays || 0) > 0;
 
   function openSourate(s) {
-    const locked = !s.free && !isPro;
+    const locked = !s.free && !isPro && s.id !== weeklyId;
     // Contenu Pro : on laisse DÉCOUVRIR (audio + mot-à-mot) pour donner le goût.
     // Le jeu reste réservé — le mur arrive une fois l'envie créée, pas avant.
     if (!locked && guestBlocked) { setShowGate(true); return; }
@@ -7851,9 +7926,9 @@ function ComprendrePage({ navigate }) {
 
   return shell(
     <>
-      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
-      {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro} onPlay={function(){
-        if (!sourate.free && !isPro) { setShowPro(true); return; }
+      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
+      {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
+        if (!sourate.free && !isPro && sourate.id !== weeklyId) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
         setMode('play');
       }} onBack={function(){ setMode('hub'); }} />}
@@ -7940,7 +8015,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
   );
 }
 
-function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onOpen, onBack, onPro, reciter, onReciter }) {
+function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, weeklyId, onOpen, onBack, onPro, reciter, onReciter }) {
   const GOLD = '#e6c84a';
   const list = sourates || [];
   const [openReciter, setOpenReciter] = React.useState(false);
@@ -8031,7 +8106,8 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
       <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.4)', margin: '24px 0 12px' }}>Choisis une sourate</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {list.map(function (s) {
-          const locked = !s.free && !isPro;
+          const weekly = !s.free && !isPro && s.id === weeklyId;
+          const locked = !s.free && !isPro && !weekly;
           const total = s.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0);
           const best = st.best[s.id] || 0;
           return (
@@ -8041,6 +8117,9 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 18, fontWeight: 800, color: '#f0ede6', fontFamily: 'Cinzel,serif' }}>{s.name}</span>
                   {locked && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 8px', borderRadius: 999 }}>PRO</span>}
+                  {/* La sourate offerte cette semaine se signale : sans étiquette,
+                      le cadeau passe inaperçu et ne ramène personne lundi. */}
+                  {weekly && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#04301c', background: 'linear-gradient(135deg,#6ee7a0,#2fa96a)', padding: '2px 8px', borderRadius: 999 }}>CETTE SEMAINE</span>}
                 </div>
                 <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{s.fr} · {total} mots{best > 0 ? ' · record ' + best + '%' : ''}</div>
               </div>
@@ -8065,7 +8144,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
         <span style={{ fontSize: 22 }}>✨</span>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13.5, color: '#f0ede6', fontWeight: 700 }}>D'autres sourates arrivent bientôt</div>
-          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>On enrichit le contenu chaque semaine — les membres Pro y ont accès en premier.</div>
+          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>On enrichit le contenu régulièrement — les membres Pro y ont accès en premier.</div>
         </div>
       </div>
     </div>
