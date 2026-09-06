@@ -217,12 +217,17 @@ function hmQuotaResetIn() {
    Sans carte et sans Stripe : le but n'est pas d'encaisser, c'est que la
    personne vive l'accès complet puis le perde. Ce qu'on a eu puis perdu pèse
    bien plus lourd que ce qu'on nous promet. */
+/* Renvoie true UNIQUEMENT si l'essai vient d'être ouvert à l'instant. C'est ce
+   qui déclenche l'écran de bienvenue : le rattacher au démarrage réel de
+   l'essai plutôt qu'à l'événement « inscription » le rend insensible aux
+   chemins d'inscription — et à leurs échecs partiels. */
 function hmTrialStart(uid) {
-  if (!uid) return;
+  if (!uid) return false;
   const t = hmRead(HM_TRIAL_KEY, {});
-  if (t[uid]) return;
+  if (t[uid]) return false;
   t[uid] = Date.now();
   hmWrite(HM_TRIAL_KEY, t);
+  return true;
 }
 /* L'essai est terminé mais l'utilisateur ne l'a pas encore appris. Sert à
    n'annoncer la fin qu'une fois, au premier mur rencontré — annoncer une perte
@@ -611,8 +616,13 @@ function AuthModal({ onClose }) {
     try {
       if (tab === 'signup') {
         const cred = await window._auth.createUserWithEmailAndPassword(email, password);
-        if (name) await cred.user.updateProfile({ displayName: name });
-        if (window._ejsSend) window._ejsSend(email, name || cred.user.displayName || 'cher(e) membre');
+        /* Le compte existe : tout ce qui suit est du confort. Une coupure
+           réseau sur la mise à jour du profil ne doit pas faire passer une
+           inscription réussie pour un échec. */
+        try {
+          if (name) await cred.user.updateProfile({ displayName: name });
+          if (window._ejsSend) window._ejsSend(email, name || cred.user.displayName || 'cher(e) membre');
+        } catch (e2) { console.warn('post-inscription:', e2); }
         onAuthSuccess('signup');
       } else {
         await window._auth.signInWithEmailAndPassword(email, password);
@@ -8633,6 +8643,7 @@ function App() {
   const [navKey, setNavKey] = React.useState(0);
   const [user, setUser] = React.useState(undefined);
   const [isPro, setIsPro] = React.useState(false);
+  const [proResolved, setProResolved] = React.useState(false);
   /* Jours d'essai restants. Compté séparément de `isPro` pour que l'interface
      puisse dire « il te reste 2 jours » — un accès qui s'épuise sans le montrer
      ne pousse personne à s'abonner. */
@@ -8778,11 +8789,12 @@ function App() {
 
   // Écoute statut Pro depuis Firestore
   React.useEffect(function() {
-    if (!user || !window._db) { setIsPro(false); return; }
+    if (!user || !window._db) { setIsPro(false); setProResolved(!user); return; }
     var unsub = window._db.collection('users').doc(user.uid)
       .onSnapshot(function(doc) {
         setIsPro(doc.exists && doc.data().isPro === true);
-      }, function() { setIsPro(false); });
+        setProResolved(true);
+      }, function() { setIsPro(false); setProResolved(true); });
     return unsub;
   }, [user]);
 
@@ -8791,12 +8803,15 @@ function App() {
      fin, et la relance tombe à côté. */
   React.useEffect(function () {
     if (!user) { setTrialLeft(0); return; }
-    hmTrialStart(user.uid);
+    /* Attendre le statut Pro : sinon un abonné qui se reconnecte se verrait
+       offrir un essai le temps que Firestore réponde. */
+    if (!proResolved || isPro) { setTrialLeft(hmTrialLeft(user.uid)); return; }
+    if (hmTrialStart(user.uid)) setShowTrialWelcome(true);
     var tick = function () { setTrialLeft(hmTrialLeft(user.uid)); };
     tick();
     var id = setInterval(tick, 60000);
     return function () { clearInterval(id); };
-  }, [user]);
+  }, [user, proResolved, isPro]);
 
   /* `isPro` vu par toute l'interface = abonné OU en essai. Un seul drapeau à
      tester partout, donc aucun endroit ne peut oublier l'essai. `paidPro` reste
