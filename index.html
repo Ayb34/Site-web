@@ -232,13 +232,19 @@
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='rgba(26,92,53,0.07)' stroke-width='0.5'%3E%3Cpath d='M30 0 L60 15 L60 45 L30 60 L0 45 L0 15 Z'/%3E%3Cpath d='M30 10 L50 20 L50 40 L30 50 L10 40 L10 20 Z'/%3E%3Cpath d='M30 20 L40 25 L40 35 L30 40 L20 35 L20 25 Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
+  /* Le navigateur saute entierement la mise en page et la peinture des sections
+     hors ecran. Sur une page de 19 000 px et un telephone, c'est la difference
+     entre un defilement lisse et un defilement qui accroche. `auto` retient la
+     hauteur reelle apres le premier rendu, donc la barre de defilement ne saute
+     pas. Le hero et le bloc devoile en sont exclus : ils sont vus tout de suite. */
+  main > section:not(.hero-section) { content-visibility: auto; contain-intrinsic-size: auto 1200px; }
+
   /* ── Scroll animations ── */
   /* ── Base reveal — monte avec légère rotation ── */
   .reveal {
     opacity: 0;
     transform: translateY(40px) scale(0.97);
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal.visible {
     opacity: 1;
@@ -250,7 +256,6 @@
     opacity: 0;
     transform: translateX(-60px) scale(0.97);
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-left.visible {
     opacity: 1;
@@ -262,7 +267,6 @@
     opacity: 0;
     transform: translateX(60px) scale(0.97);
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-right.visible {
     opacity: 1;
@@ -274,7 +278,6 @@
     opacity: 0;
     transform: scale(0.82);
     transition: opacity 0.65s cubic-bezier(0.34,1.4,0.64,1), transform 0.65s cubic-bezier(0.34,1.4,0.64,1);
-    will-change: transform, opacity;
   }
   .reveal-scale.visible {
     opacity: 1;
@@ -286,7 +289,6 @@
     opacity: 0;
     transform: translateY(36px);
     transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-stagger.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay: 0s; }
   .reveal-stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay: 0.10s; }
@@ -300,13 +302,11 @@
     opacity: 0;
     transform: translateX(-50px);
     transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-stagger-alt > *:nth-child(even) {
     opacity: 0;
     transform: translateX(50px);
     transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-stagger-alt.visible > *:nth-child(1) { opacity:1; transform:translateX(0); transition-delay: 0s; }
   .reveal-stagger-alt.visible > *:nth-child(2) { opacity:1; transform:translateX(0); transition-delay: 0.10s; }
@@ -319,7 +319,6 @@
     transform: translateY(40px) scale(0.96);
     transform-origin: top center;
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-flip.visible {
     opacity: 1;
@@ -572,23 +571,40 @@
      pourquoi. Il ouvre maintenant ce que le premier scroll devoile — juste
      sous le trait, qui lui sert de filet. */
   .hero-hadith {
-    margin: 26px auto 34px; max-width: 460px; padding: 0 18px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    margin: 30px auto 44px; max-width: 540px; padding: 0 22px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
     text-align: center;
   }
+  /* L'arabe respire large : a 1.5 d'interligne les hamzas et les points des
+     lettres se touchaient d'une ligne a l'autre. Amiri demande 1.9. */
   .hh-ar {
     margin: 0; font-family: Amiri, Georgia, serif;
-    font-size: 19px; line-height: 1.5; color: rgba(247,238,203,0.7);
+    font-size: 24px; line-height: 1.95; color: rgba(247,238,203,0.82);
   }
+  /* Mesure limitee a 30 caracteres : au-dela, l'oeil perd la ligne suivante sur
+     un texte italique centre. */
   .hh-fr {
-    margin: 0; font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic; font-size: 18px; line-height: 1.45;
-    color: rgba(240,237,230,0.82);
+    margin: 0; max-width: 30ch;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: 21px; line-height: 1.55;
+    color: rgba(240,237,230,0.9); text-wrap: balance;
   }
+  /* Le nom du rapporteur se detache de la traduction par un filet, pas par un
+     saut de ligne : c'est une attribution, pas une phrase de plus. */
   .hh-src {
+    display: flex; align-items: center; gap: 11px;
     font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; font-weight: 800;
-    letter-spacing: 0.15em; text-transform: uppercase; color: rgba(200,167,39,0.75);
+    letter-spacing: 0.18em; text-transform: uppercase; color: rgba(200,167,39,0.8);
   }
+  .hh-src::before, .hh-src::after {
+    content: ''; width: 26px; height: 1px;
+    background: rgba(200,167,39,0.45);
+  }
+  /* Le hadith entre juste apres le trait, pas en meme temps : le trait se
+     dessine, puis la parole arrive. Une seule propriete animee, sur un petit
+     element — sans consequence pour le defilement. */
+  .hero-next.in .hero-hadith { animation: hadithIn .9s cubic-bezier(.22,1,.36,1) .3s both; }
+  @keyframes hadithIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
   /* ── Invite a descendre ──
      Le hero remplit l'ecran : sans repere, rien ne dit qu'il y a une suite. */
@@ -664,9 +680,9 @@
     .peek-foot strong { font-size: 16px; }
     .hero-cta { padding: 14px 22px; font-size: 15.5px; }
     .hero-sub { font-size: 12px; margin-top: 10px; gap: 2px 11px; }
-    .hh-ar { font-size: 16px; line-height: 1.6; }
-    .hh-fr { font-size: 14.5px; line-height: 1.4; }
-    .hh-src { font-size: 9px; }
+    .hh-ar { font-size: 21px; line-height: 1.85; }
+    .hh-fr { font-size: 19px; }
+    .hh-src { font-size: 9.5px; }
     .hero-scroll { margin-top: 22px; gap: 6px; }
     .hs-line { height: 24px; }
   }
@@ -709,10 +725,11 @@
     .peek-foot strong { font-size: 20px; }
     .hero-cta { max-width: 420px; padding: 20px 30px; font-size: 19px; }
     .hero-sub { font-size: 14.5px; gap: 4px 20px; margin-top: 18px; }
-    .hero-hadith { margin: 40px auto 46px; max-width: 520px; }
-    .hh-ar { font-size: 22px; }
-    .hh-fr { font-size: 19px; }
-    .hh-src { font-size: 11px; }
+    .hero-hadith { margin: 46px auto 58px; max-width: 620px; gap: 20px; }
+    .hh-ar { font-size: 31px; }
+    .hh-fr { font-size: 26px; max-width: 34ch; }
+    .hh-src { font-size: 11.5px; }
+    .hh-src::before, .hh-src::after { width: 34px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .peek { animation: none; }
@@ -722,6 +739,7 @@
     .hs-line i { animation: none; }
     .hero-next { opacity: 1; transform: none; transition: none; }
     .hero-next-sep { transform: scaleX(1); transition: none; }
+    .hero-next.in .hero-hadith { animation: none; }
   }
 
   /* Section text backdrop */
@@ -935,28 +953,24 @@
   .reveal-blur {
     opacity: 0; transform: translateY(28px);
     transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-blur.visible { opacity: 1; transform: translateY(0); }
 
   .reveal-zoom {
     opacity: 0; transform: scale(0.88);
     transition: opacity 0.6s cubic-bezier(0.34,1.4,0.64,1), transform 0.6s cubic-bezier(0.34,1.4,0.64,1);
-    will-change: transform, opacity;
   }
   .reveal-zoom.visible { opacity: 1; transform: scale(1); }
 
   .reveal-drop {
     opacity: 0; transform: translateY(-28px) scale(0.97);
     transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.34,1.3,0.64,1);
-    will-change: transform, opacity;
   }
   .reveal-drop.visible { opacity: 1; transform: translateY(0) scale(1); }
 
   .reveal-glow {
     opacity: 0; transform: translateY(20px);
     transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
-    will-change: transform, opacity;
   }
   .reveal-glow.visible { opacity: 1; transform: translateY(0); }
 

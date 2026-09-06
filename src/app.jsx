@@ -8431,7 +8431,8 @@ function App() {
           <figure className="hero-hadith">
             <p className="hh-ar" dir="rtl" lang="ar">مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ</p>
             <blockquote className="hh-fr">
-              « Quiconque emprunte un chemin en quête de science, Allah lui facilite par cela un chemin vers le Paradis. »
+              « Quiconque emprunte un chemin en quête de science,
+              Allah lui facilitera par là un chemin vers le Paradis. »
             </blockquote>
             <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
           </figure>
