@@ -1350,14 +1350,15 @@ const HERO_BT = {
   correct: 1,
 };
 
-/* `ink` = la couleur du texte du bouton. Un fond clair impose un texte sombre
-   (le blanc sur ce vert plafonne a 2:1, illisible au soleil), mais le noir pur
-   avait l'air d'un texte par defaut pose la par erreur. Chaque encre est donc
-   la teinte tres foncee de sa propre couleur : ca se lit comme un choix. */
+/* `color` habille l'onglet et le halo ; `g1`/`g2` sont le degrade du bouton.
+   Le texte du bouton est blanc, ce qui impose un fond profond : sur l'or clair
+   d'origine (#e6c84a) le blanc tombait a 1,9:1, illisible en plein soleil. Ces
+   degrades gardent l'identite de chaque activite en descendant la luminosite
+   jusqu'a un contraste d'au moins 4,5:1. */
 const HERO_TABS = [
-  { id: 'comprendre', label: 'Comprendre', tag: 'Le Coran mot à mot', color: '#e6c84a', rgb: '230,200,74', ink: '#3d2c00', cta: 'Comprendre le Coran' },
-  { id: 'blind-test', label: 'Blind Test', tag: 'Reconnais la sourate', color: '#4ade80', rgb: '74,222,128', ink: '#04301c', cta: 'Lancer un Blind Test' },
-  { id: 'quiz',       label: 'Quiz',       tag: '740 questions',       color: '#60a5fa', rgb: '96,165,250', ink: '#082647', cta: 'Commencer le Quiz' },
+  { id: 'comprendre', label: 'Comprendre', tag: 'Le Coran mot à mot', color: '#e6c84a', rgb: '230,200,74', g1: '#a8801a', g2: '#6d4f08', cta: 'Comprendre le Coran' },
+  { id: 'blind-test', label: 'Blind Test', tag: 'Reconnais la sourate', color: '#4ade80', rgb: '74,222,128', g1: '#1f9455', g2: '#0d5730', cta: 'Lancer un Blind Test' },
+  { id: 'quiz',       label: 'Quiz',       tag: '740 questions',       color: '#60a5fa', rgb: '96,165,250', g1: '#2f6fd0', g2: '#15417e', cta: 'Commencer le Quiz' },
 ];
 
 function HeroIcon({ id, color }) {
@@ -1573,9 +1574,8 @@ function Hero({ navigate }) {
            vivant — sur mobile, rien d'autre ne le distingue d'une image. */}
         <button className="hero-cta" onClick={function () { navigate(active.id); }}
           style={{
-            background: 'linear-gradient(135deg, ' + active.color + ', ' + active.color + 'aa)',
-            boxShadow: '0 10px 34px rgba(' + active.rgb + ',0.34), 0 2px 0 rgba(255,255,255,0.25) inset',
-            color: active.ink,
+            background: 'linear-gradient(135deg, ' + active.g1 + ', ' + active.g2 + ')',
+            boxShadow: '0 10px 34px rgba(' + active.rgb + ',0.30), 0 1px 0 rgba(255,255,255,0.22) inset',
           }}>
           <span className="cta-txt">{active.cta}</span>
           <span className="cta-arrow" aria-hidden="true">→</span>
