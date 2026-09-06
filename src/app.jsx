@@ -4541,13 +4541,13 @@ function QuizPage({ navigate }) {
                     style={{ background: locked ? 'rgba(255,255,255,0.03)' : `${lv.color}0d`, border: `1.5px solid ${locked ? 'rgba(255,255,255,0.08)' : lv.color + '2a'}`, borderRadius: 14, padding: '15px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', transition: 'all 0.18s', fontFamily: 'Plus Jakarta Sans, sans-serif', opacity: locked ? 0.6 : 1 }}
                     onMouseEnter={e => { if (!locked) { e.currentTarget.style.background = `${lv.color}1e`; e.currentTarget.style.borderColor = `${lv.color}66`; } }}
                     onMouseLeave={e => { if (!locked) { e.currentTarget.style.background = `${lv.color}0d`; e.currentTarget.style.borderColor = `${lv.color}2a`; } }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: `${lv.color}18`, border: `1px solid ${lv.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{locked ? '🔒' : lv.icon}</div>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: `${lv.color}18`, border: `1px solid ${lv.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{locked ? '⏳' : lv.icon}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ color: locked ? 'rgba(255,255,255,0.4)' : lv.color, fontWeight: 800, fontSize: 15, marginBottom: 2 }}>{lv.label}</div>
                       <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{locked ? 'Ta partie du jour est faite — revient dans ' + hmQuotaResetIn() : lv.desc + ' · 10 questions'}</div>
                     </div>
                     {locked
-                      ? <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 8, padding: '3px 8px', color: 'rgba(200,167,39,0.7)', flexShrink: 0 }}>Pro</span>
+                      ? <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 8, padding: '3px 8px', color: 'rgba(200,167,39,0.7)', flexShrink: 0 }}>Demain</span>
                       : sc
                         ? <div style={{ textAlign: 'right', flexShrink: 0 }}>
                             <div style={{ color: lv.color, fontWeight: 800, fontSize: 15 }}>{sc.correct}/{sc.total}</div>
