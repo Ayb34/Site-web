@@ -7,14 +7,21 @@ const { useState, useEffect, useRef } = React;
 
 /* ═══ Offre Pro — argumentaire centralisé ═══
    L'annuel est le plan par défaut (cf. api/create-checkout.js).
-   Mensuel sur 12 mois : 7,99 × 12 = 95,88€. L'annuel à 29,99€ économise donc
-   65,89€, soit −69%. Tous les chiffres vivent ici : un écart de prix entre deux
-   écrans détruit la confiance juste avant le paiement. */
+   Mensuel sur 12 mois : 4,99 × 12 = 59,88€. L'annuel à 29,99€ économise donc
+   29,89€, soit −50%. Tous les chiffres vivent ici : un écart de prix entre deux
+   écrans détruit la confiance juste avant le paiement.
+
+   Le mensuel est passé de 7,99€ à 4,99€ le 06/09/2026. À 7,99, l'annuel ne
+   valait que 3,75 mois d'abonnement mensuel : personne de rationnel ne prenait
+   le mensuel, qui n'était donc pas une offre mais un leurre — et il faisait
+   paraître le site cher au premier coup d'œil. À 4,99 le rapport passe à 6
+   mois : l'annuel reste évidemment meilleur (moitié prix) et le mensuel devient
+   une vraie porte d'entrée pour qui refuse de s'engager sur un an. */
 const PRO_ANNUAL = '29,99€';
-const PRO_MONTHLY = '7,99€';
-const PRO_YEAR_AT_MONTHLY = '95,88€'; // 7,99 × 12
-const PRO_SAVE = '65,89€';            // 95,88 − 29,99
-const PRO_DISCOUNT = '−69%';
+const PRO_MONTHLY = '4,99€';
+const PRO_YEAR_AT_MONTHLY = '59,88€'; // 4,99 × 12
+const PRO_SAVE = '29,89€';            // 59,88 − 29,99
+const PRO_DISCOUNT = '−50%';
 const PRO_EQ_MONTH = '2,50€';         // 29,99 / 12
 const PRO_PER_DAY = '0,08€';          // 29,99 / 365
 
@@ -27,7 +34,7 @@ const PRO_PER_DAY = '0,08€';          // 29,99 / 365
    preuve sociale doit rester vraie même sans être remise à jour chaque semaine. */
 const MEMBERS_COUNT = '+220';
 
-/* Ancre de prix. Seul, « 29,99€ » est un chiffre nu ; à côté des 95,88€ que
+/* Ancre de prix. Seul, « 29,99€ » est un chiffre nu ; à côté des 59,88€ que
    coûterait le mensuel sur la même année, c'est une remise. On barre l'ancre
    plutôt que d'annoncer la remise en mots : le calcul se voit sans se lire. */
 function ProSavings({ align, dark }) {
@@ -956,7 +963,7 @@ function SubscriptionPage({ navigate }) {
           onMouseOut={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 4px 20px rgba(255,196,57,0.35)'; }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="#003087"><path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.99-.032.17a.804.804 0 0 1-.794.68H8.54a.483.483 0 0 1-.477-.558l.925-5.832.01-.07c.06-.372.382-.64.758-.64h1.482c3.102 0 5.533-1.258 6.243-4.895.312-1.588.05-2.85-.693-3.85a3.745 3.745 0 0 0-.72-.332z"/><path d="M18.14 7.7a6.143 6.143 0 0 0-.738-.16 9.294 9.294 0 0 0-1.476-.108H11.4a.804.804 0 0 0-.795.68L9.418 16.05l-.01.07a.805.805 0 0 0 .795.92h1.773c.37 0 .692-.267.76-.63l.63-3.99.04-.22a.804.804 0 0 1 .795-.68h.5c3.237 0 5.773-1.314 6.513-5.12.27-1.313.197-2.443-.327-3.327a3.83 3.83 0 0 0-1.747-.663 6.73 6.73 0 0 0-1.1 3.29z"/></svg>
-          PayPal — 7,99€ · 1 mois
+          PayPal — 4,99€ · 1 mois
         </button>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8 }}>
           Paiement unique · renouvellement manuel par email
@@ -3287,7 +3294,7 @@ function FaqSection() {
     },
     {
       q: 'Annuel ou mensuel — lequel choisir ?',
-      a: 'L\'annuel, sauf si tu veux vraiment tester mois par mois. Le mensuel à 7,99€ revient à 95,88€ sur une année complète ; l\'annuel est à 29,99€. Tu économises 65,89€, soit −69% — c\'est 2,50€ par mois, ou 0,08€ par jour. Concrètement : le prix d\'un café par mois pour tout le site, toute l\'année. Et apprendre sa religion ne se fait pas en trois semaines : le savoir se construit par petites doses régulières, l\'annuel est simplement le format honnête pour ça.'
+      a: 'L\'annuel, sauf si tu veux vraiment tester mois par mois. Le mensuel à 4,99€ revient à 59,88€ sur une année complète ; l\'annuel est à 29,99€. Tu économises 29,89€, soit −50% — c\'est 2,50€ par mois, ou 0,08€ par jour. Concrètement : le prix d\'un café par mois pour tout le site, toute l\'année. Et apprendre sa religion ne se fait pas en trois semaines : le savoir se construit par petites doses régulières, l\'annuel est simplement le format honnête pour ça.'
     },
     {
       q: 'Est-ce que ça vaut vraiment le coup au quotidien ?',
@@ -3299,7 +3306,7 @@ function FaqSection() {
     },
     {
       q: 'Combien ça coûte, et pourquoi pas gratuit à 100% ?',
-      a: 'L\'abonnement est à 29,99€/an — soit 2,50€/mois, ou 0,08€ par jour — sans engagement et résiliable en 1 clic. Une formule mensuelle à 7,99€/mois existe aussi, mais elle revient à 95,88€ sur l\'année : l\'annuel te fait économiser 65,89€. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu régulièrement et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par mois — pour que l\'apprentissage islamique reste à la portée de tous.'
+      a: 'L\'abonnement est à 29,99€/an — soit 2,50€/mois, ou 0,08€ par jour — sans engagement et résiliable en 1 clic. Une formule mensuelle à 4,99€/mois existe aussi, mais elle revient à 59,88€ sur l\'année : l\'annuel te fait économiser 29,89€. L\'hébergement, les API et le développement continu ont un coût réel : cet abonnement nous permet de maintenir la plateforme, d\'ajouter du contenu régulièrement et de ne dépendre d\'aucune publicité. Un tarif volontairement accessible — moins d\'un café par mois — pour que l\'apprentissage islamique reste à la portée de tous.'
     },
   ];
 
@@ -6982,7 +6989,7 @@ function CguPage({ navigate }) {
 
       <h2 style={LS.h2}>Article 4 — Abonnement Pro et facturation</h2>
       <ul style={LS.ul}>
-        <li style={LS.li}><strong>Tarif :</strong> 29,99 € TTC par an (soit 2,50 €/mois) ou 7,99 € TTC par mois</li>
+        <li style={LS.li}><strong>Tarif :</strong> 29,99 € TTC par an (soit 2,50 €/mois) ou 4,99 € TTC par mois</li>
         <li style={LS.li}><strong>Facturation :</strong> mensuelle, automatique à la date anniversaire d'inscription</li>
         <li style={LS.li}><strong>Paiement :</strong> sécurisé via Stripe (carte bancaire)</li>
         <li style={LS.li}><strong>Résiliation :</strong> possible à tout moment depuis le profil utilisateur, sans frais. L'accès Pro reste actif jusqu'à la fin de la période en cours.</li>
@@ -7199,7 +7206,7 @@ function CGVPage({ navigate }) {
       <h2 style={LS.h2}>2. Produit et prix</h2>
       <p style={LS.p}>L'abonnement <strong>Héritage Pro</strong> donne accès à l'intégralité des fonctionnalités de la plateforme (tous niveaux de quiz, blind test illimité, studio vidéo HD).</p>
       <ul style={LS.ul}>
-        <li style={LS.li}><strong>Prix :</strong> 29,99 € TTC / an (soit 2,50 €/mois) ou 7,99 € TTC / mois</li>
+        <li style={LS.li}><strong>Prix :</strong> 29,99 € TTC / an (soit 2,50 €/mois) ou 4,99 € TTC / mois</li>
         <li style={LS.li}><strong>Facturation :</strong> mensuelle, reconduite automatiquement</li>
         <li style={LS.li}><strong>Paiement :</strong> carte bancaire via Stripe (sécurisé, certifié PCI DSS)</li>
         <li style={LS.li}><strong>TVA :</strong> non applicable — entrepreneur individuel (art. 293 B CGI)</li>
@@ -7489,7 +7496,7 @@ function StickyUpgradeBanner({ navigate }) {
 function QuickCheckoutModal({ onClose, initialMethod }) {
   const { user } = useAuth();
   const [activeMethod, setActiveMethod] = React.useState(initialMethod || 'card');
-  // L'annuel est pré-sélectionné : meilleur pour l'utilisateur (−69%) et pour
+  // L'annuel est pré-sélectionné : meilleur pour l'utilisateur (voir PRO_DISCOUNT) et pour
   // la trésorerie (encaissé d'un coup, pas de churn mensuel).
   const [plan, setPlan] = React.useState('annual');
   const [loading, setLoading] = React.useState(false);
@@ -7617,7 +7624,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
         <div style={{ padding: '12px 14px 0', display: 'flex', gap: 8 }}>
           <button onClick={() => switchPlan('annual')}
             style={{ flex: 1, position: 'relative', padding: '11px 8px', borderRadius: 12, border: plan === 'annual' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'annual' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
-            <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 20, whiteSpace: 'nowrap' }}>−69%</span>
+            <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 20, whiteSpace: 'nowrap' }}>{PRO_DISCOUNT}</span>
             <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'annual' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>{PRO_ANNUAL}<span style={{ fontSize: 11, fontWeight: 700 }}>/an</span></span>
             <span style={{ display: 'block', fontSize: 10.5, color: plan === 'annual' ? '#b8960a' : '#888', fontWeight: 700, marginTop: 2 }}>soit {PRO_EQ_MONTH}/mois</span>
           </button>
