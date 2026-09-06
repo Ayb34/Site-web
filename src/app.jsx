@@ -767,7 +767,7 @@ function SubscriptionPage({ navigate }) {
           Accès Pro
         </h1>
         <div style={{ marginBottom: 10 }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>29,99€/an</span>
+          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>{PRO_ANNUAL}/an</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
           Comprendre le Coran · Quiz illimités · Blind Test complet
@@ -1019,7 +1019,7 @@ function SubscriptionPage({ navigate }) {
 
 /* --- Profile Page --- */
 function ProfilePage({ navigate }) {
-  const { user, logout, isPro } = useAuth();
+  const { user, logout, isPro, paidPro, trialing, trialLeft, openQuickCheckout } = useAuth();
   const [cancelState, setCancelState] = React.useState('idle'); // idle | confirm | loading | done | error
   const [cancelEndDate, setCancelEndDate] = React.useState('');
   const [cancelError, setCancelError] = React.useState('');
@@ -1149,15 +1149,33 @@ function ProfilePage({ navigate }) {
           }}>Déconnexion</button>
         </div>
 
+        {/* Essai en cours : ni « abonnement actif », ni bouton de résiliation.
+            Le premier est faux, le second échouerait — il n'y a rien à résilier
+            chez Stripe — et l'utilisateur croirait son accès déjà payé, donc ne
+            s'abonnerait jamais. */}
+        {trialing && (
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.2)', borderRadius: 16, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#c8a727', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>✦ Essai en cours</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
+                {trialLeft === 1 ? 'Dernier jour' : trialLeft + ' jours restants'} · aucun paiement, aucune carte enregistrée
+              </div>
+            </div>
+            <button onClick={function(){ openQuickCheckout(); }} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+              Passer à Pro — {PRO_ANNUAL}
+            </button>
+          </div>
+        )}
+
         {/* Abonnement Pro — résiliation */}
-        {isPro && (
+        {paidPro && (
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(200,167,39,0.2)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: '#c8a727', textTransform: 'uppercase', letterSpacing: 1 }}>✦ Abonnement Pro actif</span>
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>29,99€/an · Résiliable à tout moment</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{PRO_ANNUAL}/an · Résiliable à tout moment</div>
               </div>
               {cancelState === 'idle' && (
                 <button onClick={handleCancel} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: 'rgba(239,68,68,0.7)', padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -2013,7 +2031,7 @@ function Hero({ navigate }) {
 /* ─── Stats Bar (ticker) ─── */
 function StatsBar() {
   const stats = [
-  { value: '29,99€', label: 'par an' },
+  { value: PRO_ANNUAL, label: 'par an' },
   { value: '4', label: 'activités uniques' },
   { value: '100%', label: 'en français' },
   { value: 'Sans', label: 'engagement' }];
@@ -3248,7 +3266,7 @@ function StudioViralSection({ navigate }) {
               </div>
               <div style={{ flex: 1, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(200,167,39,0.05))', border: '1px solid rgba(200,167,39,0.4)', borderRadius: 14, padding: '14px 14px', position: 'relative' }}>
                 <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, fontWeight: 800, color: '#e6c84a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Pro ✦</div>
-                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#e6c84a', fontWeight: 700, lineHeight: 1 }}>29,99€<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>/an</span></div>
+                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#e6c84a', fontWeight: 700, lineHeight: 1 }}>{PRO_ANNUAL}<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>/an</span></div>
                 <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11.5, color: 'rgba(255,255,255,0.6)', margin: '8px 0 0', lineHeight: 1.6 }}>Vidéos <strong style={{ color: '#fff' }}>illimitées</strong> · tous les jeux Pro</p>
               </div>
             </div>
@@ -3621,7 +3639,7 @@ function StartPage({ navigate }) {
                 {/* upsell discret — sous les boutons, jamais en barrage */}
                 <div onClick={function(){ openQuickCheckout(); }} style={{ cursor:'pointer', background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.22)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginTop:2 }}>
                   <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.6)' }}>
-                    🔓 Tous les niveaux, 114 sourates & le Juz 'Amma — <strong style={{ color:'#e6c84a' }}>29,99€/an</strong> →
+                    🔓 Tous les niveaux, 114 sourates & le Juz 'Amma — <strong style={{ color:'#e6c84a' }}>{PRO_ANNUAL}/an</strong> →
                   </span>
                 </div>
               </>
