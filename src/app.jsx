@@ -23,10 +23,9 @@ const PRO_PER_DAY = '0,08€';          // 29,99 / 365
    que Firebase en comptait 183 : trois chiffres pour une même réalité, sur des
    écrans que le même visiteur enchaîne. Un compteur qui se contredit décrédibilise
    tout le reste de la page, y compris le prix.
-   Volontairement arrondi EN DESSOUS du réel (183 comptes vérifiés au 31/07/2026,
-   +20 issus de la campagne Meta d'août) : une preuve sociale doit rester vraie
-   même sans être remise à jour chaque semaine. */
-const MEMBERS_COUNT = '+180';
+   Volontairement arrondi EN DESSOUS du réel (225 comptes au 06/09/2026) : une
+   preuve sociale doit rester vraie même sans être remise à jour chaque semaine. */
+const MEMBERS_COUNT = '+220';
 
 /* Ancre de prix. Seul, « 29,99€ » est un chiffre nu ; à côté des 95,88€ que
    coûterait le mensuel sur la même année, c'est une remise. On barre l'ancre
@@ -1555,11 +1554,13 @@ function Hero({ navigate }) {
       <div className="hero-inner">
         <p className="hero-kicker"><span className="hk-rule" />Apprendre l'islam autrement<span className="hk-rule" /></p>
 
-        {/* « Trois façons d'apprendre » comptait les activités que les onglets
-            montrent deja juste dessous. Le titre dit maintenant a qui on parle :
-            quelqu'un qui veut apprendre l'islam sans passer par l'ecole. */}
+        {/* Le titre nomme le sujet. « L'islam s'apprend » disait la promesse
+            sans dire de quoi il s'agit : un visiteur venu d'une publicite lisait
+            « apprendre » sans savoir apprendre quoi. « Le Coran » est concret, et
+            c'est ce que les trois activites ont en commun — on le comprend mot a
+            mot, on reconnait ses sourates, on est interroge dessus. */}
         <h1 className="hero-h1">
-          L'islam s'apprend.<br />
+          Le Coran s'apprend.<br />
           <em>Pas forcément à l'école.</em>
         </h1>
 
@@ -1603,18 +1604,29 @@ function Hero({ navigate }) {
            frein doit se lire, pas se parcourir. */}
         <ul className="hero-sub">
           {[
-            { t: 'Gratuit', small: false },
-            { t: 'Sans compte', small: false },
+            { t: 'Gratuit' },
+            { t: 'Sans compte' },
             /* Masque en mobile : « gratuit » le dit deja, et le premier ecran
                compte plus de lignes qu'il n'en faut. */
             { t: 'Sans carte bancaire', small: true },
+            /* La preuve sociale etait entierement sous la ligne de flottaison :
+               225 inscrits, et personne ne le savait au moment ou l'on hesite a
+               cliquer. Chiffre arrondi en dessous du reel (voir MEMBERS_COUNT). */
+            { t: MEMBERS_COUNT + ' membres', people: true },
           ].map(function (o) {
             const t = o.t;
             return (
-              <li key={t} className={o.small ? 'sub-wide' : null}>
-                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#4ade80" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M4 12.6l5.2 5.2L20 6.6" />
-                </svg>
+              <li key={t} className={o.small ? 'sub-wide' : (o.people ? 'sub-people' : null)}>
+                {o.people ? (
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#e6c84a" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="9" cy="8" r="3.1" /><path d="M2.9 19.2a6.1 6.1 0 0 1 12.2 0" />
+                    <path d="M16.4 5.4a3.1 3.1 0 0 1 0 5.2M18 14.2a6.1 6.1 0 0 1 3.1 5" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#4ade80" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 12.6l5.2 5.2L20 6.6" />
+                  </svg>
+                )}
                 {t}
               </li>
             );
