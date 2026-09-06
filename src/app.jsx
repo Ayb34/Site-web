@@ -7299,12 +7299,12 @@ function ExitIntentPopup({ navigate }) {
 
 /* ─── Sticky Upgrade Banner (non-Pro logged-in users) ─── */
 function StickyUpgradeBanner({ navigate }) {
-  const { user, isPro, openQuickCheckout } = useAuth();
+  const { user, isPro, paidPro, trialing, trialLeft, openQuickCheckout } = useAuth();
   const [visible, setVisible] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
 
   React.useEffect(function() {
-    if (isPro || !user || dismissed) return;
+    if (paidPro || !user || dismissed) return;
     var onScroll = function() {
       setVisible(window.scrollY > 400);
     };
@@ -7312,7 +7312,10 @@ function StickyUpgradeBanner({ navigate }) {
     return function() { window.removeEventListener('scroll', onScroll); };
   }, [isPro, user, dismissed]);
 
-  if (!user || isPro || dismissed || !visible) return null;
+  /* L'essai s'affiche, il ne se subit pas : un accès complet qui s'épuise sans
+     jamais se montrer ne pousse personne à s'abonner — la personne découvre la
+     perte le jour où elle est déjà partie. */
+  if (!user || paidPro || dismissed || !visible) return null;
 
   return (
     <div className="sticky-upgrade-banner" style={{
@@ -7330,11 +7333,13 @@ function StickyUpgradeBanner({ navigate }) {
       <div style={{ display:'flex', alignItems:'center', gap:12, flex:1, minWidth:0 }}>
         <div style={{ minWidth:0 }}>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, fontWeight:800, color:'#fff', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-            Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span>
+            {trialing
+              ? <>Essai — <span style={{ color:'#f5d76e' }}>{trialLeft === 1 ? 'dernier jour' : trialLeft + ' jours restants'}</span></>
+              : <>Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span></>}
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6 }}>
             <span><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>{PRO_ANNUAL}</span> /an</span>
-            <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{PRO_DISCOUNT}</span>
+            <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{trialing ? 'pour garder' : PRO_DISCOUNT}</span>
           </div>
         </div>
       </div>
