@@ -224,6 +224,31 @@ function hmTrialStart(uid) {
   t[uid] = Date.now();
   hmWrite(HM_TRIAL_KEY, t);
 }
+/* L'essai est terminé mais l'utilisateur ne l'a pas encore appris. Sert à
+   n'annoncer la fin qu'une fois, au premier mur rencontré — annoncer une perte
+   deux fois, c'est de l'insistance ; ne l'annoncer jamais, c'est laisser
+   croire que le site s'est mis à mal fonctionner. */
+const HM_JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+const HM_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+function hmTrialEndDate() {
+  const d = new Date(Date.now() + HM_TRIAL_DAYS * 86400000);
+  return HM_JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + HM_MOIS[d.getMonth()];
+}
+
+function hmTrialEndPending(uid) {
+  if (!uid) return false;
+  const t = hmRead(HM_TRIAL_KEY, {});
+  if (!t[uid]) return false;
+  if (hmTrialLeft(uid) > 0) return false;
+  return !hmRead(HM_TRIAL_KEY + '_seen', {})[uid];
+}
+function hmTrialEndSeen(uid) {
+  if (!uid) return;
+  const seen = hmRead(HM_TRIAL_KEY + '_seen', {});
+  seen[uid] = 1;
+  hmWrite(HM_TRIAL_KEY + '_seen', seen);
+}
+
 function hmTrialLeft(uid) {
   if (!uid) return 0;
   const started = hmRead(HM_TRIAL_KEY, {})[uid];
@@ -371,6 +396,64 @@ function GuestGateModal({ onClose, context = 'default' }) {
 }
 
 /* ─── Pro Gate Modal ─── */
+/* ─── Bienvenue : l'essai s'annonce ───
+
+   Sans cet écran, l'essai était muet : l'utilisateur recevait trois jours
+   d'accès complet sans le savoir, et les perdait sans avoir su qu'il les avait.
+   Toute la mécanique repose sur la perte ressentie — un cadeau ignoré ne se
+   perd pas, il ne fait que rendre le site plus restrictif sans raison
+   apparente. C'était pire que pas d'essai du tout.
+
+   On nomme donc ce qui est ouvert, et surtout on dit d'avance ce qui se
+   referme. Annoncer la fin dès le début n'est pas un aveu : c'est ce qui donne
+   sa valeur aux trois jours. */
+function TrialWelcomeModal({ onClose, navigate }) {
+  const { openQuickCheckout } = useAuth();
+  return (
+    <ModalPortal><div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.84)', backdropFilter:'blur(10px)', zIndex:10002, display:'flex', alignItems:'center', justifyContent:'center', padding:16, animation:'overlayFade 0.25s ease-out' }}>
+      <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(150deg,#0c2415,#07160e)', border:'1px solid rgba(200,167,39,0.4)', borderRadius:24, maxWidth:400, width:'100%', padding:'32px 26px 24px', textAlign:'center', boxShadow:'0 0 90px rgba(200,167,39,0.14), 0 40px 70px rgba(0,0,0,0.65)', animation:'proPop 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
+
+        <div style={{ width:58, height:58, borderRadius:'50%', margin:'0 auto 16px', background:'rgba(200,167,39,0.12)', border:'1.5px solid rgba(200,167,39,0.35)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>✦</div>
+
+        <h2 style={{ fontFamily:'Cinzel,serif', fontSize:21, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.25 }}>
+          Tes 3 jours commencent
+        </h2>
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 20px' }}>
+          Accès complet, sans carte bancaire.<br />Tout le site est ouvert jusqu'au {hmTrialEndDate()}.
+        </p>
+
+        <ul style={{ listStyle:'none', padding:0, margin:'0 0 20px', textAlign:'left' }}>
+          {[
+            ['∞', 'Quiz et Blind Test sans limite'],
+            ['📖', "Les 38 sourates de Comprendre"],
+            ['🔥', 'Les niveaux Amateur et Avancé'],
+          ].map(function (it) {
+            return (
+              <li key={it[1]} style={{ display:'flex', alignItems:'center', gap:11, marginBottom:11 }}>
+                <span style={{ width:30, height:30, flexShrink:0, borderRadius:9, background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>{it[0]}</span>
+                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.8)' }}>{it[1]}</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
+            aux trois jours, et ça évite que le jour 4 passe pour une panne. */}
+        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
+          Après ces 3 jours, tu gardes une partie par jour et une sourate par semaine.
+        </p>
+
+        <button onClick={onClose} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
+          Commencer
+        </button>
+        <button onClick={function(){ onClose(); openQuickCheckout(); }} style={{ background:'none', border:'none', color:'rgba(240,237,230,0.35)', fontSize:12.5, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+          Passer directement à Pro — {PRO_ANNUAL}/an
+        </button>
+      </div>
+    </div></ModalPortal>
+  );
+}
+
 /* `reason` dit CE QUI vient de bloquer. Une modale qui parle du mur qu'on vient
    de heurter convertit mieux qu'un argumentaire général : l'utilisateur sait
    déjà ce qu'il veut, il faut le lui vendre, pas lui présenter le site. */
@@ -398,9 +481,15 @@ const PRO_GATE_COPY = {
 };
 
 function ProGateModal({ onClose, navigate, reason }) {
-  const { openQuickCheckout } = useAuth();
-  const copy = PRO_GATE_COPY[reason] || null;
-  const delay = reason === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
+  const { openQuickCheckout, user } = useAuth();
+  /* Au premier mur qui suit la fin de l'essai, on explique la perte avant de
+     parler du quota : sans ça, le jour 4 ressemble à un site qui s'est mis à
+     mal fonctionner. Une seule fois — ensuite les motifs normaux reprennent. */
+  const endPending = user && hmTrialEndPending(user.uid);
+  const effective = endPending ? 'trial-over' : reason;
+  React.useEffect(function () { if (endPending) hmTrialEndSeen(user.uid); }, [endPending]);
+  const copy = PRO_GATE_COPY[effective] || null;
+  const delay = effective === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
   const overlayRef = React.useRef(null);
   React.useEffect(function () {
     const scrollY = window.scrollY;
@@ -7317,11 +7406,17 @@ function StickyUpgradeBanner({ navigate }) {
      perte le jour où elle est déjà partie. */
   if (!user || paidPro || dismissed || !visible) return null;
 
+  /* Le dernier jour ne se signale pas comme les autres. Un compteur qui passe
+     de « 2 jours » à « dernier jour » dans la même typographie discrète ne se
+     remarque pas — or c'est le seul moment où la personne peut encore agir
+     avant de perdre l'accès. Le bandeau vire à l'ambre et dit ce qui se ferme. */
+  const urgent = trialing && trialLeft === 1;
+
   return (
     <div className="sticky-upgrade-banner" style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
-      background: 'linear-gradient(180deg, #102a18 0%, #0b1d11 100%)',
-      borderTop: '1.5px solid rgba(200,167,39,0.5)',
+      background: urgent ? 'linear-gradient(180deg, #2e2008 0%, #1a1305 100%)' : 'linear-gradient(180deg, #102a18 0%, #0b1d11 100%)',
+      borderTop: '1.5px solid ' + (urgent ? 'rgba(245,183,49,0.75)' : 'rgba(200,167,39,0.5)'),
       borderRadius: '18px 18px 0 0',
       padding: '13px 16px calc(13px + env(safe-area-inset-bottom, 0px))',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
@@ -7334,12 +7429,18 @@ function StickyUpgradeBanner({ navigate }) {
         <div style={{ minWidth:0 }}>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, fontWeight:800, color:'#fff', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
             {trialing
-              ? <>Essai — <span style={{ color:'#f5d76e' }}>{trialLeft === 1 ? 'dernier jour' : trialLeft + ' jours restants'}</span></>
+              ? (urgent
+                  ? <>Dernier jour <span style={{ color:'#f5b731' }}>d'accès complet</span></>
+                  : <>Essai — <span style={{ color:'#f5d76e' }}>{trialLeft} jours restants</span></>)
               : <>Débloque <span style={{ color:'#f5d76e' }}>tout l'accès</span></>}
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6 }}>
-            <span><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>{PRO_ANNUAL}</span> /an</span>
-            <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{trialing ? 'pour garder' : PRO_DISCOUNT}</span>
+            {urgent
+              ? <span style={{ color:'rgba(255,255,255,0.72)' }}>Demain : 1 partie par jour</span>
+              : <>
+                  <span><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>{PRO_ANNUAL}</span> /an</span>
+                  <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{trialing ? 'pour garder' : PRO_DISCOUNT}</span>
+                </>}
           </div>
         </div>
       </div>
@@ -8538,6 +8639,7 @@ function App() {
   const [trialLeft, setTrialLeft] = React.useState(0);
   const [showAuth, setShowAuth] = React.useState(false);
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
+  const [showTrialWelcome, setShowTrialWelcome] = React.useState(false);
   // Méthode de paiement demandée par un visiteur non connecté : compte requis
   // avant le paiement (plutôt que payer en invité puis réclamer le compte
   // après coup — flux fragile, aucune relance si l'utilisateur ferme l'onglet
@@ -8721,7 +8823,12 @@ function App() {
       if (pendingCheckout) {
         setQuickCheckoutMethod(pendingCheckout);
         setPendingCheckout(null);
+        return;
       }
+      /* Uniquement à la création du compte, et jamais par-dessus un paiement en
+         cours : annoncer un essai à quelqu'un qui sort sa carte le ferait
+         hésiter au pire moment. */
+      if (type === 'signup') setShowTrialWelcome(true);
     }
   };
 
@@ -8729,6 +8836,7 @@ function App() {
     <AuthContext.Provider value={authCtx}>
       {showAuth && <AuthModal onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
+      {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} />}
       {children}
       {/* Le pixel n'est chargé qu'ici, au clic sur « Accepter » — jamais avant. */}
       <RgpdBanner onAccept={function(){ if (window.hmPixel) window.hmPixel.init(); }} />
