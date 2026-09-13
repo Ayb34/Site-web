@@ -1378,11 +1378,14 @@ function Navbar({ navigate }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* Le Studio n'est plus mis en avant : la page reste joignable par #studio,
-     mais un site qui apprend l'islam n'a pas à vendre un éditeur vidéo en
-     navigation principale — ça disperse le message. */
-  const navLinks = ['Accueil', 'Comprendre', 'Blind test', 'Quiz'];
-  const pageMap = { 'Comprendre': 'comprendre', 'Blind test': 'blind-test', 'Quiz': 'quiz' };
+  /* Le Studio revient en navigation. Il avait été retiré parce qu'un site qui
+     enseigne l'islam n'a pas à vendre un éditeur vidéo — le raisonnement tient
+     toujours. Mais la vidéo TikTok qui apporte le plus de trafic (80 000 vues,
+     130 inscrits) le présente explicitement : quelqu'un qui arrive en le
+     cherchant doit le trouver. Promettre une fonctionnalité puis la cacher coûte
+     plus cher que de l'afficher. */
+  const navLinks = ['Accueil', 'Comprendre', 'Blind test', 'Quiz', 'Studio'];
+  const pageMap = { 'Comprendre': 'comprendre', 'Blind test': 'blind-test', 'Quiz': 'quiz', 'Studio': 'studio' };
 
   return (
     <nav style={{
@@ -2121,6 +2124,16 @@ function FeatureCards({ navigate }) {
       pro: "Le Juz 'Amma complet — 38 sourates, 571 versets",
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'comprendre',
+    },
+    {
+      num: '04', icon: '🎬', tag: null, tagColor: '#a78bfa', tagRgb: '167,139,250',
+      title: 'Studio Vidéo',
+      hook: 'Crée tes vidéos de récitation à partager — chaque vue peut être une sadaqa jariya.',
+      desc: 'Sous-titres arabes et français, fonds, polices. Poste sur TikTok, Instagram et YouTube en quelques clics.',
+      free: 'Créer · Prévisualiser · Personnaliser',
+      pro: 'Téléchargement HD · Export illimité',
+      accent: { from:'rgba(18,14,30,0.97)', to:'rgba(5,4,10,0.99)', border:'rgba(167,139,250,0.28)', glow:'rgba(167,139,250,0.12)', line:'#a78bfa' },
+      page: 'studio',
     },
   ];
 
@@ -3907,7 +3920,7 @@ function Footer({ navigate }) {
           <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
             <div>
               <p style={{ color: '#fff', fontWeight: 700, fontSize: 13, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Contenu</p>
-              {['Comprendre le Coran', 'Blind test Coran', 'Quiz islamiques'].map((l) =>
+              {['Comprendre le Coran', 'Blind test Coran', 'Quiz islamiques', 'Studio vidéo'].map((l) =>
               <a key={l} href="#" style={{ display: 'block', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', fontSize: 14, marginBottom: 10, transition: 'color 0.2s' }}
               onMouseEnter={(e) => e.target.style.color = '#c8a727'}
               onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.55)'}>{l}</a>
