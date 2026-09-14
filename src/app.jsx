@@ -478,8 +478,14 @@ function TrialWelcomeModal({ onClose, navigate }) {
           Après ces 2 jours, tu gardes une partie par jour et une sourate par semaine.
         </p>
 
-        <button onClick={onClose} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
-          Commencer
+        {/* « Commencer » refermait la fenêtre et laissait la personne sur
+            l'accueil : elle venait d'obtenir un accès complet sans jamais le
+            voir. Le bouton l'emmène maintenant dans Comprendre, où les 38
+            sourates sont ouvertes — la preuve immédiate de ce qu'elle a reçu.
+            Et il nomme la récompense plutôt que l'action : on ne clique pas
+            pour « commencer », on clique pour profiter de deux jours. */}
+        <button onClick={function(){ onClose(); if (navigate) navigate('comprendre'); }} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
+          Profiter de mes 2 jours →
         </button>
         <button onClick={function(){ onClose(); openQuickCheckout(); }} style={{ background:'none', border:'none', color:'rgba(240,237,230,0.35)', fontSize:12.5, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
           Passer directement à Pro — {PRO_ANNUAL}/an
@@ -8951,7 +8957,7 @@ function App() {
     <AuthContext.Provider value={authCtx}>
       {showAuth && <AuthModal onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
-      {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} />}
+      {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} navigate={navigate} />}
       {children}
       {/* Le pixel n'est chargé qu'ici, au clic sur « Accepter » — jamais avant. */}
       <RgpdBanner onAccept={function(){ if (window.hmPixel) window.hmPixel.init(); }} />
