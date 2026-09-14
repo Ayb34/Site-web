@@ -764,37 +764,103 @@ function SubscriptionPage({ navigate }) {
   const { user, openAuth } = useAuth();
   const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
 
-  // Guard: non connecté → montrer auth modal + page de présentation
+  /* Page vue par un visiteur NON connecté.
+
+     Elle affichait un cadenas, un prix et « connecte-toi » : aucun argument,
+     aucune raison de payer. Or c'est la destination du bouton le plus visible
+     du site — « S'abonner » dans la barre de navigation — et celle du bouton
+     principal de l'email. Sur du trafic publicitaire, une impasse à cet endroit
+     coûte directement de l'argent.
+
+     Elle dit maintenant ce qu'on achète, ce que ça coûte rapporté à la journée,
+     et pourquoi on peut faire confiance. L'action principale reste la création
+     de compte : on ne peut pas s'abonner sans compte, et les 2 jours offerts
+     sont un bien meilleur premier pas qu'un formulaire de paiement. */
   if (!user) {
+    const inclus = [
+      ['∞', 'Aucune limite quotidienne', 'Quiz et Blind Test autant que tu veux'],
+      ['📖', "Le Juz 'Amma complet", '38 sourates mot à mot, 571 versets, avec l\'audio'],
+      ['🔥', 'Tous les niveaux', 'Débutant, Amateur, Avancé — 740 questions'],
+      ['🎵', 'Les 114 sourates', 'Blind Test complet, tous les récitateurs'],
+    ];
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 20px 40px', textAlign: 'center', background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,167,39,0.08) 0%, transparent 70%)' }}>
-        <div style={{ fontSize: 52, marginBottom: 20 }}>🔒</div>
-        <h1 style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 6, letterSpacing: '-0.5px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Accès Pro
-        </h1>
-        <div style={{ marginBottom: 10 }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:22, fontWeight:900, color:'#c8a727' }}>{PRO_ANNUAL}/an</span>
+      <div style={{ minHeight: '100vh', padding: '96px 20px 60px', background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,167,39,0.08) 0%, transparent 70%)', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+        <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center' }}>
+
+          <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: 30, fontWeight: 600, color: '#fff', margin: '0 0 12px', lineHeight: 1.25 }}>
+            Apprendre sans limite
+          </h1>
+          <p style={{ color: 'rgba(240,237,230,0.55)', fontSize: 15.5, lineHeight: 1.6, margin: '0 0 30px' }}>
+            Tout Héritage Musulman, ouvert en permanence.
+          </p>
+
+          {/* Le prix rapporté à la journée. Un abonnement annuel se compare mal
+              dans l'absolu ; ramené au jour, il se compare à des dépenses que
+              chacun connaît. */}
+          <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.09), rgba(200,167,39,0.03))', border: '1px solid rgba(200,167,39,0.28)', borderRadius: 18, padding: '26px 24px', marginBottom: 26 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 7, marginBottom: 6 }}>
+              <span style={{ fontFamily: 'Cinzel, serif', fontSize: 40, fontWeight: 700, color: '#e6c84a', lineHeight: 1 }}>{PRO_ANNUAL}</span>
+              <span style={{ fontSize: 15, color: 'rgba(240,237,230,0.45)' }}>/ an</span>
+            </div>
+            <div style={{ fontSize: 13.5, color: 'rgba(240,237,230,0.5)', marginBottom: 14 }}>
+              soit {PRO_EQ_MONTH}/mois — <strong style={{ color: '#e6c84a' }}>{PRO_PER_DAY} par jour</strong>
+            </div>
+            <ProSavings />
+            {/* La comparaison est factuelle, pas moralisatrice : on met un chiffre
+                en face d'un autre et on laisse la personne conclure. */}
+            <p style={{ fontSize: 15.5, lineHeight: 1.65, color: 'rgba(240,237,230,0.6)', margin: '16px 0 0', fontStyle: 'italic', fontFamily: 'Cormorant Garamond, Georgia, serif' }}>
+              Huit centimes par jour. On dépense davantage sans y penser,
+              pour des choses dont il ne reste rien le lendemain.
+            </p>
+          </div>
+
+          <div style={{ textAlign: 'left', marginBottom: 28 }}>
+            {inclus.map(function (it) {
+              return (
+                <div key={it[1]} style={{ display: 'flex', alignItems: 'flex-start', gap: 13, marginBottom: 15 }}>
+                  <span style={{ width: 36, height: 36, flexShrink: 0, borderRadius: 10, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{it[0]}</span>
+                  <span>
+                    <span style={{ display: 'block', fontSize: 14.5, fontWeight: 800, color: '#f0ede6', lineHeight: 1.35 }}>{it[1]}</span>
+                    <span style={{ display: 'block', fontSize: 13, color: 'rgba(240,237,230,0.45)', lineHeight: 1.45 }}>{it[2]}</span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Ce qui reste quand l'abonnement s'arrête. Le dire ici enlève la
+              peur du piège, qui est le premier frein sur un abonnement annuel. */}
+          <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(240,237,230,0.55)', margin: '0 0 28px' }}>
+            Ce que tu apprends ici te reste, abonné ou non.<br />
+            L'abonnement enlève les limites, il ne retient rien en otage.
+          </p>
+
+          <button onClick={openAuth} style={{ width: '100%', maxWidth: 380, background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '17px 32px', borderRadius: 14, fontSize: 16.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 6px 26px rgba(200,167,39,0.32)', marginBottom: 12 }}>
+            Créer mon compte — 2 jours offerts →
+          </button>
+          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', margin: '0 0 24px' }}>
+            Accès complet pendant 2 jours, sans carte bancaire.<br />
+            Déjà un compte&nbsp;? Ce même bouton te connecte.
+          </p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px 18px', marginBottom: 26 }}>
+            {['Sans engagement', 'Résiliable en 1 clic', 'Remboursé sous 48h'].map(function (t) {
+              return (
+                <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
+                  <span style={{ color: '#4ade80' }}>✓</span>{t}
+                </span>
+              );
+            })}
+          </div>
+
+          <p style={{ fontSize: 13, color: 'rgba(230,200,74,0.75)', fontWeight: 700, margin: '0 0 26px' }}>
+            {MEMBERS_COUNT} membres apprennent déjà ici
+          </p>
+
+          <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', textDecoration: 'underline' }}>
+            Retour à l'accueil
+          </button>
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, marginBottom: 8, maxWidth: 380, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Comprendre le Coran · Quiz illimités · Blind Test complet
-        </p>
-        {/* Cette page est la destination du bouton principal de l'email de
-            bienvenue : ses destinataires ONT déjà un compte, mais arrivent
-            souvent déconnectés (navigateur intégré de Gmail). Le texte doit
-            donc parler aux deux cas, pas seulement aux nouveaux venus. */}
-        <p style={{ color: 'rgba(200,167,39,0.7)', fontSize: 13, marginBottom: 32, fontStyle: 'italic', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-          Connecte-toi pour continuer — ou crée ton compte, c'est gratuit.
-        </p>
-        <button onClick={openAuth} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '16px 40px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 24px rgba(200,167,39,0.35)', marginBottom: 10 }}>
-          Se connecter ou créer un compte
-        </button>
-        <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'8px 14px', marginBottom:14, display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-          <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux en 1 clic</span>
-        </div>
-        <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', textDecoration: 'underline' }}>
-          Retour à l'accueil
-        </button>
       </div>
     );
   }
