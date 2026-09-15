@@ -1735,45 +1735,31 @@ function HeroIcon({ id, color }) {
   </svg>;
 }
 
-/* ── Les trois aperçus, jouables ──
+/* ── Les trois aperçus, non jouables ──
 
-   Ils se regardaient : les mots s'allumaient seuls, la bonne réponse
-   s'illuminait au bout de 1,7 s. Le visiteur restait spectateur jusqu'au clic,
-   et le clic est justement ce qu'on lui demande de risquer en premier.
+   Ils se touchaient : le visiteur pouvait finir la démo tout seul, dans le
+   hero, avant même d'avoir cliqué sur quoi que ce soit — au risque d'être
+   rassasié par l'aperçu et de ne jamais aller plus loin.
 
-   Ils se touchent maintenant. Répondre juste dans le hero, avant même d'avoir
-   cliqué sur quoi que ce soit, c'est le premier engagement — et un visiteur qui
-   a déjà agi une fois clique bien plus volontiers la seconde.
-
-   L'animation automatique reste, mais uniquement pour Comprendre et seulement
-   tant que personne n'a touché : elle montre le principe à qui ne fait rien.
-   Les deux autres n'ont plus de révélation automatique — dévoiler la réponse
-   tout seul, c'est retirer le jeu à celui qui allait jouer. */
+   Ils se regardent à nouveau. Les mots s'allument seuls, la bonne réponse
+   s'illumine au bout d'un court délai. Le visiteur reste spectateur ; le
+   seul geste qui avance, c'est le clic sur le bouton d'action en dessous. */
 
 function HeroPeekComprendre({ live }) {
   const [open, setOpen] = React.useState({});
-  const touchedRef = React.useRef(false);
 
   React.useEffect(function () {
-    if (!live) { setOpen({}); touchedRef.current = false; return; }
+    if (!live) { setOpen({}); return; }
     setOpen({});
-    touchedRef.current = false;
-    /* Démonstration automatique après 2,2 s d'inaction seulement : celui qui
-       touche garde la main, celui qui regarde voit quand même le principe. */
     let i = 0;
     const id = setInterval(function () {
-      if (touchedRef.current || i >= HERO_VERSE.length) { clearInterval(id); return; }
+      if (i >= HERO_VERSE.length) { clearInterval(id); return; }
       const k = i;
       setOpen(function (o) { const c = Object.assign({}, o); c[k] = 1; return c; });
       i += 1;
     }, 620);
     return function () { clearInterval(id); };
   }, [live]);
-
-  const reveal = function (i) {
-    touchedRef.current = true;
-    setOpen(function (o) { const c = Object.assign({}, o); c[i] = 1; return c; });
-  };
 
   const done = HERO_VERSE.filter(function (w, i) { return open[i]; });
   const pct = done.reduce(function (s, w) { return s + w.n; }, 0) / HERO_TOTAL_WORDS * 100;
@@ -1783,18 +1769,16 @@ function HeroPeekComprendre({ live }) {
     <div className="peek peek-cmp">
       <p className="peek-q">
         {all ? <span className="peek-win">Ces 4 mots reviennent 2 683 fois dans le Coran.</span>
-             : 'Touche un mot pour le comprendre.'}
+             : 'Comprends, mot après mot.'}
       </p>
       <div className="peek-words" dir="rtl">
         {HERO_VERSE.map(function (w, i) {
           const on = !!open[i];
           return (
-            <button key={i} type="button" className={'peek-word' + (on ? ' on' : '')}
-              aria-label={w.ar + ' — ' + (on ? w.fr : 'toucher pour traduire')}
-              onClick={function () { reveal(i); }}>
+            <span key={i} className={'peek-word' + (on ? ' on' : '')} aria-hidden="true">
               <span className="pw-ar">{w.ar}</span>
               <span className="pw-fr">{w.fr}</span>
-            </button>
+            </span>
           );
         })}
       </div>
@@ -1826,8 +1810,10 @@ function HeroPeekBlindTest({ live }) {
   }, []);
 
   React.useEffect(function () {
-    if (!live) { setPick(-1); stop(); }
-    return stop;
+    if (!live) { setPick(-1); stop(); return; }
+    setPick(-1);
+    const id = setTimeout(function () { setPick(HERO_BT.correct); }, 1800);
+    return function () { clearTimeout(id); stop(); };
   }, [live, stop]);
 
   const play = function () {
@@ -1847,8 +1833,6 @@ function HeroPeekBlindTest({ live }) {
   };
 
   const answered = pick >= 0;
-  const won = pick === HERO_BT.correct;
-
   return (
     <div className="peek peek-bt">
       <button type="button" className={'bt-play' + (playing ? ' on' : '')} onClick={play}
@@ -1862,21 +1846,17 @@ function HeroPeekBlindTest({ live }) {
       </button>
       <p className="peek-q">
         {answered
-          ? <span className={won ? 'peek-win' : 'peek-lose'}>
-              {won ? 'Bien vu — c’était Ar-Rahmân.' : 'C’était Ar-Rahmân. 113 autres t’attendent.'}
-            </span>
-          : 'Quelle sourate écoutes-tu ?'}
+          ? <span className="peek-win">C’était Ar-Rahmân. 113 autres t’attendent.</span>
+          : 'Quelle sourate écoutes-tu ?'}
       </p>
       <div className="peek-grid">
         {HERO_BT.options.map(function (o, i) {
           const good = answered && i === HERO_BT.correct;
-          const bad = answered && i === pick && !won;
           return (
-            <button key={o} type="button" disabled={answered}
-              className={'peek-opt' + (good ? ' good' : '') + (bad ? ' bad' : '')}
-              onClick={function () { setPick(i); }}>
-              {o}{good ? <b>✓</b> : null}{bad ? <b className="ko">✕</b> : null}
-            </button>
+            <span key={o} aria-hidden="true"
+              className={'peek-opt' + (good ? ' good' : '')}>
+              {o}{good ? <b>✓</b> : null}
+            </span>
           );
         })}
       </div>
@@ -1887,10 +1867,14 @@ function HeroPeekBlindTest({ live }) {
 /* ── Aperçu 3 : Quiz ── */
 function HeroPeekQuiz({ live }) {
   const [pick, setPick] = React.useState(-1);
-  React.useEffect(function () { if (!live) setPick(-1); }, [live]);
+  React.useEffect(function () {
+    if (!live) { setPick(-1); return; }
+    setPick(-1);
+    const id = setTimeout(function () { setPick(HERO_QUIZ.correct); }, 1800);
+    return function () { clearTimeout(id); };
+  }, [live]);
 
   const answered = pick >= 0;
-  const won = pick === HERO_QUIZ.correct;
 
   return (
     <div className="peek peek-quiz">
@@ -1898,21 +1882,17 @@ function HeroPeekQuiz({ live }) {
       <div className="peek-grid">
         {HERO_QUIZ.choices.map(function (c, i) {
           const good = answered && i === HERO_QUIZ.correct;
-          const bad = answered && i === pick && !won;
           return (
-            <button key={c} type="button" disabled={answered}
-              className={'peek-opt' + (good ? ' good' : '') + (bad ? ' bad' : '')}
-              onClick={function () { setPick(i); }}>
-              {c}{good ? <b>✓</b> : null}{bad ? <b className="ko">✕</b> : null}
-            </button>
+            <span key={c} aria-hidden="true"
+              className={'peek-opt' + (good ? ' good' : '')}>
+              {c}{good ? <b>✓</b> : null}
+            </span>
           );
         })}
       </div>
       <p className="peek-foot">
         {answered
-          ? <span className={won ? 'peek-win' : 'peek-lose'}>
-              {won ? 'Juste. Il en reste 739.' : '25 prophètes. Il en reste 739 à tenter.'}
-            </span>
+          ? <span className="peek-win">Juste. Il en reste 739.</span>
           : <span>740 questions · 3 niveaux</span>}
       </p>
     </div>
