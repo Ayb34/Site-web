@@ -38,12 +38,19 @@ function dateFr(ms) {
 
 /* Le lien porte son origine : le site l'écrit dans Firestore sur le compte de
    l'inscrit. C'est ce qui permettra de dire lequel des trois e-mails a produit
-   des abonnements, plutôt que de le supposer. */
-function lien(campagne, chemin) {
-  return SITE + (chemin || '/') + '?utm_source=email&utm_medium=lifecycle&utm_campaign=' + campagne;
+   des abonnements, plutôt que de le supposer.
+
+   L'ordre `?requête` PUIS `#page` n'est pas cosmétique. L'inverse — écrire
+   `/#comprendre?utm_source=…` — plaçait tout dans le fragment : le routeur
+   cherchait une page nommée « comprendre?utm_source=email&… », ne la trouvait
+   pas et affichait une 404, pendant que l'attribution, qui lit
+   `location.search`, ne voyait rien. */
+function lien(campagne, page) {
+  const requete = '?utm_source=email&utm_medium=lifecycle&utm_campaign=' + campagne;
+  return SITE + '/' + requete + (page ? '#' + page : '');
 }
 
-function bouton(url, texte, campagne) {
+function bouton(url, texte) {
   return `
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
     <tr><td align="center" bgcolor="${OR}" style="border-radius:10px;">
@@ -139,7 +146,7 @@ function emailBienvenue(prenom, finMs) {
       <h1 style="${h1}">Tout le site t'est ouvert<br>jusqu'à <span style="color:${OR_CLAIR};">${dateFr(finMs)}</span>.</h1>
       <p style="${p}">Aucune carte n'a été demandée, il n'y a donc rien à résilier. À la fin des deux jours, ton compte redevient simplement gratuit.</p>
       <p style="${p}">Une seule chose à faire maintenant, et elle prend quatre minutes : <strong style="color:${TEXTE};">Al-Fâtiha, mot à mot</strong>. Tu la récites dans chaque prière — tu vas enfin voir ce que chaque mot veut dire.</p>
-      ${bouton(lien('trial_welcome', '/#comprendre'), 'Commencer par Al-Fâtiha', 'trial_welcome')}
+      ${bouton(lien('trial_welcome', 'comprendre'), 'Commencer par Al-Fâtiha')}
       <p style="${petit}padding-top:22px;">Ensuite, si tu veux : 38 sourates en mot-à-mot, 740 questions de quiz sur trois niveaux, et les 114 sourates du Blind Test.</p>
       `
     ),
@@ -163,7 +170,7 @@ function emailDernierJour(prenom, finMs) {
       )}
       <p style="${p}">Si tu veux garder l'accès entier, c'est maintenant qu'il faut le dire — demain le site aura déjà changé.</p>
       ${PRIX}
-      ${bouton(lien('trial_d1', '/#subscription'), 'Garder l\'accès complet', 'trial_d1')}
+      ${bouton(lien('trial_d1', 'subscription'), 'Garder l\'accès complet')}
       <p style="${petit}padding-top:20px;">Résiliable en un clic, remboursé sous 48 h.</p>
       `
     ),
@@ -187,7 +194,7 @@ function emailFin(prenom) {
       )}
       <p style="${p}">Si les deux jours t'ont servi, l'abonnement rouvre tout. Sinon, reviens quand tu veux : la partie du jour t'attend, et elle restera gratuite.</p>
       ${PRIX}
-      ${bouton(lien('trial_end', '/#subscription'), 'Rouvrir tout le site', 'trial_end')}
+      ${bouton(lien('trial_end', 'subscription'), 'Rouvrir tout le site')}
       <p style="${petit}padding-top:20px;">Huit centimes par jour. On dépense davantage sans y penser, pour des choses dont il ne reste rien le lendemain.</p>
       `
     ),
