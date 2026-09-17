@@ -398,6 +398,27 @@
     padding: 84px 18px calc(18px + var(--cookiebar));
     overflow: hidden;
   }
+
+  /* Fond photographique du hero — desktop uniquement pour l'instant.
+     Deux voiles par-dessus l'image, et ils ne sont pas decoratifs : le radial
+     assombrit le centre pour que le titre garde son contraste sur l'arche, le
+     lineaire fond le bas dans la couleur de page pour qu'aucune couture
+     n'apparaisse a la jonction avec la section suivante. */
+  .hero-bg { display: none; }
+  @media (min-width: 769px) {
+    .hero-bg {
+      display: block; position: absolute; inset: 0;
+      z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(to bottom, rgba(3,17,10,0.55) 0%, rgba(3,17,10,0.12) 24%, rgba(3,17,10,0.62) 80%, #03110a 100%),
+        radial-gradient(ellipse 50% 56% at 50% 50%, rgba(3,17,10,0.62) 0%, rgba(3,17,10,0.30) 50%, transparent 78%),
+        url('uploads/hero-mosquee.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  }
+
   /* Trois halos empiles, un par activite : on fond l'opacite au lieu de
      repeindre le degrade. */
   .hero-glow {
