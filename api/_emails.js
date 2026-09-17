@@ -92,6 +92,12 @@ function coquille(preheader, corps) {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:520px;">
 
     <tr><td align="center" style="padding-bottom:26px;">
+      <!-- PNG transparent, et non aplati sur le fond. Gmail sur mobile ajuste
+           les couleurs de fond de l'e-mail mais ne touche pas aux images : une
+           tuile opaque cessait de correspondre au fond decale et se voyait
+           comme un rectangle vert. La transparence s'adapte a ce que le client
+           decide de peindre. Le mot-symbole est dore a 86 %, donc il survit
+           meme chez un client qui imposerait un fond blanc. -->
       <img src="${SITE}/uploads/logo-email.png" width="150" height="127"
         alt="Héritage Musulman"
         style="display:block;width:150px;height:auto;border:0;outline:none;text-decoration:none;">
