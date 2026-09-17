@@ -1999,6 +1999,10 @@ function Hero({ navigate }) {
           <em>Pas forcément à l'école.</em>
         </h1>
 
+        {/* Onglets et apercu forment un seul bloc : sur grand ecran ils passent
+            ensemble dans la colonne de droite, ou la demo devient le sujet de
+            l'ecran. L'ordre du DOM ne bouge pas, donc le mobile est inchange. */}
+        <div className="hero-demo">
         {/* Onglets : le visiteur voit d'un coup d'œil tout ce que contient le site */}
         <div className="hero-tabs" role="tablist" aria-label="Les activités du site">
           {HERO_TABS.map(function (t, i) {
@@ -2020,6 +2024,7 @@ function Hero({ navigate }) {
           {tab === 0 && <HeroPeekComprendre live={tab === 0} />}
           {tab === 1 && <HeroPeekBlindTest live={tab === 1} />}
           {tab === 2 && <HeroPeekQuiz live={tab === 2} />}
+        </div>
         </div>
 
         {/* Le bouton emprunte la couleur de l'onglet actif jusque dans son ombre

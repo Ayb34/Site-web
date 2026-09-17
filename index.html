@@ -427,6 +427,11 @@
   }
   .hero-h1 em { font-style: italic; color: #e6c84a; }
 
+  /* Regroupe onglets + apercu. En colonne flex et non en bloc : les marges des
+     enfants ne se replient pas au travers d'un conteneur flex, donc les 11 px
+     et 18 px d'origine s'appliquent au pixel pres et le mobile est inchange. */
+  .hero-demo { width: 100%; display: flex; flex-direction: column; }
+
   /* ── Onglets ── */
   .hero-tabs { display: flex; gap: 7px; width: 100%; margin-bottom: 11px; }
   .hero-tab {
@@ -771,6 +776,46 @@
     .hh-src { font-size: 11.5px; }
     .hh-src::before, .hh-src::after { width: 34px; }
   }
+  /* ── Grand ecran : deux colonnes ──
+     Le hero etait une colonne de 640 px centree au milieu d'un ecran de 1440 :
+     les deux tiers de la largeur ne servaient a rien. Le texte tient la gauche,
+     la demo prend la droite et devient le sujet de l'ecran au lieu d'une
+     vignette sous le titre. Elle est vivante et cliquable — c'est le produit,
+     pas une capture qui se perimerait.
+
+     Seuil a 1024 et non 769 : entre les deux, deux colonnes serreraient a la
+     fois le titre et la demo, et la version centree reste meilleure.
+
+     Les deux rangees vides en 1fr encadrent le bloc de texte pour le centrer
+     verticalement contre la demo, plus haute que lui. Sans elles, la grille
+     distribuait le jeu entre les lignes du texte et les ecartait. */
+  @media (min-width: 1024px) {
+    .hero-inner {
+      display: grid; max-width: 1140px; text-align: left;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
+      grid-template-areas:
+        ".      demo"
+        "kicker demo"
+        "title  demo"
+        "cta    demo"
+        "sub    demo"
+        ".      demo"
+        "scroll scroll";
+      grid-template-rows: 1fr auto auto auto auto 1fr auto;
+      column-gap: 62px;
+      justify-items: start; align-items: start;
+    }
+    .hero-kicker { grid-area: kicker; }
+    .hero-h1 { grid-area: title; font-size: clamp(44px, 4.3vw, 60px); margin-bottom: 32px; }
+    .hero-demo { grid-area: demo; align-self: center; }
+    .hero-cta { grid-area: cta; }
+    .hero-sub { grid-area: sub; justify-content: flex-start; }
+    .hero-scroll { grid-area: scroll; justify-self: center; margin-top: 26px; }
+
+    /* La demo est desormais le sujet : elle respire. */
+    .hero-panel { height: 336px; padding: 22px 26px 24px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .peek { animation: none; }
     .hero-eq i, .bt-wave i { animation: none; height: 11px !important; }
