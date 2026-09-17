@@ -317,7 +317,7 @@ function hmTrialEndDate() {
 function hmTrialEndPending(user) {
   if (!user || !user.uid) return false;
   if (!hmTrialStartedAt(user)) return false;
-  if (hmTrialLeft(user) > 0) return false;
+  if (hmAccessLeft(user) > 0) return false;
   /* Seuls ceux qui ont vu l'essai s'ouvrir ont quelque chose à perdre : sans
      ça, un compte créé avant la refonte lirait « ton essai est terminé » pour
      un essai qui n'a jamais existé. */
@@ -336,6 +336,38 @@ function hmTrialLeft(user) {
   if (!started) return 0;
   const left = HM_TRIAL_DAYS * 86400000 - (Date.now() - started);
   return left > 0 ? Math.ceil(left / 86400000) : 0;
+}
+
+/* ── Réouverture exceptionnelle pour les membres d'avant ──
+
+   L'essai de 2 jours ne se déclenche qu'à la création du compte : les ~230
+   membres inscrits avant la refonte n'y ont donc jamais eu droit, et sont au
+   régime gratuit sans avoir jamais vu ce qu'ils manquent.
+
+   Cette fenêtre leur rouvre tout le site pendant deux jours. Elle existe pour
+   qu'un e-mail puisse le leur annoncer SANS mentir — annoncer un accès qu'on
+   n'a pas ouvert se découvre au premier clic, et une liste ne se brûle qu'une
+   fois.
+
+   Elle s'éteint d'elle-même à la date de fin : aucune intervention à prévoir,
+   et rien à nettoyer ensuite. */
+const HM_REOPEN_START = new Date(2026, 8, 17, 0, 0, 0).getTime();
+const HM_REOPEN_END = new Date(2026, 8, 20, 0, 0, 0).getTime();
+
+function hmReopenLeft(user) {
+  const created = hmTrialStartedAt(user);
+  /* Réservée aux comptes antérieurs : un nouvel inscrit a déjà son essai, lui
+     ajouter cette fenêtre lui donnerait cinq jours au lieu de deux. */
+  if (!created || created >= HM_REOPEN_START) return 0;
+  const now = Date.now();
+  if (now < HM_REOPEN_START || now >= HM_REOPEN_END) return 0;
+  return Math.ceil((HM_REOPEN_END - now) / 86400000);
+}
+
+/* Le plus généreux des deux l'emporte : les deux fenêtres ne se cumulent
+   jamais, elles se recouvrent au pire. */
+function hmAccessLeft(user) {
+  return Math.max(hmTrialLeft(user), hmReopenLeft(user));
 }
 
 /* ── Régime hérité ── */
@@ -9024,13 +9056,16 @@ function App() {
     if (!user) { setTrialLeft(0); return; }
     /* Attendre le statut Pro : sinon un abonné qui se reconnecte se verrait
        offrir un essai le temps que Firestore réponde. */
-    if (!proResolved || isPro) { setTrialLeft(hmTrialLeft(user)); return; }
+    if (!proResolved || isPro) { setTrialLeft(hmAccessLeft(user)); return; }
+    /* L'ecran de bienvenue et son e-mail ne concernent que le VRAI essai, celui
+       d'une inscription : les rouvrir a la fenetre exceptionnelle enverrait un
+       « bienvenue » a des membres de longue date. */
     if (hmTrialLeft(user) > 0 && hmWelcomePending(user.uid)) {
       hmWelcomeSeen(user.uid);
       setShowTrialWelcome(true);
       hmSendWelcomeEmail();
     }
-    var tick = function () { setTrialLeft(hmTrialLeft(user)); };
+    var tick = function () { setTrialLeft(hmAccessLeft(user)); };
     tick();
     var id = setInterval(tick, 60000);
     return function () { clearInterval(id); };

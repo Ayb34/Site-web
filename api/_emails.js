@@ -136,18 +136,18 @@ const petit = `font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height
 /* Deux colonnes « ce qui reste / ce qui ferme ». Nommer ce qui reste ouvert
    avant ce qui se ferme n'est pas de la politesse : un lecteur qui croit tout
    perdre ferme l'onglet, et personne ne paie pour un site qu'il a quitté. */
-function colonnes(garde, perd) {
+function colonnes(garde, perd, titreGarde, titrePerd) {
   const item = (t, c) => `<tr><td style="padding:3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;color:${c};">${t}</td></tr>`;
   return `
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:4px 0 22px;">
     <tr><td style="padding-bottom:14px;">
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1.5px;color:#4ade80;padding-bottom:6px;">CE QUI TE RESTE</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1.5px;color:#4ade80;padding-bottom:6px;">${titreGarde || 'CE QUI TE RESTE'}</div>
       <table role="presentation" cellpadding="0" cellspacing="0" border="0">${garde.map(t => item('✓ ' + t, '#c9d6ce')).join('')}</table>
     </td></tr>
-    <tr><td>
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1.5px;color:${OR};padding-bottom:6px;">CE QUI SE REFERME</div>
+    ${perd.length ? `<tr><td>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:1.5px;color:${OR};padding-bottom:6px;">${titrePerd || 'CE QUI SE REFERME'}</div>
       <table role="presentation" cellpadding="0" cellspacing="0" border="0">${perd.map(t => item('· ' + t, DOUX)).join('')}</table>
-    </td></tr>
+    </td></tr>` : ''}
   </table>`;
 }
 
@@ -226,6 +226,38 @@ function emailFin(prenom) {
   };
 }
 
+/* ── Réouverture — campagne unique vers les membres d'avant ──
+
+   Pas un des trois e-mails de la séquence : ceux-là parlent d'un essai ouvert à
+   l'inscription, ce que ces membres n'ont jamais eu. Leur envoyer « ton accès
+   ferme demain » serait faux, et se découvrirait au premier clic.
+
+   Celui-ci n'est vrai que parce que la fenêtre existe vraiment dans le code —
+   voir HM_REOPEN_START dans src/app.jsx. L'angle est là : c'est déjà actif,
+   il n'y a rien à faire, rien à saisir. */
+function emailReouverture(finTexte) {
+  return {
+    subject: 'On t\'a rouvert tout le site jusqu\'à ' + finTexte,
+    html: coquille(
+      'C\'est déjà actif sur ton compte — rien à faire, aucune carte.',
+      `
+      <p style="${p}">As-salāmu ʿalaykum,</p>
+      <h1 style="${h1}">Tout le site t'est ouvert<br>jusqu'à <span style="color:${OR_CLAIR};">${finTexte}</span>.</h1>
+      <p style="${p}">Tu as créé un compte sur Héritage Musulman, mais l'accès complet ne s'est jamais ouvert pour toi. C'est réparé : <strong style="color:${TEXTE};">tout est déverrouillé sur ton compte dès maintenant</strong>. Rien à faire, rien à saisir, aucune carte bancaire.</p>
+      ${colonnes(
+        ['Le Juz ʿAmma complet — 38 sourates mot à mot', 'Les 740 questions, du Débutant à l\'Avancé', 'Les 114 sourates du Blind Test', 'Aucune limite quotidienne'],
+        [],
+        'CE QUI EST OUVERT'
+      )}
+      <p style="${p}">Si tu ne fais qu'une seule chose : <strong style="color:${TEXTE};">Al-Fâtiha, mot à mot</strong>. Quatre minutes. Tu la récites dans chaque prière — tu ne la réciteras plus jamais de la même façon.</p>
+      ${bouton(lien('reouverture', 'comprendre'), 'Ouvrir Al-Fâtiha')}
+      <p style="${petit}padding-top:22px;">Après ${finTexte}, ton compte redevient gratuit et ta progression reste intacte. Si tu veux garder l'accès entier :</p>
+      ${PRIX}
+      `
+    ),
+  };
+}
+
 /* Envoi transactionnel Brevo. `fetch` est natif sur le runtime Node de Vercel.
    On renvoie une erreur parlante : un échec silencieux sur un envoi d'e-mail se
    remarque des semaines plus tard, quand personne ne se souvient de rien. */
@@ -254,6 +286,7 @@ async function envoyer(destinataire, prenom, message) {
 module.exports = {
   TRIAL_DAYS: 2,
   emailBienvenue,
+  emailReouverture,
   emailDernierJour,
   emailFin,
   envoyer,
