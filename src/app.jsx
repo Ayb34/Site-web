@@ -599,8 +599,13 @@ function ProGateModal({ onClose, navigate, reason }) {
 }
 
 /* --- Auth Modal --- */
-function AuthModal({ onClose }) {
-  const [tab, setTab] = useState('signup');
+function AuthModal({ onClose, initialTab }) {
+  /* L'onglet d'ouverture suit le bouton qui a ouvert la modale : « Connexion »
+     doit montrer le formulaire de connexion, pas celui d'inscription. La
+     modale est demontee a la fermeture, donc cet etat initial est relu a
+     chaque ouverture. Inscription reste le defaut : c'est ce que veut la
+     majorite des visiteurs. */
+  const [tab, setTab] = useState(initialTab === 'login' ? 'login' : 'signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -1546,7 +1551,7 @@ function Navbar({ navigate }) {
             </>
           ) : (
             <>
-              <button onClick={openAuth} style={{
+              <button onClick={() => openAuth('login')} style={{
                 background: 'transparent', border: '1.5px solid rgba(255,255,255,0.25)',
                 color: '#fff', padding: '8px 16px', borderRadius: 8,
                 fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
@@ -1642,13 +1647,13 @@ function Navbar({ navigate }) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button onClick={() => { setMenuOpen(false); openAuth(); }} style={{
+            <button onClick={() => { setMenuOpen(false); openAuth('signup'); }} style={{
               background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
               border: 'none', color: '#1c1200', padding: '15px', borderRadius: 12,
               fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
               letterSpacing: '-0.2px'
-            }}>✦ S'abonner — {PRO_ANNUAL}/an</button>
-            <button onClick={() => { setMenuOpen(false); openAuth(); }} style={{
+            }}>S'inscrire</button>
+            <button onClick={() => { setMenuOpen(false); openAuth('login'); }} style={{
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
               color: 'rgba(255,255,255,0.7)', padding: '13px', borderRadius: 12, fontSize: 14, fontWeight: 600,
               cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif'
@@ -8785,6 +8790,7 @@ function App() {
      ne pousse personne à s'abonner. */
   const [trialLeft, setTrialLeft] = React.useState(0);
   const [showAuth, setShowAuth] = React.useState(false);
+  const [authMode, setAuthMode] = React.useState('signup');
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
   const [showTrialWelcome, setShowTrialWelcome] = React.useState(false);
   // Méthode de paiement demandée par un visiteur non connecté : compte requis
@@ -9003,7 +9009,11 @@ function App() {
     trialLeft,
     legacy: hmIsLegacy(user),
     logout: () => window._auth && window._auth.signOut(),
-    openAuth: () => setShowAuth(true),
+    /* `openAuth` est souvent passe directement en gestionnaire de clic, et
+       recoit alors l'evenement en premier argument. On ne reconnait donc que
+       la chaine 'login' : tout le reste — evenement compris — ouvre sur
+       l'inscription, qui est le defaut voulu. */
+    openAuth: (mode) => { setAuthMode(mode === 'login' ? 'login' : 'signup'); setShowAuth(true); },
     checkoutIntent: !!pendingCheckout,
     openQuickCheckout: (method) => {
       if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
@@ -9027,7 +9037,7 @@ function App() {
 
   const wrap = (children) => (
     <AuthContext.Provider value={authCtx}>
-      {showAuth && <AuthModal onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
+      {showAuth && <AuthModal initialTab={authMode} onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
       {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} navigate={navigate} />}
       <div className="nav-progress" aria-hidden="true" />
