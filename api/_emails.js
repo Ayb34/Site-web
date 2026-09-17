@@ -84,6 +84,18 @@ function coquille(preheader, corps) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Héritage Musulman</title>
+<style>
+  /* Le logo est retire sous 600 px : sur un ecran etroit il occupait le tiers
+     du premier coup d'oeil pour ne rien dire que le texte ne dise deja.
+
+     Gmail respecte les blocs <style> et les media queries depuis 2016 pour les
+     comptes Google — donc la regle s'applique la ou le probleme se pose. Les
+     clients qui suppriment le bloc gardent le logo affiche : c'est le bon sens
+     du repli, on ne perd jamais l'identite, on la montre seulement partout. */
+  @media only screen and (max-width: 600px) {
+    .entete-logo { display: none !important; }
+  }
+</style>
 </head>
 <body bgcolor="${FOND}" style="margin:0;padding:0;background-color:${FOND};">
 <div style="display:none;font-size:1px;color:${FOND};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</div>
@@ -91,7 +103,7 @@ function coquille(preheader, corps) {
 <tr><td align="center" bgcolor="${FOND}" style="background-color:${FOND};padding:32px 16px 44px;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:520px;">
 
-    <tr><td align="center" style="padding-bottom:26px;">
+    <tr class="entete-logo"><td align="center" style="padding-bottom:26px;">
       <!-- PNG transparent, et non aplati sur le fond. Gmail sur mobile ajuste
            les couleurs de fond de l'e-mail mais ne touche pas aux images : une
            tuile opaque cessait de correspondre au fond decale et se voyait
