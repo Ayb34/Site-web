@@ -36,7 +36,13 @@ module.exports = async (req, res) => {
 
   const envoyes = [];
   const erreurs = [];
+  const liens = [];
   for (const [nom, message] of lot) {
+    /* On renvoie l'URL du bouton avec chaque envoi. Sans elle, vérifier qu'un
+       lien est correct oblige à ouvrir une boîte de réception, et on ne sait
+       même pas si le déploiement en cours porte bien la version qu'on teste. */
+    const m = message.html.match(/https:\/\/heritage-musulman\.com[^"]+/);
+    if (m) liens.push(nom + ' → ' + m[0]);
     try {
       await envoyer(to, prenom, message);
       envoyes.push(nom + ' — ' + message.subject);
@@ -45,5 +51,5 @@ module.exports = async (req, res) => {
     }
   }
 
-  res.status(erreurs.length ? 500 : 200).json({ to, envoyes, erreurs });
+  res.status(erreurs.length ? 500 : 200).json({ to, envoyes, liens, erreurs });
 };
