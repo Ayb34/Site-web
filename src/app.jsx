@@ -176,12 +176,6 @@ function ArabesqueDivider({ color = 'rgba(200,167,39,0.25)' }) {
 
 }
 
-/* Fenetre sur la pierre entre deux sections. Le systeme de reveal l'observe
-   comme un bloc ordinaire ; le rai d'or la traverse a l'apparition. */
-function ZelligeBand() {
-  return <div className="zellige-band" aria-hidden="true"><i /></div>;
-}
-
 /* --- Auth Context --- */
 const AuthContext = React.createContext(null);
 function useAuth() { return React.useContext(AuthContext); }
@@ -2024,7 +2018,7 @@ function Hero({ navigate }) {
             return (
               <button key={t.id} role="tab" aria-selected={on} type="button"
                 className={'hero-tab' + (on ? ' on' : '')}
-                style={on ? { borderColor: 'rgba(' + t.rgb + ',0.65)', background: 'rgba(' + t.rgb + ',0.12)' } : null}
+                style={on ? { borderColor: 'rgba(' + t.rgb + ',0.65)', background: 'linear-gradient(rgba(' + t.rgb + ',0.16), rgba(' + t.rgb + ',0.16)), #06170d' } : null}
                 onClick={function () { take(i); }}>
                 <HeroIcon id={t.id} color={on ? t.color : 'rgba(255,255,255,0.5)'} />
                 <span style={on ? { color: t.color } : null}>{t.label}</span>
@@ -8865,7 +8859,7 @@ function App() {
   }, [page, navKey]);
 
   useEffect(() => {
-    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line, .zellige-band';
+    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line';
     const seen = new WeakSet();
 
     const revealObs = new IntersectionObserver((entries) => {
@@ -8941,7 +8935,7 @@ function App() {
   // Re-trigger reveal when navigating back to home (new DOM elements after page switch)
   React.useEffect(() => {
     if (page !== 'home') return;
-    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line, .zellige-band';
+    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line';
     function forceRevealInViewport() {
       const vh = window.innerHeight + 60;
       document.querySelectorAll(CLASSES).forEach((el) => {
@@ -9115,15 +9109,12 @@ function App() {
           <ComprendreSection navigate={navigate} />
         </Reveal>
         <FeatureCards navigate={navigate} />
-        <ZelligeBand />
         <LearnPlaySection navigate={navigate} />
         <Testimonials />
         <StatsBar />
-        <ZelligeBand />
         <HowItWorksSection />
         <ParcoursSection />
         <ImportanceSection />
-        <ZelligeBand />
         <ComparisonTable navigate={navigate} />
         <FaqSection />
         <SoftPaywall navigate={navigate} />
