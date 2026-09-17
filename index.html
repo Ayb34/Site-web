@@ -791,8 +791,13 @@
      distribuait le jeu entre les lignes du texte et les ecartait. */
   @media (min-width: 1024px) {
     .hero-inner {
-      display: grid; max-width: 1140px; text-align: left;
-      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
+      display: grid; max-width: 1220px; text-align: left;
+      /* Etire la grille sur toute la hauteur du hero : les deux rangees en 1fr
+         s'ouvrent, le bloc de texte et la demo restent centres, et le repere de
+         defilement descend se poser au bas de l'ecran au lieu de flotter au
+         milieu du vide. */
+      align-self: stretch;
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
       grid-template-areas:
         ".      demo"
         "kicker demo"
@@ -802,18 +807,33 @@
         ".      demo"
         "scroll scroll";
       grid-template-rows: 1fr auto auto auto auto 1fr auto;
-      column-gap: 62px;
+      column-gap: 64px;
       justify-items: start; align-items: start;
     }
     .hero-kicker { grid-area: kicker; }
     .hero-h1 { grid-area: title; font-size: clamp(44px, 4.3vw, 60px); margin-bottom: 32px; }
     .hero-demo { grid-area: demo; align-self: center; }
     .hero-cta { grid-area: cta; }
-    .hero-sub { grid-area: sub; justify-content: flex-start; }
-    .hero-scroll { grid-area: scroll; justify-self: center; margin-top: 26px; }
+    /* Les quatre acquis demandent 510 px et la colonne en fait 507 : a 20 px
+       d'ecart le compteur de membres tombait seul sur une deuxieme ligne. */
+    .hero-sub { grid-area: sub; justify-content: flex-start; gap: 4px 15px; }
+    /* align-self: end colle le repere au bas de sa rangee, qui est la derniere
+       d'une grille desormais etiree sur toute la hauteur du hero. */
+    .hero-scroll { grid-area: scroll; justify-self: center; align-self: end; margin-top: 26px; }
 
-    /* La demo est desormais le sujet : elle respire. */
-    .hero-panel { height: 336px; padding: 22px 26px 24px; }
+    /* La demo est le sujet de l'ecran : elle prend la hauteur disponible plutot
+       qu'une valeur figee, pour que les grands ecrans ne se terminent pas sur
+       deux cents pixels de vide. Bornee en haut : au-dela, les apercus qui la
+       remplissent flotteraient dans un cadre trop grand. */
+    .hero-panel { height: clamp(336px, 38vh, 408px); padding: 24px 28px 26px; }
+    /* Le contenu suit l'agrandissement du cadre, sinon il y nage. */
+    .peek-q { font-size: 18px; }
+    .peek-q-lg { font-size: 19.5px; }
+    .pw-ar { font-size: 30px; }
+    .pw-fr { font-size: 11.5px; }
+    .peek-opt { font-size: 15.5px; padding: 13px; }
+    .peek-foot { font-size: 13.5px; }
+    .peek-foot strong { font-size: 22px; }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -1987,15 +1987,20 @@ function Hero({ navigate }) {
       })}
 
       <div className="hero-inner">
-        <p className="hero-kicker"><span className="hk-rule" />Apprendre l'islam autrement<span className="hk-rule" /></p>
+        {/* Le surtitre porte desormais le concret que le titre abandonne : il
+            nomme les trois activites au lieu de repeter la promesse. */}
+        <p className="hero-kicker"><span className="hk-rule" />Coran · Quiz · Blind Test<span className="hk-rule" /></p>
 
-        {/* Le titre nomme le sujet. « L'islam s'apprend » disait la promesse
-            sans dire de quoi il s'agit : un visiteur venu d'une publicite lisait
-            « apprendre » sans savoir apprendre quoi. « Le Coran » est concret, et
-            c'est ce que les trois activites ont en commun — on le comprend mot a
-            mot, on reconnait ses sourates, on est interroge dessus. */}
+        {/* « Le Coran s'apprend » retrecissait l'offre : les 740 questions du
+            quiz portent sur la sira, la croyance, les piliers — pas seulement
+            sur le Coran. Le titre revient donc au sujet entier.
+
+            Ce qui avait motive « Le Coran » — un titre trop vague pour un
+            visiteur venu d'une publicite — est regle autrement : la demo occupe
+            maintenant la moitie de l'ecran et nomme les trois activites, et le
+            surtitre les enumere. Le concret est montre plutot qu'annonce. */}
         <h1 className="hero-h1">
-          Le Coran s'apprend.<br />
+          L'islam s'apprend.<br />
           <em>Pas forcément à l'école.</em>
         </h1>
 
