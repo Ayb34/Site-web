@@ -845,6 +845,139 @@
     .hero-next { opacity: 1; transform: none; transition: none; }
     .hero-next-sep { transform: scaleX(1); transition: none; }
     .hero-next.in .hero-hadith { animation: none; }
+    body::after, .hero-glow.on { animation: none; }
+    .zellige-band > i { display: none; }
+    .arabesque path { stroke-dashoffset: 0 !important; }
+    .arabesque circle { opacity: 1 !important; }
+    .page-enter, .page-enter > main { animation: none; }
+  }
+
+  /* ═══ Zellige — la pierre du site ═══
+
+     Une seule idee gouverne tout ce qui bouge : le motif est toujours la,
+     grave dans le fond, et c'est la lumiere qui le revele. Rien ne « vole »
+     vers l'ecran ; les choses s'eclairent. C'est l'architecture islamique
+     elle-meme — pierre ajouree, lumiere qui la traverse — et ca donne une regle
+     a chaque animation au lieu d'un catalogue d'effets.
+
+     Cout : une image, decodee une fois, dans une couche fixe que le GPU compose
+     sans la repeindre. Les animations continues ne touchent que transform et
+     opacity. Aucun will-change permanent : c'est ce qui saccadait le scroll.
+     Mobile recoit un fichier quatre fois plus leger (54 Ko) : a cette opacite,
+     la finesse du trait ne se voit pas. */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: url('uploads/zellige-m.webp') center / cover no-repeat;
+    opacity: 0.16;
+  }
+  /* Une lueur d'or qui derive lentement sur la pierre : la lumiere qui vit.
+     Desktop seulement — une couche animee en permanence a un cout sur mobile,
+     et la batterie n'est pas un detail. */
+  body::after {
+    content: ''; position: fixed; z-index: 0; pointer-events: none;
+    width: 90vmax; height: 90vmax; left: 50%; top: 0;
+    margin-left: -45vmax; margin-top: -45vmax;
+    background: radial-gradient(circle, rgba(200,167,39,0.11) 0%, rgba(200,167,39,0.045) 30%, transparent 62%);
+    opacity: 0;
+  }
+  @media (min-width: 769px) {
+    body::before { background-image: url('uploads/zellige.webp'); opacity: 0.20; }
+    body::after { opacity: 1; animation: stoneLight 26s ease-in-out infinite alternate; }
+  }
+  @keyframes stoneLight {
+    0%   { transform: translate(-18vw, 4vh) scale(1); }
+    50%  { transform: translate(6vw, 16vh) scale(1.12); }
+    100% { transform: translate(20vw, 2vh) scale(0.95); }
+  }
+
+  /* Le hero porte la pierre plus franchement que le reste, et l'eteint vers
+     le bas pour rejoindre le niveau general sans couture. Meme cadrage que la
+     couche fixe (center / cover) : a l'ecran d'accueil les deux motifs se
+     superposent exactement, donc la zone de fondu ne montre pas deux zelliges
+     decales. */
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: url('uploads/zellige-m.webp') center / cover no-repeat;
+    opacity: 0.40;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  }
+  @media (min-width: 769px) {
+    .hero-bg { background-image: url('uploads/zellige.webp'); opacity: 0.48; }
+    /* Le halo de l'activite respire : il derive de quelques pourcents en
+       seize secondes. Le translateX(-50%) est celui du centrage de base — une
+       animation qui l'oublierait decalerait le halo d'un demi-ecran. */
+    .hero-glow.on { animation: glowDrift 16s ease-in-out infinite alternate; }
+  }
+  @keyframes glowDrift {
+    from { transform: translateX(-50%) translateY(0) scale(1); }
+    to   { transform: translateX(-45%) translateY(4%) scale(1.06); }
+  }
+
+  /* ── Ornement qui se trace ──
+     Le trait d'arabesque sous les titres se dessine a l'apparition du bloc au
+     lieu d'etre deja la. Etat par defaut = trace ; il n'est retenu que tant que
+     l'ancetre anime n'est pas encore visible — ainsi un ornement place hors de
+     tout bloc anime reste simplement visible, jamais bloque a l'etat cache. */
+  .arabesque path {
+    stroke-dasharray: 130; stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1.3s cubic-bezier(.22,1,.36,1) .35s;
+  }
+  .arabesque circle { transition: opacity .5s ease 1.1s; }
+  [class*="reveal"]:not(.visible) .arabesque path,
+  .hero-next:not(.in) .arabesque path { stroke-dashoffset: 130; }
+  [class*="reveal"]:not(.visible) .arabesque circle,
+  .hero-next:not(.in) .arabesque circle { opacity: 0; }
+
+  /* ── Bande de pierre entre les sections ──
+     Une fenetre sur le motif, plus franche que le fond : la page alterne salle
+     et pierre. Un rai d'or la traverse a l'apparition. Observee par le systeme
+     de reveal comme les autres blocs. */
+  .zellige-band {
+    position: relative; height: 150px; overflow: hidden;
+    background: url('uploads/zellige-m.webp') center / cover no-repeat;
+    opacity: .92;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 32%, #000 68%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 32%, #000 68%, transparent);
+  }
+  .zellige-band::before, .zellige-band::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,167,39,.55), transparent);
+  }
+  .zellige-band::before { top: 32%; }
+  .zellige-band::after { bottom: 32%; }
+  .zellige-band > i {
+    position: absolute; top: 0; bottom: 0; left: -40%; width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(230,200,74,.24), transparent);
+  }
+  .zellige-band.visible > i {
+    transition: transform 1.9s cubic-bezier(.22,1,.36,1) .1s;
+    transform: translateX(360%);
+  }
+  @media (min-width: 769px) {
+    .zellige-band { height: 200px; background-image: url('uploads/zellige.webp'); }
+  }
+
+  /* ── Entree de page ──
+     Le conteneur ne fait que s'eclairer : un transform sur lui ferait de lui le
+     bloc conteneur de la barre de navigation fixe, qui sauterait pendant
+     l'animation (voir le commentaire du portail des modales). Seul <main>, qui
+     n'abrite rien de fixe, monte legerement. */
+  .page-enter { animation: pageFade .55s ease-out both; }
+  .page-enter > main { animation: pageRise .7s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pageRise { from { transform: translateY(16px); } to { transform: none; } }
+
+  /* ── Fil d'or de progression ──
+     Une ligne de deux pixels au-dessus de la navigation, qui s'etire avec le
+     defilement. Pilotee par une variable CSS ecrite au plus une fois par image :
+     le compositeur fait le reste. */
+  .nav-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 101;
+    pointer-events: none;
+    background: linear-gradient(90deg, #c8a727, #e6c84a 60%, #f7eecb);
+    transform-origin: left; transform: scaleX(var(--hm-scroll, 0));
+    box-shadow: 0 0 10px rgba(230,200,74,.45);
   }
 
   /* Section text backdrop */

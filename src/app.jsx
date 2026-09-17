@@ -166,7 +166,7 @@ function StarIcon({ size = 20, color = '#c8a727' }) {
 /* ─── Islamic Arabesque SVG ─── */
 function ArabesqueDivider({ color = 'rgba(200,167,39,0.25)' }) {
   return (
-    <svg width="120" height="24" viewBox="0 0 120 24" fill="none" style={{ display: 'block', margin: '0 auto' }}>
+    <svg className="arabesque" width="120" height="24" viewBox="0 0 120 24" fill="none" style={{ display: 'block', margin: '0 auto' }} aria-hidden="true">
       <path d="M60 12 C50 6 40 6 30 12 C20 18 10 18 0 12" stroke={color} strokeWidth="1.5" fill="none" />
       <path d="M60 12 C70 6 80 6 90 12 C100 18 110 18 120 12" stroke={color} strokeWidth="1.5" fill="none" />
       <circle cx="60" cy="12" r="3" fill={color} />
@@ -174,6 +174,12 @@ function ArabesqueDivider({ color = 'rgba(200,167,39,0.25)' }) {
       <circle cx="90" cy="12" r="1.5" fill={color} />
     </svg>);
 
+}
+
+/* Fenetre sur la pierre entre deux sections. Le systeme de reveal l'observe
+   comme un bloc ordinaire ; le rai d'or la traverse a l'apparition. */
+function ZelligeBand() {
+  return <div className="zellige-band" aria-hidden="true"><i /></div>;
 }
 
 /* --- Auth Context --- */
@@ -1976,6 +1982,9 @@ function Hero({ navigate }) {
 
   return (
     <section className="hero-section">
+      {/* La pierre du site, plus franche ici qu'ailleurs — voir .hero-bg. */}
+      <div className="hero-bg" aria-hidden="true" />
+
       {/* Un halo par activite, empiles, et seule l'opacite change : le fondu
           se fait sur le compositeur. Transitionner `background` faisait
           repeindre 880 px de degrade pendant 600 ms a chaque rotation — c'est
@@ -8831,8 +8840,32 @@ function App() {
     return function () {window.removeEventListener('hashchange', onHashChange);};
   }, []);
 
+  /* Fil d'or de progression : une variable CSS ecrite au plus une fois par
+     image, le compositeur fait le reste. Silencieux pendant qu'une modale
+     verrouille la page — le corps est alors fixe et scrollY lit 0, ce qui
+     ferait clignoter le fil a zero puis revenir. */
+  React.useEffect(function () {
+    var ticking = false;
+    function update() {
+      ticking = false;
+      if (hmLockDepth > 0) return;
+      var doc = document.documentElement;
+      var max = doc.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, (window.scrollY || 0) / max)) : 0;
+      doc.style.setProperty('--hm-scroll', p.toFixed(4));
+    }
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+    return function () {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [page, navKey]);
+
   useEffect(() => {
-    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line';
+    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line, .zellige-band';
     const seen = new WeakSet();
 
     const revealObs = new IntersectionObserver((entries) => {
@@ -8908,7 +8941,7 @@ function App() {
   // Re-trigger reveal when navigating back to home (new DOM elements after page switch)
   React.useEffect(() => {
     if (page !== 'home') return;
-    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line';
+    const CLASSES = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-flip, .reveal-stagger, .reveal-stagger-alt, .reveal-blur, .reveal-zoom, .reveal-drop, .reveal-glow, .reveal-cards, .reveal-line, .zellige-band';
     function forceRevealInViewport() {
       const vh = window.innerHeight + 60;
       document.querySelectorAll(CLASSES).forEach((el) => {
@@ -9014,7 +9047,13 @@ function App() {
       {showAuth && <AuthModal onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
       {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} navigate={navigate} />}
-      {children}
+      <div className="nav-progress" aria-hidden="true" />
+      {/* La cle change a chaque navigation, meme vers la meme page : React
+          remonte le conteneur et l'animation d'entree rejoue. Le fil de
+          progression reste hors du conteneur pour ne pas s'eteindre avec lui. */}
+      <div className="page-enter" key={page + ':' + navKey}>
+        {children}
+      </div>
       {/* Le pixel n'est chargé qu'ici, au clic sur « Accepter » — jamais avant. */}
       <RgpdBanner onAccept={function(){ if (window.hmPixel) window.hmPixel.init(); }} />
     </AuthContext.Provider>
@@ -9076,12 +9115,15 @@ function App() {
           <ComprendreSection navigate={navigate} />
         </Reveal>
         <FeatureCards navigate={navigate} />
+        <ZelligeBand />
         <LearnPlaySection navigate={navigate} />
         <Testimonials />
         <StatsBar />
+        <ZelligeBand />
         <HowItWorksSection />
         <ParcoursSection />
         <ImportanceSection />
+        <ZelligeBand />
         <ComparisonTable navigate={navigate} />
         <FaqSection />
         <SoftPaywall navigate={navigate} />
