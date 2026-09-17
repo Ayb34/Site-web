@@ -398,39 +398,6 @@
     padding: 84px 18px calc(18px + var(--cookiebar));
     overflow: hidden;
   }
-
-  /* Fond photographique du hero — desktop uniquement pour l'instant.
-
-     `100% auto` plutot que `cover` : le hero est plus haut que l'image n'est
-     proportionnee, et `cover` l'agrandissait donc a la hauteur, ce qui rognait
-     deux cents pixels de chaque cote — les fenetres lumineuses passaient a la
-     trappe — tout en etirant le reste. En calant sur la largeur, l'image garde
-     son cadrage entier et n'est agrandie que d'un facteur proche de 1.
-
-     Quand l'ecran est plus haut que l'image ne peut couvrir, le bas manquant
-     est deja peint : `background-color` porte la couleur de page et le voile
-     lineaire devient opaque a 78 %, donc l'image s'eteint avant de s'arreter
-     et aucune couture n'est visible.
-
-     Les deux voiles ne sont pas decoratifs : le radial assombrit le centre
-     pour que le titre garde son contraste sur l'arche, le lineaire fond le bas
-     dans la couleur de page a la jonction avec la section suivante. */
-  .hero-bg { display: none; }
-  @media (min-width: 769px) {
-    .hero-bg {
-      display: block; position: absolute; inset: 0;
-      z-index: 0; pointer-events: none;
-      background-color: #03110a;
-      background-image:
-        linear-gradient(to bottom, rgba(3,17,10,0.55) 0%, rgba(3,17,10,0.12) 22%, rgba(3,17,10,0.55) 62%, #03110a 78%),
-        radial-gradient(ellipse 50% 56% at 50% 46%, rgba(3,17,10,0.62) 0%, rgba(3,17,10,0.30) 50%, transparent 78%),
-        url('uploads/hero-mosquee.webp');
-      background-size: 100% 100%, 100% 100%, 100% auto;
-      background-position: center, center, center top;
-      background-repeat: no-repeat;
-    }
-  }
-
   /* Trois halos empiles, un par activite : on fond l'opacite au lieu de
      repeindre le degrade. */
   .hero-glow {

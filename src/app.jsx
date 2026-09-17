@@ -1976,8 +1976,6 @@ function Hero({ navigate }) {
 
   return (
     <section className="hero-section">
-      <div className="hero-bg" aria-hidden="true" />
-
       {/* Un halo par activite, empiles, et seule l'opacite change : le fondu
           se fait sur le compositeur. Transitionner `background` faisait
           repeindre 880 px de degrade pendant 600 ms a chaque rotation — c'est
