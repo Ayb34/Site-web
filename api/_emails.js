@@ -86,8 +86,9 @@ function coquille(preheader, corps) {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:520px;">
 
     <tr><td align="center" style="padding-bottom:26px;">
-      <div style="font-family:Georgia,serif;font-size:19px;font-weight:bold;color:${OR};letter-spacing:3px;">HÉRITAGE</div>
-      <div style="font-family:Georgia,serif;font-size:11px;color:${DOUX};letter-spacing:5px;padding-top:3px;">MUSULMAN</div>
+      <img src="${SITE}/uploads/logo-email.png" width="150" height="127"
+        alt="Héritage Musulman"
+        style="display:block;width:150px;height:auto;border:0;outline:none;text-decoration:none;">
     </td></tr>
 
     <tr><td style="background:${CARTE};border:1px solid rgba(200,167,39,0.22);border-radius:16px;padding:32px 28px;">
