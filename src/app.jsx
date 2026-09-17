@@ -1556,17 +1556,6 @@ function Navbar({ navigate }) {
               onMouseLeave={(e) => {e.target.style.background = 'transparent';}}>
                 Connexion
               </button>
-              <button onClick={() => { openAuth(); }} style={{
-                background: 'linear-gradient(135deg,#c8a727 0%,#e6c84a 100%)',
-                border: 'none', color: '#1c1200', padding: '8px 18px', borderRadius: 8,
-                fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                boxShadow: '0 2px 12px rgba(200,167,39,0.35)', transition: 'all 0.2s',
-                fontFamily: 'Plus Jakarta Sans, sans-serif'
-              }}
-              onMouseEnter={(e) => {e.currentTarget.style.transform = 'scale(1.04)';}}
-              onMouseLeave={(e) => {e.currentTarget.style.transform = 'scale(1)';}}>
-                S'abonner {PRO_ANNUAL}/an
-              </button>
             </>
           )}
         </div>
