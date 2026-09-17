@@ -214,6 +214,7 @@ const HM_CUTOVER = Date.UTC(2026, 8, 6);
 const HM_TRIAL_DAYS = 2;
 const HM_QUOTA_KEY = 'hm_quota_v1';
 const HM_TRIAL_KEY = 'hm_trial_v1';
+const HM_WELCOME_KEY = 'hm_trial_welcome_v1';
 
 function hmToday() {
   const d = new Date();
@@ -258,17 +259,49 @@ function hmQuotaResetIn() {
    Sans carte et sans Stripe : le but n'est pas d'encaisser, c'est que la
    personne vive l'accès complet puis le perde. Ce qu'on a eu puis perdu pèse
    bien plus lourd que ce qu'on nous promet. */
-/* Renvoie true UNIQUEMENT si l'essai vient d'être ouvert à l'instant. C'est ce
-   qui déclenche l'écran de bienvenue : le rattacher au démarrage réel de
-   l'essai plutôt qu'à l'événement « inscription » le rend insensible aux
-   chemins d'inscription — et à leurs échecs partiels. */
-function hmTrialStart(uid) {
+/* L'essai court depuis la création du compte, lue sur l'objet Firebase.
+
+   Il vivait dans localStorage, ce qui posait deux problèmes : vider les données
+   du site rouvrait un essai neuf indéfiniment — le mur se contournait en trois
+   clics — et changer d'appareil en offrait un second. Firebase Auth porte déjà
+   cette date, et la porte AUSSI côté serveur : les relances par e-mail tombent
+   donc exactement en même temps que le mur, sans rien stocker de plus.
+
+   Ce qui reste dans localStorage est uniquement ce qui a été *vu* — l'écran de
+   bienvenue, l'annonce de fin. Ce sont des faits d'interface, pas des droits :
+   les perdre ne redonne aucun accès. */
+function hmTrialStartedAt(user) {
+  if (!user || !user.metadata || !user.metadata.creationTime) return 0;
+  const t = Date.parse(user.metadata.creationTime);
+  return isNaN(t) ? 0 : t;
+}
+function hmWelcomePending(uid) {
   if (!uid) return false;
-  const t = hmRead(HM_TRIAL_KEY, {});
-  if (t[uid]) return false;
-  t[uid] = Date.now();
-  hmWrite(HM_TRIAL_KEY, t);
-  return true;
+  return !hmRead(HM_WELCOME_KEY, {})[uid];
+}
+function hmWelcomeSeen(uid) {
+  if (!uid) return;
+  const seen = hmRead(HM_WELCOME_KEY, {});
+  seen[uid] = 1;
+  hmWrite(HM_WELCOME_KEY, seen);
+}
+
+/* L'e-mail de bienvenue part au moment où l'essai s'ouvre réellement, pas à
+   l'événement « inscription » : c'est le seul instant dont on est sûr qu'un
+   accès vient d'être accordé. Sans attente ni gestion d'erreur visible — un
+   e-mail qui ne part pas ne doit jamais retenir l'écran de bienvenue. Le
+   serveur refuse les doublons, l'appeler deux fois est sans conséquence. */
+function hmSendWelcomeEmail() {
+  try {
+    const u = window._auth && window._auth.currentUser;
+    if (!u) return;
+    u.getIdToken().then(function (token) {
+      fetch('/api/welcome-email', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+      }).catch(function () {});
+    }).catch(function () {});
+  } catch (e) {}
 }
 /* L'essai est terminé mais l'utilisateur ne l'a pas encore appris. Sert à
    n'annoncer la fin qu'une fois, au premier mur rencontré — annoncer une perte
@@ -281,12 +314,15 @@ function hmTrialEndDate() {
   return HM_JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + HM_MOIS[d.getMonth()];
 }
 
-function hmTrialEndPending(uid) {
-  if (!uid) return false;
-  const t = hmRead(HM_TRIAL_KEY, {});
-  if (!t[uid]) return false;
-  if (hmTrialLeft(uid) > 0) return false;
-  return !hmRead(HM_TRIAL_KEY + '_seen', {})[uid];
+function hmTrialEndPending(user) {
+  if (!user || !user.uid) return false;
+  if (!hmTrialStartedAt(user)) return false;
+  if (hmTrialLeft(user) > 0) return false;
+  /* Seuls ceux qui ont vu l'essai s'ouvrir ont quelque chose à perdre : sans
+     ça, un compte créé avant la refonte lirait « ton essai est terminé » pour
+     un essai qui n'a jamais existé. */
+  if (hmWelcomePending(user.uid)) return false;
+  return !hmRead(HM_TRIAL_KEY + '_seen', {})[user.uid];
 }
 function hmTrialEndSeen(uid) {
   if (!uid) return;
@@ -295,9 +331,8 @@ function hmTrialEndSeen(uid) {
   hmWrite(HM_TRIAL_KEY + '_seen', seen);
 }
 
-function hmTrialLeft(uid) {
-  if (!uid) return 0;
-  const started = hmRead(HM_TRIAL_KEY, {})[uid];
+function hmTrialLeft(user) {
+  const started = hmTrialStartedAt(user);
   if (!started) return 0;
   const left = HM_TRIAL_DAYS * 86400000 - (Date.now() - started);
   return left > 0 ? Math.ceil(left / 86400000) : 0;
@@ -526,7 +561,7 @@ function ProGateModal({ onClose, navigate, reason }) {
   /* Au premier mur qui suit la fin de l'essai, on explique la perte avant de
      parler du quota : sans ça, le jour 3 ressemble à un site qui s'est mis à
      mal fonctionner. Une seule fois — ensuite les motifs normaux reprennent. */
-  const endPending = user && hmTrialEndPending(user.uid);
+  const endPending = user && hmTrialEndPending(user);
   const effective = endPending ? 'trial-over' : reason;
   React.useEffect(function () { if (endPending) hmTrialEndSeen(user.uid); }, [endPending]);
   const copy = PRO_GATE_COPY[effective] || null;
@@ -8989,9 +9024,13 @@ function App() {
     if (!user) { setTrialLeft(0); return; }
     /* Attendre le statut Pro : sinon un abonné qui se reconnecte se verrait
        offrir un essai le temps que Firestore réponde. */
-    if (!proResolved || isPro) { setTrialLeft(hmTrialLeft(user.uid)); return; }
-    if (hmTrialStart(user.uid)) setShowTrialWelcome(true);
-    var tick = function () { setTrialLeft(hmTrialLeft(user.uid)); };
+    if (!proResolved || isPro) { setTrialLeft(hmTrialLeft(user)); return; }
+    if (hmTrialLeft(user) > 0 && hmWelcomePending(user.uid)) {
+      hmWelcomeSeen(user.uid);
+      setShowTrialWelcome(true);
+      hmSendWelcomeEmail();
+    }
+    var tick = function () { setTrialLeft(hmTrialLeft(user)); };
     tick();
     var id = setInterval(tick, 60000);
     return function () { clearInterval(id); };
