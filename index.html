@@ -864,7 +864,11 @@
   .hero-bg {
     position: absolute; inset: 0; z-index: 0; pointer-events: none;
     background: url('uploads/zellige-m.webp') center / cover no-repeat;
-    opacity: 0.46;
+    /* 0,34 et non 0,55 comme en desktop : l'image portrait est intrinsequement
+       plus claire (luminance moyenne 40,6 contre 23,9 sur la moitie haute, la
+       seule que le masque laisse voir). A opacite egale elle serait 1,4 fois
+       plus presente, et les deux tailles ne montreraient plus la meme pierre. */
+    opacity: 0.34;
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
   }
