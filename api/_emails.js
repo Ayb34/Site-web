@@ -26,6 +26,12 @@ const FOND = '#03110a';
 const CARTE = '#0a1f12';
 const TEXTE = '#f0ede6';
 const DOUX = '#9db3a5';
+/* Equivalents opaques des anciens rgba() : Gmail sur mobile ne les
+   interprete pas, et rendait bordures et cadres dans des teintes arbitraires.
+   Calcules par composition sur la carte #0a1f12. */
+const BORD = '#343D17';
+const BORD_PRIX = '#303A16';
+const FOND_PRIX = '#172913';
 
 const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet',
@@ -79,10 +85,10 @@ function coquille(preheader, corps) {
 <meta name="color-scheme" content="dark">
 <title>Héritage Musulman</title>
 </head>
-<body style="margin:0;padding:0;background:${FOND};">
+<body bgcolor="${FOND}" style="margin:0;padding:0;background-color:${FOND};">
 <div style="display:none;font-size:1px;color:${FOND};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</div>
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${FOND};">
-<tr><td align="center" style="padding:32px 16px 44px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${FOND}" style="background-color:${FOND};">
+<tr><td align="center" bgcolor="${FOND}" style="background-color:${FOND};padding:32px 16px 44px;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:520px;">
 
     <tr><td align="center" style="padding-bottom:26px;">
@@ -91,7 +97,7 @@ function coquille(preheader, corps) {
         style="display:block;width:150px;height:auto;border:0;outline:none;text-decoration:none;">
     </td></tr>
 
-    <tr><td style="background:${CARTE};border:1px solid rgba(200,167,39,0.22);border-radius:16px;padding:32px 28px;">
+    <tr><td bgcolor="${CARTE}" style="background-color:${CARTE};border:1px solid ${BORD};border-radius:16px;padding:32px 28px;">
       ${corps}
     </td></tr>
 
@@ -129,7 +135,7 @@ function colonnes(garde, perd) {
 
 const PRIX = `
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:22px 0 20px;">
-    <tr><td align="center" style="background:rgba(200,167,39,0.07);border:1px solid rgba(200,167,39,0.2);border-radius:12px;padding:18px;">
+    <tr><td align="center" bgcolor="${FOND_PRIX}" style="background-color:${FOND_PRIX};border:1px solid ${BORD_PRIX};border-radius:12px;padding:18px;">
       <div style="font-family:Georgia,serif;font-size:29px;color:${OR_CLAIR};">29,99&nbsp;€<span style="font-family:Arial,sans-serif;font-size:13px;color:${DOUX};"> / an</span></div>
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${DOUX};padding-top:5px;">soit 2,50&nbsp;€ par mois — ou 4,99&nbsp;€ au mois, sans engagement</div>
     </td></tr>
