@@ -111,10 +111,10 @@
        Les LIBELLES viennent de Google Ads > Objectifs > Conversions : chaque
        action en a un, distinct de l'identifiant du compte. Un libellé absent
        rend sa conversion silencieuse sans casser le reste. */
-    var GOOGLE_ADS_ID = 'AW-ID';
+    var GOOGLE_ADS_ID = 'AW-18459665864';
     var GOOGLE_LABELS = {
       inscription: 'LABEL_INSCRIPTION',
-      achat: 'LABEL_ACHAT'
+      achat: 'nLM5CPiyifwcEMjLoOJE'
     };
 
     var loaded = false;
@@ -141,6 +141,19 @@
         window.dataLayer = window.dataLayer || [];
         window.gtag = function () { window.dataLayer.push(arguments); };
         window.gtag('js', new Date());
+        /* Mode Consentement, exige pour les visiteurs europeens. On part de
+           l'etat refuse puis on accorde dans la foulee : ce bloc ne s'execute
+           que si le bandeau a ete accepte, l'autorisation est donc un fait, pas
+           une supposition. Sans ce signal explicite, Google traite les
+           conversions europeennes avec prudence et en perd. */
+        window.gtag('consent', 'default', {
+          ad_storage: 'denied', ad_user_data: 'denied',
+          ad_personalization: 'denied', analytics_storage: 'denied'
+        });
+        window.gtag('consent', 'update', {
+          ad_storage: 'granted', ad_user_data: 'granted',
+          ad_personalization: 'granted', analytics_storage: 'granted'
+        });
         window.gtag('config', GOOGLE_ADS_ID);
         var g = document.createElement('script');
         g.async = true;
@@ -182,6 +195,7 @@
           envoi.value = params.value;
           envoi.currency = params.currency || 'EUR';
         }
+        if (params.transaction_id) envoi.transaction_id = params.transaction_id;
         window.gtag('event', 'conversion', envoi);
       }
     };

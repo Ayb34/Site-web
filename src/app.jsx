@@ -6885,6 +6885,11 @@ function PaymentSuccessPage({ navigate }) {
         window.hmPixel.track('Purchase', {
           value: typeof d.amount === 'number' ? d.amount : 29.99,
           currency: d.currency || 'EUR',
+          /* Identifiant de transaction transmis a Google : le garde-fou
+             sessionStorage ci-dessus ne vaut que pour cet onglet, alors qu'un
+             lien de succes rouvert ailleurs recompterait la vente. Google
+             dedoublonne, lui, sur cet identifiant. */
+          transaction_id: psid,
         });
       })
       .catch(function () {});
