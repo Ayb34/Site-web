@@ -96,16 +96,37 @@
      (Gestionnaire d'événements Meta > Sources de données). Tant que la
      valeur reste le placeholder, tout est inerte — aucune requête réseau.
 
-     Pour ajouter TikTok plus tard : charger son snippet dans loadPixels()
-     et relayer l'événement dans track(). Le reste du site n'a pas à changer.
+     Deux régies cohabitent ici, Meta et Google Ads, derrière une seule porte :
+     `hmPixel.track()`. Le reste du site ignore qui écoute — pour en ajouter ou
+     en retirer une, rien d'autre que ce bloc ne bouge.
 -->
 <script>
   (function () {
     var META_PIXEL_ID = '1454493903104465';
+
+    /* Google Ads. Tant que l'identifiant reste le repère ci-dessous, rien n'est
+       chargé et aucun événement ne part — même mécanique d'inertie que le
+       pixel Meta avant son activation.
+
+       Les LIBELLES viennent de Google Ads > Objectifs > Conversions : chaque
+       action en a un, distinct de l'identifiant du compte. Un libellé absent
+       rend sa conversion silencieuse sans casser le reste. */
+    var GOOGLE_ADS_ID = 'AW-ID';
+    var GOOGLE_LABELS = {
+      inscription: 'LABEL_INSCRIPTION',
+      achat: 'LABEL_ACHAT'
+    };
+
     var loaded = false;
 
-    function configured() {
+    function metaOk() {
       return META_PIXEL_ID && META_PIXEL_ID !== 'META_PIXEL_ID';
+    }
+    function googleOk() {
+      return GOOGLE_ADS_ID && GOOGLE_ADS_ID !== 'AW-ID';
+    }
+    function configured() {
+      return metaOk() || googleOk();
     }
     function hasConsent() {
       try { return localStorage.getItem('hm_cookie_consent') === 'accepted'; }
@@ -115,6 +136,19 @@
     function loadPixels() {
       if (loaded || !configured() || !hasConsent()) return;
       loaded = true;
+
+      if (googleOk()) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', GOOGLE_ADS_ID);
+        var g = document.createElement('script');
+        g.async = true;
+        g.src = 'https://www.googletagmanager.com/gtag/js?id=' + GOOGLE_ADS_ID;
+        document.head.appendChild(g);
+      }
+
+      if (!metaOk()) return;
       !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
       n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
@@ -131,7 +165,24 @@
       track: function (event, params) {
         if (!hasConsent()) return;
         loadPixels();
-        if (window.fbq) window.fbq('track', event, params || {});
+        params = params || {};
+        if (window.fbq) window.fbq('track', event, params);
+
+        /* Google ne connaît que les deux actions déclarées dans le compte. Les
+           autres événements — PageView, InitiateCheckout — restent utiles à
+           Meta et sont simplement ignorés ici : créer une action Google pour
+           chacun diluerait la colonne « conversions » sans rien apprendre. */
+        if (!window.gtag || !googleOk()) return;
+        var label = event === 'CompleteRegistration' ? GOOGLE_LABELS.inscription
+                  : event === 'Purchase' ? GOOGLE_LABELS.achat
+                  : null;
+        if (!label || label.indexOf('LABEL_') === 0) return;
+        var envoi = { send_to: GOOGLE_ADS_ID + '/' + label };
+        if (params.value != null) {
+          envoi.value = params.value;
+          envoi.currency = params.currency || 'EUR';
+        }
+        window.gtag('event', 'conversion', envoi);
       }
     };
 
