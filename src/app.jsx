@@ -421,6 +421,55 @@ function hmAccessLeft(user) {
   return Math.max(hmTrialLeft(user), hmReopenLeft(user));
 }
 
+/* ── Ce que l'essai a réellement apporté ──
+
+   Pendant deux jours, `isPro` est vrai : l'interface traitait la personne en
+   essai exactement comme un abonné. Aucune sourate, aucune partie ne portait
+   la marque « Pro ». Elle utilisait « un site » sans jamais savoir quelle part
+   de ce qu'elle aimait était payante — et le jour 3, des choses disparaissaient
+   sans qu'elle ait su lesquelles avaient de la valeur.
+
+   On note donc ce qui n'aurait pas été accessible sans l'essai : les sourates
+   Pro ouvertes, et les parties jouées au-delà de la première du jour. C'est ce
+   bilan, réel et personnel, qu'on rappelle au moment où l'accès se referme. */
+const HM_TRIAL_USE_KEY = 'hm_trial_use_v1';
+function hmTrialUseRead(uid) {
+  const u = hmRead(HM_TRIAL_USE_KEY, {})[uid];
+  return u || { surahs: [], days: {} };
+}
+function hmTrialRecord(uid, kind, id) {
+  if (!uid) return;
+  const all = hmRead(HM_TRIAL_USE_KEY, {});
+  const u = all[uid] || { surahs: [], days: {} };
+  if (kind === 'surah') {
+    if (u.surahs.indexOf(id) < 0) u.surahs.push(id);
+  } else {
+    const d = hmToday();
+    u.days[d] = u.days[d] || {};
+    u.days[d][kind] = (u.days[d][kind] || 0) + 1;
+  }
+  all[uid] = u;
+  hmWrite(HM_TRIAL_USE_KEY, all);
+  window.dispatchEvent(new CustomEvent('heritage:trialuse'));
+}
+/* Une partie par jour reste gratuite : seules celles d'au-delà comptent comme
+   un apport de l'essai. Annoncer « 6 parties » quand 2 auraient été offertes
+   de toute façon serait gonfler le bilan. */
+function hmTrialSummary(uid) {
+  const u = hmTrialUseRead(uid);
+  let extra = 0;
+  Object.keys(u.days).forEach(function (d) {
+    Object.keys(u.days[d]).forEach(function (k) { extra += Math.max(0, u.days[d][k] - 1); });
+  });
+  return { surahs: u.surahs.length, extra: extra };
+}
+function hmTrialSummaryText(sum) {
+  const parts = [];
+  if (sum.surahs) parts.push(sum.surahs + (sum.surahs > 1 ? ' sourates Pro' : ' sourate Pro'));
+  if (sum.extra) parts.push(sum.extra + (sum.extra > 1 ? ' parties en plus' : ' partie en plus'));
+  return parts.join(' et ');
+}
+
 /* ── Régime hérité ── */
 function hmIsLegacy(user) {
   if (!user || !user.metadata || !user.metadata.creationTime) return false;
@@ -567,7 +616,7 @@ function TrialWelcomeModal({ onClose, navigate }) {
         {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
             aux deux jours, et ça évite que le jour 3 passe pour une panne. */}
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
-          Après ces 2 jours, tu gardes une partie par jour et une sourate par semaine.
+          Tout ce qui porte l'étiquette <strong style={{ color:'#e6c84a' }}>PRO</strong> t'est ouvert pendant ces 2 jours. Ensuite, tu gardes une partie par jour et une sourate par semaine.
         </p>
 
         {/* « Commencer » refermait la fenêtre et laissait la personne sur
@@ -609,7 +658,11 @@ const PRO_GATE_COPY = {
   'trial-over': {
     icon: '✦',
     title: 'Tes 2 jours sont terminés',
-    body: function () { return <>Tu as vu tout ce que contient Héritage.<br />Garde-le pour <strong style={{ color: '#c8a727' }}>{PRO_PER_DAY} par jour</strong>.</>; },
+    body: function (t, user) {
+      const bilan = user ? hmTrialSummaryText(hmTrialSummary(user.uid)) : '';
+      if (!bilan) return <>Tu as vu tout ce que contient Héritage.<br />Garde-le pour <strong style={{ color: '#c8a727' }}>{PRO_PER_DAY} par jour</strong>.</>;
+      return <>En deux jours, tu as ouvert <strong style={{ color: '#f0ede6' }}>{bilan}</strong>.<br />Garde tout cela pour <strong style={{ color: '#c8a727' }}>{PRO_PER_DAY} par jour</strong>.</>;
+    },
   },
 };
 
@@ -641,7 +694,7 @@ function ProGateModal({ onClose, navigate, reason }) {
 
           <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>{copy ? copy.title : 'Tu es prêt pour la suite'}</h2>
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 16px' }}>
-            {copy ? copy.body(delay) : <>Tu as fait le tour du contenu du jour.<br/>Avec <strong style={{color:'#c8a727'}}>Pro</strong>, plus aucune limite.</>}
+            {copy ? copy.body(delay, user) : <>Tu as fait le tour du contenu du jour.<br/>Avec <strong style={{color:'#c8a727'}}>Pro</strong>, plus aucune limite.</>}
           </p>
 
           {/* Prix remonté au-dessus de l'argumentaire : c'est l'information que
@@ -4182,7 +4235,7 @@ const DIFF_POOLS = {
 };
 
 function BlindTestPage({ navigate }) {
-  const { user, isPro, legacy } = useAuth();
+  const { user, isPro, legacy, trialing } = useAuth();
   const [state, setState] = React.useState('idle');
   const [difficulty, setDifficulty] = React.useState(null);
   const [question, setQuestion] = React.useState(null);
@@ -4315,6 +4368,7 @@ function BlindTestPage({ navigate }) {
   function continueLevel() {
     if (btQuotaSpent) { setShowProGate(true); return; }
     if (!isPro && !btLegacyFree) hmQuotaTake('blindtest');
+    if (trialing && user) hmTrialRecord(user.uid, 'bt');
     setSessionCount(0);setSessionOk(0);
     setState('loading');
     launch();
@@ -4326,6 +4380,7 @@ function BlindTestPage({ navigate }) {
        s'applique pas, la partie est décomptée. */
     if (!isPro && hmQuotaUsed('blindtest') >= 1) { setShowProGate(true); return; }
     if (!isPro) hmQuotaTake('blindtest');
+    if (trialing && user) hmTrialRecord(user.uid, 'bt');
     setDifficulty(next);
     setSessionCount(0);setSessionOk(0);
     setState('loading');
@@ -4463,7 +4518,7 @@ function BlindTestPage({ navigate }) {
               ))}
             </div>
 
-            <button onClick={() => { if (!difficulty) return; if (btQuotaSpent) { setShowProGate(true); return; } if (!isPro && !btLegacyFree) hmQuotaTake('blindtest'); launch(); }} style={{
+            <button onClick={() => { if (!difficulty) return; if (btQuotaSpent) { setShowProGate(true); return; } if (!isPro && !btLegacyFree) hmQuotaTake('blindtest'); if (trialing && user) hmTrialRecord(user.uid, 'bt'); launch(); }} style={{
               width: '100%', padding: '18px', borderRadius: 14, fontSize: 17, fontWeight: 800,
               background: difficulty ? 'linear-gradient(135deg,#a8891f,#c4a83a)' : 'rgba(255,255,255,0.06)',
               border: 'none', color: difficulty ? '#1c1200' : 'rgba(255,255,255,0.25)',
@@ -4654,7 +4709,7 @@ function QuizPage({ navigate }) {
   const [scores, setScores]       = React.useState({});
   const [levelModal, setLevelModal] = React.useState(null);
   const [showProGate, setShowProGate] = React.useState(false);
-  const { user, openAuth, isPro, legacy } = useAuth();
+  const { user, openAuth, isPro, legacy, trialing } = useAuth();
   /* Une partie par jour, tous niveaux. Avant, le Débutant était illimité et le
      reste invisible : personne ne touchait le mur, donc personne ne payait. */
   const quizQuotaSpent = !isPro && hmQuotaUsed('quiz') >= 1;
@@ -4951,7 +5006,7 @@ function quizPickQuestions(pool, size, seenKey) {
 }
 
 function QuizCategoryPage({ catKey, level, navigate }) {
-  const { user, openAuth, isPro, legacy } = useAuth();
+  const { user, openAuth, isPro, legacy, trialing } = useAuth();
   const [quotaGate, setQuotaGate] = React.useState(false);
   /* La limite quotidienne se prélève ICI, dans la page qui joue réellement.
      Elle était prélevée dans la modale de choix du niveau : il suffisait donc
@@ -4959,11 +5014,14 @@ function QuizCategoryPage({ catKey, level, navigate }) {
      de partie, pour jouer sans limite. La limite était en pratique fictive. */
   const quizFreeByLegacy = legacy && (level || 'debutant') === 'debutant';
   const quizTake = React.useCallback(function () {
-    if (isPro || quizFreeByLegacy) return true;
+    if (isPro || quizFreeByLegacy) {
+      if (trialing && user) hmTrialRecord(user.uid, 'quiz');
+      return true;
+    }
     if (hmQuotaUsed('quiz') >= 1) { setQuotaGate(true); return false; }
     hmQuotaTake('quiz');
     return true;
-  }, [isPro, quizFreeByLegacy]);
+  }, [isPro, quizFreeByLegacy, trialing, user]);
   const QUIZ_SIZE = 10;
   const LABELS = ['A', 'B', 'C', 'D'];
   const [showGuestGate, setShowGuestGate] = React.useState(false);
@@ -7664,6 +7722,7 @@ function StickyUpgradeBanner({ navigate }) {
      remarque pas — or c'est le seul moment où la personne peut encore agir
      avant de perdre l'accès. Le bandeau vire à l'ambre et dit ce qui se ferme. */
   const urgent = trialing && trialLeft === 1;
+  const bilan = trialing && user ? hmTrialSummaryText(hmTrialSummary(user.uid)) : '';
 
   return (
     <div className="sticky-upgrade-banner" style={{
@@ -7691,6 +7750,8 @@ function StickyUpgradeBanner({ navigate }) {
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(255,255,255,0.6)', marginTop:2, whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6, overflow:'hidden', textOverflow:'ellipsis', minWidth:0 }}>
             {urgent
               ? <span style={{ color:'rgba(255,255,255,0.72)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>Demain : 1 partie par jour</span>
+              : bilan
+              ? <span style={{ color:'rgba(255,255,255,0.72)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>Déjà {bilan}</span>
               : <>
                   <span><span style={{ color:'#f5d76e', fontWeight:900, fontSize:15 }}>{PRO_ANNUAL}</span> /an</span>
                   <span style={{ fontSize:10, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.14)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'2px 7px' }}>{trialing ? 'pour garder' : PRO_DISCOUNT}</span>
@@ -7707,7 +7768,7 @@ function StickyUpgradeBanner({ navigate }) {
         boxShadow:'0 4px 22px rgba(200,167,39,0.55)',
         whiteSpace:'nowrap', flexShrink:0
       }}>
-        Débloquer →
+        {trialing ? 'Garder →' : 'Débloquer →'}
       </button>
       <button onClick={() => setDismissed(true)} aria-label="Fermer" style={{
         background:'transparent', border:'none', color:'rgba(255,255,255,0.3)',
@@ -8143,7 +8204,7 @@ function CmpRing({ pct, size, stroke, color, track, children }) {
 }
 
 function ComprendrePage({ navigate }) {
-  const { isPro, openAuth, user, openQuickCheckout } = useAuth();
+  const { isPro, openAuth, user, openQuickCheckout, trialing } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
   const [mode, setMode] = React.useState('hub'); // hub | discover | play | result
   const [sourate, setSourate] = React.useState(null);
@@ -8215,6 +8276,7 @@ function ComprendrePage({ navigate }) {
     // Contenu Pro : on laisse DÉCOUVRIR (audio + mot-à-mot) pour donner le goût.
     // Le jeu reste réservé — le mur arrive une fois l'envie créée, pas avant.
     if (!locked && guestBlocked) { setShowGate(true); return; }
+    if (trialing && user && !s.free) hmTrialRecord(user.uid, 'surah', s.id);
     setSourate(s); setMode('discover');
   }
 
@@ -8286,7 +8348,7 @@ function ComprendrePage({ navigate }) {
 
   return shell(
     <>
-      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
+      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
       {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
         if (!sourate.free && !isPro && sourate.id !== weeklyId) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
@@ -8375,7 +8437,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
   );
 }
 
-function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, weeklyId, onOpen, onBack, onPro, reciter, onReciter }) {
+function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, trialing, weeklyId, onOpen, onBack, onPro, reciter, onReciter }) {
   const GOLD = '#e6c84a';
   const list = sourates || [];
   const [openReciter, setOpenReciter] = React.useState(false);
@@ -8476,7 +8538,10 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 18, fontWeight: 800, color: '#f0ede6', fontFamily: 'Cinzel,serif' }}>{s.name}</span>
-                  {locked && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 8px', borderRadius: 999 }}>PRO</span>}
+                  {/* Pendant l'essai, la sourate est ouverte mais reste marquée :
+                      c'est ce qui apprend à la personne quelle part de ce
+                      qu'elle utilise est payante, avant de la perdre. */}
+                  {(locked || (trialing && !s.free)) && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 8px', borderRadius: 999 }}>{locked ? 'PRO' : 'PRO · ESSAI'}</span>}
                   {/* La sourate offerte cette semaine se signale : sans étiquette,
                       le cadeau passe inaperçu et ne ramène personne lundi. */}
                   {weekly && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#04301c', background: 'linear-gradient(135deg,#6ee7a0,#2fa96a)', padding: '2px 8px', borderRadius: 999 }}>CETTE SEMAINE</span>}
@@ -8499,14 +8564,6 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
         </button>
       )}
-      {/* Teaser nouvelles sourates */}
-      <div style={{ marginTop: 14, padding: '14px 18px', background: 'linear-gradient(160deg,rgba(200,167,39,0.06),rgba(255,255,255,0.01))', border: '1px dashed rgba(200,167,39,0.28)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 22 }}>✨</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13.5, color: '#f0ede6', fontWeight: 700 }}>D'autres sourates arrivent bientôt</div>
-          <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>On enrichit le contenu régulièrement — les membres Pro y ont accès en premier.</div>
-        </div>
-      </div>
     </div>
   );
 }
