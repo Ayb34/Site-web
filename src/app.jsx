@@ -7929,7 +7929,10 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           </button>
           <button onClick={() => switchMethod('paypal')}
             style={{ flex: 1, padding: '9px 6px', borderRadius: 10, border: activeMethod === 'paypal' ? '2px solid #FFC439' : '1px solid #e5e5e5', background: activeMethod === 'paypal' ? 'rgba(255,196,57,0.10)' : '#fff', color: activeMethod === 'paypal' ? '#003087' : '#666', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s' }}>
-            PayPal · 1 mois
+            {/* La durée suit le plan choisi. Figée à « 1 mois », elle s'affichait
+                aussi sous l'annuel : on lisait « 29,99 € · PayPal · 1 mois », de
+                quoi croire que PayPal facturait l'année pour un seul mois. */}
+            PayPal · {plan === 'annual' ? '1 an' : '1 mois'}
           </button>
         </div>
 
