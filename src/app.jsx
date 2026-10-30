@@ -92,7 +92,7 @@ function ProSavings({ align, dark }) {
   const base = dark === false ? '0,0,0' : '255,255,255';
   return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:align || 'center', gap:8, flexWrap:'wrap', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-      <span style={{ fontSize:12.5, color:'rgba(' + base + ',0.35)', textDecoration:'line-through' }}>{PRO_YEAR_AT_MONTHLY} au mois</span>
+      <span style={{ fontSize:12.5, color:'rgba(' + base + ',0.35)', textDecoration:'line-through' }}>{PRO_YEAR_AT_MONTHLY} en mensuel</span>
       <span style={{ fontSize:11.5, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.12)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'3px 10px', whiteSpace:'nowrap' }}>
         {PRO_DISCOUNT} · tu économises {PRO_SAVE}
       </span>
@@ -444,32 +444,6 @@ function hmWeeklyResetIn() {
   return days <= 1 ? 'demain' : 'dans ' + days + ' jours';
 }
 
-/* ── Countdown 48h — expire depuis la première visite ── */
-function useLaunchCountdown() {
-  function getDeadline() {
-    var stored = localStorage.getItem('__launchDeadline');
-    if (stored) return parseInt(stored, 10);
-    var dl = Date.now() + 48 * 60 * 60 * 1000;
-    localStorage.setItem('__launchDeadline', dl);
-    return dl;
-  }
-  function fmt() {
-    var diff = Math.max(0, getDeadline() - Date.now());
-    var h = Math.floor(diff / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    var pad = function(n){ return n < 10 ? '0' + n : '' + n; };
-    return h + 'h ' + pad(m) + 'm ' + pad(s) + 's';
-  }
-  var _s = React.useState(fmt);
-  var val = _s[0]; var setVal = _s[1];
-  React.useEffect(function() {
-    var t = setInterval(function(){ setVal(fmt()); }, 1000);
-    return function(){ clearInterval(t); };
-  }, []);
-  return val;
-}
-
 /* ─── Guest Gate Modal (après 1ère action gratuite) ─── */
 function GuestGateModal({ onClose, context = 'default' }) {
   const { openAuth, openQuickCheckout } = useAuth();
@@ -704,7 +678,7 @@ function ProGateModal({ onClose, navigate, reason }) {
             <span style={{ color:'#4ade80', fontSize:12, flexShrink:0 }}>✓</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Annule quand tu veux</span>
             <span style={{ color:'rgba(255,255,255,0.25)' }}>·</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Remboursé sous 48h</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Satisfait ou remboursé 14 jours</span>
           </div>
           <button onClick={onClose}
             style={{ background:'none', border:'none', color:'rgba(240,237,230,0.32)', fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
@@ -967,7 +941,7 @@ function SubscriptionPage({ navigate }) {
           </p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px 18px', marginBottom: 26 }}>
-            {['Sans engagement', 'Résiliable en 1 clic', 'Remboursé sous 48h'].map(function (t) {
+            {['Sans engagement', 'Résiliable en 1 clic', 'Remboursé 14 jours'].map(function (t) {
               return (
                 <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
                   <span style={{ color: '#4ade80' }}>✓</span>{t}
@@ -2277,7 +2251,7 @@ function FeatureCards({ navigate }) {
       title: 'Blind Test Coran',
       hook: 'Reconnais à l\'oreille ce que tu n\'arrives pas à retenir par cœur.',
       desc: 'Sourates, récitateurs, thèmes — un format addictif qui grave les versets dans ta mémoire sans effort.',
-      free: 'Niveau Débutant · illimité',
+      free: 'Une partie par jour · tous niveaux',
       pro: '114 sourates · Tous niveaux · Illimité',
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'blind-test',
@@ -2286,8 +2260,8 @@ function FeatureCards({ navigate }) {
       num: '02', icon: '🧠', tag: null, tagColor: '#7bc99a', tagRgb: '123,201,154',
       title: 'Quiz Islamiques',
       hook: 'Teste tes connaissances. Surprends-toi toi-même.',
-      desc: '740 questions vérifiées sur 9 thèmes — Coran, prophètes ﷺ, histoire, jurisprudence. Trois niveaux, et un mode Mélange qui pioche partout.',
-      free: 'Niveau Débutant · illimité',
+      desc: '740 questions sur 8 thèmes — Coran, prophètes ﷺ, histoire, jurisprudence. Trois niveaux, et un mode Mélange qui pioche partout.',
+      free: 'Une partie par jour · tous niveaux',
       pro: 'Tous niveaux · Toutes catégories · Illimité',
       accent: { from:'rgba(6,22,13,0.97)', to:'rgba(2,8,4,0.99)', border:'rgba(100,180,130,0.28)', glow:'rgba(100,180,130,0.12)', line:'#4ade80' },
       page: 'quiz',
@@ -2297,7 +2271,7 @@ function FeatureCards({ navigate }) {
       title: 'Comprends le Coran',
       hook: 'Tu pries en arabe depuis des années — sans vraiment comprendre les mots.',
       desc: "Apprends le Coran mot à mot. Le Juz 'Amma seul te donne plus de la moitié des mots du Coran — ils reviennent partout. Écoute, comprends, joue, et un jour tu comprends ta prière.",
-      free: '5 sourates offertes · mot à mot · illimité',
+      free: '5 sourates offertes · mot à mot',
       pro: "Le Juz 'Amma complet — 38 sourates, 571 versets",
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'comprendre',
@@ -2366,7 +2340,7 @@ function FeatureCards({ navigate }) {
             Joue. Apprends. Crée.
           </h2>
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:'clamp(15px,1.8vw,17px)', color:'rgba(240,237,230,0.45)', maxWidth:480, margin:'0 auto 24px', lineHeight:1.8 }}>
-            Trois outils pour enrichir ta foi — sans que ça ressemble à un cours.
+            Quatre activités pour enrichir ta foi — sans que ça ressemble à un cours.
           </p>
           <ArabesqueDivider color="rgba(200,167,39,0.35)" />
         </div>
@@ -2568,7 +2542,7 @@ function HowItWorksSection() {
   }
 
   var steps = [
-    { num:'01', label:'Créer un compte',     sub:'30 secondes, c\'est tout' },
+    { num:'01', label:'Créer un compte',     sub:'30 secondes · 2 jours d\'accès complet offerts' },
     { num:'02', label:'Choisir une activité', sub:'Comprendre, Blind Test ou Quiz' },
     { num:'03', label:'Jouer & progresser',  sub:'Apprends sans t\'en rendre compte' },
   ];
@@ -2686,6 +2660,7 @@ function ComparisonTable({ navigate }) {
   { text: 'Tous les niveaux, tous les thèmes', ok: true },
   { text: 'Une partie de Quiz par jour', ok: true },
   { text: 'Une partie de Blind Test par jour', ok: true },
+  { text: '5 sourates de Comprendre, mot à mot', ok: true },
   { text: 'Une sourate Pro offerte chaque semaine', ok: true },
   { text: '🔒 Quiz illimités tous niveaux', ok: false },
   { text: '🔒 Blind test complet (114 sourates)', ok: false },
@@ -2694,7 +2669,7 @@ function ComparisonTable({ navigate }) {
      grandir, et on ne paie pas pour ce à quoi on ne s'est pas attaché. */
   { text: 'Progression, statistiques et série', ok: true },
   { text: '🔒 Sans limite quotidienne', ok: false },
-  { text: '🔒 Les 38 sourates de Comprendre', ok: false }];
+  { text: '🔒 Le Juz \'Amma complet — 38 sourates', ok: false }];
 
   const proItems = [
   { text: 'Quiz illimités · tous niveaux · toutes catégories', icon: '🧠' },
@@ -2847,30 +2822,28 @@ function ComparisonTable({ navigate }) {
 
 /* ─── Parcours ─── */
 function ParcoursSection() {
+  /* Calé sur le produit réel : trois niveaux (Débutant, Amateur, Avancé) et
+     les huit thèmes du quiz. La version précédente annonçait des niveaux
+     « Reconverti(e) » et « Intermédiaire » et des thèmes — Exégèse, Débats,
+     Soutien — qui n'existent nulle part : un abonné les aurait cherchés. */
   const parcours = [
   {
     level: 'Débutant',
     dot: '#4ade80',
-    desc: 'Tu découvres l\'islam ou tu veux revoir les bases. Histoire, piliers, vocabulaire essentiel.',
-    tags: ['Bases de l\'islam', 'Vocabulaire', 'Premiers pas']
+    desc: 'Tu découvres l\'islam, tu t\'es converti(e), ou tu veux revoir les bases.',
+    tags: ['Les 5 Piliers', 'Les Prophètes', 'Le Coran']
   },
   {
-    level: 'Reconverti(e)',
-    dot: '#60a5fa',
-    desc: 'Tu t\'es converti(e) et tu veux construire une connaissance solide, à ton rythme.',
-    tags: ['Pratique', 'Priorités', 'Soutien']
-  },
-  {
-    level: 'Intermédiaire',
+    level: 'Amateur',
     dot: '#c8a727',
-    desc: 'Tu connais les bases et tu veux approfondir : seerah, jurisprudence, Coran.',
-    tags: ['Seerah', 'Fiqh', 'Coran']
+    desc: 'Tu connais les bases et tu veux aller plus loin, thème par thème.',
+    tags: ['Les Compagnons', 'Histoire islamique', 'Hadiths & Sunna']
   },
   {
     level: 'Avancé',
     dot: '#f87171',
-    desc: 'Tu maîtrises bien et tu cherches à affiner ta compréhension des sciences islamiques.',
-    tags: ['Sciences islamiques', 'Exégèse', 'Débats']
+    desc: 'Tu veux être mis(e) au défi sur les détails que peu de gens connaissent.',
+    tags: ['Fiqh & Pratique', 'Jour du Jugement', 'Le Coran']
   }];
 
 
@@ -2896,7 +2869,7 @@ function ParcoursSection() {
             Adapté à ton niveau
           </h2>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', maxWidth: 480, margin: '0 auto' }}>
-            Quel que soit ton point de départ, il y a un parcours pour toi.
+            Trois niveaux, huit thèmes, 740 questions. Tu commences où tu veux.
           </p>
           <div style={{ marginTop: 20 }}><ArabesqueDivider color="rgba(200,167,39,0.4)" /></div>
         </div>
@@ -3102,9 +3075,14 @@ function ImportanceSection() {
             lineHeight: 1.6,
             letterSpacing: '0.01em'
           }}>
-            « Demandez le savoir du berceau jusqu'à la tombe. »
+            « Et dis : Seigneur, accroîs mes connaissances. »
           </p>
-          <p style={{ marginTop: 16, fontSize: 13, color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>SUNAN AL-TIRMIDHI, N° 74</p>
+          {/* Remplace « Demandez le savoir du berceau jusqu'à la tombe », attribué
+              ici à « Sunan At-Tirmidhi n° 74 » : la formule n'est pas un hadith
+              et ne figure pas dans ce recueil. Sur un site d'apprentissage
+              religieux, une référence inventée ruine la confiance de tout le
+              reste. Toute citation ajoutée doit être sourcée et vérifiable. */}
+          <p style={{ marginTop: 16, fontSize: 13, color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>CORAN — TÂ-HÂ (20:114)</p>
           <div style={{ width: 40, height: 2, background: 'var(--gold)', margin: '28px auto 0', opacity: 0.5 }} />
         </div>
 
@@ -3269,9 +3247,9 @@ function LearnPlaySection({ navigate }) {
               {/* Quote */}
               <div style={{ background: 'rgba(200,167,39,0.06)', border: '1px solid rgba(200,167,39,0.15)', borderRadius: 16, padding: '18px 20px' }}>
                 <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 17, color: 'rgba(255,255,255,0.7)', margin: '0 0 8px', lineHeight: 1.6 }}>
-                  "Cherchez la science du berceau jusqu'à la tombe."
+                  « Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne. »
                 </p>
-                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(200,167,39,0.6)', margin: 0, fontWeight: 600, letterSpacing: '0.04em' }}>— Hadith</p>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(200,167,39,0.6)', margin: 0, fontWeight: 600, letterSpacing: '0.04em' }}>— Prophète ﷺ, rapporté par Al-Bukhari</p>
               </div>
             </div>
 
@@ -3493,7 +3471,7 @@ function FaqSection() {
   const faqs = [
     {
       q: 'Est-ce vraiment gratuit ? Sans carte bancaire ?',
-      a: 'Oui, complètement. Le compte gratuit donne accès aux aperçus de chaque fonctionnalité sans aucune limite de temps. Aucune carte bancaire n\'est demandée à l\'inscription. Tu passes à Pro uniquement si tu veux le contenu illimité.'
+      a: 'Oui, sans limite de durée et sans carte bancaire. Le compte gratuit te donne 5 sourates de Comprendre en mot à mot, une partie de Quiz et une de Blind Test chaque jour, et une sourate Pro offerte chaque semaine. À l\'inscription, tu as en plus 2 jours d\'accès complet pour tout essayer. Tu passes à Pro seulement si tu veux tout, sans limite.'
     },
     {
       q: 'Je ne suis pas bon(ne) en islam — c\'est fait pour moi ?',
@@ -3501,7 +3479,7 @@ function FaqSection() {
     },
     {
       q: 'Est-ce que je peux résilier quand je veux ?',
-      a: 'Oui, sans condition. Que tu sois en annuel ou en mensuel, l\'abonnement se résilie en un clic depuis ton profil. Aucun engagement, aucune pénalité : tu gardes l\'accès jusqu\'à la fin de la période déjà payée, puis retour au compte gratuit. Et si tu changes d\'avis dans les 48h sans avoir utilisé le contenu Pro, on te rembourse.'
+      a: 'Oui, sans condition. Que tu sois en annuel ou en mensuel, l\'abonnement se résilie en un clic depuis ton profil. Aucun engagement, aucune pénalité : tu gardes l\'accès jusqu\'à la fin de la période déjà payée, puis retour au compte gratuit. Et si tu changes d\'avis dans les 14 jours, on te rembourse intégralement, sans justification.'
     },
     {
       q: 'Annuel ou mensuel — lequel choisir ?',
@@ -3571,7 +3549,7 @@ function FaqSection() {
         <div className="reveal-blur" style={{ textAlign: 'center', marginTop: 48 }}>
           <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: 'rgba(240,237,230,0.4)' }}>
             Autre question ?{' '}
-            <a href="mailto:ayyb.34@gmail.com" style={{ color: 'rgba(200,167,39,0.7)', textDecoration: 'none', borderBottom: '1px solid rgba(200,167,39,0.3)' }}>
+            <a href="mailto:contact.heritagemusulman@gmail.com" style={{ color: 'rgba(200,167,39,0.7)', textDecoration: 'none', borderBottom: '1px solid rgba(200,167,39,0.3)' }}>
               Écris-nous
             </a>
           </p>
@@ -3596,9 +3574,6 @@ function Testimonials() {
   return (
     <section style={{ padding: '70px 24px 60px', position: 'relative', overflow: 'hidden' }}>
       <div style={{ maxWidth: 1080, margin: '0 auto', textAlign: 'center' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <span style={{ color: '#e6c84a', fontSize: 18, letterSpacing: 2 }}>★★★★★</span>
-        </div>
         <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 900, fontSize: 'clamp(24px,4vw,40px)', color: '#fff', letterSpacing: '-0.5px', marginBottom: 10 }}>
           Ils apprennent déjà avec <span style={{ color: '#c8a727' }}>Héritage Musulman</span>
         </h2>
@@ -3608,7 +3583,6 @@ function Testimonials() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, textAlign: 'left' }}>
           {reviews.map((r, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.18)', borderRadius: 16, padding: '22px 22px 18px' }}>
-              <div style={{ color: '#e6c84a', fontSize: 13, letterSpacing: 1.5, marginBottom: 10 }}>★★★★★</div>
               <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6, margin: '0 0 14px' }}>« {r.t} »</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#1f6f4a,#0b1a11)', border: '1.5px solid rgba(200,167,39,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 15, color: '#e6c84a' }}>{r.n[0]}</div>
@@ -3656,7 +3630,7 @@ function SoftPaywall({ navigate }) {
             { icon: '📖', title: 'Comprendre le Coran', desc: "Le Juz 'Amma mot à mot — 38 sourates" },
             { icon: '🧠', title: 'Quiz illimités', desc: 'Tous niveaux, toutes catégories' },
             { icon: '🎵', title: 'Blind test complet', desc: '114 sourates à reconnaître' },
-            { icon: '📅', title: 'Nouveau contenu', desc: 'Chaque semaine incha\'Allah' },
+            { icon: '📅', title: 'Nouveau contenu', desc: 'Ajouté régulièrement incha\'Allah' },
           ].map((item) => (
             <div key={item.title} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.15)', borderRadius: 14, padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
               <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
@@ -3704,7 +3678,7 @@ function SoftPaywall({ navigate }) {
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux</span>
             <span style={{ color:'rgba(255,255,255,0.3)' }}>·</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Remboursé sous 48h si non utilisé</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Satisfait ou remboursé 14 jours</span>
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8, textAlign:'center' }}>
             {PRO_PER_DAY} par jour — moins qu'un café par mois, pour un savoir qui te suit toute ta vie · 🔒 Paiement sécurisé
@@ -3750,7 +3724,7 @@ function StartPage({ navigate }) {
     {
       icon: '🧠', tag: 'ENRICHISSANT', tagColor: '#4ade80', tagRgb: '74,222,128',
       title: 'Quiz Islamiques',
-      desc: '740 questions vérifiées sur 9 thèmes — dont une catégorie Coran entière. Trois niveaux, et un mode Mélange qui ne repose jamais deux fois la même question.',
+      desc: '740 questions sur 8 thèmes — dont une catégorie Coran entière. Trois niveaux, et un mode Mélange qui ne repose jamais deux fois la même question.',
       free: ['Niveau Débutant illimité', 'Tous les thèmes en aperçu', 'Score sauvegardé'],
       pro: ['Niveaux Amateur & Avancé débloqués', 'Quiz illimités', 'Toutes catégories', 'Corrections détaillées'],
       cta: '🧠 Essayer le Quiz', page: 'quiz',
@@ -7249,7 +7223,7 @@ function CguPage({ navigate }) {
 
       <h2 style={LS.h2}>Article 5 — Droit de rétractation</h2>
       <p style={LS.p}>
-        Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation de 14 jours <strong>ne s'applique pas</strong> aux contenus numériques dont l'exécution a commencé avec l'accord exprès du consommateur avant l'expiration du délai de rétractation et après renoncement exprès à son droit. Cet accord et cette renonciation sont recueillis lors de la souscription à l'abonnement Pro.
+        Conformément aux articles L221-18 et suivants du Code de la consommation, l'utilisateur dispose d'un délai de <strong>14 jours</strong> à compter de la souscription pour exercer son droit de rétractation, sans avoir à motiver sa décision. Il lui suffit d'en faire la demande à contact.heritagemusulman@gmail.com : le remboursement intégral intervient dans les 14 jours suivant la demande, par le moyen de paiement utilisé lors de la souscription.
       </p>
 
       <h2 style={LS.h2}>Article 6 — Obligations de l'utilisateur</h2>
@@ -7468,8 +7442,7 @@ function CGVPage({ navigate }) {
       <p style={LS.p}>L'accès Pro est activé immédiatement après confirmation du paiement par Stripe. Il est lié à votre compte et non transférable.</p>
 
       <h2 style={LS.h2}>4. Rétractation</h2>
-      <p style={LS.p}>Conformément à l'article L.221-28 du Code de la consommation, <strong>le droit de rétractation de 14 jours ne s'applique pas</strong> aux contenus numériques fournis immédiatement après confirmation de paiement, avec votre accord exprès.</p>
-      <p style={LS.p}>Toutefois, si vous n'avez pas encore accédé au service, vous pouvez demander un remboursement dans les 48h à : <strong>contact.heritagemusulman@gmail.com</strong>.</p>
+      <p style={LS.p}>Vous disposez de <strong>14 jours</strong> à compter de la souscription pour vous rétracter, sans avoir à vous justifier. Il suffit d'écrire à <strong>contact.heritagemusulman@gmail.com</strong> : le remboursement est intégral, sur le moyen de paiement utilisé, dans les 14 jours suivant la demande.</p>
 
       <h2 style={LS.h2}>5. Résiliation</h2>
       <p style={LS.p}>Vous pouvez résilier votre abonnement à tout moment depuis votre espace <strong>Profil</strong> sur le site. La résiliation prend effet à la fin de la période de facturation en cours — vous conservez l'accès Pro jusqu'à cette date. Aucun remboursement partiel n'est effectué.</p>
@@ -8391,7 +8364,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
             Débloquer tout — {PRO_ANNUAL}/an
           </button>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
-            <span>✓ {MEMBERS_COUNT} membres</span><span>✓ Sans engagement</span><span>✓ Remboursé sous 48h</span>
+            <span>✓ {MEMBERS_COUNT} membres</span><span>✓ Sans engagement</span><span>✓ Remboursé 14 jours</span>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.32)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
             Plus tard
