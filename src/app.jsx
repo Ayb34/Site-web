@@ -5,6 +5,57 @@
 
 const { useState, useEffect, useRef } = React;
 
+/* ═══ Firebase ═══
+   Initialisé ici et non plus dans index.html : les SDK y sont désormais
+   différés pour ne plus bloquer le premier rendu, et un script inline
+   s'exécuterait avant eux. app.js est le dernier script différé de la page,
+   donc Firebase est garanti chargé à cet instant. */
+try {
+  firebase.initializeApp({
+    apiKey: "AIzaSyB5EBPkPUOnC1wmF0Sr8kNmiLa5AhHc3bk",
+    authDomain: "heritage-musulman.firebaseapp.com",
+    projectId: "heritage-musulman",
+    storageBucket: "heritage-musulman.firebasestorage.app",
+    messagingSenderId: "163564732732",
+    appId: "1:163564732732:web:8e5e4be344683a0822de39",
+  });
+  window._auth = firebase.auth();
+  window._db = firebase.firestore();
+} catch (e) { console.warn('Firebase non configuré:', e.message); }
+
+/* ═══ Scripts tiers chargés à la demande ═══
+   Une promesse par adresse : deux appels simultanés partagent le même
+   téléchargement au lieu d'en lancer deux. */
+const hmScripts = {};
+function hmLoadScript(src) {
+  if (!hmScripts[src]) {
+    hmScripts[src] = new Promise(function (resolve, reject) {
+      const sc = document.createElement('script');
+      sc.src = src;
+      sc.async = true;
+      sc.onload = resolve;
+      sc.onerror = function () { delete hmScripts[src]; reject(new Error('Échec du chargement : ' + src)); };
+      document.head.appendChild(sc);
+    });
+  }
+  return hmScripts[src];
+}
+
+/* Stripe pesait 256 Ko sur chaque visite, pour moins de 1 % de visiteurs qui
+   atteignent le paiement. Il est désormais préchargé une fois la page
+   affichée et le navigateur au repos — la caisse reste instantanée pour qui
+   y va, et Stripe garde ses signaux antifraude sur la plupart des sessions —
+   mais il ne dispute plus jamais la bande passante au premier écran. */
+function hmLoadStripe() {
+  if (window.Stripe) return Promise.resolve(window.Stripe);
+  return hmLoadScript('https://js.stripe.com/v3/').then(function () { return window.Stripe; });
+}
+window.addEventListener('load', function () {
+  const go = function () { hmLoadStripe().catch(function () {}); };
+  if ('requestIdleCallback' in window) window.requestIdleCallback(go, { timeout: 6000 });
+  else setTimeout(go, 3000);
+});
+
 /* ═══ Offre Pro — argumentaire centralisé ═══
    L'annuel est le plan par défaut (cf. api/create-checkout.js).
    Mensuel sur 12 mois : 4,99 × 12 = 59,88€. L'annuel à 29,99€ économise donc
@@ -144,7 +195,7 @@ function hmCanShowProGate(key) {
 function CrescentLogo({ size = 32 }) {
   return (
     <img
-      src="uploads/logo.png"
+      src="uploads/logo-560.webp"
       alt="Héritage Musulman"
       style={{
         width: size, height: size,
@@ -749,7 +800,7 @@ function AuthModal({ onClose, initialTab }) {
         padding: '36px 32px', maxWidth: 420, width: '100%'
       }} onClick={e => e.stopPropagation()}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <img src="uploads/logo.png" alt="Héritage Musulman" className="auth-modal-logo" style={{ width: 150, height: 150, objectFit: 'contain', display: 'block', margin: '0 auto 8px' }} />
+          <img src="uploads/logo-560.webp" alt="Héritage Musulman" className="auth-modal-logo" style={{ width: 150, height: 150, objectFit: 'contain', display: 'block', margin: '0 auto 8px' }} />
           <h2 style={{ color: '#c8a727', fontSize: 22, fontWeight: 800, margin: 0 }}>
             {tab === 'signup' ? 'Créer un compte' : 'Connexion'}
           </h2>
@@ -963,7 +1014,7 @@ function SubscriptionPage({ navigate }) {
     }
     busyRef.current = true;
     try {
-      var stripe = window.Stripe('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
+      var stripe = (await hmLoadStripe())('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -5975,7 +6026,14 @@ function VideoCreatorPage({ navigate }) {
 
   // ── Offline encoder via WebCodecs + mp4-muxer ──
   const createVideoOffline = async function () {
-    if (!window.VideoEncoder || !window.AudioEncoder || !window.Mp4Muxer) return false;
+    if (!window.VideoEncoder || !window.AudioEncoder) return false;
+    /* mp4-muxer n'est utile qu'ici : chargé au premier export plutôt qu'à
+       chaque visite de l'accueil. */
+    if (!window.Mp4Muxer) {
+      try { await hmLoadScript('https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.5/build/mp4-muxer.min.js'); }
+      catch (e) { return false; }
+      if (!window.Mp4Muxer) return false;
+    }
     // Drop FPS aggressively for static content — text is stationary, eyes won't notice.
     // Animated bgs need more frames; static ones can run at 4 fps with no visual loss.
     const ANIMATED_BG_FPS = { stars: 1, night: 1, kaaba: 1, bokeh: 1, video: 1 };
@@ -7738,7 +7796,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
     }
     busyRef.current = true;
     try {
-      var stripe = window.Stripe('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
+      var stripe = (await hmLoadStripe())('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
       var res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

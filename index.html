@@ -36,45 +36,48 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="preconnect" href="https://www.gstatic.com"/>
 <link rel="preconnect" href="https://unpkg.com" crossorigin/>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-<link rel="preconnect" href="https://js.stripe.com" crossorigin/>
 <link rel="dns-prefetch" href="https://api.emailjs.com"/>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com"/>
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com"/>
 
 <!-- ── Fonts (DM Serif Display supprimé — 0 usage) ── -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel:wght@400;600;700&family=Fraunces:ital,opsz,wght@1,144,200;1,144,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Cinzel:wght@400;600;700&family=Fraunces:ital,opsz,wght@1,144,200;1,144,300&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
 
 <!-- ── Preload critiques ── -->
 <link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
-<link rel="preload" as="script" href="/app.js?v=2"/>
+<link rel="preload" as="script" href="/app.js?v=3"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
-<!-- ── Stripe.js ── -->
-<script src="https://js.stripe.com/v3/" async defer></script>
-<!-- ── React 18 production builds ── -->
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
-<!-- App précompilé (JSX → JS via esbuild, voir `npm run build`). Plus de compilation Babel au runtime. -->
-<script src="/app.js?v=2" defer></script>
-<!-- ── Firebase (sync — requis avant l'init inline) ── -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<!-- ── EmailJS (différé — init lazy au premier envoi) ── -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.5/build/mp4-muxer.min.js" defer></script>
+<!-- ── Scripts : TOUS différés, dans l'ordre d'exécution voulu ──
+     Ils étaient bloquants, et placés AVANT les ~1 100 lignes de CSS : le
+     navigateur ne pouvait rien peindre — pas même l'écran de chargement —
+     tant que React, ReactDOM et les trois SDK Firebase n'étaient pas
+     téléchargés et exécutés. Premier rendu mesuré : 1,9 s sur fibre.
+
+     `defer` télécharge en parallèle et exécute dans l'ordre du document,
+     après l'analyse du HTML. L'ordre ci-dessous est donc une dépendance :
+     React → ReactDOM → Firebase → app.js (qui initialise Firebase en tête).
+
+     Retirés du chargement initial, et chargés à la demande depuis app.js :
+     Stripe (256 Ko, utile à moins de 1 % des visiteurs), EmailJS et
+     mp4-muxer (Studio). -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" defer></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+<script src="/app.js?v=3" defer></script>
 <script>
   (function(){
     var _EJS_PUBLIC_KEY  = '0p0THZMRdSKSdd8Yj';
     var _EJS_SERVICE_ID  = 'service_s1qs19r';
     var _EJS_TEMPLATE_ID = 'template_17svpba';
     var _ejsInited = false;
-    window._ejsSend = function(toEmail, toName) {
+    function send(toEmail, toName) {
       try {
-        if (!_ejsInited && typeof emailjs !== 'undefined') {
+        if (!_ejsInited) {
           emailjs.init({ publicKey: _EJS_PUBLIC_KEY });
           _ejsInited = true;
         }
@@ -83,6 +86,15 @@
           to_name:  toName || 'cher(e) membre'
         });
       } catch(e) { console.warn('EmailJS:', e); }
+    }
+    /* Chargé au premier envoi, c'est-à-dire à l'inscription : rien à faire
+       payer aux visiteurs qui ne s'inscrivent pas. */
+    window._ejsSend = function(toEmail, toName) {
+      if (typeof emailjs !== 'undefined') return send(toEmail, toName);
+      var sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+      sc.onload = function () { send(toEmail, toName); };
+      document.head.appendChild(sc);
     };
   })();
 </script>
@@ -202,21 +214,6 @@
 
     loadPixels();
   })();
-</script>
-<script>
-  var _fbConfig = {
-    apiKey: "AIzaSyB5EBPkPUOnC1wmF0Sr8kNmiLa5AhHc3bk",
-    authDomain: "heritage-musulman.firebaseapp.com",
-    projectId: "heritage-musulman",
-    storageBucket: "heritage-musulman.firebasestorage.app",
-    messagingSenderId: "163564732732",
-    appId: "1:163564732732:web:8e5e4be344683a0822de39"
-  };
-  try {
-    firebase.initializeApp(_fbConfig);
-    window._auth = firebase.auth();
-    window._db   = firebase.firestore();
-  } catch(e) { console.warn("Firebase non configure:", e.message); }
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -928,7 +925,7 @@
      la finesse du trait ne se voit pas. */
   .hero-bg {
     position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background: url('uploads/zellige-m.webp') center / cover no-repeat;
+    background-position: center; background-size: cover; background-repeat: no-repeat;
     /* 0,34 et non 0,55 comme en desktop : l'image portrait est intrinsequement
        plus claire (luminance moyenne 40,6 contre 23,9 sur la moitie haute, la
        seule que le masque laisse voir). A opacite egale elle serait 1,4 fois
@@ -936,6 +933,13 @@
     opacity: 0.34;
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  }
+  /* Chaque largeur ne declare QUE son image, dans des requetes qui s'excluent :
+     une image de base surchargee ensuite peut etre telechargee quand meme
+     (au redimensionnement, ou par certains navigateurs), et le zellige est
+     deja le plus gros fichier de la page. */
+  @media (max-width: 768px) {
+    .hero-bg { background-image: url('uploads/zellige-m.webp'); }
   }
   @media (min-width: 769px) {
     .hero-bg { background-image: url('uploads/zellige.webp'); opacity: 0.55; }
@@ -1339,7 +1343,7 @@
 <body>
 
 <div id="app-loading">
-  <img id="app-loading-crescent" src="uploads/logo.png" alt=""/>
+  <img id="app-loading-crescent" src="uploads/logo-560.webp" alt=""/>
   <div id="app-loading-inner"></div>
 </div>
 <div id="root"></div>
