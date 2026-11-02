@@ -558,7 +558,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
           })}
         </div>
         <button onClick={function(){ openAuth(); onClose(); }}
-          style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'14px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:10, boxShadow:'0 4px 20px rgba(200,167,39,0.35)' }}>
+          style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:10, boxShadow:'0 4px 20px rgba(200,167,39,0.35)' }}>
           Créer mon compte — c'est gratuit →
         </button>
         <button onClick={onClose}
@@ -625,7 +625,7 @@ function TrialWelcomeModal({ onClose, navigate }) {
             sourates sont ouvertes — la preuve immédiate de ce qu'elle a reçu.
             Et il nomme la récompense plutôt que l'action : on ne clique pas
             pour « commencer », on clique pour profiter de deux jours. */}
-        <button onClick={function(){ onClose(); if (navigate) navigate('comprendre'); }} style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
+        <button onClick={function(){ onClose(); if (navigate) navigate('comprendre'); }} style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
           Profiter de mes 2 jours →
         </button>
         <button onClick={function(){ onClose(); openQuickCheckout(); }} style={{ background:'none', border:'none', color:'rgba(240,237,230,0.35)', fontSize:12.5, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
@@ -724,7 +724,7 @@ function ProGateModal({ onClose, navigate, reason }) {
         {/* Pied collant : prix et bouton restent visibles quel que soit le défilement. */}
         <div className="pro-modal-footer" style={{ padding:'12px 24px 16px' }}>
           <button onClick={function(){ onClose(); openQuickCheckout(); }}
-            style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
+            style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
             Passer à Pro — {PRO_ANNUAL}/an
           </button>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap', marginBottom:8 }}>
@@ -862,8 +862,8 @@ function AuthModal({ onClose, initialTab }) {
                   onKeyDown={e => e.key === 'Enter' && sendReset()} style={inp} />
                 {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 12, textAlign: 'center' }}>{error}</p>}
                 <button onClick={sendReset} disabled={loading} style={{
-                  width: '100%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
-                  border: 'none', color: '#1c1200', padding: '14px', borderRadius: 10,
+                  width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+                  border: 'none', color: '#fff', padding: '14px', borderRadius: 10,
                   fontSize: 15, fontWeight: 700, cursor: loading ? 'wait' : 'pointer',
                   fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 12
                 }}>{loading ? '…' : 'Envoyer le lien'}</button>
@@ -892,8 +892,8 @@ function AuthModal({ onClose, initialTab }) {
             )}
             {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 14, textAlign: 'center' }}>{error}</p>}
             <button onClick={submit} disabled={loading} style={{
-              width: '100%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
-              border: 'none', color: '#1c1200', padding: '14px', borderRadius: 10,
+              width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+              border: 'none', color: '#fff', padding: '14px', borderRadius: 10,
               fontSize: 15, fontWeight: 700, cursor: loading ? 'wait' : 'pointer',
               fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 14
             }}>{loading ? '…' : (tab === 'signup' ? 'Créer mon compte' : 'Se connecter')}</button>
@@ -985,7 +985,7 @@ function SubscriptionPage({ navigate }) {
             L'abonnement enlève les limites, il ne retient rien en otage.
           </p>
 
-          <button onClick={openAuth} style={{ width: '100%', maxWidth: 380, background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '17px 32px', borderRadius: 14, fontSize: 16.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 6px 26px rgba(200,167,39,0.32)', marginBottom: 12 }}>
+          <button onClick={openAuth} style={{ width: '100%', maxWidth: 380, background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '17px 32px', borderRadius: 14, fontSize: 16.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 6px 26px rgba(200,167,39,0.32)', marginBottom: 12 }}>
             Créer mon compte — 2 jours offerts →
           </button>
           <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', margin: '0 0 24px' }}>
@@ -1154,8 +1154,8 @@ function SubscriptionPage({ navigate }) {
         <button
           onClick={() => openCheckout('card')}
           className="sub-cta-btn"
-          style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)',
-            border: 'none', color: '#0a1a08', padding: '16px', borderRadius: 12,
+          style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+            border: 'none', color: '#fff', padding: '16px', borderRadius: 12,
             fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
             letterSpacing: 0.3, boxShadow: '0 4px 24px rgba(200,167,39,0.25)',
             transition: 'transform 0.15s, box-shadow 0.15s'
@@ -1226,7 +1226,7 @@ function SubscriptionPage({ navigate }) {
               <div style={{ padding:40, textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
                 <div style={{ fontSize:32, marginBottom:12 }}>⚠️</div>
                 <p style={{ color:'#dc2626', fontSize:14, marginBottom:20 }}>{checkoutError}</p>
-                <button onClick={() => openCheckout('card')} style={{ background:'#c8a727', border:'none', color:'#1c1200', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:700, cursor:'pointer' }}>Réessayer</button>
+                <button onClick={() => openCheckout('card')} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:700, cursor:'pointer' }}>Réessayer</button>
               </div>
             )}
 
@@ -1345,9 +1345,9 @@ function ProfilePage({ navigate }) {
         }}>
           <div style={{
             width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
+            background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 28, fontWeight: 800, color: '#1c1200'
+            fontSize: 28, fontWeight: 800, color: '#fff'
           }}>
             {((user && (user.displayName || user.email)) || '?')[0].toUpperCase()}
           </div>
@@ -1383,7 +1383,7 @@ function ProfilePage({ navigate }) {
                 {trialLeft === 1 ? 'Dernier jour' : trialLeft + ' jours restants'} · aucun paiement, aucune carte enregistrée
               </div>
             </div>
-            <button onClick={function(){ openQuickCheckout(); }} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <button onClick={function(){ openQuickCheckout(); }} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               Passer à Pro — {PRO_ANNUAL}
             </button>
           </div>
@@ -1576,8 +1576,8 @@ function ProfilePage({ navigate }) {
               {totalPossible - totalCompleted} niveau{totalPossible - totalCompleted > 1 ? 'x' : ''} restant{totalPossible - totalCompleted > 1 ? 's' : ''}
             </p>
             <button onClick={() => navigate('quiz')} style={{
-              background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none',
-              color: '#1c1200', padding: '14px 32px', borderRadius: 12,
+              background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none',
+              color: '#fff', padding: '14px 32px', borderRadius: 12,
               fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif'
             }}>Accéder aux quiz →</button>
           </div>
@@ -1664,7 +1664,7 @@ function Navbar({ navigate }) {
               {isPro ? (
                 <div className="nav-pro-wrap">
                   <button onClick={() => navigate('profile')} className="nav-pro-btn" title="Compte Pro — voir mon profil">
-                    <div style={{ width:24, height:24, borderRadius:'50%', background:'linear-gradient(135deg,#c8a727,#e6c84a)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:800, color:'#1c1200', flexShrink:0 }}>
+                    <div style={{ width:24, height:24, borderRadius:'50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:800, color: '#fff', flexShrink:0 }}>
                       {(user.displayName || user.email || '?')[0].toUpperCase()}
                     </div>
                     <span style={{ overflow:'hidden', textOverflow:'ellipsis', maxWidth:100 }}>
@@ -1770,8 +1770,8 @@ function Navbar({ navigate }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
               background: 'rgba(200,167,39,0.07)', borderRadius: 12, border: '1px solid rgba(200,167,39,0.15)' }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: '#1c1200', flexShrink: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
                 {((user.displayName || user.email || '?')[0]).toUpperCase()}
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
@@ -1793,8 +1793,8 @@ function Navbar({ navigate }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button onClick={() => { setMenuOpen(false); openAuth('signup'); }} style={{
-              background: 'linear-gradient(135deg,#a8891f,#c4a83a)',
-              border: 'none', color: '#1c1200', padding: '15px', borderRadius: 12,
+              background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+              border: 'none', color: '#fff', padding: '15px', borderRadius: 12,
               fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
               letterSpacing: '-0.2px'
             }}>S'inscrire</button>
@@ -2519,7 +2519,7 @@ function HowItWorksSection() {
           </div>
         )}
         {showBtn && (
-          <div style={{ marginTop:4, background: clicked ? 'rgba(200,167,39,0.18)' : 'linear-gradient(135deg,#c8a727,#e6c84a)', borderRadius:9, padding:'11px 0', textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color: clicked ? '#c8a727' : '#030d06', transform: clicked ? 'scale(0.97)' : 'scale(1)', transition:'all 0.15s', boxShadow: clicked ? 'none' : '0 4px 18px rgba(200,167,39,0.28)' }}>
+          <div style={{ marginTop:4, background: clicked ? 'rgba(200,167,39,0.18)' : 'linear-gradient(135deg,#a8801a,#6d4f08)', borderRadius:9, padding:'11px 0', textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color: clicked ? '#c8a727' : '#fff', transform: clicked ? 'scale(0.97)' : 'scale(1)', transition:'all 0.15s', boxShadow: clicked ? 'none' : '0 4px 18px rgba(200,167,39,0.28)' }}>
             {clicked ? 'Création en cours…' : 'Créer mon compte →'}
           </div>
         )}
@@ -2630,7 +2630,7 @@ function HowItWorksSection() {
               return (
                 <div key={i} onClick={function() { setScene(i); setPaused(false); }}
                   style={{ display:'flex', gap:14, alignItems:'flex-start', padding:'16px 14px', borderRadius:12, cursor:'pointer', background: isActive ? 'rgba(200,167,39,0.06)' : 'transparent', border: isActive ? '1px solid rgba(200,167,39,0.22)' : '1px solid transparent', transition:'all 0.3s' }}>
-                  <div style={{ flexShrink:0, width:34, height:34, borderRadius:'50%', background: isActive ? 'linear-gradient(135deg,#c8a727,#e6c84a)' : 'rgba(200,167,39,0.08)', border: isActive ? 'none' : '1.5px solid rgba(200,167,39,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Cinzel,serif', fontSize:11, color: isActive ? '#030d06' : 'rgba(200,167,39,0.55)', fontWeight:700, boxShadow: isActive ? '0 0 14px rgba(200,167,39,0.32)' : 'none', transition:'all 0.3s' }}>
+                  <div style={{ flexShrink:0, width:34, height:34, borderRadius:'50%', background: isActive ? 'linear-gradient(135deg,#a8801a,#6d4f08)' : 'rgba(200,167,39,0.08)', border: isActive ? 'none' : '1.5px solid rgba(200,167,39,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Cinzel,serif', fontSize:11, color: isActive ? '#fff' : 'rgba(200,167,39,0.55)', fontWeight:700, boxShadow: isActive ? '0 0 14px rgba(200,167,39,0.32)' : 'none', transition:'all 0.3s' }}>
                     {s.num}
                   </div>
                   <div>
@@ -2855,15 +2855,15 @@ function ComparisonTable({ navigate }) {
             )}
             <button onClick={() => isPro ? navigate('blind-test') : openQuickCheckout()} style={{
               marginTop: isPro ? 32 : 12, width: '100%', position: 'relative', zIndex: 1,
-              background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
+              background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
               border: 'none', color: '#fff', padding: '15px', borderRadius: 10,
               fontSize: 15, fontWeight: 800, cursor: 'pointer',
               fontFamily: 'Plus Jakarta Sans, sans-serif',
               boxShadow: '0 4px 20px rgba(200,167,39,0.35)',
               transition: 'all 0.2s'
             }}
-            onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.55)';e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.background='linear-gradient(135deg, #d4b42e 0%, #b8991f 100%)';}}
-            onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 4px 20px rgba(200,167,39,0.35)';e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.background='linear-gradient(135deg, #c8a727 0%, #a8891f 100%)';}}>
+            onMouseEnter={(e) => {e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.55)';e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.background='linear-gradient(135deg,#b88d1f,#7a590a)';}}
+            onMouseLeave={(e) => {e.currentTarget.style.boxShadow='0 4px 20px rgba(200,167,39,0.35)';e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.background='linear-gradient(135deg,#a8801a,#6d4f08)';}}>
               {isPro ? '✦ Commencer une activité →' : 'Débloquer l\'accès complet →'}
             </button>
           </div>
@@ -3309,7 +3309,7 @@ function LearnPlaySection({ navigate }) {
             {/* CTA buttons — outside stagger so always visible */}
             <div className="reveal-blur" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 4px', textAlign: 'center', letterSpacing: '0.04em' }}>Essaie maintenant — c'est gratuit</p>
-              <button onClick={() => navigate('blind-test')} style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '14px 20px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 16px rgba(200,167,39,0.3)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              <button onClick={() => navigate('blind-test')} style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '14px 20px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 16px rgba(200,167,39,0.3)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
                 onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(200,167,39,0.45)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 4px 16px rgba(200,167,39,0.3)'; }}>
                 🎵 Jouer au Blind Test →
@@ -3392,7 +3392,7 @@ function StudioViralSection({ navigate }) {
             {phones.map((p, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, transform: i === 0 ? 'rotate(-3deg)' : 'rotate(2.5deg) translateY(18px)', flexShrink: 0 }}>
                 {/* Views badge — ABOVE phone */}
-                <div style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', borderRadius: 20, padding: '5px 14px', boxShadow: '0 4px 16px rgba(200,167,39,0.45)', whiteSpace: 'nowrap' }}>
+                <div style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', borderRadius: 20, padding: '5px 14px', boxShadow: '0 4px 16px rgba(200,167,39,0.45)', whiteSpace: 'nowrap' }}>
                   <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: '#fff', fontWeight: 900 }}>👁 {p.views} vues</span>
                 </div>
                 {/* Phone frame */}
@@ -3492,7 +3492,7 @@ function StudioViralSection({ navigate }) {
               </div>
             </div>
 
-            <button onClick={() => navigate('studio')} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '15px 24px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 20px rgba(200,167,39,0.35)', transition: 'all 0.2s', textAlign: 'center' }}
+            <button onClick={() => navigate('studio')} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '15px 24px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 20px rgba(200,167,39,0.35)', transition: 'all 0.2s', textAlign: 'center' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(200,167,39,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(200,167,39,0.35)'; }}>
               🎬 Créer ma première vidéo →
@@ -3713,8 +3713,8 @@ function SoftPaywall({ navigate }) {
         {/* CTA buttons */}
         <div className="soft-paywall-btns" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
           <button onClick={() => openQuickCheckout()} style={{
-            background: 'linear-gradient(135deg, #c8a727 0%, #a8891f 100%)',
-            border: 'none', color: '#0a1a08', padding: '18px 44px', borderRadius: 14,
+            background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+            border: 'none', color: '#fff', padding: '18px 44px', borderRadius: 14,
             fontSize: 16.5, fontWeight: 800, cursor: 'pointer',
             boxShadow: '0 6px 32px rgba(200,167,39,0.45)',
             fontFamily: 'Plus Jakarta Sans, sans-serif',
@@ -3835,7 +3835,7 @@ function StartPage({ navigate }) {
         {!isPro ? (
           <div className="sp-4" style={{ display:'flex', flexDirection:'column', gap:12, width:'100%', maxWidth:460, margin:'0 auto' }}>
             <button onClick={function(){ navigate('blind-test'); }}
-              style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 24px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 28px rgba(200,167,39,0.42)', transition:'all 0.2s', letterSpacing:'-0.1px', width:'100%' }}
+              style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'17px 24px', borderRadius:14, fontSize:16, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 6px 28px rgba(200,167,39,0.42)', transition:'all 0.2s', letterSpacing:'-0.1px', width:'100%' }}
               onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.03)'; e.currentTarget.style.boxShadow='0 8px 36px rgba(200,167,39,0.6)'; }}
               onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.42)'; }}>
               🎵 Jouer au Blind Test
@@ -4028,7 +4028,7 @@ function StartPage({ navigate }) {
 
           {isPro ? (
             <button onClick={function(){ navigate('blind-test'); }}
-              style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'17px 56px', borderRadius:15, fontSize:16.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 8px 36px rgba(200,167,39,0.45)', marginBottom:16, transition:'all 0.2s' }}
+              style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'17px 56px', borderRadius:15, fontSize:16.5, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 8px 36px rgba(200,167,39,0.45)', marginBottom:16, transition:'all 0.2s' }}
               onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; }}
               onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; }}>
               ✦ Commencer une activité →
@@ -4040,7 +4040,7 @@ function StartPage({ navigate }) {
                 <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, fontWeight:800, color:'#7bc99a', letterSpacing:'0.06em' }}>Sans engagement — résiliable en 1 clic</span>
               </div>
               <button onClick={function(){ openQuickCheckout(); }}
-                style={{ background:'linear-gradient(135deg,#c8a727,#e6c84a)', border:'none', color:'#1a0e00', padding:'20px 60px', borderRadius:16, fontSize:18, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 10px 44px rgba(200,167,39,0.55)', marginBottom:14, transition:'all 0.2s', display:'inline-block', maxWidth:'100%' }}
+                style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'20px 60px', borderRadius:16, fontSize:18, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 10px 44px rgba(200,167,39,0.55)', marginBottom:14, transition:'all 0.2s', display:'inline-block', maxWidth:'100%' }}
                 onMouseEnter={function(e){ e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 12px 56px rgba(200,167,39,0.75)'; }}
                 onMouseLeave={function(e){ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 10px 44px rgba(200,167,39,0.55)'; }}>
                 {user ? '🔓 Débloquer l\'accès complet →' : 'Accéder à l\'offre →'}
@@ -4520,8 +4520,8 @@ function BlindTestPage({ navigate }) {
 
             <button onClick={() => { if (!difficulty) return; if (btQuotaSpent) { setShowProGate(true); return; } if (!isPro && !btLegacyFree) hmQuotaTake('blindtest'); if (trialing && user) hmTrialRecord(user.uid, 'bt'); launch(); }} style={{
               width: '100%', padding: '18px', borderRadius: 14, fontSize: 17, fontWeight: 800,
-              background: difficulty ? 'linear-gradient(135deg,#a8891f,#c4a83a)' : 'rgba(255,255,255,0.06)',
-              border: 'none', color: difficulty ? '#1c1200' : 'rgba(255,255,255,0.25)',
+              background: difficulty ? 'linear-gradient(135deg,#a8801a,#6d4f08)' : 'rgba(255,255,255,0.06)',
+              border: 'none', color: difficulty ? '#fff' : 'rgba(255,255,255,0.25)',
               cursor: difficulty ? 'pointer' : 'default', letterSpacing: '-0.2px',
               boxShadow: difficulty ? '0 4px 28px rgba(160,130,25,0.35)' : 'none', transition: 'all 0.2s'
             }}
@@ -4571,7 +4571,7 @@ function BlindTestPage({ navigate }) {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {NEXT_DIFF[difficulty] && sessionOk >= 6 &&
-                <button onClick={goNextLevel} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+                <button onClick={goNextLevel} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '16px', borderRadius: 12, fontSize: 16, fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                   ✦ Niveau suivant : {{ debutant:'Amateur', amateur:'Avancé(e)' }[difficulty]}
@@ -4677,8 +4677,8 @@ function BlindTestPage({ navigate }) {
                 </p>
                 {!correct && <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, marginBottom: 16 }}>C'était <strong style={{ color: '#c8a727' }}>{question.surah.fr}</strong> ({question.surah.ar})</p>}
                 <button onClick={goNextOrBilan} style={{
-                  background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none',
-                  color: '#1c1200', padding: '13px 32px', borderRadius: 12, fontSize: 15,
+                  background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none',
+                  color: '#fff', padding: '13px 32px', borderRadius: 12, fontSize: 15,
                   fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
@@ -5153,7 +5153,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
             <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.12), rgba(200,167,39,0.04))', border: '1.5px solid rgba(200,167,39,0.4)', borderRadius: 18, padding: '20px 22px', marginBottom: 28, textAlign: 'center' }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 6 }}>💾 Sauvegarde ce score de {finalScore}/{questions.length}</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16, lineHeight: 1.5 }}>Crée ton compte gratuit pour garder ta progression et débloquer <strong style={{ color: '#c8a727' }}>toutes les catégories</strong>. 10 secondes.</div>
-              <button onClick={openAuth} style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
+              <button onClick={openAuth} style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
                 Créer mon compte gratuit →
               </button>
             </div>
@@ -5161,7 +5161,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
 
           {/* Buttons */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={replay} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#f5edd8', padding: '14px 30px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <button onClick={replay} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#f5edd8', padding: '14px 30px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               🔄 Rejouer
             </button>
             <button onClick={() => navigate('quiz')} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.75)', padding: '14px 30px', borderRadius: 14, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -5265,7 +5265,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
             </div>
             <div style={{ textAlign: 'center' }}>
               <button onClick={next}
-                style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#f5edd8', padding: '15px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', transition: 'transform 0.18s', fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+                style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#f5edd8', padding: '15px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', transition: 'transform 0.18s', fontFamily: 'Plus Jakarta Sans, sans-serif' }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
                 {current + 1 >= questions.length ? '📊 Voir mon bilan' : `Question suivante  ${current + 2}/${questions.length} →`}
@@ -6363,7 +6363,7 @@ function VideoCreatorPage({ navigate }) {
 
   const STEP_LABELS = ['Configuration', 'Audio', 'Aperçu & Export'];
 
-  const btnPrimary = { background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#f5edd8', padding: '13px 32px', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'transform 0.15s' };
+  const btnPrimary = { background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#f5edd8', padding: '13px 32px', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'transform 0.15s' };
   const btnSecondary = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.75)', padding: '12px 24px', borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' };
 
   return (
@@ -6398,7 +6398,7 @@ function VideoCreatorPage({ navigate }) {
             return (
               <React.Fragment key={s}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: 1 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, transition: 'all 0.25s', background: done ? '#c8a727' : active ? 'rgba(200,167,39,0.18)' : 'rgba(255,255,255,0.06)', border: done ? 'none' : active ? '2px solid #c8a727' : '1.5px solid rgba(255,255,255,0.12)', color: done ? '#000' : active ? '#c8a727' : 'rgba(255,255,255,0.3)', cursor: done ? 'pointer' : 'default' }}
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, transition: 'all 0.25s', background: done ? '#a8801a' : active ? 'rgba(200,167,39,0.18)' : 'rgba(255,255,255,0.06)', border: done ? 'none' : active ? '2px solid #c8a727' : '1.5px solid rgba(255,255,255,0.12)', color: done ? '#fff' : active ? '#c8a727' : 'rgba(255,255,255,0.3)', cursor: done ? 'pointer' : 'default' }}
                     onClick={() => { if (done) setStep(s); }}>
                     {done ? '✓' : s}
                   </div>
@@ -6421,7 +6421,7 @@ function VideoCreatorPage({ navigate }) {
 
             {/* Step header spanning full width */}
             <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#c8a727', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#000', flexShrink: 0 }}>1</div>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>1</div>
               <span style={{ fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px' }}>Configuration de la vidéo</span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
             </div>
@@ -6585,7 +6585,7 @@ function VideoCreatorPage({ navigate }) {
 
             {/* Step header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#c8a727', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#000', flexShrink: 0 }}>2</div>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>2</div>
               <span style={{ fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px' }}>Choix de l'audio</span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
             </div>
@@ -6722,7 +6722,7 @@ function VideoCreatorPage({ navigate }) {
           <div>
             {/* Step header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#c8a727', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#000', flexShrink: 0 }}>3</div>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>3</div>
               <span style={{ fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px' }}>Aperçu & Export</span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
             </div>
@@ -6771,7 +6771,7 @@ function VideoCreatorPage({ navigate }) {
                 <div>
                   {!isCreating && !downloadUrl ? (
                     <button onClick={createVideoAuto}
-                      style={{ width: '100%', background: 'linear-gradient(135deg,#a8891f,#c8a727)', border: 'none', color: '#fff', padding: '17px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', letterSpacing: 0.2, boxShadow: '0 6px 28px rgba(200,167,39,0.3)', transition: 'transform 0.15s, box-shadow 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+                      style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '17px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', letterSpacing: 0.2, boxShadow: '0 6px 28px rgba(200,167,39,0.3)', transition: 'transform 0.15s, box-shadow 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
                       onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 36px rgba(200,167,39,0.4)'; }}
                       onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 6px 28px rgba(200,167,39,0.3)'; }}>
                       <span style={{ fontSize: 18 }}>🎬</span>
@@ -7143,7 +7143,7 @@ function PaymentSuccessPage({ navigate }) {
               </div>
             )}
             <button type="submit" disabled={setupLoading}
-              style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#0a1a08', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
+              style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
               {setupLoading ? 'Connexion...' : 'Accéder à mon espace Pro →'}
             </button>
           </form>
@@ -7169,7 +7169,7 @@ function PaymentSuccessPage({ navigate }) {
           </p>
         </div>
       ) : (
-        <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8891f,#c4a83a)', border: 'none', color: '#1c1200', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s' }}
+        <button onClick={function(){ navigate('home'); }} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '16px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 8px 32px rgba(200,167,39,0.35)', transition: 'all 0.2s' }}
           onMouseEnter={function(e){ e.currentTarget.style.transform='translateY(-2px)'; }}
           onMouseLeave={function(e){ e.currentTarget.style.transform='translateY(0)'; }}>
           Découvrir mes fonctionnalités →
@@ -7599,8 +7599,8 @@ function RgpdBanner({ onAccept, onDecline }) {
           Refuser
         </button>
         <button onClick={accept} style={{
-          background: 'linear-gradient(135deg,#c8a727,#e6c84a)',
-          border: 'none', color: '#1c1200', padding: '8px 22px', borderRadius: 8,
+          background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+          border: 'none', color: '#fff', padding: '8px 22px', borderRadius: 8,
           fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
           boxShadow: '0 2px 12px rgba(200,167,39,0.35)', transition: 'all 0.2s'
         }}
@@ -7625,7 +7625,7 @@ function NotFoundPage({ navigate }) {
       <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', maxWidth: 360, lineHeight: 1.7, margin: '0 0 36px' }}>
         La page que tu cherches a peut-être été déplacée ou n'existe plus. Retourne à l'accueil.
       </p>
-      <button onClick={() => navigate('home')} style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#fff', padding: '14px 36px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 20px rgba(200,167,39,0.3)', transition: 'all 0.2s' }}
+      <button onClick={() => navigate('home')} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '14px 36px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 20px rgba(200,167,39,0.3)', transition: 'all 0.2s' }}
         onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(200,167,39,0.45)'; }}
         onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 4px 20px rgba(200,167,39,0.3)'; }}>
         ← Retour à l'accueil
@@ -7681,7 +7681,7 @@ function ExitIntentPopup({ navigate }) {
           <ProSavings />
         </div>
         <button onClick={function(){ close(); openQuickCheckout(); }}
-          style={{ width:'100%', background:'linear-gradient(135deg,#c8a727,#a8891f)', border:'none', color:'#0a1a08', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
+          style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 20px rgba(200,167,39,0.4)', marginBottom:10 }}>
           🔓 Débloquer l'accès complet
         </button>
         <div style={{ background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.22)', borderRadius:10, padding:'7px 12px', margin:'8px 0 10px', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
@@ -7761,8 +7761,8 @@ function StickyUpgradeBanner({ navigate }) {
       </div>
 
       <button onClick={() => openQuickCheckout()} className="sticky-upgrade-banner-btn" style={{
-        background:'linear-gradient(135deg,#e6c84a,#c8a727)',
-        border:'none', color:'#0a1a08', padding:'13px 22px', borderRadius:12,
+        background: 'linear-gradient(135deg,#a8801a,#6d4f08)',
+        border:'none', color: '#fff', padding:'13px 22px', borderRadius:12,
         fontSize:14, fontWeight:900, cursor:'pointer',
         fontFamily:'Plus Jakarta Sans,sans-serif',
         boxShadow:'0 4px 22px rgba(200,167,39,0.55)',
@@ -7949,7 +7949,7 @@ function QuickCheckoutModal({ onClose, initialMethod }) {
           <div style={{ padding: '30px 20px', textAlign: 'center', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
             <div style={{ fontSize: 28, marginBottom: 10 }}>⚠️</div>
             <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 16 }}>{error}</p>
-            <button onClick={() => startCheckout(activeMethod)} style={{ background: '#c8a727', border: 'none', color: '#1c1200', padding: '10px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>Réessayer</button>
+            <button onClick={() => startCheckout(activeMethod)} style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '10px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>Réessayer</button>
           </div>
         )}
 
@@ -8349,7 +8349,7 @@ function TestPage({ navigate }) {
   const GOLD = '#e6c84a';
   const wrap = { minHeight: '100vh', padding: '92px 18px calc(48px + env(safe-area-inset-bottom, 0px))', fontFamily: 'Plus Jakarta Sans, sans-serif', color: '#f0ede6' };
   const col = { maxWidth: 480, margin: '0 auto' };
-  const btnGold = { width: '100%', border: 'none', borderRadius: 16, padding: '18px 22px', fontSize: 17, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#c8a727)', boxShadow: '0 8px 28px rgba(200,167,39,0.32)' };
+  const btnGold = { width: '100%', border: 'none', borderRadius: 16, padding: '18px 22px', fontSize: 17, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit', color: '#fff', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset' };
   const btnGhost = { width: '100%', borderRadius: 16, padding: '15px 20px', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', color: '#f0ede6', background: '#0a1f12', border: '1px solid rgba(200,167,39,0.35)' };
 
   if (err) return (
@@ -8425,9 +8425,9 @@ function TestPage({ navigate }) {
                 <button key={c} onClick={function () { answer(c); }} disabled={done} style={{
                   minHeight: 54, width: '100%', padding: '13px 16px', borderRadius: 14, fontFamily: 'inherit',
                   fontSize: 16, fontWeight: 700, textAlign: 'center', cursor: done ? 'default' : 'pointer',
-                  color: good ? '#062b15' : bad ? '#fff' : '#f0ede6',
-                  background: good ? '#4ade80' : bad ? '#b4232d' : '#0a1f12',
-                  border: '1px solid ' + (good ? '#4ade80' : bad ? '#d9434d' : 'rgba(255,255,255,0.12)'),
+                  color: good || bad ? '#fff' : '#f0ede6',
+                  background: good ? '#15803d' : bad ? '#b4232d' : '#0a1f12',
+                  border: '1px solid ' + (good ? '#22c55e' : bad ? '#d9434d' : 'rgba(255,255,255,0.12)'),
                   opacity: done && !good && !bad ? 0.45 : 1,
                   transition: 'background .2s, opacity .2s, color .2s',
                 }}>{c}</button>
@@ -8627,7 +8627,7 @@ function ComprendrePage({ navigate }) {
           Les sourates n'ont pas pu être chargées. Vérifie ta connexion et réessaie.
         </p>
         <button onClick={function(){ setDataErr(false); cmpLoadData().then(setData).catch(function(){ setDataErr(true); }); }}
-          style={{ background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '13px 28px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+          style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '13px 28px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
           Réessayer
         </button>
       </div>
@@ -8719,7 +8719,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
         {/* Pied collant : le bouton d'achat ne descend jamais sous l'écran. */}
         <div className="pro-modal-footer" style={{ padding: '12px 26px 16px' }}>
           <button onClick={function () { onClose(); openQuickCheckout(); }}
-            style={{ width: '100%', background: 'linear-gradient(135deg,#c8a727,#a8891f)', border: 'none', color: '#1a1205', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
+            style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
             Débloquer tout — {PRO_ANNUAL}/an
           </button>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
@@ -8761,13 +8761,13 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
           qu'une fois qu'il y a quelque chose à y montrer. */}
       {guest && !(st.xp > 0) ? (
         <div style={{ marginBottom: 24 }}>
-          <button onClick={function () { const f = list.find(function (x) { return x.surah === 1; }); if (f) onOpen(f); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '17px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#e6c84a,#c8a727)', boxShadow: '0 8px 28px rgba(200,167,39,0.3)', marginBottom: 12 }}>
-            <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(26,18,5,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21, fontWeight: 900, color: '#1a1205' }}>1</span>
+          <button onClick={function () { const f = list.find(function (x) { return x.surah === 1; }); if (f) onOpen(f); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '17px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset', marginBottom: 12 }}>
+            <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21, fontWeight: 900, color: '#fff' }}>1</span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: 16.5, fontWeight: 900, color: '#1a1205' }}>Commence par Al-Fâtiha</span>
-              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(26,18,5,0.72)' }}>Gratuit, sans compte · environ 4 minutes</span>
+              <span style={{ display: 'block', fontSize: 16.5, fontWeight: 900, color: '#fff' }}>Commence par <span style={{ whiteSpace: 'nowrap' }}>Al-Fâtiha</span></span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Gratuit, sans compte · environ 4 minutes</span>
             </span>
-            <span style={{ fontSize: 22, fontWeight: 900, color: '#1a1205' }}>→</span>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>→</span>
           </button>
           <button onClick={onTest} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '15px 18px', borderRadius: 18, cursor: 'pointer', fontFamily: 'inherit', background: '#0a1f12', border: '1px solid rgba(200,167,39,0.35)' }}>
             <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: GOLD }}>%</span>
@@ -8864,17 +8864,17 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
           const best = st.best[s.id] || 0;
           return (
             <button key={s.id} onClick={function(){ onOpen(s); }} style={{ textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, background: locked ? 'linear-gradient(160deg,rgba(200,167,39,0.05),rgba(255,255,255,0.01))' : 'linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))', border: '1px solid ' + (locked ? 'rgba(200,167,39,0.18)' : 'rgba(200,167,39,0.3)'), borderRadius: 18, padding: '18px 20px', fontFamily: 'inherit', position: 'relative' }}>
-              <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: locked ? 'rgba(200,167,39,0.1)' : 'linear-gradient(135deg,#c8a727,#a8891f)', border: locked ? '1px solid rgba(200,167,39,0.3)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: locked ? 20 : 22, fontWeight: 900, color: locked ? GOLD : '#1a1205' }}>{locked ? '🔒' : s.surah}</div>
+              <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 14, background: locked ? 'rgba(200,167,39,0.1)' : 'linear-gradient(135deg,#a8801a,#6d4f08)', border: locked ? '1px solid rgba(200,167,39,0.3)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: locked ? 20 : 22, fontWeight: 900, color: locked ? GOLD : '#fff' }}>{locked ? '🔒' : s.surah}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 18, fontWeight: 800, color: '#f0ede6', fontFamily: 'Cinzel,serif' }}>{s.name}</span>
                   {/* Pendant l'essai, la sourate est ouverte mais reste marquée :
                       c'est ce qui apprend à la personne quelle part de ce
                       qu'elle utilise est payante, avant de la perdre. */}
-                  {(locked || (trialing && !s.free)) && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#b8922f)', padding: '2px 8px', borderRadius: 999 }}>{locked ? 'PRO' : 'PRO · ESSAI'}</span>}
+                  {(locked || (trialing && !s.free)) && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#fff', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', padding: '2px 8px', borderRadius: 999 }}>{locked ? 'PRO' : 'PRO · ESSAI'}</span>}
                   {/* La sourate offerte cette semaine se signale : sans étiquette,
                       le cadeau passe inaperçu et ne ramène personne lundi. */}
-                  {weekly && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#04301c', background: 'linear-gradient(135deg,#6ee7a0,#2fa96a)', padding: '2px 8px', borderRadius: 999 }}>CETTE SEMAINE</span>}
+                  {weekly && <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', color: '#fff', background: 'linear-gradient(135deg,#1f9455,#0d5730)', padding: '2px 8px', borderRadius: 999 }}>CETTE SEMAINE</span>}
                 </div>
                 <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{s.fr} · {total} mots{best > 0 ? ' · record ' + best + '%' : ''}</div>
               </div>
@@ -8960,9 +8960,9 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack, preview }) {
       <div style={{ position: 'sticky', bottom: 0, background: 'linear-gradient(0deg,#03070a 60%,transparent)', padding: '16px 0 24px', display: 'flex', gap: 12 }}>
         <button onClick={function(){ playAyah(sourate.surah, ayah.n); setRevealed(ayah.words.length); }} style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: 'rgba(200,167,39,0.12)', color: GOLD, fontSize: 22, cursor: 'pointer' }}>▶</button>
         {!last ? (
-          <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
+          <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
         ) : (
-          <button onClick={onPlay} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: preview ? 'linear-gradient(135deg,#c8a727,#a8891f)' : 'linear-gradient(135deg,#4ade80,#22a35a)', color: preview ? '#1a1205' : '#04140a', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <button onClick={onPlay} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: preview ? 'linear-gradient(135deg,#a8801a,#6d4f08)' : 'linear-gradient(135deg,#1f9455,#0d5730)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
             {preview ? '🔓 Débloquer pour jouer →' : '🎮 Maintenant, joue →'}
           </button>
         )}
@@ -9183,7 +9183,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
 
       {/* actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <button onClick={onReplay} style={{ padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Rejouer cette sourate</button>
+        <button onClick={onReplay} style={{ padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Rejouer cette sourate</button>
         <button onClick={share} style={{ padding: '14px', borderRadius: 16, border: '1px solid rgba(200,167,39,0.4)', background: 'rgba(200,167,39,0.08)', color: '#e6c84a', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>📤 Partager ma progression</button>
         <button onClick={onHub} style={{ padding: '12px', borderRadius: 16, border: 'none', background: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Retour au menu</button>
       </div>
@@ -9240,7 +9240,7 @@ function ComprendreSection({ navigate }) {
           })}
         </div>
 
-        <button onClick={function(){ if (navigate) navigate('comprendre'); }} style={{ padding: '16px 40px', borderRadius: 100, border: 'none', background: 'linear-gradient(135deg,#c8a727,#a8891f)', color: '#1a1205', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', boxShadow: '0 8px 30px rgba(200,167,39,0.35)' }}>
+        <button onClick={function(){ if (navigate) navigate('comprendre'); }} style={{ padding: '16px 40px', borderRadius: 100, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', boxShadow: '0 8px 30px rgba(200,167,39,0.35)' }}>
           Comprends le Coran →
         </button>
         <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>5 sourates gratuites · sans inscription pour essayer</p>
