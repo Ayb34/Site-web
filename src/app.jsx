@@ -8206,6 +8206,300 @@ function CmpRing({ pct, size, stroke, color, track, children }) {
   );
 }
 
+/* ═══ Test — « Combien de mots de ta Fâtiha comprends-tu ? » ═══
+
+   Page d'arrivée des vidéos. Le blind test fait des vues mais pas d'inscrits
+   parce qu'il donne tout dans la vidéo ; ici, la vidéo ouvre une question —
+   « combien de mots comprends-tu ? » — dont la réponse n'existe que sur le site.
+
+   Tout vient de comprendre.json, jamais d'un texte écrit à la main : le mot,
+   sa translittération, son sens. Les mauvaises réponses proposées sont de vraies
+   gloses d'autres mots du corpus — on n'invente aucun sens, même faux.
+
+   Aucun compte n'est demandé pour passer le test : le score est la récompense,
+   et le compte se propose APRÈS, au moment où la personne sait ce qui lui
+   manque. Demander l'inscription avant, c'est perdre la moitié des gens au
+   premier écran. */
+const HM_TEST_KEY = 'hm_test_fatiha_v1';
+const HM_TEST_SHARE_URL = 'https://heritage-musulman.com/?utm_source=partage&utm_medium=test&utm_campaign=test_fatiha#test';
+
+function testNormFr(t) {
+  return (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+function testShuffle(arr) {
+  const b = arr.slice();
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+/* Une proposition fausse ne doit jamais pouvoir passer pour juste : on écarte
+   celles qui contiennent la bonne réponse ou y sont contenues (« C'est Toi
+   que » face à « et c'est Toi que »), et celles qui partagent un mot porteur
+   de sens (« le chemin » face à « le chemin de »). */
+function testCompatible(gloss, right) {
+  if (!gloss || gloss === right) return false;
+  const g = testNormFr(gloss), r = testNormFr(right);
+  if (g.indexOf(r) >= 0 || r.indexOf(g) >= 0) return false;
+  const lourds = r.split(/[^a-z]+/).filter(function (x) { return x.length >= 5; });
+  return !lourds.some(function (x) { return g.indexOf(x) >= 0; });
+}
+
+/* 29 mots dans la Fâtiha, 26 distincts : « le Tout-Miséricordieux », « le
+   Très-Miséricordieux » et « sur eux » reviennent deux fois. On ne les
+   demande qu'une fois — les redemander gonflerait le score sans rien mesurer. */
+function testBuild(data) {
+  const fatiha = data.surahs.find(function (x) { return x.surah === 1; });
+  if (!fatiha) return [];
+  const seen = {};
+  const items = [];
+  fatiha.ayahs.forEach(function (a, ai) {
+    a.words.forEach(function (w, wi) {
+      const k = cmpNorm(w.ar);
+      if (seen[k]) return;
+      seen[k] = 1;
+      items.push({ ar: w.ar, tr: w.tr, fr: w.fr, n: ai + 1, at: wi, verse: a.words.map(function (x) { return x.ar; }) });
+    });
+  });
+  const proches = items.map(function (it) { return it.fr; });
+  const pool = {};
+  data.surahs.forEach(function (x) {
+    x.ayahs.forEach(function (a) {
+      a.words.forEach(function (w) { if (w.fr && w.fr.length <= 28) pool[w.fr] = 1; });
+    });
+  });
+  /* Le reste du corpus ne doit rien partager avec le vocabulaire de la
+     Fâtiha : « suivre le chemin droit » proposé pour « Guide-nous », ou « le
+     jour » pour « du Jour », serait une deuxième bonne réponse. */
+  const fatihaLourds = {};
+  proches.forEach(function (g) { testNormFr(g).split(/[^a-z]+/).forEach(function (x) { if (x.length >= 4) fatihaLourds[x] = 1; }); });
+  const corpus = Object.keys(pool).filter(function (g) {
+    return !testNormFr(g).split(/[^a-z]+/).some(function (x) { return fatihaLourds[x]; });
+  });
+  return items.map(function (it) {
+    // Une proposition tirée de la Fâtiha elle-même — plausible, donc qui
+    // mesure vraiment — et deux tirées du reste du corpus.
+    const near = testShuffle(proches.filter(function (g) { return testCompatible(g, it.fr); })).slice(0, 1);
+    const far = testShuffle(corpus.filter(function (g) { return testCompatible(g, it.fr) && near.indexOf(g) < 0; })).slice(0, 3 - near.length);
+    return Object.assign({}, it, { choices: testShuffle([it.fr].concat(near, far)) });
+  });
+}
+
+function TestPage({ navigate }) {
+  const { user, openAuth } = useAuth();
+  const [data, setData] = React.useState(cmpDataCache);
+  const [err, setErr] = React.useState(false);
+  const [phase, setPhase] = React.useState('intro');
+  const [qs, setQs] = React.useState([]);
+  const [i, setI] = React.useState(0);
+  const [picked, setPicked] = React.useState(null);
+  const [answers, setAnswers] = React.useState([]);
+  const [shared, setShared] = React.useState('');
+
+  React.useEffect(function () {
+    let off = false;
+    cmpLoadData().then(function (d) { if (!off) setData(d); }).catch(function () { if (!off) setErr(true); });
+    return function () { off = true; };
+  }, []);
+
+  function start() {
+    if (!data) return;
+    setQs(testBuild(data)); setI(0); setAnswers([]); setPicked(null); setShared('');
+    setPhase('play');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function answer(choice) {
+    if (picked !== null) return;
+    const q = qs[i];
+    const ok = choice === q.fr;
+    setPicked(choice);
+    if (ok && navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+    const next = answers.concat([ok]);
+    /* Une bonne réponse passe vite ; une erreur reste plus longtemps à l'écran,
+       le temps de lire le bon sens — c'est là que le test apprend quelque chose. */
+    setTimeout(function () {
+      setAnswers(next);
+      setPicked(null);
+      if (i + 1 >= qs.length) {
+        const pct = Math.round(next.filter(Boolean).length / qs.length * 100);
+        hmWrite(HM_TEST_KEY, { pct: pct, at: Date.now() });
+        setPhase('done');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } else {
+        setI(i + 1);
+      }
+    }, ok ? 650 : 1400);
+  }
+
+  function share(pct) {
+    const text = 'J\'ai compris ' + pct + ' % des mots de ma Fâtiha. Et toi ?';
+    if (navigator.share) {
+      navigator.share({ title: 'Le test de la Fâtiha', text: text, url: HM_TEST_SHARE_URL }).catch(function () {});
+      return;
+    }
+    try {
+      navigator.clipboard.writeText(text + ' ' + HM_TEST_SHARE_URL);
+      setShared('Lien copié');
+    } catch (e) {}
+  }
+
+  const GOLD = '#e6c84a';
+  const wrap = { minHeight: '100vh', padding: '92px 18px calc(48px + env(safe-area-inset-bottom, 0px))', fontFamily: 'Plus Jakarta Sans, sans-serif', color: '#f0ede6' };
+  const col = { maxWidth: 480, margin: '0 auto' };
+  const btnGold = { width: '100%', border: 'none', borderRadius: 16, padding: '18px 22px', fontSize: 17, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit', color: '#1a1205', background: 'linear-gradient(135deg,#e6c84a,#c8a727)', boxShadow: '0 8px 28px rgba(200,167,39,0.32)' };
+  const btnGhost = { width: '100%', borderRadius: 16, padding: '15px 20px', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', color: '#f0ede6', background: '#0a1f12', border: '1px solid rgba(200,167,39,0.35)' };
+
+  if (err) return (
+    <div style={wrap}><div style={Object.assign({}, col, { textAlign: 'center', paddingTop: 60 })}>
+      <p style={{ fontSize: 16, marginBottom: 18 }}>Le test n'a pas pu se charger. Vérifie ta connexion.</p>
+      <button style={btnGhost} onClick={function () { window.location.reload(); }}>Réessayer</button>
+    </div></div>
+  );
+
+  /* ── Accueil du test ── */
+  if (phase === 'intro') {
+    const v2 = data ? data.surahs[0].ayahs[1].words.map(function (w) { return w.ar; }).join(' ') : '';
+    return (
+      <div style={wrap}><div className="peek" style={Object.assign({}, col, { textAlign: 'center' })}>
+        <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(200,167,39,0.9)', margin: '0 0 16px' }}>◆ Le test de la Fâtiha</p>
+        <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 400, fontSize: 'clamp(29px, 8.4vw, 40px)', lineHeight: 1.12, letterSpacing: '-0.02em', margin: '0 0 16px', textWrap: 'balance' }}>
+          Tu récites Al-Fâtiha <em style={{ color: GOLD }}>au moins 17 fois par jour.</em>
+        </h1>
+        <p style={{ fontSize: 18, lineHeight: 1.5, color: 'rgba(240,237,230,0.82)', margin: '0 0 26px' }}>
+          Combien de ses mots comprends-tu vraiment&nbsp;?
+        </p>
+        {v2 && <p dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 30, lineHeight: 1.9, color: 'rgba(247,238,203,0.9)', margin: '0 0 24px' }}>{v2}</p>}
+        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 26 }}>
+          {['26 mots', '2 minutes', 'Sans compte'].map(function (t) {
+            return <span key={t} style={{ fontSize: 13, fontWeight: 700, padding: '7px 13px', borderRadius: 999, background: '#0a1f12', border: '1px solid rgba(200,167,39,0.25)', color: 'rgba(240,237,230,0.85)' }}>{t}</span>;
+          })}
+        </div>
+        <button style={Object.assign({}, btnGold, { opacity: data ? 1 : 0.6 })} disabled={!data} onClick={start}>
+          {data ? 'Commencer le test →' : 'Chargement…'}
+        </button>
+        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '16px 0 0' }}>
+          Ton score s'affiche à la fin. Aucune inscription demandée.<br />
+          17 fois : une Fâtiha par rak'a, 17 rak'at obligatoires par jour.
+        </p>
+      </div></div>
+    );
+  }
+
+  /* ── Le test ── */
+  if (phase === 'play') {
+    const q = qs[i];
+    return (
+      <div style={wrap}><div style={col}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+          <div style={{ flex: 1, height: 6, borderRadius: 6, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: (i / qs.length * 100) + '%', background: 'linear-gradient(90deg,#c8a727,#e6c84a)', borderRadius: 6, transition: 'width .35s ease' }} />
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 800, color: 'rgba(240,237,230,0.6)', whiteSpace: 'nowrap' }}>{i + 1} / {qs.length}</span>
+        </div>
+
+        <div key={i} className="peek">
+          {/* Le verset entier, le mot demandé en or : on teste un mot dans sa
+              phrase, comme il est réellement récité, pas isolé. */}
+          <p dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 21, lineHeight: 2, textAlign: 'center', margin: '0 0 6px', color: 'rgba(240,237,230,0.38)' }}>
+            {q.verse.map(function (w, k) {
+              return <span key={k} style={k === q.at ? { color: GOLD } : null}>{w}{k < q.verse.length - 1 ? ' ' : ''}</span>;
+            })}
+          </p>
+          <p style={{ fontSize: 11.5, textAlign: 'center', color: 'rgba(240,237,230,0.35)', margin: '0 0 18px', letterSpacing: '0.08em' }}>VERSET {q.n}</p>
+
+          <div style={{ textAlign: 'center', padding: '20px 16px 18px', borderRadius: 20, background: 'linear-gradient(165deg,#0c2415,#06170d)', border: '1px solid rgba(200,167,39,0.28)', marginBottom: 18 }}>
+            <div dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1.5, color: '#f7eecb' }}>{q.ar}</div>
+            {q.tr && <div style={{ fontSize: 15, fontStyle: 'italic', color: 'rgba(240,237,230,0.55)', marginTop: 2 }}>{q.tr}</div>}
+          </div>
+
+          <p style={{ fontSize: 15, fontWeight: 800, textAlign: 'center', margin: '0 0 12px' }}>Que veut dire ce mot&nbsp;?</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {q.choices.map(function (c) {
+              const done = picked !== null;
+              const good = done && c === q.fr;
+              const bad = done && c === picked && c !== q.fr;
+              return (
+                <button key={c} onClick={function () { answer(c); }} disabled={done} style={{
+                  minHeight: 54, width: '100%', padding: '13px 16px', borderRadius: 14, fontFamily: 'inherit',
+                  fontSize: 16, fontWeight: 700, textAlign: 'center', cursor: done ? 'default' : 'pointer',
+                  color: good ? '#062b15' : bad ? '#fff' : '#f0ede6',
+                  background: good ? '#4ade80' : bad ? '#b4232d' : '#0a1f12',
+                  border: '1px solid ' + (good ? '#4ade80' : bad ? '#d9434d' : 'rgba(255,255,255,0.12)'),
+                  opacity: done && !good && !bad ? 0.45 : 1,
+                  transition: 'background .2s, opacity .2s, color .2s',
+                }}>{c}</button>
+              );
+            })}
+          </div>
+          <button onClick={function () { answer('__idk'); }} disabled={picked !== null} style={{ display: 'block', margin: '16px auto 0', background: 'none', border: 'none', padding: '10px 14px', color: 'rgba(240,237,230,0.5)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>
+            Je ne sais pas
+          </button>
+        </div>
+      </div></div>
+    );
+  }
+
+  /* ── Résultat ── */
+  const total = qs.length;
+  const right = answers.filter(Boolean).length;
+  const pct = total ? Math.round(right / total * 100) : 0;
+  const missed = qs.filter(function (q, k) { return !answers[k]; });
+  const verdict = pct >= 85 ? 'Tu comprends presque toute ta Fâtiha.'
+    : pct >= 50 ? 'Tu comprends une bonne partie de ta Fâtiha.'
+    : 'Tu la récites mieux que tu ne la comprends — comme la plupart des gens.';
+  return (
+    <div style={wrap}><div className="peek" style={Object.assign({}, col, { textAlign: 'center' })}>
+      <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(200,167,39,0.9)', margin: '0 0 18px' }}>◆ Ton résultat</p>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+        <CmpRing pct={pct} size={168} stroke={12} color={GOLD}>
+          <span style={{ fontSize: 46, fontWeight: 900, color: GOLD, lineHeight: 1 }}>{pct}<span style={{ fontSize: 22 }}>%</span></span>
+          <span style={{ fontSize: 12, color: 'rgba(240,237,230,0.6)', marginTop: 4 }}>de ta Fâtiha</span>
+        </CmpRing>
+      </div>
+      <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 400, fontSize: 'clamp(24px, 6.6vw, 30px)', lineHeight: 1.2, margin: '0 0 8px', textWrap: 'balance' }}>{verdict}</h1>
+      <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.6)', margin: '0 0 26px' }}>{right} mots compris sur {total}.</p>
+
+      {missed.length > 0 && (
+        <div style={{ textAlign: 'left', marginBottom: 26 }}>
+          <p style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.5)', margin: '0 0 10px', textAlign: 'center' }}>Les mots qui te manquent</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+            {missed.slice(0, 6).map(function (q) {
+              return (
+                <div key={q.ar} style={{ padding: '10px 12px', borderRadius: 12, background: '#0a1f12', border: '1px solid rgba(200,167,39,0.18)', textAlign: 'center' }}>
+                  <div dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 23, lineHeight: 1.6, color: '#f7eecb' }}>{q.ar}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: GOLD, lineHeight: 1.35 }}>{q.fr}</div>
+                </div>
+              );
+            })}
+          </div>
+          {missed.length > 6 && <p style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)', margin: '10px 0 0', textAlign: 'center' }}>et {missed.length - 6} autres.</p>}
+        </div>
+      )}
+
+      {/* Le compte se propose ICI, quand la personne sait exactement ce qui lui
+          manque — pas avant le test. */}
+      {user ? (
+        <button style={btnGold} onClick={function () { navigate('comprendre'); }}>Apprendre ces mots →</button>
+      ) : (
+        <>
+          <button style={btnGold} onClick={function () { openAuth('signup'); }}>Apprendre ces mots — 2 jours offerts →</button>
+          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>Accès complet aux 38 sourates pendant 2 jours, sans carte bancaire.</p>
+          <button style={Object.assign({}, btnGhost, { marginBottom: 10 })} onClick={function () { navigate('comprendre'); }}>Apprendre la Fâtiha gratuitement</button>
+        </>
+      )}
+      <button style={Object.assign({}, btnGhost, { marginTop: user ? 12 : 0 })} onClick={function () { share(pct); }}>
+        {shared || 'Partager mon score'}
+      </button>
+      <button onClick={start} style={{ display: 'block', margin: '18px auto 0', background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 10 }}>
+        Refaire le test
+      </button>
+    </div></div>
+  );
+}
+
 function ComprendrePage({ navigate }) {
   const { isPro, openAuth, user, openQuickCheckout, trialing } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
@@ -8351,7 +8645,7 @@ function ComprendrePage({ navigate }) {
 
   return shell(
     <>
-      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
+      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
       {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
         if (!sourate.free && !isPro && sourate.id !== weeklyId) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
@@ -8440,7 +8734,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
   );
 }
 
-function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, trialing, weeklyId, onOpen, onBack, onPro, reciter, onReciter }) {
+function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, trialing, guest, onTest, onSignup, weeklyId, onOpen, onBack, onPro, reciter, onReciter }) {
   const GOLD = '#e6c84a';
   const list = sourates || [];
   const [openReciter, setOpenReciter] = React.useState(false);
@@ -8460,6 +8754,36 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
         </p>
       </div>
 
+      {/* ── Visiteur qui découvre : un accueil, pas un tableau de zéros ──
+          La campagne Google envoyait ici : 110 clics, 0 inscrit. Un inconnu
+          lisait « 0 % · niveau 1 · 0 mot · 0 XP », puis 32 cadenas, et nulle
+          part l'inscription ni les 2 jours offerts. Le tableau ne s'affiche
+          qu'une fois qu'il y a quelque chose à y montrer. */}
+      {guest && !(st.xp > 0) ? (
+        <div style={{ marginBottom: 24 }}>
+          <button onClick={function () { const f = list.find(function (x) { return x.surah === 1; }); if (f) onOpen(f); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '17px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#e6c84a,#c8a727)', boxShadow: '0 8px 28px rgba(200,167,39,0.3)', marginBottom: 12 }}>
+            <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(26,18,5,0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21, fontWeight: 900, color: '#1a1205' }}>1</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 16.5, fontWeight: 900, color: '#1a1205' }}>Commence par Al-Fâtiha</span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(26,18,5,0.72)' }}>Gratuit, sans compte · environ 4 minutes</span>
+            </span>
+            <span style={{ fontSize: 22, fontWeight: 900, color: '#1a1205' }}>→</span>
+          </button>
+          <button onClick={onTest} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '15px 18px', borderRadius: 18, cursor: 'pointer', fontFamily: 'inherit', background: '#0a1f12', border: '1px solid rgba(200,167,39,0.35)' }}>
+            <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: GOLD }}>%</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: '#f0ede6', lineHeight: 1.3 }}>Combien de mots de ta Fâtiha comprends-tu&nbsp;?</span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: GOLD }}>Fais le test · 2 minutes</span>
+            </span>
+            <span style={{ fontSize: 20, color: GOLD }}>›</span>
+          </button>
+          <p style={{ fontSize: 13, color: 'rgba(240,237,230,0.55)', textAlign: 'center', margin: '16px 0 0', lineHeight: 1.6 }}>
+            En créant ton compte, les <strong style={{ color: '#f0ede6' }}>38 sourates</strong> s'ouvrent pendant 2 jours, sans carte.{' '}
+            <button onClick={onSignup} style={{ background: 'none', border: 'none', padding: 0, color: GOLD, fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>Créer mon compte</button>
+          </p>
+        </div>
+      ) : (
+        <>
       {/* ── Ce que tu sais déjà lire du Coran ──
           Mis AVANT la progression dans le corpus : c'est le chiffre qui donne du
           sens à l'effort. « J'ai appris 40 mots » ne veut rien dire ; « je lis
@@ -8495,6 +8819,9 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
           </div>
         </div>
       </div>
+
+        </>
+      )}
 
       {/* Choix du récitateur — replié par défaut : c'est un réglage, il ne doit
           pas concurrencer visuellement le choix de sourate qui est l'action
@@ -8980,6 +9307,16 @@ function App() {
     // compte donc que les changements de page pour éviter un doublon.
     if (firstNavRef.current) { firstNavRef.current = false; return; }
     if (window.hmPixel) window.hmPixel.track('PageView');
+    /* Le site navigue par `#` : pour Vercel, toute une visite tenait sur la
+       page « / ». Vérifié le 01/11 — accueil, Comprendre puis Quiz ne
+       produisaient qu'UNE page vue, donc chaque visite comptait comme un
+       rebond, même celle de quelqu'un qui jouait trois parties. On signale
+       désormais chaque page. La première est déjà comptée par le script au
+       chargement ; la ressignaler ferait passer tout visiteur pour engagé. */
+    if (typeof window.va === 'function') {
+      const path = page === 'home' ? '/' : '/' + page;
+      window.va('pageview', { route: path, path: path });
+    }
   }, [page, navKey]);
 
   // Handle browser back/forward
@@ -9235,6 +9572,7 @@ function App() {
     return wrap(<QuizCategoryPage catKey={rest} level="debutant" navigate={navigate} />);
   }
   if (page === 'studio') return wrap(<VideoCreatorPage navigate={navigate} />);
+  if (page === 'test') return wrap(<><Navbar navigate={navigate} /><TestPage navigate={navigate} /></>);
   if (page === 'comprendre') return wrap(<ComprendrePage navigate={navigate} />);
   if (page === 'start') return wrap(<StartPage navigate={navigate} />);
   if (page === 'subscription') return wrap(<><Navbar navigate={navigate} /><SubscriptionPage navigate={navigate} /></>);
