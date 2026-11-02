@@ -497,41 +497,41 @@ function hmWeeklyResetIn() {
 function GuestGateModal({ onClose, context = 'default' }) {
   const { openAuth, openQuickCheckout } = useAuth();
   const overlayRef = React.useRef(null);
+  /* Le compte se demande après UN essai : une manche de Blind Test, une
+     question de quiz, la découverte d'une sourate. Assez pour savoir ce
+     qu'on obtient, pas assez pour s'en passer. Jusqu'au 02/11/2026 on pouvait
+     cliquer « Continuer sans compte » et jouer indéfiniment : la demande
+     d'inscription était une suggestion, et la plupart des visiteurs la
+     refusaient sans conséquence.
+
+     Ce que la modale promet est ce que le compte gratuit donne vraiment :
+     2 jours d'accès complet, puis une partie par jour. */
+  const FEATS = ['✓ 2 jours d\'accès complet offerts', '✓ Sans carte bancaire', '✓ Ta progression sauvegardée', '✓ Ensuite, 1 partie gratuite par jour'];
   const GATE_COPY = {
     default: {
       emoji: '🎯',
-      title: 'Tu es lancé(e) !',
-      sub: <>Crée ton compte gratuit pour continuer<br/>et sauvegarder ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
-      feats: ['✓ Score & progression sauvegardés','✓ Reprends là où tu t\'es arrêté','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+      title: 'Continue avec ton compte',
+      sub: <>Crée ton compte pour continuer<br/>et garder ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
     },
     blindtest: {
       emoji: '🎵',
-      title: 'Beau parcours !',
-      sub: <>Crée ton compte gratuit pour continuer<br/>le Blind Test et garder ton score.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
-      feats: ['✓ Ton score sauvegardé','✓ Reprends quand tu veux','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+      title: 'Continue la partie',
+      sub: <>Crée ton compte pour jouer<br/>les manches suivantes et garder ton score.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
     },
     quiz: {
       emoji: '🧠',
-      title: 'Bien joué !',
-      sub: <>Crée ton compte gratuit pour continuer<br/>le quiz et suivre ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
-      feats: ['✓ Ta progression sauvegardée','✓ Reprends quand tu veux','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+      title: 'Continue le quiz',
+      sub: <>Crée ton compte pour répondre<br/>aux questions suivantes.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
     },
     studio: {
       emoji: '🎬',
       title: 'Ta vidéo est prête !',
-      sub: <>Crée ton compte gratuit pour<br/>télécharger ta vidéo.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
-      feats: ['✓ Télécharge ta vidéo en HD','✓ 1 vidéo offerte, sans carte','✓ Tes créations sauvegardées','✓ Accès gratuit pour toujours'],
+      sub: <>Crée ton compte pour<br/>télécharger ta vidéo.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
     },
     comprendre: {
       emoji: '📖',
-      title: 'Continue ton apprentissage',
-      sub: <>Crée ton compte gratuit pour continuer<br/>et sauvegarder ta progression.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
-      // Ne jamais promettre ici ce que le compte gratuit ne donne pas.
-      // L'ancienne ligne « Toutes les sourates débloquées* » (astérisque sans
-      // note) annonçait le contenu Pro au moment de l'inscription : l'utilisateur
-      // créait son compte, tombait sur le mur Pro juste après, et lisait la
-      // promesse comme un piège. On ne vend plus que ce que le gratuit tient.
-      feats: ['✓ Ta progression sauvegardée sur tous tes appareils','✓ Rejoue les sourates gratuites autant que tu veux','✓ Sans carte bancaire','✓ Accès gratuit pour toujours'],
+      title: 'Passe au jeu',
+      sub: <>Crée ton compte pour jouer cette sourate<br/>et garder les mots que tu apprends.<br/><strong style={{color:'rgba(240,237,230,0.85)'}}>Ça prend 10 secondes.</strong></>,
     },
   };
   const copy = GATE_COPY[context] || GATE_COPY.default;
@@ -553,17 +553,17 @@ function GuestGateModal({ onClose, context = 'default' }) {
         </p>
         {/* Avantages compte gratuit */}
         <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'12px 16px', marginBottom:22, textAlign:'left' }}>
-          {copy.feats.map(function(f) {
+          {FEATS.map(function(f) {
             return <div key={f} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.65)', marginBottom:6 }}>{f}</div>;
           })}
         </div>
         <button onClick={function(){ openAuth(); onClose(); }}
           style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color: '#fff', padding:'14px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:10, boxShadow:'0 4px 20px rgba(200,167,39,0.35)' }}>
-          Créer mon compte — c'est gratuit →
+          Créer mon compte gratuit →
         </button>
-        <button onClick={onClose}
-          style={{ background:'none', border:'none', color:'rgba(240,237,230,0.28)', fontSize:12, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-          Continuer sans compte (progression non sauvegardée)
+        <button onClick={function(){ openAuth('login'); onClose(); }}
+          style={{ background:'none', border:'none', color:'rgba(240,237,230,0.6)', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', padding:'8px 12px' }}>
+          J'ai déjà un compte
         </button>
       </div>
     </div></ModalPortal>
@@ -2192,7 +2192,7 @@ function Hero({ navigate }) {
         <ul className="hero-sub">
           {[
             { t: 'Gratuit' },
-            { t: 'Sans compte' },
+            { t: '2 jours offerts' },
             /* Masque en mobile : « gratuit » le dit deja, et le premier ecran
                compte plus de lignes qu'il n'en faut. */
             { t: 'Sans carte bancaire', small: true },
@@ -3863,7 +3863,7 @@ function StartPage({ navigate }) {
             ) : (
               <>
                 <p style={{ marginTop:4, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.4)', textAlign:'center', lineHeight:1.6 }}>
-                  100% gratuit · sans carte · joue sans compte 🎯
+                  100% gratuit · sans carte · 2 jours d'accès complet offerts
                 </p>
                 <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.3)', textAlign:'center' }}>
                   Déjà un compte ? <span onClick={openAuth} style={{ color:'#c8a727', cursor:'pointer', textDecoration:'underline' }}>Se connecter</span>
@@ -4334,8 +4334,8 @@ function BlindTestPage({ navigate }) {
   }
 
   function goNextOrBilan() {
-    // Gate invité après 3 manches (assez de goût + investi → max inscriptions)
-    if (!user && sessionCount === 3 && !showGuestGate) {
+    // Invité : une manche pour goûter, la suivante demande un compte.
+    if (!user) {
       setShowGuestGate(true);
       return;
     }
@@ -4414,7 +4414,7 @@ function BlindTestPage({ navigate }) {
     <div className="fade-up" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '90px 20px 80px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
 
       {showProGate && <ProGateModal reason={btQuotaSpent ? 'quota-blindtest' : null} onClose={function(){ setShowProGate(false); }} navigate={navigate} />}
-      {showGuestGate && <GuestGateModal context="blindtest" onClose={function(){ setShowGuestGate(false); launch(); }} />}
+      {showGuestGate && <GuestGateModal context="blindtest" onClose={function(){ setShowGuestGate(false); }} />}
 
       {/* ── Bouton Retour ── */}
       <button onClick={() => { if (audioRef.current) audioRef.current.pause(); navigate('home'); }} style={{
@@ -5069,8 +5069,8 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   };
 
   const next = () => {
-    // Gate invité après 3 questions (assez de goût + investi -> max inscriptions)
-    if (!user && current === 2 && current + 1 < questions.length) {
+    // Invité : une question pour goûter, la suivante demande un compte.
+    if (!user && current + 1 < questions.length) {
       setShowGuestGate(true);
       return;
     }
@@ -5180,7 +5180,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
 
   return (
     <div className="fade-up" style={{ minHeight: '100vh', fontFamily: 'Plus Jakarta Sans, sans-serif', paddingBottom: 60 }}>
-      {showGuestGate && <GuestGateModal context="quiz" onClose={function(){ setShowGuestGate(false); setCurrent(c => c + 1); setChosen(null); setAnswered(false); }} />}
+      {showGuestGate && <GuestGateModal context="quiz" onClose={function(){ setShowGuestGate(false); }} />}
 
       {/* ── Top bar ── */}
       <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(5,14,8,0.92)', backdropFilter: 'blur(14px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '14px 20px' }}>
@@ -8373,7 +8373,7 @@ function TestPage({ navigate }) {
         </p>
         {v2 && <p dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 30, lineHeight: 1.9, color: 'rgba(247,238,203,0.9)', margin: '0 0 24px' }}>{v2}</p>}
         <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 26 }}>
-          {['26 mots', '2 minutes', 'Sans compte'].map(function (t) {
+          {['26 mots', '2 minutes', 'Score immédiat'].map(function (t) {
             return <span key={t} style={{ fontSize: 13, fontWeight: 700, padding: '7px 13px', borderRadius: 999, background: '#0a1f12', border: '1px solid rgba(200,167,39,0.25)', color: 'rgba(240,237,230,0.85)' }}>{t}</span>;
           })}
         </div>
@@ -8381,7 +8381,7 @@ function TestPage({ navigate }) {
           {data ? 'Commencer le test →' : 'Chargement…'}
         </button>
         <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '16px 0 0' }}>
-          Ton score s'affiche à la fin. Aucune inscription demandée.<br />
+          Ton score s'affiche dès la fin du test.<br />
           17 fois : une Fâtiha par rak'a, 17 rak'at obligatoires par jour.
         </p>
       </div></div>
@@ -8462,11 +8462,34 @@ function TestPage({ navigate }) {
       <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 400, fontSize: 'clamp(24px, 6.6vw, 30px)', lineHeight: 1.2, margin: '0 0 8px', textWrap: 'balance' }}>{verdict}</h1>
       <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.6)', margin: '0 0 26px' }}>{right} mots compris sur {total}.</p>
 
-      {missed.length > 0 && (
+      {/* Le score est libre — c'est lui qu'on partage. Le détail des mots
+          manqués, lui, se garde dans un compte : c'est la raison concrète d'en
+          créer un, au moment où la personne veut savoir. */}
+      {missed.length > 0 && !user && (
+        <div style={{ position: 'relative', marginBottom: 22 }}>
+          <div aria-hidden="true" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8, filter: 'blur(7px)', opacity: 0.55, pointerEvents: 'none', userSelect: 'none' }}>
+            {missed.slice(0, 4).map(function (q) {
+              return (
+                <div key={q.ar} style={{ padding: '10px 12px', borderRadius: 12, background: '#0a1f12', border: '1px solid rgba(200,167,39,0.18)', textAlign: 'center' }}>
+                  <div dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 23, lineHeight: 1.6, color: '#f7eecb' }}>{q.ar}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: GOLD }}>{q.fr}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12 }}>
+            <p style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.4, margin: 0, textShadow: '0 2px 12px rgba(0,0,0,0.9)' }}>
+              {missed.length === 1 ? '1 mot te manque.' : missed.length + ' mots te manquent.'}<br />
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(240,237,230,0.8)' }}>Crée ton compte pour les voir et les apprendre.</span>
+            </p>
+          </div>
+        </div>
+      )}
+      {missed.length > 0 && user && (
         <div style={{ textAlign: 'left', marginBottom: 26 }}>
           <p style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.5)', margin: '0 0 10px', textAlign: 'center' }}>Les mots qui te manquent</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-            {missed.slice(0, 6).map(function (q) {
+            {missed.map(function (q) {
               return (
                 <div key={q.ar} style={{ padding: '10px 12px', borderRadius: 12, background: '#0a1f12', border: '1px solid rgba(200,167,39,0.18)', textAlign: 'center' }}>
                   <div dir="rtl" lang="ar" style={{ fontFamily: 'Amiri, Georgia, serif', fontSize: 23, lineHeight: 1.6, color: '#f7eecb' }}>{q.ar}</div>
@@ -8475,7 +8498,6 @@ function TestPage({ navigate }) {
               );
             })}
           </div>
-          {missed.length > 6 && <p style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)', margin: '10px 0 0', textAlign: 'center' }}>et {missed.length - 6} autres.</p>}
         </div>
       )}
 
@@ -8485,8 +8507,8 @@ function TestPage({ navigate }) {
         <button style={btnGold} onClick={function () { navigate('comprendre'); }}>Apprendre ces mots →</button>
       ) : (
         <>
-          <button style={btnGold} onClick={function () { openAuth('signup'); }}>Apprendre ces mots — 2 jours offerts →</button>
-          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>Accès complet aux 38 sourates pendant 2 jours, sans carte bancaire.</p>
+          <button style={btnGold} onClick={function () { openAuth('signup'); }}>Voir mes mots — créer mon compte →</button>
+          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>Gratuit, sans carte bancaire. 2 jours d'accès complet aux 38 sourates.</p>
           <button style={Object.assign({}, btnGhost, { marginBottom: 10 })} onClick={function () { navigate('comprendre'); }}>Apprendre la Fâtiha gratuitement</button>
         </>
       )}
@@ -8565,14 +8587,13 @@ function ComprendrePage({ navigate }) {
   const [showGate, setShowGate] = React.useState(false);
   const [showPro, setShowPro] = React.useState(false);
   const weeklyId = cmpWeeklyId(data);
-  // Invité : 1 sourate offerte. Ensuite (autre sourate OU rejouer) → compte requis.
-  const guestBlocked = !user && (st.plays || 0) > 0;
+  // Invité : écouter et lire mot à mot, librement. Jouer demande un compte.
+  const guestBlocked = !user;
 
   function openSourate(s) {
     const locked = !s.free && !isPro && s.id !== weeklyId;
     // Contenu Pro : on laisse DÉCOUVRIR (audio + mot-à-mot) pour donner le goût.
     // Le jeu reste réservé — le mur arrive une fois l'envie créée, pas avant.
-    if (!locked && guestBlocked) { setShowGate(true); return; }
     if (trialing && user && !s.free) hmTrialRecord(user.uid, 'surah', s.id);
     setSourate(s); setMode('discover');
   }
@@ -8765,7 +8786,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
             <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21, fontWeight: 900, color: '#fff' }}>1</span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: 'block', fontSize: 16.5, fontWeight: 900, color: '#fff' }}>Commence par <span style={{ whiteSpace: 'nowrap' }}>Al-Fâtiha</span></span>
-              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Gratuit, sans compte · environ 4 minutes</span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Écoute-la mot à mot · gratuit, sans compte</span>
             </span>
             <span style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>→</span>
           </button>
@@ -9243,7 +9264,7 @@ function ComprendreSection({ navigate }) {
         <button onClick={function(){ if (navigate) navigate('comprendre'); }} style={{ padding: '16px 40px', borderRadius: 100, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', boxShadow: '0 8px 30px rgba(200,167,39,0.35)' }}>
           Comprends le Coran →
         </button>
-        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>5 sourates gratuites · sans inscription pour essayer</p>
+        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>5 sourates gratuites · compte gratuit, sans carte</p>
       </div>
     </section>
   );
