@@ -37,9 +37,22 @@ const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 's
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet',
   'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
+/* Heure de Paris, pas celle du serveur : Vercel tourne en UTC, et une
+   inscription à 23 h 30 en France tombait la veille ou le lendemain. */
+function paris(ms) {
+  const d = new Date(new Date(ms).toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+  return d;
+}
 function dateFr(ms) {
-  const d = new Date(ms);
+  const d = paris(ms);
   return JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()];
+}
+/* « demain » ou « ce soir » : le cron passe à 9 h, et pour qui s'est inscrit
+   en soirée l'accès ferme le jour même. */
+function quandFr(finMs) {
+  const fin = paris(finMs), now = paris(Date.now());
+  if (fin.toDateString() === now.toDateString()) return { mot: fin.getHours() >= 18 ? 'ce soir' : "aujourd'hui", heure: fin.getHours() + ' h' };
+  return { mot: 'demain', heure: null };
 }
 
 /* Le lien porte son origine : le site l'écrit dans Firestore sur le compte de
@@ -182,21 +195,21 @@ function emailBienvenue(prenom, finMs) {
 function emailDernierJour(prenom, finMs) {
   const salut = prenom ? `${prenom},` : 'As-salāmu ʿalaykum,';
   return {
-    subject: 'Ton accès complet ferme demain',
+    subject: 'Ton accès complet ferme ' + quandFr(finMs).mot,
     html: coquille(
       'Ce que tu gardes, et ce qui se referme.',
       `
       <p style="${p}">${salut}</p>
       <h1 style="${h1}">Il te reste un jour<br>d'accès complet.</h1>
-      <p style="${p}">Demain, ${dateFr(finMs)}, ton compte redevient gratuit. Rien ne sera perdu de ce que tu as appris — mais le rythme change.</p>
+      <p style="${p}">${quandFr(finMs).heure ? (quandFr(finMs).mot === 'ce soir' ? 'Ce soir' : "Aujourd'hui") + ', vers ' + quandFr(finMs).heure : 'Demain, ' + dateFr(finMs)}, ton compte redevient gratuit. Rien ne sera perdu de ce que tu as appris — mais le rythme change.</p>
       ${colonnes(
-        ['Toute ta progression, définitivement', 'Al-Fâtiha et Al-Ikhlâs en entier', 'Une partie de Quiz par jour', 'Une partie de Blind Test par jour', 'Une sourate Pro offerte chaque semaine'],
-        ['Les 36 autres sourates en mot-à-mot', 'Les niveaux Amateur et Avancé', 'Les 114 sourates du Blind Test', 'Le jeu sans limite quotidienne']
+        ['Toute ta progression, définitivement', '5 sourates en entier, dont Al-Fâtiha', 'Une partie de Quiz par jour', 'Une partie de Blind Test par jour', 'Une sourate Pro offerte chaque semaine'],
+        ['Les 33 autres sourates en mot-à-mot', 'Le Quiz sans limite', 'Le Blind Test sans limite']
       )}
       <p style="${p}">Si tu veux garder l'accès entier, c'est maintenant qu'il faut le dire — demain le site aura déjà changé.</p>
       ${PRIX}
       ${bouton(lien('trial_d1', 'subscription'), 'Garder l\'accès complet')}
-      <p style="${petit}padding-top:20px;">Résiliable en un clic, remboursé sous 48 h.</p>
+      <p style="${petit}padding-top:20px;">Résiliable en un clic, satisfait ou remboursé 14 jours.</p>
       `
     ),
   };
@@ -214,7 +227,7 @@ function emailFin(prenom) {
       <h1 style="${h1}">Tes deux jours<br>sont passés.</h1>
       <p style="${p}">Ton compte reste actif et ta progression est intacte. Ce que tu as appris ne t'est pas repris : tu peux continuer, simplement à un rythme plus lent.</p>
       ${colonnes(
-        ['Une partie de Quiz par jour', 'Une partie de Blind Test par jour', 'Al-Fâtiha et Al-Ikhlâs, toujours', 'Une sourate Pro offerte chaque semaine'],
+        ['Une partie de Quiz par jour', 'Une partie de Blind Test par jour', '5 sourates, dont Al-Fâtiha, toujours', 'Une sourate Pro offerte chaque semaine'],
         ['Le Juz ʿAmma complet, 38 sourates', 'Les 740 questions, tous niveaux', 'Les 114 sourates du Blind Test']
       )}
       <p style="${p}">Si les deux jours t'ont servi, l'abonnement rouvre tout. Sinon, reviens quand tu veux : la partie du jour t'attend, et elle restera gratuite.</p>

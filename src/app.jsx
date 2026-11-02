@@ -360,8 +360,11 @@ function hmSendWelcomeEmail() {
    croire que le site s'est mis à mal fonctionner. */
 const HM_JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const HM_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-function hmTrialEndDate() {
-  const d = new Date(Date.now() + HM_TRIAL_DAYS * 86400000);
+/* Calculée depuis la création du compte : l'écran de bienvenue peut
+   s'afficher plus tard (autre appareil, autre navigateur), et « maintenant + 2
+   jours » annonçait alors une date qui n'était plus la vraie. */
+function hmTrialEndDate(user) {
+  const d = new Date((hmTrialStartedAt(user) || Date.now()) + HM_TRIAL_DAYS * 86400000);
   return HM_JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + HM_MOIS[d.getMonth()];
 }
 
@@ -583,7 +586,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
    referme. Annoncer la fin dès le début n'est pas un aveu : c'est ce qui donne
    sa valeur aux deux jours. */
 function TrialWelcomeModal({ onClose, navigate }) {
-  const { openQuickCheckout } = useAuth();
+  const { openQuickCheckout, user } = useAuth();
   React.useEffect(function () { hmLockScroll(); return hmUnlockScroll; }, []);
   return (
     <ModalPortal><div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.84)', backdropFilter:'blur(10px)', zIndex:10002, display:'flex', alignItems:'center', justifyContent:'center', padding:16, animation:'overlayFade 0.25s ease-out' }}>
@@ -595,14 +598,13 @@ function TrialWelcomeModal({ onClose, navigate }) {
           Tes 2 jours commencent
         </h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 20px' }}>
-          Accès complet, sans carte bancaire.<br />Tout le site est ouvert jusqu'au {hmTrialEndDate()}.
+          Accès complet, sans carte bancaire.<br />Tout le site est ouvert jusqu'au {hmTrialEndDate(user)}.
         </p>
 
         <ul style={{ listStyle:'none', padding:0, margin:'0 0 20px', textAlign:'left' }}>
           {[
             ['∞', 'Quiz et Blind Test sans limite'],
             ['📖', "Les 38 sourates de Comprendre"],
-            ['🔥', 'Les niveaux Amateur et Avancé'],
           ].map(function (it) {
             return (
               <li key={it[1]} style={{ display:'flex', alignItems:'center', gap:11, marginBottom:11 }}>
@@ -616,7 +618,7 @@ function TrialWelcomeModal({ onClose, navigate }) {
         {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
             aux deux jours, et ça évite que le jour 3 passe pour une panne. */}
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
-          Tout ce qui porte l'étiquette <strong style={{ color:'#e6c84a' }}>PRO</strong> t'est ouvert pendant ces 2 jours. Ensuite, tu gardes une partie par jour et une sourate par semaine.
+          Tout ce qui porte l'étiquette <strong style={{ color:'#e6c84a' }}>PRO</strong> t'est ouvert pendant ces 2 jours. Ensuite, tu gardes chaque jour une partie de Quiz et une de Blind Test, 5 sourates, et une sourate Pro par semaine.
         </p>
 
         {/* « Commencer » refermait la fenêtre et laissait la personne sur
@@ -625,7 +627,10 @@ function TrialWelcomeModal({ onClose, navigate }) {
             sourates sont ouvertes — la preuve immédiate de ce qu'elle a reçu.
             Et il nomme la récompense plutôt que l'action : on ne clique pas
             pour « commencer », on clique pour profiter de deux jours. */}
-        <button onClick={function(){ onClose(); if (navigate) navigate('comprendre'); }} style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
+        {/* Qui s'inscrit au milieu d'une partie veut la continuer : depuis le
+            02/11, le compte se demande après une manche ou une question. On ne
+            l'emmène dans Comprendre que s'il ne jouait à rien. */}
+        <button onClick={function(){ onClose(); const h = (window.location.hash || '').slice(1); const enJeu = h === 'blind-test' || h === 'test' || h === 'comprendre' || h.indexOf('quiz-') === 0; if (navigate && !enJeu) navigate('comprendre'); }} style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', boxShadow:'0 4px 22px rgba(200,167,39,0.32)', marginBottom:10 }}>
           Profiter de mes 2 jours →
         </button>
         <button onClick={function(){ onClose(); openQuickCheckout(); }} style={{ background:'none', border:'none', color:'rgba(240,237,230,0.35)', fontSize:12.5, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
@@ -815,7 +820,7 @@ function AuthModal({ onClose, initialTab }) {
   const inp = {
     width: '100%', background: 'rgba(255,255,255,0.06)',
     border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-    padding: '13px 16px', color: '#fff', fontSize: 15, marginBottom: 12,
+    padding: '13px 16px', color: '#fff', fontSize: 16, marginBottom: 12,
     fontFamily: 'Plus Jakarta Sans, sans-serif', outline: 'none', display: 'block'
   };
   return (
@@ -832,6 +837,13 @@ function AuthModal({ onClose, initialTab }) {
             {tab === 'signup' ? 'Créer un compte' : 'Connexion'}
           </h2>
         </div>
+        {/* Ce que donne le compte, au moment de le créer : sans cette ligne, la
+            modale ne disait que « Créer un compte » — un effort sans contrepartie. */}
+        {tab === 'signup' && !checkoutIntent && !forgotMode && (
+          <p style={{ textAlign: 'center', color: 'rgba(240,237,230,0.75)', fontSize: 13.5, lineHeight: 1.5, margin: '-12px 0 18px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <strong style={{ color: '#e6c84a' }}>2 jours d'accès complet offerts</strong><br />Gratuit · sans carte bancaire
+          </p>
+        )}
         {checkoutIntent && !forgotMode && (
           <div style={{ background: 'rgba(200,167,39,0.08)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 12, padding: '10px 14px', marginBottom: 18, textAlign: 'center' }}>
             <span style={{ color: 'rgba(240,237,230,0.75)', fontSize: 12.5, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
@@ -877,9 +889,9 @@ function AuthModal({ onClose, initialTab }) {
           </>
         ) : (
           <>
-            {tab === 'signup' && <input type="text" placeholder="Prénom (optionnel)" value={name} onChange={e => setName(e.target.value)} style={inp} />}
-            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={inp} />
-            <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)}
+            {tab === 'signup' && <input type="text" name="given-name" autoComplete="given-name" placeholder="Prénom (optionnel)" value={name} onChange={e => setName(e.target.value)} style={inp} />}
+            <input type="email" name="email" autoComplete={tab === 'signup' ? 'email' : 'username'} inputMode="email" autoCapitalize="none" autoCorrect="off" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={inp} />
+            <input type="password" name="password" autoComplete={tab === 'signup' ? 'new-password' : 'current-password'} placeholder={tab === 'signup' ? 'Mot de passe (6 caractères min.)' : 'Mot de passe'} value={password} onChange={e => setPassword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && submit()} style={{...inp, marginBottom: tab === 'login' ? 6 : 18}} />
             {tab === 'login' && (
               <div style={{ textAlign: 'right', marginBottom: 16 }}>
@@ -2716,7 +2728,7 @@ function ComparisonTable({ navigate }) {
   { text: '5 sourates de Comprendre, mot à mot', ok: true },
   { text: 'Une sourate Pro offerte chaque semaine', ok: true },
   { text: '🔒 Quiz illimités tous niveaux', ok: false },
-  { text: '🔒 Blind test complet (114 sourates)', ok: false },
+  { text: '🔒 Blind Test sans limite', ok: false },
   /* La progression passe au gratuit. La cacher supprimait le mécanisme même
      qui donne envie de payer : on ne s'attache pas à ce qu'on ne voit pas
      grandir, et on ne paie pas pour ce à quoi on ne s'est pas attaché. */
@@ -3762,7 +3774,7 @@ function StartPage({ navigate }) {
       icon: '📖', tag: 'NOUVEAU', tagColor: '#c8a727', tagRgb: '200,167,39',
       title: 'Comprends le Coran',
       desc: 'Apprends le Coran mot à mot, verset par verset, avec audio et phonétique. Quelques dizaines de mots suffisent à saisir une grande partie du Coran — comprends enfin ce que tu récites dans ta prière.',
-      free: ['Al-Fâtiha & Al-Ikhlâs — illimité', 'Audio & phonétique inclus', 'Progression sauvegardée'],
+      free: ['5 sourates en entier, dont Al-Fâtiha', 'Une sourate Pro offerte chaque semaine', 'Écoute et mot-à-mot de toutes les sourates'],
       pro: ["Le Juz 'Amma en entier — 38 sourates, 571 versets", 'Nouvelles sourates régulièrement', 'Suivi de progression complet'],
       cta: '📖 Essayer Comprendre le Coran', page: 'comprendre',
     },
@@ -3770,16 +3782,16 @@ function StartPage({ navigate }) {
       icon: '🎵', tag: 'POPULAIRE', tagColor: '#4ade80', tagRgb: '74,222,128',
       title: 'Blind Test Coran',
       desc: 'Reconnais les sourates à l\'oreille. Un format addictif qui grave les versets dans ta mémoire — sans effort, en jouant.',
-      free: ['Niveau Débutant illimité', 'Score en temps réel', 'Toutes les parties que tu veux'],
-      pro: ['114 sourates — accès complet', 'Tous les niveaux & récitateurs', 'Statistiques de progression', 'Défis illimités'],
+      free: ['Une partie par jour', 'Les 3 niveaux, les 114 sourates', 'Score en temps réel'],
+      pro: ['Parties illimitées', 'Enchaîne les niveaux sans attendre'],
       cta: '🎵 Essayer le Blind Test', page: 'blind-test',
     },
     {
       icon: '🧠', tag: 'ENRICHISSANT', tagColor: '#4ade80', tagRgb: '74,222,128',
       title: 'Quiz Islamiques',
       desc: '740 questions sur 8 thèmes — dont une catégorie Coran entière. Trois niveaux, et un mode Mélange qui ne repose jamais deux fois la même question.',
-      free: ['Niveau Débutant illimité', 'Tous les thèmes en aperçu', 'Score sauvegardé'],
-      pro: ['Niveaux Amateur & Avancé débloqués', 'Quiz illimités', 'Toutes catégories', 'Corrections détaillées'],
+      free: ['Une partie par jour', 'Les 3 niveaux, les 8 thèmes', 'Score sauvegardé'],
+      pro: ['Quiz illimités', '740 questions sans attendre le lendemain'],
       cta: '🧠 Essayer le Quiz', page: 'quiz',
     },
   ];
@@ -4533,7 +4545,7 @@ function BlindTestPage({ navigate }) {
               <p style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
                 {isPro
                   ? '✦ Session illimitée · Accès Pro complet'
-                  : '🌱 Niveau Débutant gratuit · Passe à Pro pour les niveaux Amateur & Avancé'}
+                  : '1 partie gratuite par jour · Pro : parties illimitées'}
               </p>
             )}
           </div>
@@ -4775,9 +4787,9 @@ function QuizPage({ navigate }) {
         ) : (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '8px 18px' }}>
             <span style={{ fontSize: 13 }}>🌱</span>
-            <span style={{ color: 'rgba(74,222,128,0.85)', fontSize: 12, fontWeight: 700 }}>Gratuit : niveau Débutant · 10 questions</span>
+            <span style={{ color: 'rgba(74,222,128,0.85)', fontSize: 12, fontWeight: 700 }}>Gratuit : 1 partie par jour, tous niveaux</span>
             <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>·</span>
-            <span style={{ color: 'rgba(200,167,39,0.7)', fontSize: 12, fontWeight: 700 }}>🔒 Amateur & Avancé → Pro</span>
+            <span style={{ color: 'rgba(200,167,39,0.7)', fontSize: 12, fontWeight: 700 }}>Pro : illimité</span>
           </div>
         )}
       </div>
@@ -4917,7 +4929,7 @@ function QuizPage({ navigate }) {
                 );
               })}
             </div>
-            {!isPro && <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.5)', textAlign:'center', marginBottom:12 }}>🔒 Niveaux Amateur & Avancé — abonnés Pro uniquement</p>}
+            {!isPro && <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.5)', textAlign:'center', marginBottom:12 }}>1 partie gratuite par jour · illimité avec Pro</p>}
             <button onClick={() => setLevelModal(null)} style={{ display: 'block', width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.28)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', paddingTop: 4 }}>Annuler</button>
           </div>
         </div>
@@ -7066,9 +7078,9 @@ function PaymentSuccessPage({ navigate }) {
   var ring = 'conic-gradient(#c8a727 ' + Math.min(360, tick * 6) + 'deg, rgba(255,255,255,0.06) 0deg)';
 
   var perks = [
-    { icon: '🎵', label: 'Blind Test — tous les niveaux' },
-    { icon: '🧠', label: 'Quiz — Amateur & Avancé débloqués' },
-    { icon: '⚡', label: 'Nouvelles fonctionnalités en avant-première' },
+    { icon: '📖', label: 'Les 38 sourates de Comprendre' },
+    { icon: '🎵', label: 'Blind Test sans limite' },
+    { icon: '🧠', label: 'Quiz sans limite' },
   ];
 
   return (
@@ -7673,7 +7685,7 @@ function ExitIntentPopup({ navigate }) {
           Tu as vu l'aperçu gratuit.
         </h2>
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(255,255,255,0.5)', lineHeight:1.7, marginBottom:8 }}>
-          Les niveaux <strong style={{color:'#fff'}}>Amateur & Avancé</strong>, le Blind Test complet et Comprendre vidéo t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
+          Les <strong style={{color:'#fff'}}>38 sourates</strong> de Comprendre, le Quiz et le Blind Test sans limite t'attendent. La plateforme islamique <strong style={{color:'#fff'}}>100% en français</strong> la plus complète.
         </p>
         <div style={{ marginBottom:20 }}>
           <span style={{ fontFamily:'Playfair Display,serif', fontSize:26, fontWeight:900, color:'#c8a727' }}>{PRO_ANNUAL}/an</span>
