@@ -748,6 +748,24 @@ function ProGateModal({ onClose, navigate, reason }) {
   );
 }
 
+/* Navigateurs intégrés aux applis (TikTok, Instagram, Facebook, Snapchat).
+   Google y refuse toute connexion (« disallowed_useragent ») : le bouton
+   y mènerait à une page d'erreur. Or c'est précisément là qu'arrivent les
+   visiteurs des vidéos — on ne leur montre donc que l'e-mail. */
+function hmInAppBrowser() {
+  try { return /FBAN|FBAV|Instagram|musical_ly|BytedanceWebview|TikTok|Snapchat|Line\//i.test(navigator.userAgent || ''); }
+  catch (e) { return false; }
+}
+
+const HM_GOOGLE_G = (
+  <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>
+);
+
 /* --- Auth Modal --- */
 function AuthModal({ onClose, initialTab }) {
   /* L'onglet d'ouverture suit le bouton qui a ouvert la modale : « Connexion »
@@ -786,9 +804,38 @@ function AuthModal({ onClose, initialTab }) {
       'auth/wrong-password': 'Mot de passe incorrect.',
       'auth/invalid-credential': 'Email ou mot de passe incorrect.',
       'auth/too-many-requests': 'Trop de tentatives. Réessaie plus tard.',
+      'auth/account-exists-with-different-credential': 'Un compte existe déjà avec cet email : connecte-toi avec ton mot de passe.',
+      'auth/operation-not-allowed': 'La connexion Google n\'est pas encore activée.',
+      'auth/unauthorized-domain': 'La connexion Google n\'est pas autorisée sur ce site.',
+      'auth/network-request-failed': 'Connexion internet instable. Réessaie.',
     };
     return m[code] || 'Une erreur est survenue.';
   };
+  /* Un tap au lieu de trois champs : sur mobile, inventer un mot de passe est
+     le moment où l'on abandonne. Le même bouton sert à l'inscription et à la
+     connexion — Firebase dit lui-même si le compte est neuf, et seul un compte
+     neuf compte comme une inscription (pixel, écran de bienvenue). */
+  const googleIn = async () => {
+    if (!window._auth || !window.firebase) { setError('Firebase non configuré.'); return; }
+    setError(''); setLoading(true);
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    try {
+      const res = await window._auth.signInWithPopup(provider);
+      const neuf = !!(res && res.additionalUserInfo && res.additionalUserInfo.isNewUser);
+      onAuthSuccess(neuf ? 'signup' : 'login');
+      onClose();
+    } catch (e) {
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') { /* fermé par l'utilisateur */ }
+      else if (e.code === 'auth/popup-blocked') {
+        // Fenêtre bloquée : on bascule sur la redirection, reprise au retour (cf. AuthProvider).
+        try { await window._auth.signInWithRedirect(provider); return; } catch (e2) { setError(errorFr(e2.code)); }
+      }
+      else setError(errorFr(e.code));
+    } finally { setLoading(false); }
+  };
+  const showGoogle = !hmInAppBrowser();
+
   const submit = async () => {
     if (!window._auth) { setError('Firebase non configuré.'); return; }
     setError(''); setLoading(true);
@@ -889,6 +936,24 @@ function AuthModal({ onClose, initialTab }) {
           </>
         ) : (
           <>
+            {showGoogle && (
+              <>
+                <button onClick={googleIn} disabled={loading} style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  background: '#fff', border: '1px solid #dadce0', color: '#1f1f1f', padding: '13px 16px',
+                  borderRadius: 10, fontSize: 15.5, fontWeight: 600, cursor: loading ? 'wait' : 'pointer',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 14
+                }}>
+                  {HM_GOOGLE_G}
+                  Continuer avec Google
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 14px' }}>
+                  <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>ou avec ton email</span>
+                  <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+                </div>
+              </>
+            )}
             {tab === 'signup' && <input type="text" name="given-name" autoComplete="given-name" placeholder="Prénom (optionnel)" value={name} onChange={e => setName(e.target.value)} style={inp} />}
             <input type="email" name="email" autoComplete={tab === 'signup' ? 'email' : 'username'} inputMode="email" autoCapitalize="none" autoCorrect="off" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={inp} />
             <input type="password" name="password" autoComplete={tab === 'signup' ? 'new-password' : 'current-password'} placeholder={tab === 'signup' ? 'Mot de passe (6 caractères min.)' : 'Mot de passe'} value={password} onChange={e => setPassword(e.target.value)}
@@ -9496,6 +9561,18 @@ function App() {
       }, function() { setIsPro(false); setProResolved(true); });
     return unsub;
   }, [user]);
+
+  /* Retour d'une connexion Google par redirection (quand la fenêtre a été
+     bloquée) : la page a été rechargée, la modale n'existe plus. On compte
+     l'inscription ici, une fois — l'essai et la bienvenue suivent seuls. */
+  React.useEffect(function () {
+    if (!window._auth || !window._auth.getRedirectResult) return;
+    window._auth.getRedirectResult().then(function (res) {
+      if (res && res.user && res.additionalUserInfo && res.additionalUserInfo.isNewUser && window.hmPixel) {
+        window.hmPixel.track('CompleteRegistration');
+      }
+    }).catch(function () {});
+  }, []);
 
   /* L'origine du visiteur suit son compte.
      Les paramètres UTM étaient rangés dans le navigateur et n'allaient nulle
