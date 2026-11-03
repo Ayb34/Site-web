@@ -2311,7 +2311,7 @@ function Hero({ navigate }) {
             surtitre les enumere. Le concret est montre plutot qu'annonce. */}
         <h1 className="hero-h1">
           Apprends ton deen.<br />
-          <em>En jouant, à ton rythme.</em>
+          <em>En jouant, à&nbsp;ton&nbsp;rythme.</em>
         </h1>
 
         {/* Onglets et apercu forment un seul bloc : sur grand ecran ils passent
