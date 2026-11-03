@@ -46,7 +46,7 @@
 <!-- ── Preload critiques ── -->
 <link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
-<link rel="preload" as="script" href="/app.js?v=10"/>
+<link rel="preload" as="script" href="/app.js?v=11"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
@@ -68,7 +68,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-<script src="/app.js?v=10" defer></script>
+<script src="/app.js?v=11" defer></script>
 <script>
   (function(){
     var _EJS_PUBLIC_KEY  = '0p0THZMRdSKSdd8Yj';
@@ -979,7 +979,8 @@
        plus claire (luminance moyenne 40,6 contre 23,9 sur la moitie haute, la
        seule que le masque laisse voir). A opacite egale elle serait 1,4 fois
        plus presente, et les deux tailles ne montreraient plus la meme pierre. */
-    opacity: 0.34;
+    opacity: calc(0.34 * var(--zf, 1));
+    transform: scale(1.06); will-change: transform, opacity;
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
   }
@@ -991,7 +992,7 @@
     .hero-bg { background-image: url('uploads/zellige-m.webp'); }
   }
   @media (min-width: 769px) {
-    .hero-bg { background-image: url('uploads/zellige.webp'); opacity: 0.55; }
+    .hero-bg { background-image: url('uploads/zellige.webp'); opacity: calc(0.55 * var(--zf, 1)); }
     /* Le halo de l'activite respire : il derive de quelques pourcents en
        seize secondes. Le translateX(-50%) est celui du centrage de base — une
        animation qui l'oublierait decalerait le halo d'un demi-ecran. */

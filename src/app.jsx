@@ -2172,7 +2172,11 @@ function HomeSky() {
     const sun = root.querySelector('.sky-sun');
     const stars = root.querySelector('.sky-stars');
     const moon = root.querySelector('.sky-moon');
-    let raf = 0;
+    // Zellige du hero : en descendant, il tourne lentement, s'approche et
+    // s'efface dans le ciel — comme si on passait sous la coupole.
+    const zel = document.querySelector('.hero-bg');
+    const calme = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let raf = 0, lastHz = -1;
     const clamp = function (x) { return x < 0 ? 0 : x > 1 ? 1 : x; };
     const paint = function () {
       raf = 0;
@@ -2194,6 +2198,16 @@ function HomeSky() {
       sun.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
       sun.style.opacity = vis.toFixed(3);
       moon.style.opacity = clamp((p - 0.86) / 0.1).toFixed(3);
+      if (zel && !calme) {
+        const hz = clamp(window.scrollY / h);
+        if (hz < 1 || lastHz < 1) {
+          lastHz = hz;
+          // Échelle toujours assez grande pour que la rotation ne découvre
+          // jamais les coins de l'image (portrait 375×812 : 4° → ×1,15).
+          zel.style.transform = 'translate3d(0,' + Math.round(hz * h * 0.35) + 'px,0) scale(' + (1.06 + hz * 0.2).toFixed(4) + ') rotate(' + (hz * 4).toFixed(3) + 'deg)';
+          zel.style.setProperty('--zf', (1 - hz * 0.85).toFixed(3));
+        }
+      }
     };
     const onScroll = function () { if (!raf) raf = requestAnimationFrame(paint); };
     paint();
