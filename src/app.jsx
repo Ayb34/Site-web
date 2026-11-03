@@ -2182,8 +2182,9 @@ function HomeSky() {
         const a = SKY_STOPS[i], b = SKY_STOPS[i + 1];
         layers[i].style.opacity = clamp((p - a) / (b - a)).toFixed(3);
       }
-      // Étoiles : présentes sous le hero, éteintes au jour, rallumées après le Maghrib.
-      const st = p < 0.3 ? 0.55 * (1 - p / 0.3) : p > 0.74 ? clamp((p - 0.74) / 0.2) : 0;
+      // Étoiles : un fond étoilé discret toute la page, plus dense la nuit
+      // (sous le hero et après le Maghrib).
+      const st = 0.5 + (p < 0.3 ? 0.25 * (1 - p / 0.3) : p > 0.74 ? 0.5 * clamp((p - 0.74) / 0.2) : 0);
       stars.style.opacity = st.toFixed(3);
       // Soleil : se lève à l'aube, culmine à midi, se couche au Maghrib.
       const t = clamp((p - 0.1) / 0.72);
@@ -2402,7 +2403,7 @@ function StatsBar() {
 
   return (
     <div style={{
-      background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.25) 100%)',
+      background: 'transparent',
       padding: '22px 0',
       overflow: 'hidden',
       position: 'relative'
@@ -2755,7 +2756,7 @@ function HowItWorksSection() {
   var sceneLabels = ['Inscription','Choix d\'activité','Quiz en action'];
 
   return (
-    <section style={{ padding:'100px 24px', background:'linear-gradient(180deg,#030d06 0%,#040f07 100%)', position:'relative', overflow:'hidden' }}>
+    <section style={{ padding:'100px 24px', background:'transparent', position:'relative', overflow:'hidden' }}>
       <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(200,167,39,0.04) 0%, transparent 70%)', pointerEvents:'none' }} />
 
       <div style={{ maxWidth:900, margin:'0 auto', position:'relative' }}>
@@ -2890,9 +2891,7 @@ function ComparisonTable({ navigate }) {
 
 
   return (
-    <section style={{ padding: '80px 24px', background: 'rgba(0,0,0,0.18)', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), transparent)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to top, rgba(0,0,0,0.2), transparent)', pointerEvents: 'none' }} />
+    <section style={{ padding: '80px 24px', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
       {/* Lueur dorée centre-droite */}
       <div style={{ position: 'absolute', top: '20%', right: '-10%', width: 550, height: 550, background: 'radial-gradient(circle, rgba(200,167,39,0.1) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       {/* Lueur verte centre-gauche */}
@@ -3055,8 +3054,6 @@ function ParcoursSection() {
 
   return (
     <section style={{ padding: '80px 24px', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), transparent)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to top, rgba(0,0,0,0.2), transparent)', pointerEvents: 'none' }} />
       {/* Lueur verte haut-droite */}
       <div style={{ position: 'absolute', top: '-5%', right: '-6%', width: 520, height: 520, background: 'radial-gradient(circle, rgba(26,92,53,0.5) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       {/* Lueur dorée bas-centre */}
@@ -3306,7 +3303,7 @@ function LearnPlaySection({ navigate }) {
     { icon: '🤍', title: 'Tu renforces ta foi en t\'amusant', desc: 'Reconnaître une sourate à l\'oreille, répondre juste sur les prophètes — chaque victoire te rapproche de ton deen.' },
   ];
   return (
-    <section style={{ background: 'rgba(2,10,4,0.35)', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ background: 'transparent', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
       {/* bg glow left */}
       <div style={{ position: 'absolute', top: '30%', left: '-10%', width: 500, height: 500, background: 'radial-gradient(ellipse, rgba(200,167,39,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
       {/* bg glow right */}
@@ -3706,7 +3703,7 @@ function FaqSection() {
   ];
 
   return (
-    <section style={{ padding: '100px 24px 80px', background: 'rgba(3,13,6,0.3)' }}>
+    <section style={{ padding: '100px 24px 80px', background: 'transparent' }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
         {/* Header */}
         <div className="reveal-blur" style={{ textAlign: 'center', marginBottom: 56 }}>
@@ -3809,7 +3806,7 @@ function SoftPaywall({ navigate }) {
   return (
     <section style={{
       padding: '80px 24px 100px',
-      background: 'linear-gradient(180deg, rgba(200,167,39,0.06) 0%, rgba(0,0,0,0.3) 100%)',
+      background: 'transparent',
       textAlign: 'center',
       position: 'relative', overflow: 'hidden'
     }}>
@@ -4237,7 +4234,7 @@ function Footer({ navigate }) {
 
   return (
     <footer style={{
-      background: 'linear-gradient(180deg, rgba(0,0,0,0.4) 0%, #071f12 100%)',
+      background: 'linear-gradient(180deg, rgba(3,17,10,0) 0%, rgba(4,22,13,0.9) 100%)',
       padding: '56px 24px 32px',
       color: 'rgba(255,255,255,0.7)'
     }}>
