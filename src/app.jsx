@@ -2310,8 +2310,8 @@ function Hero({ navigate }) {
             maintenant la moitie de l'ecran et nomme les trois activites, et le
             surtitre les enumere. Le concret est montre plutot qu'annonce. */}
         <h1 className="hero-h1">
-          L'islam s'apprend.<br />
-          <em>Pas forcément à l'école.</em>
+          Apprends ton deen.<br />
+          <em>En jouant, à ton rythme.</em>
         </h1>
 
         {/* Onglets et apercu forment un seul bloc : sur grand ecran ils passent
