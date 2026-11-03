@@ -46,7 +46,7 @@
 <!-- ── Preload critiques ── -->
 <link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
-<link rel="preload" as="script" href="/app.js?v=8"/>
+<link rel="preload" as="script" href="/app.js?v=9"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
@@ -68,7 +68,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-<script src="/app.js?v=8" defer></script>
+<script src="/app.js?v=9" defer></script>
 <script>
   (function(){
     var _EJS_PUBLIC_KEY  = '0p0THZMRdSKSdd8Yj';
@@ -287,6 +287,45 @@
 
 
   #root { position: relative; z-index: 1; }
+
+  /* Ciel de l'accueil (HomeSky) : tons sombres, le texte reste blanc
+     sur fond foncé à chaque heure. Le calque de base = couleur du body,
+     pour que le hero ne change pas. */
+  .home-sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #03110a; }
+  .sky-l, .sky-stars { position: absolute; inset: 0; opacity: 0; will-change: opacity; }
+  .sky-fajr    { background: linear-gradient(180deg, #0a1230 0%, #1b1d3e 55%, #4a2a4a 100%); }
+  .sky-dhuhr   { background: linear-gradient(180deg, #082634 0%, #0c3440 50%, #12403a 100%); }
+  .sky-asr     { background: linear-gradient(180deg, #0f2526 0%, #1f3324 50%, #4a4318 100%); }
+  .sky-maghrib { background: linear-gradient(180deg, #160c16 0%, #3a1712 55%, #6e3410 100%); }
+  .sky-isha    { background: linear-gradient(180deg, #02040a 0%, #040b10 55%, #06130c 100%); }
+  .sky-stars {
+    background-image:
+      radial-gradient(1.2px 1.2px at 12% 18%, #fff, transparent),
+      radial-gradient(1px 1px at 27% 42%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 44% 12%, #fff, transparent),
+      radial-gradient(1px 1px at 63% 30%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 78% 9%, #fff, transparent),
+      radial-gradient(1px 1px at 88% 46%, #fff, transparent),
+      radial-gradient(1.1px 1.1px at 6% 62%, #fff, transparent),
+      radial-gradient(1px 1px at 35% 74%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 54% 58%, #fff, transparent),
+      radial-gradient(1px 1px at 71% 82%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 93% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 19% 90%, #fff, transparent);
+  }
+  .sky-sun {
+    position: absolute; left: -210px; top: -210px; width: 420px; height: 420px;
+    border-radius: 50%; opacity: 0; will-change: transform, opacity;
+    background: radial-gradient(circle, rgba(255,226,160,0.30) 0%, rgba(255,186,90,0.12) 32%, rgba(255,160,60,0) 68%);
+  }
+  .sky-moon {
+    position: absolute; top: 16%; right: 12%; width: 54px; height: 54px; opacity: 0;
+    filter: drop-shadow(0 0 18px rgba(230,200,74,0.45)); will-change: opacity;
+  }
+  @media (max-width: 768px) {
+    .sky-sun { left: -150px; top: -150px; width: 300px; height: 300px; }
+    .sky-moon { top: 12%; right: 8%; width: 40px; height: 40px; }
+  }
 
 
 

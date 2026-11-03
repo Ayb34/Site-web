@@ -2150,6 +2150,82 @@ function Reveal({ children }) {
   return <div ref={ref} id="apres-hero" className={'hero-next' + (seen ? ' in' : '')}>{children}</div>;
 }
 
+/* ─── Ciel de l'accueil : du Fajr à l'Isha ───
+   En descendant la page, le fond traverse une journée : nuit étoilée sous le
+   hero, aube, ciel de midi, lumière dorée de l'Asr, braise du Maghrib, puis
+   la nuit et le croissant au moment de l'offre. Un repère discret de la
+   journée de prière, sans texte de plus à lire.
+
+   Performance : cinq calques de dégradé FIXES superposés dont on ne change
+   que l'opacité, plus un soleil qu'on ne fait que translater — uniquement des
+   propriétés composées par le GPU, aucun repaint au scroll. Pas de
+   background-attachment: fixed (cassé sur iOS, 76 % du trafic).
+   Monté dans <body> par portail : le conteneur de page a une animation
+   d'entrée (transform), qui ferait défiler un enfant position: fixed. */
+const SKY_STOPS = [0, 0.16, 0.4, 0.62, 0.8, 1];
+function HomeSky() {
+  const ref = React.useRef(null);
+  React.useEffect(function () {
+    const root = ref.current;
+    if (!root) return;
+    const layers = root.querySelectorAll('.sky-l');
+    const sun = root.querySelector('.sky-sun');
+    const stars = root.querySelector('.sky-stars');
+    const moon = root.querySelector('.sky-moon');
+    let raf = 0;
+    const clamp = function (x) { return x < 0 ? 0 : x > 1 ? 1 : x; };
+    const paint = function () {
+      raf = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? clamp(window.scrollY / max) : 0;
+      for (let i = 0; i < layers.length; i++) {
+        const a = SKY_STOPS[i], b = SKY_STOPS[i + 1];
+        layers[i].style.opacity = clamp((p - a) / (b - a)).toFixed(3);
+      }
+      // Étoiles : présentes sous le hero, éteintes au jour, rallumées après le Maghrib.
+      const st = p < 0.3 ? 0.55 * (1 - p / 0.3) : p > 0.74 ? clamp((p - 0.74) / 0.2) : 0;
+      stars.style.opacity = st.toFixed(3);
+      // Soleil : se lève à l'aube, culmine à midi, se couche au Maghrib.
+      const t = clamp((p - 0.1) / 0.72);
+      const vis = p < 0.1 || p > 0.84 ? 0 : Math.min(1, Math.sin(Math.PI * t) * 2.2);
+      const w = window.innerWidth, h = window.innerHeight;
+      const x = (0.08 + 0.84 * t) * w, y = h * (0.82 - 0.62 * Math.sin(Math.PI * t));
+      sun.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
+      sun.style.opacity = vis.toFixed(3);
+      moon.style.opacity = clamp((p - 0.86) / 0.1).toFixed(3);
+    };
+    const onScroll = function () { if (!raf) raf = requestAnimationFrame(paint); };
+    paint();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    // La page s'allonge quand les images et sections différées arrivent.
+    const ro = window.ResizeObserver ? new ResizeObserver(onScroll) : null;
+    if (ro) ro.observe(document.body);
+    return function () {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (ro) ro.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+  return (
+    <ModalPortal>
+      <div ref={ref} className="home-sky" aria-hidden="true">
+        <div className="sky-l sky-fajr" />
+        <div className="sky-l sky-dhuhr" />
+        <div className="sky-l sky-asr" />
+        <div className="sky-l sky-maghrib" />
+        <div className="sky-l sky-isha" />
+        <div className="sky-stars" />
+        <div className="sky-sun" />
+        <svg className="sky-moon" viewBox="0 0 64 64">
+          <path d="M40 6a26 26 0 1 0 18 44A22 22 0 1 1 40 6z" fill="#e6c84a" />
+        </svg>
+      </div>
+    </ModalPortal>
+  );
+}
+
 function Hero({ navigate }) {
   const { isPro } = useAuth();
   const [tab, setTab] = React.useState(0);
@@ -3230,7 +3306,7 @@ function LearnPlaySection({ navigate }) {
     { icon: '🤍', title: 'Tu renforces ta foi en t\'amusant', desc: 'Reconnaître une sourate à l\'oreille, répondre juste sur les prophètes — chaque victoire te rapproche de ton deen.' },
   ];
   return (
-    <section style={{ background: 'linear-gradient(180deg, #020a04 0%, #030d06 100%)', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ background: 'rgba(2,10,4,0.35)', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
       {/* bg glow left */}
       <div style={{ position: 'absolute', top: '30%', left: '-10%', width: 500, height: 500, background: 'radial-gradient(ellipse, rgba(200,167,39,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
       {/* bg glow right */}
@@ -3630,7 +3706,7 @@ function FaqSection() {
   ];
 
   return (
-    <section style={{ padding: '100px 24px 80px', background: '#030d06' }}>
+    <section style={{ padding: '100px 24px 80px', background: 'rgba(3,13,6,0.3)' }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
         {/* Header */}
         <div className="reveal-blur" style={{ textAlign: 'center', marginBottom: 56 }}>
@@ -9696,6 +9772,7 @@ function App() {
 
   return wrap(
     <>
+      <HomeSky />
       <Navbar navigate={navigate} />
       <main>
         {/* Ordre = du plus accrocheur au moins, avec l'offre en fin de parcours :
