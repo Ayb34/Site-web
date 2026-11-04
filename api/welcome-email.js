@@ -1,4 +1,5 @@
-/* E-mail de bienvenue, envoyé à l'instant où l'essai s'ouvre.
+/* E-mail de bienvenue, envoyé à la création du compte (et, avant le
+   04/11/2026, à l'ouverture de l'essai).
 
    Authentifié par jeton Firebase, comme la résiliation : un point d'entrée qui
    envoie du courrier et qui accepterait une adresse dans le corps de la requête
@@ -6,7 +7,7 @@
    CONTENUE DANS LE JETON, jamais à une adresse transmise. */
 
 const admin = require('firebase-admin');
-const { emailBienvenue, envoyer, TRIAL_DAYS } = require('./_emails');
+const { emailBienvenue, emailBienvenueGratuit, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -57,7 +58,10 @@ module.exports = async (req, res) => {
     }
 
     const prenom = (u.displayName || '').trim().split(' ')[0] || '';
-    await envoyer(email, prenom, emailBienvenue(prenom, cree + TRIAL_DAYS * 86400000));
+    const message = cree >= TRIAL_STOP
+      ? emailBienvenueGratuit(prenom)
+      : emailBienvenue(prenom, cree + TRIAL_DAYS * 86400000);
+    await envoyer(email, prenom, message);
 
     await ref.set({ mails: { welcome: true } }, { merge: true });
     res.json({ ok: true, sent: 'welcome' });

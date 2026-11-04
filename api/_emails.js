@@ -172,6 +172,32 @@ const PRIX = `
     </td></tr>
   </table>`;
 
+/* Fin de l'essai de 2 jours : comptes créés après cette date (même valeur
+   que HM_TRIAL_STOP dans src/app.jsx). Ils reçoivent la bienvenue « gratuite »
+   et aucune relance de fin d'essai. */
+const TRIAL_STOP = Date.UTC(2026, 10, 4, 12, 15, 0);
+
+/* ── 0. Bienvenue — compte gratuit, sans essai (depuis le 04/11/2026) ──
+   Remplace aussi l'ancien e-mail EmailJS, qui annonçait encore les 2 jours et
+   ne partait qu'aux inscriptions par e-mail (jamais par Google). */
+function emailBienvenueGratuit(prenom) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  return {
+    subject: 'Bienvenue sur Héritage Musulman — par quoi commencer',
+    html: coquille(
+      'Quatre minutes pour comprendre ta Fâtiha.',
+      `
+      <p style="${p}">${salut}</p>
+      <h1 style="${h1}">Ton compte est prêt.</h1>
+      <p style="${p}">Il est gratuit, et il le reste : chaque jour, une partie de Quiz et une de Blind Test, 5 sourates de Comprendre en entier — dont Al-Fâtiha —, et une sourate Pro offerte chaque semaine. Ta progression est sauvegardée.</p>
+      <p style="${p}">Par quoi commencer : <strong style="color:${TEXTE};">Al-Fâtiha, mot à mot</strong>. Tu la récites dans chaque prière — en quatre minutes, tu vois enfin ce que chaque mot veut dire.</p>
+      ${bouton(lien('welcome', 'comprendre'), 'Commencer par Al-Fâtiha')}
+      <p style="${petit}padding-top:22px;">Le jour où tu veux aller plus loin — les 38 sourates et des parties sans limite —, le Pro est à 4,99&nbsp;€ par mois, ou 29,99&nbsp;€ par an (2,50&nbsp;€ par mois). Satisfait ou remboursé 14 jours.</p>
+      `
+    ),
+  };
+}
+
 /* ── 1. Bienvenue — envoyé à l'instant où l'essai s'ouvre ── */
 function emailBienvenue(prenom, finMs) {
   const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
@@ -298,7 +324,9 @@ async function envoyer(destinataire, prenom, message) {
 
 module.exports = {
   TRIAL_DAYS: 2,
+  TRIAL_STOP,
   emailBienvenue,
+  emailBienvenueGratuit,
   emailReouverture,
   emailDernierJour,
   emailFin,

@@ -974,7 +974,6 @@ function AuthModal({ onClose, initialTab }) {
            inscription réussie pour un échec. */
         try {
           if (name) await cred.user.updateProfile({ displayName: name });
-          if (window._ejsSend) window._ejsSend(email, name || cred.user.displayName || 'cher(e) membre');
         } catch (e2) { console.warn('post-inscription:', e2); }
         onAuthSuccess('signup');
       } else {
@@ -9774,8 +9773,9 @@ function App() {
   React.useEffect(function () {
     if (!window._auth || !window._auth.getRedirectResult) return;
     window._auth.getRedirectResult().then(function (res) {
-      if (res && res.user && res.additionalUserInfo && res.additionalUserInfo.isNewUser && window.hmPixel) {
-        window.hmPixel.track('CompleteRegistration');
+      if (res && res.user && res.additionalUserInfo && res.additionalUserInfo.isNewUser) {
+        if (window.hmPixel) window.hmPixel.track('CompleteRegistration');
+        hmSendWelcomeEmail();
       }
     }).catch(function () {});
   }, []);
@@ -9847,6 +9847,10 @@ function App() {
       setShowAuth(false);
       // Seule la création de compte est une conversion — pas une reconnexion.
       if (type === 'signup' && window.hmPixel) window.hmPixel.track('CompleteRegistration');
+      /* Bienvenue par Brevo, pour toutes les inscriptions (e-mail ET Google).
+         L'ancien envoi EmailJS ne partait qu'aux inscriptions par e-mail et
+         annonçait encore l'essai. Le serveur refuse les doublons. */
+      if (type === 'signup') hmSendWelcomeEmail();
       if (pendingCheckout) {
         setQuickCheckoutMethod(pendingCheckout);
         setPendingCheckout(null);

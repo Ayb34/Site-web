@@ -16,7 +16,7 @@
    le site utilise pour afficher le mur. Les deux ne peuvent pas diverger. */
 
 const admin = require('firebase-admin');
-const { emailDernierJour, emailFin, envoyer, TRIAL_DAYS } = require('./_emails');
+const { emailDernierJour, emailFin, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -47,6 +47,8 @@ module.exports = async (req, res) => {
         const cree = Date.parse(u.metadata.creationTime);
         if (isNaN(cree)) return;
         const age = maintenant - cree;
+        // Comptes créés après la fin de l'essai : ils n'en ont pas eu, rien à relancer.
+        if (cree >= TRIAL_STOP) return;
         if (age >= 0 && age < FENETRE) candidats.push({ u, cree, age });
       });
       pageToken = lot.pageToken;

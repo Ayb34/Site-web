@@ -36,7 +36,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="preconnect" href="https://www.gstatic.com"/>
 <link rel="preconnect" href="https://unpkg.com" crossorigin/>
-<link rel="dns-prefetch" href="https://api.emailjs.com"/>
 <link rel="dns-prefetch" href="https://firestore.googleapis.com"/>
 <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com"/>
 
@@ -46,7 +45,7 @@
 <!-- ── Preload critiques ── -->
 <link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
-<link rel="preload" as="script" href="/app.js?v=16"/>
+<link rel="preload" as="script" href="/app.js?v=17"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
@@ -61,43 +60,14 @@
      React → ReactDOM → Firebase → app.js (qui initialise Firebase en tête).
 
      Retirés du chargement initial, et chargés à la demande depuis app.js :
-     Stripe (256 Ko, utile à moins de 1 % des visiteurs), EmailJS et
-     mp4-muxer (Studio). -->
+     Stripe (256 Ko, utile à moins de 1 % des visiteurs) et mp4-muxer
+     (Studio). -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" defer></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-<script src="/app.js?v=16" defer></script>
-<script>
-  (function(){
-    var _EJS_PUBLIC_KEY  = '0p0THZMRdSKSdd8Yj';
-    var _EJS_SERVICE_ID  = 'service_s1qs19r';
-    var _EJS_TEMPLATE_ID = 'template_17svpba';
-    var _ejsInited = false;
-    function send(toEmail, toName) {
-      try {
-        if (!_ejsInited) {
-          emailjs.init({ publicKey: _EJS_PUBLIC_KEY });
-          _ejsInited = true;
-        }
-        emailjs.send(_EJS_SERVICE_ID, _EJS_TEMPLATE_ID, {
-          to_email: toEmail,
-          to_name:  toName || 'cher(e) membre'
-        });
-      } catch(e) { console.warn('EmailJS:', e); }
-    }
-    /* Chargé au premier envoi, c'est-à-dire à l'inscription : rien à faire
-       payer aux visiteurs qui ne s'inscrivent pas. */
-    window._ejsSend = function(toEmail, toName) {
-      if (typeof emailjs !== 'undefined') return send(toEmail, toName);
-      var sc = document.createElement('script');
-      sc.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-      sc.onload = function () { send(toEmail, toName); };
-      document.head.appendChild(sc);
-    };
-  })();
-</script>
+<script src="/app.js?v=17" defer></script>
 <!-- ── Pixel publicitaire (Meta) ──
      Chargé UNIQUEMENT après consentement explicite : en France, déposer un
      cookie publicitaire avant l'accord de l'utilisateur est une infraction
