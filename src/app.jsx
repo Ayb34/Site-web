@@ -107,8 +107,8 @@ function ProSavings({ align, dark }) {
 const PRO_WHY = [
   { icon:'🕌', title:'Comprends enfin ta prière', desc:'Tu récites déjà 5 fois par jour. Le mot-à-mot transforme chaque salât en un moment que tu comprends vraiment.' },
   { icon:'⏱️', title:'5 minutes par jour suffisent', desc:'Dans les transports, après le fajr, avant de dormir. Le savoir se construit par petites doses régulières.' },
-  { icon:'🌱', title:'Une sadaqa jariya', desc:'Chaque vidéo de récitation que tu crées et partages continue de te rapporter, même après ta mort.' },
-  { icon:'📜', title:'Un devoir, pas un loisir', desc:'« La recherche du savoir est une obligation pour tout musulman. » — Ibn Majah' },
+  { icon:'🤲', title:'Même en butant, c\'est récompensé', desc:'« Celui qui lit le Coran en butant, et pour qui c\'est difficile, aura deux récompenses. » — Bukhari 4937, Muslim 798' },
+  { icon:'📜', title:'Un devoir, pas un loisir', desc:'« La recherche du savoir est une obligation pour tout musulman. » — Ibn Majah 224' },
 ];
 
 /* `limit` sert les modales : au-delà de 2 arguments, le bouton d'achat passe
@@ -263,6 +263,19 @@ function useAuth() { return React.useContext(AuthContext); }
    plus l'accès quotidien aux niveaux supérieurs. */
 const HM_CUTOVER = Date.UTC(2026, 8, 6);
 const HM_TRIAL_DAYS = 2;
+/* Fin de l'essai de 2 jours (04/11/2026, choix d'Ayoub). Les comptes créés
+   après cette date n'y ont plus droit ; ceux déjà en essai le terminent.
+
+   Pourquoi : l'essai repoussait la décision d'achat de 48 h. L'envie de payer
+   est la plus forte au moment où l'on bute sur la limite, en pleine partie ;
+   avec l'essai, ce moment tombait deux jours plus tard, souvent quand la
+   personne n'était plus là — il ne restait qu'un e-mail pour la relancer. La
+   seule vente obtenue jusque-là l'avait été sans essai.
+
+   À la place : le compte gratuit garde sa partie quotidienne, et le mur
+   (2e partie, sourate Pro) vend tout de suite, avec « satisfait ou remboursé
+   14 jours » pour retirer le risque que l'essai retirait. */
+const HM_TRIAL_STOP = Date.UTC(2026, 10, 4, 12, 15, 0);
 const HM_QUOTA_KEY = 'hm_quota_v1';
 const HM_TRIAL_KEY = 'hm_trial_v1';
 const HM_WELCOME_KEY = 'hm_trial_welcome_v1';
@@ -387,7 +400,7 @@ function hmTrialEndSeen(uid) {
 
 function hmTrialLeft(user) {
   const started = hmTrialStartedAt(user);
-  if (!started) return 0;
+  if (!started || started >= HM_TRIAL_STOP) return 0;
   const left = HM_TRIAL_DAYS * 86400000 - (Date.now() - started);
   return left > 0 ? Math.ceil(left / 86400000) : 0;
 }
@@ -508,8 +521,8 @@ function GuestGateModal({ onClose, context = 'default' }) {
      refusaient sans conséquence.
 
      Ce que la modale promet est ce que le compte gratuit donne vraiment :
-     2 jours d'accès complet, puis une partie par jour. */
-  const FEATS = ['✓ 2 jours d\'accès complet offerts', '✓ Sans carte bancaire', '✓ Ta progression sauvegardée', '✓ Ensuite, 1 partie gratuite par jour'];
+     une partie offerte chaque jour, 5 sourates, la progression gardée. */
+  const FEATS = ['✓ Gratuit, sans carte bancaire', '✓ 1 partie offerte chaque jour', '✓ 5 sourates de Comprendre en entier', '✓ Ta progression sauvegardée'];
   const GATE_COPY = {
     default: {
       emoji: '🎯',
@@ -641,6 +654,93 @@ function TrialWelcomeModal({ onClose, navigate }) {
   );
 }
 
+/* ─── Ce que le Pro rapporte — le cœur du mur de paiement ───
+   Depuis la fin de l'essai (04/11/2026), le paiement se propose au moment où
+   l'on bute sur la limite. À cet instant la personne ne connaît le site que
+   depuis quelques minutes : une liste de fonctionnalités ne suffit pas, il
+   faut qu'elle voie ce qu'elle y GAGNE, et qu'elle ait des raisons de faire
+   confiance.
+
+   Trois rentabilités, dans l'ordre où on se les pose :
+   1. concrète — ce que je saurai faire (comprendre le Coran, ma prière) ;
+   2. religieuse — apprendre le Coran n'est jamais perdu. Hadiths authentiques
+      UNIQUEMENT, référence numérotée à chaque fois, en français seulement.
+      On ne dit jamais que l'abonnement rapporte des récompenses : c'est
+      l'apprentissage qui est récompensé, le site n'en est que le moyen ;
+   3. financière — le prix rapporté au mois et au jour.
+   Puis les preuves : un avis réel (repris de la section avis), le nombre de
+   membres, et les garanties qui retirent le risque. */
+const PRO_GAINS = [
+  ['📖', "Plus d'un mot du Coran sur deux", "Les 38 sourates du Juz 'Amma, mot à mot : leurs mots reviennent dans tout le Coran."],
+  ['🕌', 'Ta prière, enfin comprise', 'Les sourates que tu récites dans la salât, comprises mot par mot.'],
+  ['∞', 'Quiz et Blind Test sans limite', '740 questions, 114 sourates : autant de parties que tu veux.'],
+];
+const PRO_HADITHS = [
+  { t: "Quiconque emprunte un chemin en quête de science, Allah lui facilitera par là un chemin vers le Paradis.", s: 'Muslim 2699' },
+  { t: "Celui qui lit une lettre du Livre d'Allah obtient une bonne action, et la bonne action vaut dix fois autant.", s: 'Tirmidhi 2910' },
+  { t: "Celui qui lit le Coran en butant, et pour qui c'est difficile, aura deux récompenses.", s: 'Bukhari 4937 · Muslim 798' },
+];
+function ProValue({ skipQuran }) {
+  const GOLD = '#e6c84a';
+  const f = 'Plus Jakarta Sans,sans-serif';
+  const label = function (t) {
+    return <div style={{ fontFamily: f, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(200,167,39,0.85)', margin: '0 0 10px', textAlign: 'center' }}>{t}</div>;
+  };
+  const gains = skipQuran ? PRO_GAINS.slice(1) : PRO_GAINS;
+  return (
+    <div style={{ textAlign: 'left' }}>
+      {label('Ce que tu y gagnes')}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+        {gains.map(function (g) {
+          return (
+            <div key={g[1]} style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.16)', borderRadius: 12, padding: '11px 13px' }}>
+              <span style={{ fontSize: 17, lineHeight: 1.3, flexShrink: 0, width: 20, textAlign: 'center', color: GOLD, fontWeight: 900 }}>{g[0]}</span>
+              <div>
+                <div style={{ fontFamily: f, fontSize: 13, fontWeight: 800, color: '#f0ede6', marginBottom: 2 }}>{g[1]}</div>
+                <div style={{ fontFamily: f, fontSize: 12, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>{g[2]}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {label('Un savoir qui ne se perd jamais')}
+      <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.10), rgba(200,167,39,0.03))', border: '1px solid rgba(200,167,39,0.28)', borderRadius: 14, padding: '6px 15px', marginBottom: 18 }}>
+        {PRO_HADITHS.map(function (h, i) {
+          return (
+            <figure key={h.s} style={{ margin: 0, padding: '11px 0', borderTop: i ? '1px solid rgba(200,167,39,0.14)' : 'none' }}>
+              <blockquote style={{ margin: 0, fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: 'italic', fontSize: 16.5, lineHeight: 1.45, color: '#f7eecb' }}>« {h.t} »</blockquote>
+              <figcaption style={{ fontFamily: f, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.06em', color: 'rgba(200,167,39,0.8)', marginTop: 5 }}>Prophète ﷺ — {h.s}</figcaption>
+            </figure>
+          );
+        })}
+      </div>
+
+      {label('Et pour ton budget')}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(74,222,128,0.07)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 12, padding: '12px 14px', marginBottom: 18 }}>
+        <span style={{ fontSize: 22, flexShrink: 0 }}>☕</span>
+        <div style={{ fontFamily: f, fontSize: 12.5, color: 'rgba(240,237,230,0.75)', lineHeight: 1.55 }}>
+          <strong style={{ color: '#fff' }}>{PRO_EQ_MONTH} par mois, moins qu'un café.</strong> Soit {PRO_PER_DAY} par jour pour un savoir qui t'accompagne toute ta vie — et ce que tu apprends te reste, même si tu arrêtes.
+        </div>
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
+        <p style={{ fontFamily: f, fontSize: 13, color: 'rgba(240,237,230,0.85)', lineHeight: 1.55, margin: '0 0 8px' }}>« Je le recommande, tout est complet et très bien expliqué. »</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: f, fontSize: 12 }}>
+          <span style={{ fontWeight: 800, color: '#fff' }}>Yacine</span>
+          <span style={{ color: 'rgba(74,222,128,0.85)', fontWeight: 700 }}>✓ Membre</span>
+          <span style={{ marginLeft: 'auto', color: 'rgba(240,237,230,0.5)' }}>{MEMBERS_COUNT} membres</span>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontFamily: f, fontSize: 11.5, color: 'rgba(240,237,230,0.7)', marginBottom: 4 }}>
+        {['↩ Remboursé sous 14 jours', '✓ Annulable en 1 clic', '🔒 Paiement sécurisé', '🤲 Projet indépendant, sans pub'].map(function (t) {
+          return <div key={t} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 9, padding: '8px 9px', textAlign: 'center', lineHeight: 1.35 }}>{t}</div>;
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* `reason` dit CE QUI vient de bloquer. Une modale qui parle du mur qu'on vient
    de heurter convertit mieux qu'un argumentaire général : l'utilisateur sait
    déjà ce qu'il veut, il faut le lui vendre, pas lui présenter le site. */
@@ -648,12 +748,12 @@ const PRO_GATE_COPY = {
   'quota-quiz': {
     icon: '✓',
     title: 'Ta partie du jour est faite',
-    body: function (t) { return <>Elle revient dans <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Avec Pro, elle ne s'arrête jamais.</>; },
+    body: function (t) { return <>Elle revient dans <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Ou continue maintenant, sans attendre.</>; },
   },
   'quota-blindtest': {
     icon: '✓',
     title: 'Ta partie du jour est faite',
-    body: function (t) { return <>Elle revient dans <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Avec Pro, tu enchaînes les 114 sourates.</>; },
+    body: function (t) { return <>Elle revient dans <strong style={{ color: '#c8a727' }}>{t}</strong>.<br />Ou continue maintenant, sans attendre.</>; },
   },
   'weekly': {
     icon: '✦',
@@ -712,25 +812,14 @@ function ProGateModal({ onClose, navigate, reason }) {
             <ProSavings />
           </div>
 
-          <ul style={{ listStyle:'none', padding:0, margin:'0 0 16px', textAlign:'left' }}>
-            {['✓ Quiz et Blind Test sans limite quotidienne','✓ Les 38 sourates de Comprendre, tout de suite','✓ 740 questions · 114 sourates · 3 niveaux'].map(function(item) {
-              return <li key={item} style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.65)', marginBottom:7 }}>{item}</li>;
-            })}
-          </ul>
-
-          {/* Ce que ça change au quotidien. Remplace l'ancienne liste de features :
-              elle faisait doublon avec celle ci-dessus, et décrivait ce qu'on
-              achète plutôt que ce que ça change. */}
-          <div className="pro-gate-feat-list">
-            <ProWhyGrid columns={1} limit={2} />
-          </div>
+          <ProValue />
         </div>
 
         {/* Pied collant : prix et bouton restent visibles quel que soit le défilement. */}
         <div className="pro-modal-footer" style={{ padding:'12px 24px 16px' }}>
           <button onClick={function(){ onClose(); openQuickCheckout(); }}
             style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
-            Passer à Pro — {PRO_ANNUAL}/an
+            Continuer sans limite — {PRO_ANNUAL}/an
           </button>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap', marginBottom:8 }}>
             <span style={{ color:'#4ade80', fontSize:12, flexShrink:0 }}>✓</span>
@@ -888,7 +977,7 @@ function AuthModal({ onClose, initialTab }) {
             modale ne disait que « Créer un compte » — un effort sans contrepartie. */}
         {tab === 'signup' && !checkoutIntent && !forgotMode && (
           <p style={{ textAlign: 'center', color: 'rgba(240,237,230,0.75)', fontSize: 13.5, lineHeight: 1.5, margin: '-12px 0 18px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            <strong style={{ color: '#e6c84a' }}>2 jours d'accès complet offerts</strong><br />Gratuit · sans carte bancaire
+            <strong style={{ color: '#e6c84a' }}>Gratuit, sans carte bancaire</strong><br />1 partie offerte chaque jour · ta progression gardée
           </p>
         )}
         {checkoutIntent && !forgotMode && (
@@ -1001,8 +1090,8 @@ function SubscriptionPage({ navigate }) {
 
      Elle dit maintenant ce qu'on achète, ce que ça coûte rapporté à la journée,
      et pourquoi on peut faire confiance. L'action principale reste la création
-     de compte : on ne peut pas s'abonner sans compte, et les 2 jours offerts
-     sont un bien meilleur premier pas qu'un formulaire de paiement. */
+     de compte : on ne peut pas s'abonner sans compte, et la partie gratuite
+     du jour est un bien meilleur premier pas qu'un formulaire de paiement. */
   if (!user) {
     const inclus = [
       ['∞', 'Aucune limite quotidienne', 'Quiz et Blind Test autant que tu veux'],
@@ -1063,10 +1152,10 @@ function SubscriptionPage({ navigate }) {
           </p>
 
           <button onClick={openAuth} style={{ width: '100%', maxWidth: 380, background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '17px 32px', borderRadius: 14, fontSize: 16.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 6px 26px rgba(200,167,39,0.32)', marginBottom: 12 }}>
-            Créer mon compte — 2 jours offerts →
+            Créer mon compte gratuit →
           </button>
           <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', margin: '0 0 24px' }}>
-            Accès complet pendant 2 jours, sans carte bancaire.<br />
+            Gratuit, sans carte bancaire. 1 partie offerte chaque jour.<br />
             Déjà un compte&nbsp;? Ce même bouton te connecte.
           </p>
 
@@ -2360,7 +2449,7 @@ function Hero({ navigate }) {
         <ul className="hero-sub">
           {[
             { t: 'Gratuit' },
-            { t: '2 jours offerts' },
+            { t: 'Sans pub' },
             /* Masque en mobile : « gratuit » le dit deja, et le premier ecran
                compte plus de lignes qu'il n'en faut. */
             { t: 'Sans carte bancaire', small: true },
@@ -2763,7 +2852,7 @@ function HowItWorksSection() {
   }
 
   var steps = [
-    { num:'01', label:'Créer un compte',     sub:'30 secondes · 2 jours d\'accès complet offerts' },
+    { num:'01', label:'Créer un compte',     sub:'30 secondes · gratuit, sans carte' },
     { num:'02', label:'Choisir une activité', sub:'Comprendre, Blind Test ou Quiz' },
     { num:'03', label:'Jouer & progresser',  sub:'Apprends sans t\'en rendre compte' },
   ];
@@ -3688,7 +3777,7 @@ function FaqSection() {
   const faqs = [
     {
       q: 'Est-ce vraiment gratuit ? Sans carte bancaire ?',
-      a: 'Oui, sans limite de durée et sans carte bancaire. Le compte gratuit te donne 5 sourates de Comprendre en mot à mot, une partie de Quiz et une de Blind Test chaque jour, et une sourate Pro offerte chaque semaine. À l\'inscription, tu as en plus 2 jours d\'accès complet pour tout essayer. Tu passes à Pro seulement si tu veux tout, sans limite.'
+      a: 'Oui, sans limite de durée et sans carte bancaire. Le compte gratuit te donne 5 sourates de Comprendre en mot à mot, une partie de Quiz et une de Blind Test chaque jour, et une sourate Pro offerte chaque semaine. Et si le Pro ne te convient pas, tu es remboursé sous 14 jours. Tu passes à Pro seulement si tu veux tout, sans limite.'
     },
     {
       q: 'Je ne suis pas bon(ne) en islam — c\'est fait pour moi ?',
@@ -4027,7 +4116,7 @@ function StartPage({ navigate }) {
             ) : (
               <>
                 <p style={{ marginTop:4, fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, color:'rgba(240,237,230,0.4)', textAlign:'center', lineHeight:1.6 }}>
-                  100% gratuit · sans carte · 2 jours d'accès complet offerts
+                  100% gratuit · sans carte · 1 partie offerte chaque jour
                 </p>
                 <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12.5, color:'rgba(240,237,230,0.3)', textAlign:'center' }}>
                   Déjà un compte ? <span onClick={openAuth} style={{ color:'#c8a727', cursor:'pointer', textDecoration:'underline' }}>Se connecter</span>
@@ -8672,7 +8761,7 @@ function TestPage({ navigate }) {
       ) : (
         <>
           <button style={btnGold} onClick={function () { openAuth('signup'); }}>Voir mes mots — créer mon compte →</button>
-          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>Gratuit, sans carte bancaire. 2 jours d'accès complet aux 38 sourates.</p>
+          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>Gratuit, sans carte bancaire. Tes mots manqués et ta progression gardés.</p>
           <button style={Object.assign({}, btnGhost, { marginBottom: 10 })} onClick={function () { navigate('comprendre'); }}>Apprendre la Fâtiha gratuitement</button>
         </>
       )}
@@ -8886,19 +8975,15 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.35)', margin: '0 0 16px' }}>
           Calculé sur les 77 878 mots du Coran — pondéré par leur fréquence réelle.
         </p>
-        <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 16, textAlign: 'left' }}>
-          {['📖 ' + lockedCount + ' sourates de plus — ' + lockedVerses + ' versets mot à mot', '🎵 Blind Test complet — 114 sourates', '🧠 Quiz tous niveaux, tous thèmes', '📈 Ta progression suivie sur tous tes appareils'].map(function (f) {
-            return <div key={f} style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.7)', marginBottom: 7, display: 'flex', gap: 8 }}><span style={{ color: '#4ade80', fontWeight: 800 }}>✓</span>{f}</div>;
-          })}
-        </div>
-        <div style={{ marginBottom: 14 }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.65)', margin: '0 0 16px' }}>
+          {lockedCount} sourates de plus · {lockedVerses} versets mot à mot
+        </p>
+        <div style={{ marginBottom: 18 }}>
           <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>{PRO_ANNUAL}</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / an</span>
           <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: 'rgba(240,237,230,0.4)', marginTop: 2, marginBottom: 8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
           <ProSavings />
         </div>
-        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11.5, color: 'rgba(240,237,230,0.45)', lineHeight: 1.6, margin: '0 0 4px' }}>
-          🤲 Ton abonnement finance un projet 100% indépendant, sans pub — apprendre sa religion n'a pas de prix, mais le maintenir a un coût.
-        </p>
+        <ProValue skipQuran />
         </div>
 
         {/* Pied collant : le bouton d'achat ne descend jamais sous l'écran. */}
@@ -8942,7 +9027,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
       {/* ── Visiteur qui découvre : un accueil, pas un tableau de zéros ──
           La campagne Google envoyait ici : 110 clics, 0 inscrit. Un inconnu
           lisait « 0 % · niveau 1 · 0 mot · 0 XP », puis 32 cadenas, et nulle
-          part l'inscription ni les 2 jours offerts. Le tableau ne s'affiche
+          part l'inscription. Le tableau ne s'affiche
           qu'une fois qu'il y a quelque chose à y montrer. */}
       {guest && !(st.xp > 0) ? (
         <div style={{ marginBottom: 24 }}>
@@ -8963,7 +9048,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
             <span style={{ fontSize: 20, color: GOLD }}>›</span>
           </button>
           <p style={{ fontSize: 13, color: 'rgba(240,237,230,0.55)', textAlign: 'center', margin: '16px 0 0', lineHeight: 1.6 }}>
-            En créant ton compte, les <strong style={{ color: '#f0ede6' }}>38 sourates</strong> s'ouvrent pendant 2 jours, sans carte.{' '}
+            Ton compte gratuit t'ouvre <strong style={{ color: '#f0ede6' }}>5 sourates</strong> en entier et garde ta progression.{' '}
             <button onClick={onSignup} style={{ background: 'none', border: 'none', padding: 0, color: GOLD, fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>Créer mon compte</button>
           </p>
         </div>
@@ -9732,10 +9817,9 @@ function App() {
         setPendingCheckout(null);
         return;
       }
-      /* Uniquement à la création du compte, et jamais par-dessus un paiement en
-         cours : annoncer un essai à quelqu'un qui sort sa carte le ferait
-         hésiter au pire moment. */
-      if (type === 'signup') setShowTrialWelcome(true);
+      /* Plus d'écran de bienvenue à l'inscription : sans essai, il n'y a rien
+         à annoncer, et il couperait la partie que la personne veut reprendre.
+         Les derniers comptes en essai le voient encore (cf. effet plus haut). */
     }
   };
 
