@@ -182,19 +182,32 @@ const TRIAL_STOP = Date.UTC(2026, 10, 4, 12, 15, 0);
    ne partait qu'aux inscriptions par e-mail (jamais par Google). */
 function emailBienvenueGratuit(prenom) {
   const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const url = SITE + '/#comprendre';
+  /* Volontairement « nu » : ni logo, ni bouton, ni prix, ni lien de
+     désinscription. Gmail classe en Promotions ce qui ressemble à une
+     newsletter (gabarit coloré, image, gros bouton, mention de prix) ; un
+     message écrit comme par une personne arrive dans Principale. La question
+     finale invite à répondre : chaque réponse apprend à Gmail que l'expéditeur
+     est un correspondant, pas un annonceur. */
+  const lignes = [
+    salut,
+    'Ton compte est prêt. Il est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, 5 sourates de Comprendre en entier, et une sourate de plus offerte chaque semaine. Ta progression est sauvegardée.',
+    'Si tu ne sais pas par où commencer : Al-Fâtiha, mot à mot. Tu la récites dans chaque prière, et en quatre minutes tu vois enfin ce que chaque mot veut dire.',
+    url,
+    'Une question pour moi : qu’est-ce qui t’a amené sur le site ? Réponds simplement à cet e-mail, je lis tout.',
+    'Ayoub\nHéritage Musulman',
+  ];
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map((l) => l === url
+    ? `<p style="margin:0 0 14px;"><a href="${url}">${url.replace('https://', '')}</a></p>`
+    : `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`).join('\n')}
+</body></html>`;
   return {
-    subject: 'Bienvenue sur Héritage Musulman — par quoi commencer',
-    html: coquille(
-      'Quatre minutes pour comprendre ta Fâtiha.',
-      `
-      <p style="${p}">${salut}</p>
-      <h1 style="${h1}">Ton compte est prêt.</h1>
-      <p style="${p}">Il est gratuit, et il le reste : chaque jour, une partie de Quiz et une de Blind Test, 5 sourates de Comprendre en entier — dont Al-Fâtiha —, et une sourate Pro offerte chaque semaine. Ta progression est sauvegardée.</p>
-      <p style="${p}">Par quoi commencer : <strong style="color:${TEXTE};">Al-Fâtiha, mot à mot</strong>. Tu la récites dans chaque prière — en quatre minutes, tu vois enfin ce que chaque mot veut dire.</p>
-      ${bouton(lien('welcome', 'comprendre'), 'Commencer par Al-Fâtiha')}
-      <p style="${petit}padding-top:22px;">Le jour où tu veux aller plus loin — les 38 sourates et des parties sans limite —, le Pro est à 4,99&nbsp;€ par mois, ou 29,99&nbsp;€ par an (2,50&nbsp;€ par mois). Satisfait ou remboursé 14 jours.</p>
-      `
-    ),
+    subject: 'Ton compte Héritage Musulman est prêt',
+    html,
+    text: lignes.join('\n\n'),
+    senderName: 'Ayoub · Héritage Musulman',
   };
 }
 
@@ -308,10 +321,13 @@ async function envoyer(destinataire, prenom, message) {
     method: 'POST',
     headers: { 'api-key': cle, 'content-type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({
-      sender: SENDER,
+      sender: message.senderName ? { ...SENDER, name: message.senderName } : SENDER,
+      replyTo: { email: SENDER.email, name: message.senderName || SENDER.name },
       to: [prenom ? { email: destinataire, name: prenom } : { email: destinataire }],
       subject: message.subject,
       htmlContent: message.html,
+      // Une version texte : un message HTML seul est un signal « marketing ».
+      ...(message.text ? { textContent: message.text } : {}),
     }),
   });
 
