@@ -654,6 +654,53 @@ function TrialWelcomeModal({ onClose, navigate }) {
   );
 }
 
+/* ─── Choix du plan, sur le mur ───
+   « 29,99 € » seul fait peur à qui découvre le site depuis cinq minutes : c'est
+   le chiffre le plus gros de l'écran, et il se lit comme une dépense d'un coup.
+   Le mensuel à 4,99 € est donc montré à côté, comme vraie porte d'entrée —
+   l'annuel reste présélectionné et son avantage (−50 %, 2,50 €/mois) se voit
+   sans calcul. Le bouton d'achat suit le plan choisi. */
+function ProPlanPicker({ plan, setPlan }) {
+  const f = 'Plus Jakarta Sans,sans-serif';
+  const card = function (on) {
+    return { flex: 1, position: 'relative', textAlign: 'center', cursor: 'pointer', fontFamily: f, borderRadius: 14, padding: '16px 8px 12px',
+      background: on ? 'linear-gradient(160deg, rgba(200,167,39,0.18), rgba(200,167,39,0.05))' : 'rgba(255,255,255,0.03)',
+      border: on ? '2px solid #c8a727' : '1px solid rgba(255,255,255,0.12)', color: '#f0ede6', transition: 'all .15s' };
+  };
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10 }}>
+        <button type="button" role="radio" aria-checked={plan === 'annual'} onClick={function () { setPlan('annual'); }} style={card(plan === 'annual')}>
+          <span style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 10.5, fontWeight: 900, letterSpacing: '0.04em', color: '#fff', background: 'linear-gradient(135deg,#1f9455,#0d5730)', borderRadius: 999, padding: '3px 9px' }}>{PRO_DISCOUNT} · conseillé</span>
+          <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'rgba(240,237,230,0.65)', marginBottom: 3 }}>Annuel</span>
+          <span style={{ display: 'block', fontSize: 23, fontWeight: 900, color: '#e6c84a', lineHeight: 1.1 }}>{PRO_EQ_MONTH}<span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(240,237,230,0.6)' }}>/mois</span></span>
+          <span style={{ display: 'block', fontSize: 11, color: 'rgba(240,237,230,0.55)', marginTop: 4 }}>{PRO_ANNUAL} par an</span>
+        </button>
+        <button type="button" role="radio" aria-checked={plan === 'monthly'} onClick={function () { setPlan('monthly'); }} style={card(plan === 'monthly')}>
+          <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'rgba(240,237,230,0.65)', marginBottom: 3 }}>Mensuel</span>
+          <span style={{ display: 'block', fontSize: 23, fontWeight: 900, color: plan === 'monthly' ? '#e6c84a' : '#f0ede6', lineHeight: 1.1 }}>{PRO_MONTHLY}<span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(240,237,230,0.6)' }}>/mois</span></span>
+          <span style={{ display: 'block', fontSize: 11, color: 'rgba(240,237,230,0.55)', marginTop: 4 }}>sans engagement</span>
+        </button>
+      </div>
+      <p style={{ fontFamily: f, fontSize: 11.5, color: 'rgba(240,237,230,0.5)', textAlign: 'center', margin: '9px 0 0', lineHeight: 1.5 }}>
+        {plan === 'annual'
+          ? <>Soit {PRO_PER_DAY} par jour · tu économises <strong style={{ color: '#4ade80' }}>{PRO_SAVE}</strong> sur l'année</>
+          : <>Annulable à tout moment · passe à l'annuel quand tu veux</>}
+      </p>
+    </div>
+  );
+}
+
+/* Bouton d'achat du mur : libellé et montant suivent le plan choisi. */
+function ProBuyButton({ plan, onClick }) {
+  return (
+    <button onClick={onClick} className="pro-buy"
+      style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '16px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 8, boxShadow: '0 6px 22px rgba(168,128,26,0.4), 0 1px 0 rgba(255,255,255,0.22) inset' }}>
+      {plan === 'monthly' ? 'Continuer — ' + PRO_MONTHLY + '/mois' : 'Continuer — ' + PRO_ANNUAL + '/an'}
+    </button>
+  );
+}
+
 /* ─── Ce que le Pro rapporte — le cœur du mur de paiement ───
    Depuis la fin de l'essai (04/11/2026), le paiement se propose au moment où
    l'on bute sur la limite. À cet instant la personne ne connaît le site que
@@ -781,6 +828,7 @@ function ProGateModal({ onClose, navigate, reason }) {
   React.useEffect(function () { if (endPending) hmTrialEndSeen(user.uid); }, [endPending]);
   const copy = PRO_GATE_COPY[effective] || null;
   const delay = effective === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
+  const [plan, setPlan] = React.useState('annual');
   const overlayRef = React.useRef(null);
   React.useEffect(function () {
     hmLockScroll();
@@ -788,14 +836,14 @@ function ProGateModal({ onClose, navigate, reason }) {
     return hmUnlockScroll;
   }, []);
   return (
-    <ModalPortal><div ref={overlayRef} onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', animation:'overlayFade 0.25s ease-out' }}>
-      <div className="pro-modal-card" onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, maxWidth:400, width:'100%', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
+    <ModalPortal><div ref={overlayRef} onClick={onClose} className="pro-sheet-overlay" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(10px)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', animation:'overlayFade 0.25s ease-out' }}>
+      <div className="pro-modal-card pro-sheet" onClick={function(e){ e.stopPropagation(); }} style={{ background:'linear-gradient(145deg,#0a1f12,#071510)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:22, maxWidth:400, width:'100%', textAlign:'center', boxShadow:'0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation:'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
 
         {/* Zone défilante : l'argumentaire peut être long sans jamais repousser
             le bouton d'achat hors de l'écran. */}
         <div className="pro-modal-scroll" style={{ padding:'26px 24px 16px' }}>
           {/* Cadrage par la progression, pas par le verrou : on félicite avant de proposer */}
-          <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>{copy ? copy.icon : '✦'}</div>
+          <div className="pro-sheet-icon" style={{ width:52, height:52, borderRadius:'50%', background:'rgba(200,167,39,0.1)', border:'1.5px solid rgba(200,167,39,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24, margin:'0 auto 14px' }}>{copy ? copy.icon : '✦'}</div>
 
           <h2 style={{ fontFamily:'Cinzel,serif', fontSize:20, color:'#f0ede6', margin:'0 0 8px', lineHeight:1.2 }}>{copy ? copy.title : 'Tu es prêt pour la suite'}</h2>
           <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13.5, color:'rgba(240,237,230,0.55)', lineHeight:1.6, margin:'0 0 16px' }}>
@@ -803,24 +851,16 @@ function ProGateModal({ onClose, navigate, reason }) {
           </p>
 
           {/* Prix remonté au-dessus de l'argumentaire : c'est l'information que
-              l'utilisateur cherche en premier, la cacher plus bas donne
-              l'impression qu'on l'esquive. */}
-          <div style={{ background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:14, padding:'16px 18px', marginBottom:16 }}>
-            <span style={{ fontFamily:'Cinzel,serif', fontSize:34, fontWeight:700, color:'#c8a727' }}>{PRO_ANNUAL}</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.4)' }}> / an</span>
-            <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.45)', marginTop:2, marginBottom:8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
-            <ProSavings />
-          </div>
+              l'utilisateur cherche en premier. Deux plans côte à côte, pour que
+              le premier chiffre lu ne soit pas 29,99 € seul. */}
+          <ProPlanPicker plan={plan} setPlan={setPlan} />
 
           <ProValue />
         </div>
 
         {/* Pied collant : prix et bouton restent visibles quel que soit le défilement. */}
         <div className="pro-modal-footer" style={{ padding:'12px 24px 16px' }}>
-          <button onClick={function(){ onClose(); openQuickCheckout(); }}
-            style={{ width:'100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border:'none', color:'#fff', padding:'15px', borderRadius:12, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif', marginBottom:8, boxShadow:'0 4px 20px rgba(200,167,39,0.3)' }}>
-            Continuer sans limite — {PRO_ANNUAL}/an
-          </button>
+          <ProBuyButton plan={plan} onClick={function(){ onClose(); openQuickCheckout('card', plan); }} />
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, flexWrap:'wrap', marginBottom:8 }}>
             <span style={{ color:'#4ade80', fontSize:12, flexShrink:0 }}>✓</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Annule quand tu veux</span>
@@ -8032,12 +8072,12 @@ function StickyUpgradeBanner({ navigate }) {
 }
 
 /* ─── QuickCheckoutModal — Option A : checkout direct sans auth ─── */
-function QuickCheckoutModal({ onClose, initialMethod }) {
+function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
   const { user } = useAuth();
   const [activeMethod, setActiveMethod] = React.useState(initialMethod || 'card');
   // L'annuel est pré-sélectionné : meilleur pour l'utilisateur (voir PRO_DISCOUNT) et pour
   // la trésorerie (encaissé d'un coup, pas de churn mensuel).
-  const [plan, setPlan] = React.useState('annual');
+  const [plan, setPlan] = React.useState(initialPlan === 'monthly' ? 'monthly' : 'annual');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const checkoutRef = React.useRef(null);
@@ -8937,6 +8977,7 @@ function ComprendrePage({ navigate }) {
 // ── Modal Pro contextuel « Comprendre » — vendu sur le bénéfice, pas sur le verrou ──
 function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
   const { openQuickCheckout } = useAuth();
+  const [plan, setPlan] = React.useState('annual');
   const GOLD = '#e6c84a';
   const list = sourates || [];
   const lockedCount = list.filter(function (s) { return !s.free; }).length;
@@ -8947,10 +8988,10 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
     return function () { document.body.style.overflow = ''; };
   }, []);
   return (
-    <ModalPortal><div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'overlayFade 0.25s ease-out' }}>
-      <div className="pro-modal-card" onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, maxWidth: 410, width: '100%', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
+    <ModalPortal><div onClick={onClose} className="pro-sheet-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'overlayFade 0.25s ease-out' }}>
+      <div className="pro-modal-card pro-sheet" onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, maxWidth: 410, width: '100%', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div className="pro-modal-scroll" style={{ padding: '30px 26px 14px' }}>
-        <div style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
+        <div className="pro-sheet-icon" style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
           Lis <span style={{ color: GOLD }}>{cmpFmt(maxQuranPct)}% des mots</span><br />du Coran.
         </h2>
@@ -8978,20 +9019,13 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
         <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.65)', margin: '0 0 16px' }}>
           {lockedCount} sourates de plus · {lockedVerses} versets mot à mot
         </p>
-        <div style={{ marginBottom: 18 }}>
-          <span style={{ fontFamily: 'Cinzel,serif', fontSize: 34, fontWeight: 700, color: GOLD }}>{PRO_ANNUAL}</span><span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, color: 'rgba(240,237,230,0.4)' }}> / an</span>
-          <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12, color: 'rgba(240,237,230,0.4)', marginTop: 2, marginBottom: 8 }}>soit {PRO_EQ_MONTH}/mois — {PRO_PER_DAY} par jour</div>
-          <ProSavings />
-        </div>
+        <ProPlanPicker plan={plan} setPlan={setPlan} />
         <ProValue skipQuran />
         </div>
 
         {/* Pied collant : le bouton d'achat ne descend jamais sous l'écran. */}
         <div className="pro-modal-footer" style={{ padding: '12px 26px 16px' }}>
-          <button onClick={function () { onClose(); openQuickCheckout(); }}
-            style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '15px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', marginBottom: 10, boxShadow: '0 4px 20px rgba(200,167,39,0.35)' }}>
-            Débloquer tout — {PRO_ANNUAL}/an
-          </button>
+          <ProBuyButton plan={plan} onClick={function () { onClose(); openQuickCheckout('card', plan); }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
             <span>✓ {MEMBERS_COUNT} membres</span><span>✓ Sans engagement</span><span>✓ Remboursé 14 jours</span>
           </div>
@@ -9552,6 +9586,8 @@ function App() {
   const [showAuth, setShowAuth] = React.useState(false);
   const [authMode, setAuthMode] = React.useState('signup');
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
+  // Plan choisi sur le mur : le formulaire de paiement s'ouvre déjà dessus.
+  const [quickCheckoutPlan, setQuickCheckoutPlan] = React.useState('annual');
   const [showTrialWelcome, setShowTrialWelcome] = React.useState(false);
   // Méthode de paiement demandée par un visiteur non connecté : compte requis
   // avant le paiement (plutôt que payer en invité puis réclamer le compte
@@ -9804,7 +9840,8 @@ function App() {
        l'inscription, qui est le defaut voulu. */
     openAuth: (mode) => { setAuthMode(mode === 'login' ? 'login' : 'signup'); setShowAuth(true); },
     checkoutIntent: !!pendingCheckout,
-    openQuickCheckout: (method) => {
+    openQuickCheckout: (method, plan) => {
+      setQuickCheckoutPlan(plan === 'monthly' ? 'monthly' : 'annual');
       if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
       setQuickCheckoutMethod(method || 'card');
     },
@@ -9826,7 +9863,7 @@ function App() {
   const wrap = (children) => (
     <AuthContext.Provider value={authCtx}>
       {showAuth && <AuthModal initialTab={authMode} onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
-      {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} onClose={() => setQuickCheckoutMethod(null)} />}
+      {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} initialPlan={quickCheckoutPlan} onClose={() => setQuickCheckoutMethod(null)} />}
       {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} navigate={navigate} />}
       <div className="nav-progress" aria-hidden="true" />
       {/* La cle change a chaque navigation, meme vers la meme page : React
