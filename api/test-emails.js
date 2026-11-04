@@ -13,7 +13,7 @@
    revérifiée dans une vraie boîte, et reconstruire ce point d'entrée à ce
    moment-là serait du travail refait. */
 
-const { emailBienvenue, emailDernierJour, emailFin, envoyer, TRIAL_DAYS } = require('./_emails');
+const { emailBienvenue, emailBienvenueGratuit, emailDernierJour, emailFin, envoyer, TRIAL_DAYS } = require('./_emails');
 
 module.exports = async (req, res) => {
   const secret = process.env.CRON_SECRET;
@@ -28,11 +28,17 @@ module.exports = async (req, res) => {
   const prenom = req.query.prenom || '';
   const fin = Date.now() + TRIAL_DAYS * 86400000;
 
-  const lot = [
+  let lot = [
+    ['gratuit', emailBienvenueGratuit(prenom)],
     ['bienvenue', emailBienvenue(prenom, fin)],
     ['dernier-jour', emailDernierJour(prenom, fin)],
     ['fin', emailFin(prenom)],
   ];
+  // ?only=gratuit (ou une liste séparée par des virgules) : n'envoie que ceux-là.
+  if (req.query.only) {
+    const voulus = String(req.query.only).split(',');
+    lot = lot.filter(([nom]) => voulus.includes(nom));
+  }
 
   const envoyes = [];
   const erreurs = [];
