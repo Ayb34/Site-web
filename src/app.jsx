@@ -85,16 +85,14 @@ const PRO_PER_DAY = '0,08€';          // 29,99 / 365
    preuve sociale doit rester vraie même sans être remise à jour chaque semaine. */
 const MEMBERS_COUNT = '+220';
 
-/* Ancre de prix. Seul, « 29,99€ » est un chiffre nu ; à côté des 59,88€ que
-   coûterait le mensuel sur la même année, c'est une remise. On barre l'ancre
-   plutôt que d'annoncer la remise en mots : le calcul se voit sans se lire. */
-function ProSavings({ align, dark }) {
-  const base = dark === false ? '0,0,0' : '255,255,255';
+/* Économie de l'annuel, comparée au mensuel — le seul autre prix réellement
+   en vente. Plus de prix barré (retiré le 04/11/2026, choix d'Ayoub) : barrer
+   « 59,88 € » laissait croire à un ancien prix qui n'a jamais été affiché. */
+function ProSavings({ align }) {
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:align || 'center', gap:8, flexWrap:'wrap', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
-      <span style={{ fontSize:12.5, color:'rgba(' + base + ',0.35)', textDecoration:'line-through' }}>{PRO_YEAR_AT_MONTHLY} en mensuel</span>
-      <span style={{ fontSize:11.5, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.12)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'3px 10px', whiteSpace:'nowrap' }}>
-        {PRO_DISCOUNT} · tu économises {PRO_SAVE}
+    <div style={{ display:'flex', justifyContent:align || 'center', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
+      <span style={{ fontSize:11.5, fontWeight:800, color:'#4ade80', background:'rgba(74,222,128,0.12)', border:'1px solid rgba(74,222,128,0.3)', borderRadius:20, padding:'3px 10px', textAlign:'center', lineHeight:1.4 }}>
+        {PRO_DISCOUNT} par rapport au mensuel · tu économises {PRO_SAVE}
       </span>
     </div>
   );
