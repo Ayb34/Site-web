@@ -83,7 +83,7 @@ const PRO_PER_DAY = '0,08€';          // 29,99 / 365
    tout le reste de la page, y compris le prix.
    Volontairement arrondi EN DESSOUS du réel (225 comptes au 06/09/2026) : une
    preuve sociale doit rester vraie même sans être remise à jour chaque semaine. */
-const MEMBERS_COUNT = '+220';
+const MEMBERS_COUNT = '+240';
 
 /* Économie de l'annuel, comparée au mensuel — le seul autre prix réellement
    en vente. Plus de prix barré (retiré le 04/11/2026, choix d'Ayoub) : barrer
@@ -1815,9 +1815,11 @@ function Navbar({ navigate }) {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      background: scrolled ? 'rgba(3,14,8,0.82)' : 'rgba(3,14,8,0.55)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
+      /* Transparent tant qu'on n'a pas défilé : le bandeau sombre coupait le
+         dégradé du hero. Il revient (fond + flou) dès qu'il passe sur du contenu. */
+      background: scrolled ? 'rgba(3,14,8,0.82)' : 'transparent',
+      backdropFilter: scrolled ? 'blur(6px)' : 'none',
+      WebkitBackdropFilter: scrolled ? 'blur(6px)' : 'none',
       borderBottom: scrolled ? '1px solid rgba(200,167,39,0.13)' : '1px solid transparent',
       boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.45)' : 'none',
       transition: 'all 0.3s ease',
@@ -2014,268 +2016,6 @@ function Navbar({ navigate }) {
 
 }
 
-/* ─── Démo vivante du hero — un verset s'anime mot à mot, en boucle ─── */
-/* ═══ Hero ═══
-
-   Le hero fait le tour du site, parce que c'est ce qui marche déjà : la créative
-   publicitaire la plus performante est celle qui présente les activités une par
-   une. Un visiteur doit savoir en un écran ce qu'il va trouver ici.
-
-   Trois onglets, et chacun montre l'activité réelle plutôt qu'une description :
-   un vrai verset qu'on décompose, un vrai extrait à reconnaître, une vraie
-   question du quiz. Le panneau tourne tout seul pour ceux qui ne touchent rien ;
-   le premier geste rend la main au visiteur.
-
-   La version précédente ne vendait que « Comprendre » — le site paraissait
-   mono-produit alors qu'il en compte trois. */
-
-const HERO_TOTAL_WORDS = 77878; // mots du Coran (corpus Uthmani)
-const HERO_VERSE = [
-  { ar: 'بِسْمِ',      tr: 'bismi',      fr: 'Au nom de',              n: 115 },
-  { ar: 'ٱللَّهِ',      tr: 'Llâhi',      fr: 'Allah',                  n: 2265 },
-  { ar: 'ٱلرَّحْمَـٰنِ', tr: 'ar-Rahmâni', fr: 'le Tout-Miséricordieux', n: 157 },
-  { ar: 'ٱلرَّحِيمِ',   tr: 'ar-Rahîm',   fr: 'le Très-Miséricordieux', n: 146 },
-];
-// Question réellement tirée de questions.json (catégorie Prophètes, niveau Débutant).
-const HERO_QUIZ = {
-  /* Espace insecable : sans elle le « ? » tombait seul sur une troisieme ligne. */
-  q: 'Combien de prophètes sont mentionnés nommément dans le Coran ?',
-  choices: ['20', '25', '30', '35'],
-  correct: 1,
-};
-const HERO_BT = {
-  options: ['Al-Kahf', 'Ar-Rahman', 'Ya-Sin', 'Al-Mulk'],
-  correct: 1,
-};
-
-/* `color` habille l'onglet et le halo ; `g1`/`g2` sont le degrade du bouton.
-   Le texte du bouton est blanc, ce qui impose un fond profond : sur l'or clair
-   d'origine (#e6c84a) le blanc tombait a 1,9:1, illisible en plein soleil. Ces
-   degrades gardent l'identite de chaque activite en descendant la luminosite
-   jusqu'a un contraste d'au moins 4,5:1. */
-const HERO_TABS = [
-  { id: 'comprendre', label: 'Comprendre', tag: 'Le Coran mot à mot', color: '#e6c84a', rgb: '230,200,74', g1: '#a8801a', g2: '#6d4f08', cta: 'Comprendre le Coran' },
-  { id: 'blind-test', label: 'Blind Test', tag: 'Reconnais la sourate', color: '#4ade80', rgb: '74,222,128', g1: '#1f9455', g2: '#0d5730', cta: 'Lancer un Blind Test' },
-  { id: 'quiz',       label: 'Quiz',       tag: '740 questions',       color: '#60a5fa', rgb: '96,165,250', g1: '#2f6fd0', g2: '#15417e', cta: 'Commencer le Quiz' },
-];
-
-function HeroIcon({ id, color }) {
-  if (id === 'blind-test') {
-    return <span className="hero-eq" aria-hidden="true">
-      {[0, 1, 2, 3].map(function (n) {
-        return <i key={n} style={{ background: color, animationDelay: (n * 0.14) + 's', height: (6 + (n % 2) * 7) + 'px' }} />;
-      })}
-    </span>;
-  }
-  if (id === 'quiz') {
-    return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <path d="M9.1 9.2a3 3 0 0 1 5.8 1c0 2-2.9 2.9-2.9 2.9" /><circle cx="12" cy="17.6" r="1" fill={color} stroke="none" />
-    </svg>;
-  }
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" aria-hidden="true">
-    <path d="M4 5.5h6a2 2 0 0 1 2 2v11a1.6 1.6 0 0 0-1.6-1.6H4z" /><path d="M20 5.5h-6a2 2 0 0 0-2 2v11a1.6 1.6 0 0 1 1.6-1.6H20z" />
-  </svg>;
-}
-
-/* ── Les trois aperçus, non jouables ──
-
-   Ils se touchaient : le visiteur pouvait finir la démo tout seul, dans le
-   hero, avant même d'avoir cliqué sur quoi que ce soit — au risque d'être
-   rassasié par l'aperçu et de ne jamais aller plus loin.
-
-   Ils se regardent à nouveau. Les mots s'allument seuls, la bonne réponse
-   s'illumine au bout d'un court délai. Le visiteur reste spectateur ; le
-   seul geste qui avance, c'est le clic sur le bouton d'action en dessous. */
-
-function HeroPeekComprendre({ live }) {
-  const [open, setOpen] = React.useState({});
-
-  React.useEffect(function () {
-    if (!live) { setOpen({}); return; }
-    setOpen({});
-    let i = 0;
-    const id = setInterval(function () {
-      if (i >= HERO_VERSE.length) { clearInterval(id); return; }
-      const k = i;
-      setOpen(function (o) { const c = Object.assign({}, o); c[k] = 1; return c; });
-      i += 1;
-    }, 620);
-    return function () { clearInterval(id); };
-  }, [live]);
-
-  const done = HERO_VERSE.filter(function (w, i) { return open[i]; });
-  const pct = done.reduce(function (s, w) { return s + w.n; }, 0) / HERO_TOTAL_WORDS * 100;
-  const all = done.length === HERO_VERSE.length;
-
-  return (
-    <div className="peek peek-cmp">
-      <p className="peek-q">
-        {all ? <span className="peek-win">Ces 4 mots reviennent 2 683 fois dans le Coran.</span>
-             : 'Comprends, mot après mot.'}
-      </p>
-      <div className="peek-words" dir="rtl">
-        {HERO_VERSE.map(function (w, i) {
-          const on = !!open[i];
-          return (
-            <span key={i} className={'peek-word' + (on ? ' on' : '')} aria-hidden="true">
-              <span className="pw-ar">{w.ar}</span>
-              <span className="pw-fr">{w.fr}</span>
-            </span>
-          );
-        })}
-      </div>
-      <p className="peek-foot">
-        <strong>{(pct >= 1 ? pct.toFixed(1) : pct.toFixed(2)).replace(/\.0$/, '').replace('.', ',')}&nbsp;%</strong>
-        <span> des mots du Coran</span>
-      </p>
-    </div>
-  );
-}
-
-/* ── Aperçu 2 : Blind Test ──
-   Sans son, on demandait de reconnaître une récitation qu'on n'entendait pas.
-   Le vrai extrait se charge au premier toucher — jamais avant, pour ne rien
-   coûter à qui ne joue pas, et parce qu'un navigateur mobile refuse de toute
-   façon de démarrer un son sans geste. Ar-Rahmân v13, le refrain le plus
-   reconnaissable du Coran : le but est qu'il trouve, pas qu'il échoue. */
-const HERO_BT_AUDIO = 'https://everyayah.com/data/Alafasy_128kbps/055013.mp3';
-
-function HeroPeekBlindTest({ live }) {
-  const [pick, setPick] = React.useState(-1);
-  const [playing, setPlaying] = React.useState(false);
-  const audioRef = React.useRef(null);
-
-  const stop = React.useCallback(function () {
-    const a = audioRef.current;
-    if (a) { a.pause(); a.currentTime = 0; }
-    setPlaying(false);
-  }, []);
-
-  React.useEffect(function () {
-    if (!live) { setPick(-1); stop(); return; }
-    setPick(-1);
-    const id = setTimeout(function () { setPick(HERO_BT.correct); }, 1800);
-    return function () { clearTimeout(id); stop(); };
-  }, [live, stop]);
-
-  const play = function () {
-    let a = audioRef.current;
-    if (!a) {
-      a = new Audio(HERO_BT_AUDIO);
-      a.preload = 'none';
-      a.addEventListener('ended', function () { setPlaying(false); });
-      a.addEventListener('error', function () { setPlaying(false); });
-      audioRef.current = a;
-    }
-    if (playing) { stop(); return; }
-    a.currentTime = 0;
-    const p = a.play();
-    if (p && p.then) p.then(function () { setPlaying(true); }).catch(function () { setPlaying(false); });
-    else setPlaying(true);
-  };
-
-  const answered = pick >= 0;
-  return (
-    <div className="peek peek-bt">
-      <button type="button" className={'bt-play' + (playing ? ' on' : '')} onClick={play}
-        aria-label={playing ? 'Arrêter la récitation' : 'Écouter la récitation'}>
-        <span className="bt-wave" aria-hidden="true">
-          {[0,1,2,3,4,5,6,7,8,9,10,11].map(function (i) {
-            return <i key={i} style={{ animationDelay: (i * 0.08) + 's', height: (8 + ((i * 7) % 17)) + 'px' }} />;
-          })}
-        </span>
-        <span className="bt-play-txt">{playing ? 'En écoute…' : '▶ Écouter'}</span>
-      </button>
-      <p className="peek-q">
-        {answered
-          ? <span className="peek-win">C’était Ar-Rahmân. 113 autres t’attendent.</span>
-          : 'Quelle sourate écoutes-tu ?'}
-      </p>
-      <div className="peek-grid">
-        {HERO_BT.options.map(function (o, i) {
-          const good = answered && i === HERO_BT.correct;
-          return (
-            <span key={o} aria-hidden="true"
-              className={'peek-opt' + (good ? ' good' : '')}>
-              {o}{good ? <b>✓</b> : null}
-            </span>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ── Aperçu 3 : Quiz ── */
-function HeroPeekQuiz({ live }) {
-  const [pick, setPick] = React.useState(-1);
-  React.useEffect(function () {
-    if (!live) { setPick(-1); return; }
-    setPick(-1);
-    const id = setTimeout(function () { setPick(HERO_QUIZ.correct); }, 1800);
-    return function () { clearTimeout(id); };
-  }, [live]);
-
-  const answered = pick >= 0;
-
-  return (
-    <div className="peek peek-quiz">
-      <p className="peek-q peek-q-lg">{HERO_QUIZ.q}</p>
-      <div className="peek-grid">
-        {HERO_QUIZ.choices.map(function (c, i) {
-          const good = answered && i === HERO_QUIZ.correct;
-          return (
-            <span key={c} aria-hidden="true"
-              className={'peek-opt' + (good ? ' good' : '')}>
-              {c}{good ? <b>✓</b> : null}
-            </span>
-          );
-        })}
-      </div>
-      <p className="peek-foot">
-        {answered
-          ? <span className="peek-win">Juste. Il en reste 739.</span>
-          : <span>740 questions · 3 niveaux</span>}
-      </p>
-    </div>
-  );
-}
-
-/* Devoile son contenu quand il entre dans l'ecran.
-
-   Le hero tient desormais tout l'ecran : la section suivante ne doit pas se
-   deviner avant qu'on ait decide de descendre. Filet de securite volontaire —
-   si IntersectionObserver manque ou n'emet jamais, le contenu s'affiche quand
-   meme au bout de 4 s : une page vide est un bug bien pire qu'une animation
-   ratee. */
-function Reveal({ children }) {
-  const ref = React.useRef(null);
-  const [seen, setSeen] = React.useState(false);
-  React.useEffect(function () {
-    const el = ref.current;
-    if (!el || typeof IntersectionObserver === 'undefined') { setSeen(true); return; }
-    const show = function () { setSeen(true); cleanup(); };
-    const io = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting) show();
-    }, { rootMargin: '0px 0px -10% 0px' });
-    /* Filet de securite : si l'observateur n'emet jamais, le premier scroll
-       suffit a devoiler. Pas de minuterie aveugle — elle afficherait la section
-       toute seule au bout de quelques secondes, et l'animation serait deja
-       jouee quand le visiteur descend enfin. */
-    const onScroll = function () {
-      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) show();
-    };
-    function cleanup() {
-      io.disconnect();
-      window.removeEventListener('scroll', onScroll);
-    }
-    io.observe(el);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return cleanup;
-  }, []);
-  return <div ref={ref} id="apres-hero" className={'hero-next' + (seen ? ' in' : '')}>{children}</div>;
-}
-
 /* ─── Ciel de l'accueil : du Fajr à l'Isha ───
    En descendant la page, le fond traverse une journée : nuit étoilée sous le
    hero, aube, ciel de midi, lumière dorée de l'Asr, braise du Maghrib, puis
@@ -2367,227 +2107,82 @@ function HomeSky() {
   );
 }
 
+/* ═══ Hero ═══
+   Simple, comme à l'époque où les visiteurs jouaient : un titre, une phrase,
+   un bouton. Les onglets et les démos animées ont été retirés (13/11/2026) :
+   trop d'éléments à lire avant de savoir quoi faire. Comprendre reste le
+   bouton principal ; Blind Test et Quiz sont accessibles en un geste, juste
+   en dessous, pour ceux qui arrivent d'une vidéo de jeu. */
+
+function HeroIcon({ id, color }) {
+  if (id === 'blind-test') {
+    return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 10v4M8 6.5v11M12 3.5v17M16 7.5v9M20 10v4" />
+    </svg>;
+  }
+  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <path d="M9.1 9.2a3 3 0 0 1 5.8 1c0 2-2.9 2.9-2.9 2.9" /><circle cx="12" cy="17.6" r="1" fill={color} stroke="none" />
+  </svg>;
+}
+
 function Hero({ navigate }) {
-  const { isPro } = useAuth();
-  const [tab, setTab] = React.useState(0);
-  const stopRef = React.useRef(null);
-
-  /* Rotation automatique, mais UN SEUL TOUR.
-     Beaucoup de visiteurs ne touchent rien : le hero doit leur montrer les trois
-     activités quand même. Passé ce tour, il se fige sur Comprendre.
-
-     Une rotation sans fin faisait changer le libellé du bouton sous le pouce :
-     quelqu'un qui lisait « Comprendre le Coran » et levait le doigt pour appuyer
-     pouvait atterrir sur « Lancer un Blind Test ». C'est le clic qui paie ce
-     site — il ne doit jamais bouger au moment où on le vise.
-
-     D'où le second garde-fou : le moindre signe de vie (doigt posé, molette,
-     touche, défilement) arrête la rotation sur-le-champ. `pointerdown` se
-     déclenche avant le `click`, donc un doigt qui descend fige l'affichage
-     avant même que le clic ne parte. */
-  React.useEffect(function () {
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return;
-    const events = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'];
-    let steps = 0;
-    const id = setInterval(function () {
-      steps += 1;
-      setTab(function (t) { return (t + 1) % HERO_TABS.length; });
-      if (steps >= HERO_TABS.length) stop();
-    }, 4600);
-    function stop() {
-      clearInterval(id);
-      events.forEach(function (e) { window.removeEventListener(e, stop); });
-    }
-    events.forEach(function (e) { window.addEventListener(e, stop, { passive: true }); });
-    stopRef.current = stop;
-    return stop;
-  }, []);
-
-  const take = function (i) { if (stopRef.current) stopRef.current(); setTab(i); };
-  const active = HERO_TABS[tab];
-
   return (
     <section className="hero-section">
-      {/* La pierre du site, plus franche ici qu'ailleurs — voir .hero-bg. */}
       <div className="hero-bg" aria-hidden="true" />
 
-      {/* Un halo par activite, empiles, et seule l'opacite change : le fondu
-          se fait sur le compositeur. Transitionner `background` faisait
-          repeindre 880 px de degrade pendant 600 ms a chaque rotation — c'est
-          ce qui rendait le hero saccade sur mobile. */}
-      {HERO_TABS.map(function (t, i) {
-        return <div key={t.id} className={'hero-glow' + (i === tab ? ' on' : '')}
-          style={{ background: 'radial-gradient(circle, rgba(' + t.rgb + ',0.13) 0%, rgba(26,92,53,0.10) 40%, transparent 68%)' }}
-          aria-hidden="true" />;
-      })}
-
       <div className="hero-inner">
-        {/* Le surtitre porte desormais le concret que le titre abandonne : il
-            nomme les trois activites au lieu de repeter la promesse. */}
-        <p className="hero-kicker"><span className="hk-rule" />Coran · Quiz · Blind Test<span className="hk-rule" /></p>
+        {/* Preuve sociale avant le scroll (81 % des meilleurs heros la
+            montrent, 41 % en moyenne). Chiffre arrondi en dessous du reel,
+            voir MEMBERS_COUNT. */}
+        <p className="hero-proof">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#e6c84a" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="9" cy="8" r="3.1" /><path d="M2.9 19.2a6.1 6.1 0 0 1 12.2 0" />
+            <path d="M16.4 5.4a3.1 3.1 0 0 1 0 5.2M18 14.2a6.1 6.1 0 0 1 3.1 5" />
+          </svg>
+          <span><strong>{MEMBERS_COUNT} membres</strong> apprennent déjà ici</span>
+        </p>
 
-        {/* « Le Coran s'apprend » retrecissait l'offre : les 740 questions du
-            quiz portent sur la sira, la croyance, les piliers — pas seulement
-            sur le Coran. Le titre revient donc au sujet entier.
-
-            Ce qui avait motive « Le Coran » — un titre trop vague pour un
-            visiteur venu d'une publicite — est regle autrement : la demo occupe
-            maintenant la moitie de l'ecran et nomme les trois activites, et le
-            surtitre les enumere. Le concret est montre plutot qu'annonce. */}
         <h1 className="hero-h1">
           Apprends ton deen.<br />
           <em>En jouant, à&nbsp;ton&nbsp;rythme.</em>
         </h1>
+        <p className="hero-lead">
+          Comprends le Coran mot à mot, reconnais les sourates à l'oreille,
+          teste tes connaissances. Quelques minutes par jour.
+        </p>
 
-        {/* Onglets et apercu forment un seul bloc : sur grand ecran ils passent
-            ensemble dans la colonne de droite, ou la demo devient le sujet de
-            l'ecran. L'ordre du DOM ne bouge pas, donc le mobile est inchange. */}
-        <div className="hero-demo">
-        {/* Onglets : le visiteur voit d'un coup d'œil tout ce que contient le site */}
-        <div className="hero-tabs" role="tablist" aria-label="Les activités du site">
-          {HERO_TABS.map(function (t, i) {
-            const on = i === tab;
-            return (
-              <button key={t.id} role="tab" aria-selected={on} type="button"
-                className={'hero-tab' + (on ? ' on' : '')}
-                style={on ? { borderColor: 'rgba(' + t.rgb + ',0.65)', background: 'linear-gradient(rgba(' + t.rgb + ',0.16), rgba(' + t.rgb + ',0.16)), #06170d' } : null}
-                onClick={function () { take(i); }}>
-                <HeroIcon id={t.id} color={on ? t.color : 'rgba(255,255,255,0.5)'} />
-                <span style={on ? { color: t.color } : null}>{t.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="hero-panel" style={{ borderColor: 'rgba(' + active.rgb + ',0.32)' }}>
-          <p className="hero-panel-tag" style={{ color: active.color }}>{active.tag}</p>
-          {tab === 0 && <HeroPeekComprendre live={tab === 0} />}
-          {tab === 1 && <HeroPeekBlindTest live={tab === 1} />}
-          {tab === 2 && <HeroPeekQuiz live={tab === 2} />}
-        </div>
-        </div>
-
-        {/* Le bouton emprunte la couleur de l'onglet actif jusque dans son ombre
-           et son halo : trois activites, un seul bouton, mais qui change de peau
-           avec ce qu'il promet. Le reflet qui passe dessus signale qu'il est
-           vivant — sur mobile, rien d'autre ne le distingue d'une image. */}
-        <button className="hero-cta" onClick={function () { navigate(active.id); }}
-          style={{
-            background: 'linear-gradient(135deg, ' + active.g1 + ', ' + active.g2 + ')',
-            boxShadow: '0 10px 34px rgba(' + active.rgb + ',0.30), 0 1px 0 rgba(255,255,255,0.22) inset',
-          }}>
-          <span className="cta-txt">{active.cta}</span>
+        <button className="hero-cta" onClick={function () { navigate('comprendre'); }}>
+          <span className="cta-txt">Commencer gratuitement</span>
           <span className="cta-arrow" aria-hidden="true">→</span>
-          <span className="cta-shine" aria-hidden="true" />
         </button>
-        {/* Trois acquis coches plutot qu'une phrase grise : ce qui leve le
-           frein doit se lire, pas se parcourir. */}
+
+        {/* Les freins leves, colles au bouton — y compris sur mobile :
+            « sans carte bancaire » est la premiere crainte avant l'inscription. */}
         <ul className="hero-sub">
-          {[
-            { t: 'Gratuit' },
-            { t: 'Sans pub' },
-            /* Masque en mobile : « gratuit » le dit deja, et le premier ecran
-               compte plus de lignes qu'il n'en faut. */
-            { t: 'Sans carte bancaire', small: true },
-            /* La preuve sociale etait entierement sous la ligne de flottaison :
-               225 inscrits, et personne ne le savait au moment ou l'on hesite a
-               cliquer. Chiffre arrondi en dessous du reel (voir MEMBERS_COUNT). */
-            { t: MEMBERS_COUNT + ' membres', people: true },
-          ].map(function (o) {
-            const t = o.t;
+          {['Gratuit', 'Sans pub', 'Sans carte bancaire'].map(function (t) {
             return (
-              <li key={t} className={o.small ? 'sub-wide' : (o.people ? 'sub-people' : null)}>
-                {o.people ? (
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#e6c84a" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="9" cy="8" r="3.1" /><path d="M2.9 19.2a6.1 6.1 0 0 1 12.2 0" />
-                    <path d="M16.4 5.4a3.1 3.1 0 0 1 0 5.2M18 14.2a6.1 6.1 0 0 1 3.1 5" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#4ade80" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M4 12.6l5.2 5.2L20 6.6" />
-                  </svg>
-                )}
+              <li key={t}>
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#4ade80" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 12.6l5.2 5.2L20 6.6" />
+                </svg>
                 {t}
               </li>
             );
           })}
         </ul>
 
-        {/* Le hero occupe tout l'ecran : sans repere, rien ne dit qu'il y a une
-           suite. Le trait se remplit en boucle vers le bas — un geste, pas un mot. */}
-        <button type="button" className="hero-scroll" aria-label="Voir la suite"
-          onClick={function () {
-            const el = document.getElementById('apres-hero');
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }}>
-          <span className="hs-txt">Découvrir</span>
-          <span className="hs-line" aria-hidden="true"><i /></span>
-        </button>
+        <div className="hero-acts">
+          <span className="ha-or">ou joue directement</span>
+          <button type="button" className="ha-chip" onClick={function () { navigate('blind-test'); }}>
+            <HeroIcon id="blind-test" color="#4ade80" />Blind Test
+          </button>
+          <button type="button" className="ha-chip" onClick={function () { navigate('quiz'); }}>
+            <HeroIcon id="quiz" color="#60a5fa" />Quiz
+          </button>
+        </div>
       </div>
     </section>
   );
-}
-
-/* ─── Stats Bar (ticker) ─── */
-function StatsBar() {
-  const stats = [
-  { value: PRO_ANNUAL, label: 'par an' },
-  { value: '4', label: 'activités uniques' },
-  { value: '100%', label: 'en français' },
-  { value: 'Sans', label: 'engagement' }];
-
-
-  // Duplicate items for seamless loop
-  const items = [...stats, ...stats, ...stats];
-
-  return (
-    <div style={{
-      background: 'transparent',
-      padding: '22px 0',
-      overflow: 'hidden',
-      position: 'relative'
-    }}>
-      {/* fade edges */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to right, rgba(5,20,10,0.7), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, rgba(5,20,10,0.7), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-
-      <style>{`
-        @keyframes ticker {
-          from { transform: translateX(0); }
-          to   { transform: translateX(calc(-100% / 3)); }
-        }
-        .ticker-track {
-          display: flex;
-          align-items: center;
-          gap: 0;
-          width: max-content;
-          animation: ticker 18s linear infinite;
-        }
-        .ticker-track:hover { animation-play-state: paused; }
-      `}</style>
-
-      <div className="ticker-track">
-        {items.map((s, i) =>
-        <React.Fragment key={i}>
-            <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            padding: '0 40px', flexShrink: 0
-          }}>
-              <span style={{ fontSize: 'clamp(22px,3.5vw,30px)', fontWeight: 800, color: '#c8a727', lineHeight: 1 }}>
-                {s.value}
-              </span>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginTop: 3, textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>
-                {s.label}
-              </span>
-            </div>
-            {/* separator diamond */}
-            <span style={{ color: 'rgba(200,167,39,0.35)', fontSize: 10, flexShrink: 0 }}>◆</span>
-          </React.Fragment>
-        )}
-      </div>
-    </div>);
-
 }
 
 /* ─── Feature Cards ─── */
@@ -2637,10 +2232,6 @@ function FeatureCards({ navigate }) {
 
   return (
     <section id="features" style={{ padding:'96px 24px 80px', background:'transparent', position:'relative', overflow:'hidden' }}>
-      {/* Glows fond */}
-      <div style={{ position:'absolute', top:'-10%', left:'-8%', width:600, height:600, background:'radial-gradient(circle,rgba(26,92,53,0.45) 0%,transparent 70%)', pointerEvents:'none', zIndex:0 }} />
-      <div style={{ position:'absolute', bottom:'-5%', right:'-5%', width:500, height:500, background:'radial-gradient(circle,rgba(200,167,39,0.1) 0%,transparent 70%)', pointerEvents:'none', zIndex:0 }} />
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'radial-gradient(ellipse at center,transparent 40%,rgba(5,20,10,0.45) 100%)' }} />
 
       <div style={{ maxWidth:1120, margin:'0 auto', position:'relative', zIndex:1, display:'flex', flexDirection:'column' }}>
 
@@ -2756,250 +2347,6 @@ function FeatureCards({ navigate }) {
   );
 }
 
-/* ─── How It Works ─── */
-function HowItWorksSection() {
-  const [scene, setScene] = React.useState(0);
-  const [progress, setProgress] = React.useState(0);
-  const [tick, setTick] = React.useState(0);
-  const [paused, setPaused] = React.useState(false);
-  const SCENE_MS = 4800;
-
-  React.useEffect(function() {
-    if (paused) return;
-    setProgress(0);
-    setTick(0);
-    var start = Date.now();
-    var iv = setInterval(function() {
-      var elapsed = Date.now() - start;
-      setTick(elapsed);
-      setProgress(Math.min(elapsed / SCENE_MS * 100, 100));
-      if (elapsed >= SCENE_MS) {
-        clearInterval(iv);
-        setScene(function(s) { return (s + 1) % 3; });
-      }
-    }, 40);
-    return function() { clearInterval(iv); };
-  }, [scene, paused]);
-
-  /* ── Scene 0 : Création de compte ── */
-  function renderScene0() {
-    var typed = tick > 600 ? 'yasmin@gmail.com'.slice(0, Math.min(Math.floor((tick - 600) / 80), 16)) : '';
-    var showPass = tick > 2200;
-    var showBtn  = tick > 2600;
-    var clicked  = tick > 3400;
-    var success  = tick > 4000;
-    if (success) return (
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:250, gap:12 }}>
-        <div style={{ width:58, height:58, borderRadius:'50%', background:'rgba(74,222,128,0.13)', border:'2px solid #4ade80', display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>✓</div>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:15, fontWeight:700, color:'#4ade80', margin:0 }}>Compte créé !</p>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(240,237,230,0.45)', textAlign:'center', margin:0 }}>Bienvenue sur Héritage Musulman 🕌</p>
-      </div>
-    );
-    return (
-      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, fontWeight:700, color:'#f0ede6', margin:0 }}>Créer ton compte gratuit</p>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.38)', margin:'0 0 4px' }}>Aucune carte bancaire requise</p>
-        <div>
-          <label style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.45)', display:'block', marginBottom:5 }}>Email</label>
-          <div style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(200,167,39,0.35)', borderRadius:9, padding:'9px 12px', fontFamily:'monospace', fontSize:12, color:'#f0ede6', minHeight:34, display:'flex', alignItems:'center' }}>
-            {typed}
-            <span style={{ display:'inline-block', width:1.5, height:13, background:'#c8a727', marginLeft:1, opacity: tick % 700 < 350 ? 1 : 0 }} />
-          </div>
-        </div>
-        {showPass && (
-          <div>
-            <label style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.45)', display:'block', marginBottom:5 }}>Mot de passe</label>
-            <div style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:9, padding:'9px 12px', fontFamily:'monospace', fontSize:12, color:'rgba(240,237,230,0.35)', minHeight:34 }}>••••••••</div>
-          </div>
-        )}
-        {showBtn && (
-          <div style={{ marginTop:4, background: clicked ? 'rgba(200,167,39,0.18)' : 'linear-gradient(135deg,#a8801a,#6d4f08)', borderRadius:9, padding:'11px 0', textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:13, fontWeight:700, color: clicked ? '#c8a727' : '#fff', transform: clicked ? 'scale(0.97)' : 'scale(1)', transition:'all 0.15s', boxShadow: clicked ? 'none' : '0 4px 18px rgba(200,167,39,0.28)' }}>
-            {clicked ? 'Création en cours…' : 'Créer mon compte →'}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  /* ── Scene 1 : Choix d'activité ── */
-  function renderScene1() {
-    var activities = [
-      { icon:'🎵', name:'Blind Test', desc:'Reconnais les sourates', color:'#c8a727' },
-      { icon:'❓', name:'Quiz Islam', desc:'Teste tes connaissances', color:'#60a5fa' },
-    ];
-    var selectedIdx = tick > 2800 ? 0 : null;
-    return (
-      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, fontWeight:700, color:'#f0ede6', margin:'0 0 4px' }}>Que veux-tu faire ?</p>
-        <div style={{ display:'flex', flexDirection:'column', gap:9 }}>
-          {activities.map(function(act, i) {
-            var isSel = selectedIdx === i;
-            var visible = tick > 300 + i * 280;
-            return (
-              <div key={i} style={{ background: isSel ? 'rgba(200,167,39,0.1)' : 'rgba(255,255,255,0.04)', border: isSel ? ('1.5px solid ' + act.color) : '1px solid rgba(255,255,255,0.08)', borderRadius:10, padding:'11px 12px', display:'flex', alignItems:'center', gap:10, opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateX(-10px)', transition:'opacity 0.4s, transform 0.4s, background 0.3s, border-color 0.3s', boxShadow: isSel ? ('0 0 14px ' + act.color + '33') : 'none' }}>
-                <span style={{ fontSize:18, flexShrink:0 }}>{act.icon}</span>
-                <div style={{ flex:1 }}>
-                  <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color: isSel ? act.color : '#f0ede6', margin:0 }}>{act.name}</p>
-                  <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, color:'rgba(240,237,230,0.38)', margin:0 }}>{act.desc}</p>
-                </div>
-                {isSel && <span style={{ fontSize:14, color:act.color }}>✓</span>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  /* ── Scene 2 : Quiz en action ── */
-  function renderScene2() {
-    var answers = ['104 sourates','112 sourates','114 sourates','120 sourates'];
-    var showQ       = tick > 400;
-    var showAns     = tick > 1000;
-    var wrongSel    = tick > 1900 ? 0    : null;
-    var correctSel  = tick > 3000 ? 2    : null;
-    var showPts     = tick > 3500;
-    return (
-      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:2 }}>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.38)' }}>Question 3 / 10</span>
-          <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:800, color: showPts ? '#4ade80' : '#c8a727', transition:'color 0.3s' }}>
-            {showPts ? '30' : '20'} pts {showPts && '🎉'}
-          </span>
-        </div>
-        <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:9, padding:'12px', opacity: showQ ? 1 : 0, transition:'opacity 0.5s' }}>
-          <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'#f0ede6', lineHeight:1.5, margin:0 }}>Combien de sourates compte le Saint Coran ?</p>
-        </div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7, opacity: showAns ? 1 : 0, transition:'opacity 0.5s' }}>
-          {answers.map(function(ans, i) {
-            var bg = 'rgba(255,255,255,0.05)', border = '1px solid rgba(255,255,255,0.08)', color = 'rgba(240,237,230,0.8)', suffix = '';
-            if (wrongSel === i && correctSel === null) { bg='rgba(239,68,68,0.15)'; border='1px solid rgba(239,68,68,0.5)'; color='#ef4444'; suffix=' ✗'; }
-            if (correctSel !== null && i === 0)    { bg='rgba(239,68,68,0.1)';  border='1px solid rgba(239,68,68,0.3)';  color='rgba(239,68,68,0.55)'; suffix=' ✗'; }
-            if (correctSel !== null && i === 2)    { bg='rgba(74,222,128,0.15)'; border='1px solid rgba(74,222,128,0.6)'; color='#4ade80'; suffix=' ✓'; }
-            return (
-              <div key={i} style={{ background:bg, border:border, borderRadius:8, padding:'8px 5px', textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:600, color:color, transition:'all 0.3s', lineHeight:1.3 }}>
-                {ans}{suffix}
-              </div>
-            );
-          })}
-        </div>
-        {showPts && <div style={{ textAlign:'center', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, fontWeight:800, color:'#4ade80' }}>+10 pts !</div>}
-      </div>
-    );
-  }
-
-  var steps = [
-    { num:'01', label:'Créer un compte',     sub:'30 secondes · gratuit, sans carte' },
-    { num:'02', label:'Choisir une activité', sub:'Comprendre, Blind Test ou Quiz' },
-    { num:'03', label:'Jouer & progresser',  sub:'Apprends sans t\'en rendre compte' },
-  ];
-  var sceneLabels = ['Inscription','Choix d\'activité','Quiz en action'];
-
-  return (
-    <section style={{ padding:'100px 24px', background:'transparent', position:'relative', overflow:'hidden' }}>
-      <div style={{ position:'absolute', inset:0, backgroundImage:'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(200,167,39,0.04) 0%, transparent 70%)', pointerEvents:'none' }} />
-
-      <div style={{ maxWidth:900, margin:'0 auto', position:'relative' }}>
-
-        {/* Header */}
-        <div className="reveal-blur" style={{ textAlign:'center', marginBottom:56 }}>
-          <span style={{ display:'inline-block', background:'rgba(200,167,39,0.1)', border:'1px solid rgba(200,167,39,0.25)', borderRadius:20, padding:'5px 16px', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, color:'rgba(200,167,39,0.9)', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:18 }}>
-            Comment ça marche
-          </span>
-          <h2 style={{ fontFamily:'Cinzel,serif', fontSize:'clamp(26px,4vw,40px)', color:'#f0ede6', lineHeight:1.2, marginBottom:14 }}>
-            Lancé en <span style={{ color:'#c8a727' }}>3 étapes</span>
-          </h2>
-          <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:16, color:'rgba(240,237,230,0.55)', maxWidth:480, margin:'0 auto' }}>
-            Pas de configuration. Pas de mode d'emploi. Tu arrives, tu joues, tu progresses.
-          </p>
-        </div>
-
-        {/* Two-col layout */}
-        <div className="reveal-zoom" style={{ display:'flex', gap:52, alignItems:'center', flexWrap:'wrap', justifyContent:'center' }}>
-
-          {/* Left — clickable step list */}
-          <div style={{ flex:'1 1 220px', minWidth:220, maxWidth:340, display:'flex', flexDirection:'column', gap:6 }}>
-            {steps.map(function(s, i) {
-              var isActive = scene === i;
-              return (
-                <div key={i} onClick={function() { setScene(i); setPaused(false); }}
-                  style={{ display:'flex', gap:14, alignItems:'flex-start', padding:'16px 14px', borderRadius:12, cursor:'pointer', background: isActive ? 'rgba(200,167,39,0.06)' : 'transparent', border: isActive ? '1px solid rgba(200,167,39,0.22)' : '1px solid transparent', transition:'all 0.3s' }}>
-                  <div style={{ flexShrink:0, width:34, height:34, borderRadius:'50%', background: isActive ? 'linear-gradient(135deg,#a8801a,#6d4f08)' : 'rgba(200,167,39,0.08)', border: isActive ? 'none' : '1.5px solid rgba(200,167,39,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Cinzel,serif', fontSize:11, color: isActive ? '#fff' : 'rgba(200,167,39,0.55)', fontWeight:700, boxShadow: isActive ? '0 0 14px rgba(200,167,39,0.32)' : 'none', transition:'all 0.3s' }}>
-                    {s.num}
-                  </div>
-                  <div>
-                    <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, fontWeight:700, color: isActive ? '#f0ede6' : 'rgba(240,237,230,0.4)', margin:'0 0 2px', transition:'color 0.3s' }}>{s.label}</p>
-                    <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.28)', margin:0 }}>{s.sub}</p>
-                  </div>
-                </div>
-              );
-            })}
-            {/* Play/pause */}
-            <button onClick={function() { setPaused(function(p) { return !p; }); }}
-              style={{ alignSelf:'flex-start', marginLeft:14, marginTop:6, display:'flex', alignItems:'center', gap:7, background:'none', border:'1px solid rgba(255,255,255,0.09)', borderRadius:20, padding:'6px 14px', cursor:'pointer', color:'rgba(240,237,230,0.38)', fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12 }}>
-              <span>{paused ? '▶' : '⏸'}</span>
-              <span>{paused ? 'Reprendre' : 'Pause'}</span>
-            </button>
-          </div>
-
-          {/* Right — animated phone */}
-          <div style={{ flex:'1 1 240px', minWidth:240, display:'flex', flexDirection:'column', alignItems:'center', gap:18 }}>
-            {/* Phone frame */}
-            <div style={{ width:262, background:'#071510', borderRadius:30, border:'2px solid rgba(200,167,39,0.28)', overflow:'hidden', boxShadow:'0 0 60px rgba(200,167,39,0.11), 0 32px 64px rgba(0,0,0,0.65)', position:'relative' }}>
-              {/* Status bar */}
-              <div style={{ background:'#030d06', padding:'10px 20px 0', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, color:'rgba(240,237,230,0.45)' }}>9:41</span>
-                <div style={{ width:52, height:5, background:'rgba(200,167,39,0.12)', borderRadius:3, border:'1px solid rgba(200,167,39,0.18)' }} />
-                <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:10, color:'rgba(240,237,230,0.45)' }}>●●●</span>
-              </div>
-              {/* App header */}
-              <div style={{ background:'rgba(200,167,39,0.07)', borderBottom:'1px solid rgba(200,167,39,0.13)', padding:'9px 16px', display:'flex', alignItems:'center', gap:8 }}>
-                <span style={{ fontSize:14 }}>☪️</span>
-                <span style={{ fontFamily:'Cinzel,serif', fontSize:11, color:'#c8a727' }}>Héritage Musulman</span>
-              </div>
-              {/* Scene */}
-              <div style={{ padding:'18px 16px 22px', minHeight:280 }}>
-                {scene === 0 && renderScene0()}
-                {scene === 1 && renderScene1()}
-                {scene === 2 && renderScene2()}
-              </div>
-            </div>
-
-            {/* Progress bars (3 segments) */}
-            <div style={{ width:262, display:'flex', gap:5 }}>
-              {[0,1,2].map(function(i) {
-                var isActive = scene === i;
-                var isDone   = scene > i;
-                return (
-                  <div key={i} onClick={function() { setScene(i); setPaused(false); }}
-                    style={{ flex:1, height:3, background:'rgba(255,255,255,0.09)', borderRadius:2, overflow:'hidden', cursor:'pointer' }}>
-                    <div style={{ height:'100%', width: isDone ? '100%' : isActive ? (progress + '%') : '0%', background:'linear-gradient(90deg,#c8a727,#e6c84a)', borderRadius:2, transition: isActive ? 'none' : 'width 0.35s' }} />
-                  </div>
-                );
-              })}
-            </div>
-            <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(240,237,230,0.3)', textAlign:'center', margin:0 }}>
-              Étape {scene + 1} / 3 — {sceneLabels[scene]}
-            </p>
-          </div>
-
-        </div>
-
-        {/* Bottom badge */}
-        <div className="reveal-blur" style={{ textAlign:'center', marginTop:56 }}>
-          <div style={{ display:'inline-flex', alignItems:'center', gap:10, background:'rgba(200,167,39,0.07)', border:'1px solid rgba(200,167,39,0.2)', borderRadius:40, padding:'12px 28px' }}>
-            <span style={{ fontSize:20 }}>⏱️</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:14, color:'rgba(240,237,230,0.7)' }}>
-              Première partie en moins de <strong style={{ color:'#c8a727' }}>2 minutes</strong> — même depuis ton téléphone
-            </span>
-          </div>
-        </div>
-
-      </div>
-    </section>
-  );
-}
-
 /* ─── Comparison Table ─── */
 function ComparisonTable({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
@@ -3032,10 +2379,6 @@ function ComparisonTable({ navigate }) {
 
   return (
     <section style={{ padding: '80px 24px', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
-      {/* Lueur dorée centre-droite */}
-      <div style={{ position: 'absolute', top: '20%', right: '-10%', width: 550, height: 550, background: 'radial-gradient(circle, rgba(200,167,39,0.1) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      {/* Lueur verte centre-gauche */}
-      <div style={{ position: 'absolute', bottom: '10%', left: '-8%', width: 480, height: 480, background: 'radial-gradient(circle, rgba(26,92,53,0.45) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div className="reveal-left section-text-backdrop" style={{ textAlign: 'center', marginBottom: 56 }}>
           <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 12 }}>
@@ -3163,458 +2506,6 @@ function ComparisonTable({ navigate }) {
       </div>
     </section>);
 
-}
-
-/* ─── Parcours ─── */
-function ParcoursSection() {
-  /* Calé sur le produit réel : trois niveaux (Débutant, Amateur, Avancé) et
-     les huit thèmes du quiz. La version précédente annonçait des niveaux
-     « Reconverti(e) » et « Intermédiaire » et des thèmes — Exégèse, Débats,
-     Soutien — qui n'existent nulle part : un abonné les aurait cherchés. */
-  const parcours = [
-  {
-    level: 'Débutant',
-    dot: '#4ade80',
-    desc: 'Tu découvres l\'islam, tu t\'es converti(e), ou tu veux revoir les bases.',
-    tags: ['Les 5 Piliers', 'Les Prophètes', 'Le Coran']
-  },
-  {
-    level: 'Amateur',
-    dot: '#c8a727',
-    desc: 'Tu connais les bases et tu veux aller plus loin, thème par thème.',
-    tags: ['Les Compagnons', 'Histoire islamique', 'Hadiths & Sunna']
-  },
-  {
-    level: 'Avancé',
-    dot: '#f87171',
-    desc: 'Tu veux être mis(e) au défi sur les détails que peu de gens connaissent.',
-    tags: ['Fiqh & Pratique', 'Jour du Jugement', 'Le Coran']
-  }];
-
-
-  return (
-    <section style={{ padding: '80px 24px', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
-      {/* Lueur verte haut-droite */}
-      <div style={{ position: 'absolute', top: '-5%', right: '-6%', width: 520, height: 520, background: 'radial-gradient(circle, rgba(26,92,53,0.5) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      {/* Lueur dorée bas-centre */}
-      <div style={{ position: 'absolute', bottom: '5%', left: '30%', width: 460, height: 460, background: 'radial-gradient(circle, rgba(200,167,39,0.09) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div className="reveal-right section-text-backdrop" style={{ textAlign: 'center', marginBottom: 56 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 12 }}>
-            ◆ PARCOURS
-          </p>
-          <h2 style={{
-            fontFamily: 'Playfair Display, serif', fontWeight: 900,
-            fontSize: 'clamp(26px,4.5vw,44px)', color: '#fff',
-            letterSpacing: '-0.5px', lineHeight: 1.15,
-            marginBottom: 16
-          }}>
-            Adapté à ton niveau
-          </h2>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', maxWidth: 480, margin: '0 auto' }}>
-            Trois niveaux, huit thèmes, 740 questions. Tu commences où tu veux.
-          </p>
-          <div style={{ marginTop: 20 }}><ArabesqueDivider color="rgba(200,167,39,0.4)" /></div>
-        </div>
-
-        <div className="reveal-stagger-alt" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: 20
-        }}>
-          {parcours.map((p, i) => {
-            // Each card gets a unique dark gradient anchored to its accent colour
-            const cardBgs = [
-            `linear-gradient(155deg, rgba(18,58,32,0.94) 0%, rgba(3,12,6,0.97) 100%)`,
-            `linear-gradient(155deg, rgba(10,28,48,0.94) 0%, rgba(3,8,18,0.97) 100%)`,
-            `linear-gradient(155deg, rgba(36,32,8,0.94) 0%, rgba(10,8,3,0.97) 100%)`,
-            `linear-gradient(155deg, rgba(46,14,14,0.92) 0%, rgba(14,4,4,0.97) 100%)`];
-
-            const cardBorders = [
-            `rgba(78,222,128,0.22)`,
-            `rgba(96,165,250,0.22)`,
-            `rgba(200,167,39,0.3)`,
-            `rgba(248,113,113,0.22)`];
-
-            return (
-              <div key={i} style={{
-                background: cardBgs[i],
-                border: `1px solid ${cardBorders[i]}`,
-                borderRadius: 20, padding: '28px 24px',
-                position: 'relative', overflow: 'hidden',
-                boxShadow: `0 8px 36px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)`,
-                transition: 'all 0.3s',
-                cursor: 'default'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-6px)';
-                e.currentTarget.style.boxShadow = `0 16px 52px rgba(0,0,0,0.65), 0 0 28px ${p.dot}22, inset 0 1px 0 rgba(255,255,255,0.07)`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = `0 8px 36px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)`;
-              }}>
-
-              {/* Top accent line */}
-              <div style={{
-                  position: 'absolute', top: 0, left: '8%', right: '8%', height: 2,
-                  background: `linear-gradient(90deg, transparent, ${p.dot}88, transparent)`
-                }} />
-              {/* Corner glow */}
-              <div style={{
-                  position: 'absolute', top: -30, right: -30, width: 100, height: 100,
-                  background: `radial-gradient(circle, ${p.dot}22 0%, transparent 70%)`,
-                  pointerEvents: 'none'
-                }} />
-
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: p.dot, boxShadow: `0 0 10px ${p.dot}99`, flexShrink: 0 }} />
-                  <h3 style={{ fontWeight: 700, fontSize: 17, color: '#fff' }}>{p.level}</h3>
-                </div>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, marginBottom: 20 }}>
-                  {p.desc}
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {p.tags.map((tag, j) =>
-                    <span key={j} style={{
-                      background: `${p.dot}18`, color: p.dot,
-                      border: `1px solid ${p.dot}44`,
-                      fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
-                      letterSpacing: '0.03em'
-                    }}>{tag}</span>
-                    )}
-                </div>
-              </div>
-            </div>);
-
-          })}
-        </div>
-      </div>
-    </section>);
-
-}
-
-/* ─── Importance de l'islam ─── */
-function ImportanceSection() {
-  const pillars = [
-  {
-    emoji: "🌿",
-    title: "Une paix intérieure profonde",
-    desc: "L'islam n'est pas qu'une religion — c'est un mode de vie complet. Chaque connaissance acquise apaise l'âme, ancre le cœur et donne un sens à chaque journée."
-  },
-  {
-    emoji: "📖",
-    title: "Comprendre ce que tu récites",
-    desc: "Tu lis le Coran chaque jour — mais en saisir le sens transforme ta relation à Allah. La connaissance est la clé qui ouvre la porte de chaque sourate."
-  },
-  {
-    emoji: "🕌",
-    title: "Vivre l'islam pleinement",
-    desc: "Connaître les piliers, l'histoire et les prophètes, c'est être fier de sa foi. C'est répondre aux questions de tes proches avec assurance et clarté."
-  },
-  {
-    emoji: "🌙",
-    title: "Une récompense qui dure",
-    desc: "« Celui qui emprunte un chemin pour acquérir un savoir, Allah lui facilite un chemin vers le Paradis. » — Sahih Muslim. Chaque verset appris est une lumière."
-  },
-  {
-    emoji: "🤝",
-    title: "Transmettre à ceux qu'on aime",
-    desc: "Enseigner à ses enfants, répondre à un ami curieux, expliquer à sa famille — le savoir islamique est un cadeau que tu peux offrir à chaque instant."
-  },
-  {
-    emoji: "⚡",
-    title: "Se reconnecter en 5 minutes",
-    desc: "Pas besoin d'une heure. Un quiz, une histoire, une écoute. Héritage Musulman s'adapte à ta vie pour que la foi reste vivante, même dans l'agitation du quotidien."
-  }];
-
-
-  return (
-    <section style={{
-      padding: '100px 24px',
-      background: 'transparent',
-      position: 'relative', overflow: 'hidden'
-    }}>
-      {/* Lueurs */}
-      <div style={{ position: 'absolute', top: '10%', left: '-8%', width: 560, height: 560, background: 'radial-gradient(circle, rgba(26,92,53,0.5) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: '5%', right: '-6%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(200,167,39,0.11) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '45%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 600, background: 'radial-gradient(ellipse, rgba(26,92,53,0.15) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-
-      <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-
-        {/* En-tête */}
-        <div className="reveal-scale" style={{ textAlign: 'center', marginBottom: 72 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 16 }}>✦ POURQUOI APPRENDRE</p>
-          <h2 style={{
-            fontFamily: 'Playfair Display, serif', fontWeight: 900,
-            fontSize: 'clamp(32px, 5vw, 56px)', color: '#fff',
-            lineHeight: 1.15, margin: '0 0 24px'
-          }}>
-            L'islam mérite d'être<br />
-            <span style={{ color: 'var(--gold)', fontStyle: 'italic' }}>vraiment compris.</span>
-          </h2>
-          <p style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontStyle: 'italic',
-            fontSize: 'clamp(17px, 2.2vw, 22px)',
-            color: 'rgba(255,255,255,0.6)',
-            maxWidth: 560, margin: '0 auto',
-            lineHeight: 1.7
-          }}>Pas pour les autres. Pour toi. Pour la paix que tu ressens quand tu sais pourquoi tu fais ce que tu fais.</p>
-        </div>
-
-        {/* Grille de pilliers */}
-        <div className="reveal-stagger" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 28
-        }}>
-          {pillars.map((p, i) =>
-          <div key={i} style={{
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20,
-            padding: '32px 28px',
-            position: 'relative',
-            overflow: 'hidden',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(26,92,53,0.18) 0%, rgba(200,167,39,0.04) 100%)';
-            e.currentTarget.style.borderColor = 'rgba(200,167,39,0.25)';
-            e.currentTarget.style.transform = 'translateY(-4px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}>
-              {/* Accent top */}
-              <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(200,167,39,0.3), transparent)' }} />
-              <div style={{ fontSize: 38, marginBottom: 18, lineHeight: 1 }}>{p.emoji}</div>
-              <h3 style={{
-              fontFamily: 'Playfair Display, serif',
-              fontWeight: 700, fontSize: 19,
-              color: '#fff', marginBottom: 12, lineHeight: 1.3
-            }}>{p.title}</h3>
-              <p style={{
-              fontSize: 14, lineHeight: 1.8,
-
-              fontFamily: 'Plus Jakarta Sans, sans-serif', color: "rgb(217, 175, 10)"
-            }}>{p.desc}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Citation centrale */}
-        <div className="reveal" style={{ textAlign: 'center', marginTop: 72, maxWidth: 700, margin: '72px auto 0' }}>
-          <div style={{ width: 40, height: 2, background: 'var(--gold)', margin: '0 auto 28px', opacity: 0.5 }} />
-          <p style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontStyle: 'italic',
-            fontSize: 'clamp(20px, 3vw, 28px)',
-            color: 'rgba(255,255,255,0.85)',
-            lineHeight: 1.6,
-            letterSpacing: '0.01em'
-          }}>
-            « Et dis : Seigneur, accroîs mes connaissances. »
-          </p>
-          {/* Remplace « Demandez le savoir du berceau jusqu'à la tombe », attribué
-              ici à « Sunan At-Tirmidhi n° 74 » : la formule n'est pas un hadith
-              et ne figure pas dans ce recueil. Sur un site d'apprentissage
-              religieux, une référence inventée ruine la confiance de tout le
-              reste. Toute citation ajoutée doit être sourcée et vérifiable. */}
-          <p style={{ marginTop: 16, fontSize: 13, color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>CORAN — TÂ-HÂ (20:114)</p>
-          <div style={{ width: 40, height: 2, background: 'var(--gold)', margin: '28px auto 0', opacity: 0.5 }} />
-        </div>
-
-      </div>
-    </section>);
-
-}
-
-
-/* ─── Learn & Play Section ─── */
-function LearnPlaySection({ navigate }) {
-  const benefits = [
-    { icon: '🧠', title: 'Tu retiens sans effort', desc: 'Le jeu active la mémoire à long terme. Ce que tu apprends en jouant reste gravé bien plus profondément qu\'un cours classique.' },
-    { icon: '🔥', title: 'Tu te dépasses à chaque session', desc: 'Chaque bonne réponse te pousse plus loin. Chaque erreur devient une leçon. Le défi permanent maintient ta progression.' },
-    { icon: '🤍', title: 'Tu renforces ta foi en t\'amusant', desc: 'Reconnaître une sourate à l\'oreille, répondre juste sur les prophètes — chaque victoire te rapproche de ton deen.' },
-  ];
-  return (
-    <section style={{ background: 'transparent', padding: '100px 24px', position: 'relative', overflow: 'hidden' }}>
-      {/* bg glow left */}
-      <div style={{ position: 'absolute', top: '30%', left: '-10%', width: 500, height: 500, background: 'radial-gradient(ellipse, rgba(200,167,39,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      {/* bg glow right */}
-      <div style={{ position: 'absolute', bottom: '10%', right: '-5%', width: 400, height: 400, background: 'radial-gradient(ellipse, rgba(100,60,200,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
-
-      <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-
-        {/* Header */}
-        <div className="reveal-blur" style={{ textAlign: 'center', marginBottom: 72 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.25)', borderRadius: 20, padding: '6px 18px', marginBottom: 20 }}>
-            <span style={{ fontSize: 13 }}>🎮</span>
-            <span style={{ color: '#c8a727', fontSize: 13, fontWeight: 700, fontFamily: 'Plus Jakarta Sans, sans-serif', letterSpacing: '0.05em' }}>BLIND TEST & QUIZ</span>
-          </div>
-          <h2 style={{ fontFamily: 'Fraunces, serif', fontWeight: 200, fontStyle: 'italic', fontSize: 'clamp(36px, 5vw, 62px)', color: '#fff', margin: '0 0 16px', lineHeight: 1.1, letterSpacing: '-1px' }}>
-            Apprends ton deen.<br /><span style={{ color: '#c8a727' }}>Sans t'en rendre compte.</span>
-          </h2>
-          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 16, color: 'rgba(255,255,255,0.5)', maxWidth: 540, margin: '0 auto', lineHeight: 1.7 }}>
-            Le vrai apprentissage ne ressemble pas à une leçon. Il ressemble à un jeu qu'on n'a pas envie d'arrêter.
-          </p>
-        </div>
-
-        {/* Main layout */}
-        <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 72 }}>
-
-          {/* LEFT — Mockups */}
-          <div className="reveal-left" style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 420, width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.25)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Aperçu interactif</span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-            </div>
-
-            {/* Blind Test card */}
-            <div style={{ background: 'linear-gradient(145deg,rgba(18,10,2,0.95),rgba(8,6,2,0.98))', border: '1px solid rgba(200,167,39,0.22)', borderRadius: 22, overflow: 'hidden', position: 'relative' }}>
-              {/* Top bar */}
-              <div style={{ background: 'rgba(200,167,39,0.08)', borderBottom: '1px solid rgba(200,167,39,0.12)', padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 15 }}>🎵</span>
-                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 13, color: '#fff' }}>Blind Test Coran</span>
-                </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: '#c8a727', fontWeight: 700 }}>7/10</span>
-                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: '#fb923c', fontWeight: 700 }}>🔥 ×3</span>
-                </div>
-              </div>
-              <div style={{ padding: '20px 18px' }}>
-                {/* Player */}
-                <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 14, padding: '16px', marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,rgba(200,167,39,0.3),rgba(200,167,39,0.08))', border: '1.5px solid rgba(200,167,39,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>▶</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 3, height: 28 }}>
-                        {[5,9,14,11,19,15,22,17,12,20,16,11,21,14,10,17,12,15,19,11,9,14,6,10,16,12,20,15,8,12].map((h,i) => (
-                          <div key={i} style={{ flex: 1, height: h, borderRadius: 2, background: i < 16 ? `rgba(200,167,39,${0.5+i*0.03})` : 'rgba(255,255,255,0.1)' }} />
-                        ))}
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                        <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>0:18</span>
-                        <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>0:45</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Question */}
-                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Quelle est cette sourate ?</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
-                  {[{l:'Al-Fatiha',ok:false},{l:'Al-Baqara',ok:false},{l:'Al-Kahf',ok:true},{l:'Al-Imran',ok:false}].map((s,i) => (
-                    <div key={i} style={{ background: s.ok ? 'rgba(34,197,94,0.15)' : i===0 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${s.ok ? 'rgba(34,197,94,0.5)' : i===0 ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, padding: '10px 8px', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: s.ok ? '#4ade80' : i===0 ? '#f87171' : 'rgba(255,255,255,0.5)', fontWeight: s.ok ? 800 : 400, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                      {s.ok && '✓ '}{i===0 && '✗ '}{s.l}
-                    </div>
-                  ))}
-                </div>
-                {/* Bonne réponse banner */}
-                <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18 }}>✅</span>
-                  <div>
-                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, fontWeight: 800, color: '#4ade80', margin: 0 }}>Bonne réponse !</p>
-                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Sourate 18 — La Caverne (Al-Kahf)</p>
-                  </div>
-                  <span style={{ marginLeft: 'auto', fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: '#c8a727', fontWeight: 800 }}>+10 pts</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quiz card */}
-            <div style={{ background: 'linear-gradient(145deg,rgba(4,12,24,0.97),rgba(2,6,14,0.99))', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 22, overflow: 'hidden', position: 'relative' }}>
-              {/* Top bar */}
-              <div style={{ background: 'rgba(96,165,250,0.06)', borderBottom: '1px solid rgba(96,165,250,0.1)', padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 15 }}>🧠</span>
-                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 13, color: '#fff' }}>Quiz — Les Prophètes</span>
-                </div>
-                <div style={{ background: 'rgba(200,167,39,0.15)', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 20, padding: '2px 10px' }}>
-                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 10, color: '#c8a727', fontWeight: 700 }}>Amateur</span>
-                </div>
-              </div>
-              <div style={{ padding: '18px' }}>
-                {/* Question num + timer */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Question 4 / 10</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 20, padding: '2px 10px' }}>
-                    <span style={{ fontSize: 11 }}>⏱</span>
-                    <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: '#f87171', fontWeight: 700 }}>12s</span>
-                  </div>
-                </div>
-                {/* Progress bar */}
-                <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, marginBottom: 16, overflow: 'hidden' }}>
-                  <div style={{ width: '38%', height: '100%', background: 'linear-gradient(90deg,#60a5fa,#818cf8)', borderRadius: 2 }} />
-                </div>
-                {/* Question */}
-                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(96,165,250,0.15)', borderRadius: 14, padding: '14px 16px', marginBottom: 14 }}>
-                  <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 14, color: '#fff', margin: 0, lineHeight: 1.55, fontWeight: 600 }}>Dans quelle ville le Prophète ﷺ est-il né ?</p>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {[{l:'Médine',s:'wrong'},{l:'La Mecque',s:'correct'},{l:'Jérusalem',s:''},{l:'Taïf',s:''}].map((a,i) => (
-                    <div key={i} style={{ background: a.s==='correct'?'rgba(34,197,94,0.12)':a.s==='wrong'?'rgba(239,68,68,0.08)':'rgba(255,255,255,0.03)', border:`1.5px solid ${a.s==='correct'?'rgba(34,197,94,0.4)':a.s==='wrong'?'rgba(239,68,68,0.25)':'rgba(255,255,255,0.07)'}`, borderRadius: 11, padding: '11px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: a.s==='correct'?'rgba(34,197,94,0.2)':a.s==='wrong'?'rgba(239,68,68,0.15)':'rgba(255,255,255,0.06)', border:`1.5px solid ${a.s==='correct'?'#4ade80':a.s==='wrong'?'#f87171':'rgba(255,255,255,0.15)'}`, display:'flex',alignItems:'center',justifyContent:'center', fontSize: 11, color: a.s==='correct'?'#4ade80':a.s==='wrong'?'#f87171':'rgba(255,255,255,0.3)', fontWeight:800 }}>
-                          {a.s==='correct'?'✓':a.s==='wrong'?'✗':['A','B','C','D'][i]}
-                        </div>
-                        <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: a.s==='correct'?'#4ade80':a.s==='wrong'?'#f87171':'rgba(255,255,255,0.6)', fontWeight: a.s?700:400 }}>{a.l}</span>
-                      </div>
-                      {a.s==='correct' && <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: '#c8a727', fontWeight: 800 }}>+10 pts</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT — Benefits */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 380, justifyContent: 'center' }}>
-            <div className="reveal-stagger-alt" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              {benefits.map((b, i) => (
-                <div key={i} style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>{b.icon}</div>
-                  <div>
-                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 15, color: '#fff', margin: '0 0 6px' }}>{b.title}</p>
-                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.48)', margin: 0, lineHeight: 1.65 }}>{b.desc}</p>
-                  </div>
-                </div>
-              ))}
-
-              {/* Quote */}
-              <div style={{ background: 'rgba(200,167,39,0.06)', border: '1px solid rgba(200,167,39,0.15)', borderRadius: 16, padding: '18px 20px' }}>
-                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 17, color: 'rgba(255,255,255,0.7)', margin: '0 0 8px', lineHeight: 1.6 }}>
-                  « Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne. »
-                </p>
-                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 11, color: 'rgba(200,167,39,0.6)', margin: 0, fontWeight: 600, letterSpacing: '0.04em' }}>— Prophète ﷺ, rapporté par Al-Bukhari</p>
-              </div>
-            </div>
-
-            {/* CTA buttons — outside stagger so always visible */}
-            <div className="reveal-blur" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 4px', textAlign: 'center', letterSpacing: '0.04em' }}>Essaie maintenant — c'est gratuit</p>
-              <button onClick={() => navigate('blind-test')} style={{ width: '100%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#fff', padding: '14px 20px', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', boxShadow: '0 4px 16px rgba(200,167,39,0.3)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(200,167,39,0.45)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 4px 16px rgba(200,167,39,0.3)'; }}>
-                🎵 Jouer au Blind Test →
-              </button>
-              <button onClick={() => navigate('quiz')} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '13px 20px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-                onMouseEnter={e => { e.currentTarget.style.background='rgba(255,255,255,0.09)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.3)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.15)'; }}>
-                🧠 Tester le Quiz →
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
 }
 
 /* ─── Studio Viral Section ─── */
@@ -3950,7 +2841,6 @@ function SoftPaywall({ navigate }) {
       textAlign: 'center',
       position: 'relative', overflow: 'hidden'
     }}>
-      <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 600, background: 'radial-gradient(ellipse, rgba(200,167,39,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div className="reveal-flip" style={{ maxWidth: 640, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
         <h2 style={{
@@ -9506,7 +8396,6 @@ function ComprendreSection({ navigate }) {
   ];
   return (
     <section style={{ padding: '80px 24px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '10%', left: '-10%', width: 520, height: 520, background: 'radial-gradient(circle,rgba(200,167,39,0.12) 0%,transparent 70%)', pointerEvents: 'none' }} />
       <div className="reveal-scale" style={{ maxWidth: 880, margin: '0 auto', position: 'relative', zIndex: 1, textAlign: 'center' }}>
         <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD, marginBottom: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>◆ Nouveau · Comprendre le Coran</p>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 'clamp(26px,4.8vw,46px)', color: '#f0ede6', lineHeight: 1.18, margin: '0 0 16px' }}>
@@ -9919,7 +8808,7 @@ function App() {
             la-dessus forcait un calque geant, et c'est le scroll entier qui
             saccadait. Le reste suit normalement — il est de toute facon deux
             ecrans plus bas. */}
-        <Reveal>
+        <div className="hero-next in">
           <span className="hero-next-sep" aria-hidden="true" />
           {/* Le hadith ouvre desormais ce qui se devoile, au lieu d'alourdir le
               premier ecran : c'est un « pourquoi », pas une demonstration, et il
@@ -9935,14 +8824,9 @@ function App() {
             <figcaption className="hh-src">Prophète ﷺ — rapporté par Muslim</figcaption>
           </figure>
           <ComprendreSection navigate={navigate} />
-        </Reveal>
+        </div>
         <FeatureCards navigate={navigate} />
-        <LearnPlaySection navigate={navigate} />
         <Testimonials />
-        <StatsBar />
-        <HowItWorksSection />
-        <ParcoursSection />
-        <ImportanceSection />
         <ComparisonTable navigate={navigate} />
         <FaqSection />
         <SoftPaywall navigate={navigate} />

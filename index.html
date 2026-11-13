@@ -50,7 +50,7 @@
 <!-- ── Preload critiques ── -->
 <link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
-<link rel="preload" as="script" href="/app.js?v=17"/>
+<link rel="preload" as="script" href="/app.js?v=18"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
@@ -72,7 +72,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-<script src="/app.js?v=17" defer></script>
+<script src="/app.js?v=18" defer></script>
 <!-- ── Pixel publicitaire (Meta) ──
      Chargé UNIQUEMENT après consentement explicite : en France, déposer un
      cookie publicitaire avant l'accord de l'utilisateur est une infraction
@@ -561,6 +561,7 @@
   }
   .hero-h1 em { font-style: italic; color: #e6c84a; }
 
+
   /* Regroupe onglets + apercu. En colonne flex et non en bloc : les marges des
      enfants ne se replient pas au travers d'un conteneur flex, donc les 11 px
      et 18 px d'origine s'appliquent au pixel pres et le mobile est inchange. */
@@ -739,7 +740,6 @@
     font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.62);
   }
   .hero-sub li { display: inline-flex; align-items: center; gap: 5px; }
-  @media (max-width: 768px) { .hero-sub .sub-wide { display: none; } }
   /* Le compteur de membres se distingue des acquis : ce n'est pas un frein
      leve, c'est une preuve. D'ou l'or plutot que le vert, et le chiffre en
      gras. */
@@ -924,66 +924,6 @@
     .hh-src { font-size: 11.5px; }
     .hh-src::before, .hh-src::after { width: 34px; }
   }
-  /* ── Grand ecran : deux colonnes ──
-     Le hero etait une colonne de 640 px centree au milieu d'un ecran de 1440 :
-     les deux tiers de la largeur ne servaient a rien. Le texte tient la gauche,
-     la demo prend la droite et devient le sujet de l'ecran au lieu d'une
-     vignette sous le titre. Elle est vivante et cliquable — c'est le produit,
-     pas une capture qui se perimerait.
-
-     Seuil a 1024 et non 769 : entre les deux, deux colonnes serreraient a la
-     fois le titre et la demo, et la version centree reste meilleure.
-
-     Les deux rangees vides en 1fr encadrent le bloc de texte pour le centrer
-     verticalement contre la demo, plus haute que lui. Sans elles, la grille
-     distribuait le jeu entre les lignes du texte et les ecartait. */
-  @media (min-width: 1024px) {
-    .hero-inner {
-      display: grid; max-width: 1220px; text-align: left;
-      /* Etire la grille sur toute la hauteur du hero : les deux rangees en 1fr
-         s'ouvrent, le bloc de texte et la demo restent centres, et le repere de
-         defilement descend se poser au bas de l'ecran au lieu de flotter au
-         milieu du vide. */
-      align-self: stretch;
-      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
-      grid-template-areas:
-        ".      demo"
-        "kicker demo"
-        "title  demo"
-        "cta    demo"
-        "sub    demo"
-        ".      demo"
-        "scroll scroll";
-      grid-template-rows: 1fr auto auto auto auto 1fr auto;
-      column-gap: 64px;
-      justify-items: start; align-items: start;
-    }
-    .hero-kicker { grid-area: kicker; }
-    .hero-h1 { grid-area: title; font-size: clamp(44px, 4.3vw, 60px); margin-bottom: 32px; }
-    .hero-demo { grid-area: demo; align-self: center; }
-    .hero-cta { grid-area: cta; }
-    /* Les quatre acquis demandent 510 px et la colonne en fait 507 : a 20 px
-       d'ecart le compteur de membres tombait seul sur une deuxieme ligne. */
-    .hero-sub { grid-area: sub; justify-content: flex-start; gap: 4px 15px; }
-    /* align-self: end colle le repere au bas de sa rangee, qui est la derniere
-       d'une grille desormais etiree sur toute la hauteur du hero. */
-    .hero-scroll { grid-area: scroll; justify-self: center; align-self: end; margin-top: 26px; }
-
-    /* La demo est le sujet de l'ecran : elle prend la hauteur disponible plutot
-       qu'une valeur figee, pour que les grands ecrans ne se terminent pas sur
-       deux cents pixels de vide. Bornee en haut : au-dela, les apercus qui la
-       remplissent flotteraient dans un cadre trop grand. */
-    .hero-panel { height: clamp(336px, 38vh, 408px); padding: 24px 28px 26px; }
-    /* Le contenu suit l'agrandissement du cadre, sinon il y nage. */
-    .peek-q { font-size: 18px; }
-    .peek-q-lg { font-size: 19.5px; }
-    .pw-ar { font-size: 30px; }
-    .pw-fr { font-size: 11.5px; }
-    .peek-opt { font-size: 15.5px; padding: 13px; }
-    .peek-foot { font-size: 13.5px; }
-    .peek-foot strong { font-size: 22px; }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .peek { animation: none; }
     .hero-eq i, .bt-wave i { animation: none; height: 11px !important; }
@@ -1021,11 +961,110 @@
      une image de base surchargee ensuite peut etre telechargee quand meme
      (au redimensionnement, ou par certains navigateurs), et le zellige est
      deja le plus gros fichier de la page. */
-  @media (max-width: 768px) {
-    .hero-bg { background-image: url('uploads/zellige-m.webp'); }
+  /* 13/11/2026 : le zellige est remplace par un simple degrade (choix
+     d'Ayoub : un fond tres discret, sans motif). Une lumiere verte douce en
+     haut, qui se fond dans le vert de la page. Rien a telecharger. */
+  /* ══ Hero simple (13/11/2026) ══
+     Place APRES les anciennes regles du hero (tailles par hauteur d'ecran) :
+     ces regles-ci les remplacent. Ordre : preuve -> titre -> phrase ->
+     bouton -> freins leves -> acces direct aux jeux. */
+  .hero-section {
+    min-height: 92vh; min-height: 92svh;
+    padding: 92px 18px calc(36px + var(--cookiebar));
+  }
+  .hero-inner { max-width: 600px; }
+  .hero-proof {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin: 0 0 22px; padding: 7px 15px 7px 12px; border-radius: 100px;
+    background: rgba(230,200,74,0.07); border: 1px solid rgba(230,200,74,0.22);
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; line-height: 1.2;
+    color: rgba(240,237,230,0.78);
+  }
+  .hero-proof strong { color: #e6c84a; font-weight: 800; }
+  .hero-h1 {
+    font-size: clamp(30px, 9.9vw, 46px); line-height: 1.08;
+    margin: 0 0 16px;
+  }
+  .hero-lead {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; line-height: 1.55;
+    color: rgba(240,237,230,0.7); max-width: 24em; margin: 0 0 28px; text-wrap: pretty;
+  }
+  .hero-cta {
+    max-width: 400px; padding: 18px 24px; font-size: 17px; font-weight: 800;
+    background: linear-gradient(135deg, #a8801a, #6d4f08);
+    box-shadow: 0 10px 34px rgba(230,200,74,0.28), 0 1px 0 rgba(255,255,255,0.22) inset;
+  }
+  .hero-sub { margin: 12px 0 0; font-size: 12.5px; gap: 4px 14px; }
+  .hero-sub li { white-space: nowrap; }
+  .hero-acts {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 10px; margin-top: 30px; font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .ha-or {
+    width: 100%; font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(255,255,255,0.4);
+  }
+  .ha-chip {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-width: 140px; min-height: 46px; padding: 0 20px; border-radius: 100px; cursor: pointer;
+    font-family: inherit; font-size: 15px; font-weight: 700; color: #fff;
+    background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.14);
+    transition: border-color .2s, background .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ha-chip:hover, .ha-chip:active { border-color: rgba(230,200,74,0.55); background: rgba(230,200,74,0.08); }
+  .ha-chip:focus-visible { outline: 2px solid #e6c84a; outline-offset: 2px; }
+
+  /* Petits ecrans (iPhone SE/8, 667 px) : tout se resserre. */
+  @media (max-height: 720px) {
+    .hero-section { padding-top: 80px; padding-bottom: calc(24px + var(--cookiebar)); }
+    .hero-proof { margin-bottom: 14px; font-size: 12px; padding: 6px 13px 6px 11px; }
+    .hero-h1 { font-size: clamp(31px, 9vw, 38px); margin-bottom: 12px; }
+    .hero-lead { font-size: 14.5px; margin-bottom: 20px; }
+    .hero-cta { padding: 15px 22px; font-size: 16px; }
+    .hero-acts { margin-top: 20px; gap: 8px; }
+    .ha-chip { min-height: 42px; }
+  }
+  /* Telephones etroits (< 360 px) : les trois freins tiennent sur une ligne. */
+  @media (max-width: 359px) {
+    .hero-sub { font-size: 11.5px; gap: 3px 10px; }
+    .ha-chip { min-width: 0; }
   }
   @media (min-width: 769px) {
-    .hero-bg { background-image: url('uploads/zellige.webp'); opacity: calc(0.55 * var(--zf, 1)); }
+    .hero-section { padding: 120px 24px 64px; }
+    .hero-proof { font-size: 14px; margin-bottom: 26px; }
+    .hero-h1 { font-size: clamp(50px, 5.2vw, 66px); margin-bottom: 20px; }
+    .hero-lead { font-size: 19px; max-width: 30em; margin-bottom: 34px; }
+    .hero-cta { max-width: 420px; padding: 20px 30px; font-size: 19px; }
+    .hero-sub { font-size: 14px; margin-top: 16px; gap: 4px 20px; }
+    .hero-acts { margin-top: 36px; }
+    .ha-chip { font-size: 15.5px; min-height: 48px; }
+  }
+
+  /* Paliers nombreux et adoucis (courbe en S) : un degrade a 3 points sur un
+     fond aussi sombre laisse voir des bandes. Le halo dore est fondu dans le
+     meme calque. Le hero commence sous le header, devenu transparent : le
+     degrade passe derriere lui, sans cassure. */
+  .hero-bg {
+    background-image:
+      radial-gradient(ellipse 75% 45% at 50% -8%,
+        rgba(230,200,74,0.075) 0%, rgba(230,200,74,0.06) 20%, rgba(230,200,74,0.038) 40%,
+        rgba(230,200,74,0.018) 60%, rgba(230,200,74,0.006) 80%, rgba(230,200,74,0) 100%),
+      radial-gradient(ellipse 140% 80% at 50% -8%,
+        rgba(40,116,70,0.52) 0%, rgba(38,110,66,0.46) 12%, rgba(35,102,62,0.37) 24%,
+        rgba(31,92,56,0.27) 36%, rgba(27,82,50,0.18) 48%, rgba(24,72,44,0.11) 60%,
+        rgba(21,64,40,0.055) 72%, rgba(19,58,36,0.02) 84%, rgba(18,54,34,0) 100%);
+    opacity: 1;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  /* Grain a 4 % : invisible a l'oeil, il casse les paliers de couleur que les
+     ecrans 8 bits dessinent sur les degrades sombres. */
+  .hero-bg::after {
+    content: ''; position: absolute; inset: 0; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .hero-glow { display: none; }
+  @media (min-width: 769px) {
     /* Le halo de l'activite respire : il derive de quelques pourcents en
        seize secondes. Le translateX(-50%) est celui du centrage de base — une
        animation qui l'oublierait decalerait le halo d'un demi-ecran. */
