@@ -8226,7 +8226,7 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
   const current = playing && !allRevealed ? revealed - 1 : tapped;
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '72px 16px calc(96px + var(--cookiebar, 0px) + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 0' }}>← Retour</button>
         <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}><span translate="no">{sourate.name}</span> · verset {ayah.n}/{total}</span>
@@ -8236,7 +8236,7 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
         <div style={{ height: '100%', width: ((ai + (allRevealed ? 1 : 0.5)) / total * 100) + '%', background: 'linear-gradient(90deg,#a8801a,' + GOLD + ')', borderRadius: 4, transition: 'width .6s cubic-bezier(0.4,0,0.2,1)' }} />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap', margin: '18px 0 22px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap', margin: '12px 0 14px' }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD, margin: 0 }}>
           {preview ? '✦ Aperçu Pro · découverte offerte' : 'Découverte · écoute & lis'}
         </p>
@@ -8246,21 +8246,21 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
       </div>
 
       {/* Mot-à-mot : RTL, chaque mot avec son sens dessous. Touchable : le mot est récité seul. */}
-      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse', justifyContent: 'center', alignContent: 'flex-start', gap: '14px 12px', padding: '6px 0 18px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse', justifyContent: 'center', alignContent: 'flex-start', gap: '8px 7px', padding: '4px 0 14px' }}>
         {ayah.words.map(function (w, i) {
           const show = i < revealed;
           const on = i === current;
           return (
-            <button key={ai + '-' + i} onClick={function () { tapWord(i); }} aria-label={'Écouter ' + (w.tr || '') + ' : ' + w.fr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit',
+            <button key={ai + '-' + i} onClick={function () { tapWord(i); }} aria-label={'Écouter ' + (w.tr || '') + ' : ' + w.fr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '8px 10px 7px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', minWidth: 64,
               background: on ? 'rgba(230,200,74,0.22)' : show ? 'rgba(200,167,39,0.10)' : 'rgba(255,255,255,0.03)',
               border: '1px solid ' + (on ? GOLD : show ? 'rgba(200,167,39,0.4)' : 'rgba(255,255,255,0.06)'),
               boxShadow: on ? '0 0 22px rgba(230,200,74,0.35)' : 'none',
               opacity: show ? 1 : 0.35,
               transform: on ? 'translateY(-2px) scale(1.06)' : show ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)',
               transition: 'all 0.45s cubic-bezier(0.34,1.56,0.64,1)' }}>
-              <span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 40, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
-              <span style={{ fontSize: 12.5, color: show ? 'rgba(240,237,230,0.55)' : 'transparent', fontStyle: 'italic', fontWeight: 500, transition: 'color 0.4s' }}>{w.tr || cmpPhon(w.ar)}</span>
-              <span style={{ fontSize: 14, color: show ? GOLD : 'transparent', fontWeight: 600, transition: 'color 0.4s' }}>{w.fr}</span>
+              <span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 'clamp(26px, 7.6vw, 38px)', color: '#f7eecb', lineHeight: 1.25, direction: 'rtl' }}>{w.ar}</span>
+              <span style={{ fontSize: 11.5, color: show ? 'rgba(240,237,230,0.55)' : 'transparent', fontStyle: 'italic', fontWeight: 500, transition: 'color 0.4s' }}>{w.tr || cmpPhon(w.ar)}</span>
+              <span style={{ fontSize: 13, lineHeight: 1.25, maxWidth: 140, color: show ? GOLD : 'transparent', fontWeight: 600, transition: 'color 0.4s' }}>{w.fr}</span>
             </button>
           );
         })}
@@ -8272,26 +8272,32 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
           à traduire — mises bout à bout elles donnent une phrase bancale. Le sens
           du verset vient donc toujours d'une traduction reconnue. */}
       <div style={{ minHeight: 50, textAlign: 'center', opacity: allRevealed ? 1 : 0, transition: 'opacity 0.5s', marginBottom: 12 }}>
-        <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 20, fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.5, margin: 0 }}>
+        <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 'clamp(17px, 4.6vw, 20px)', fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.45, margin: 0 }}>
           « {ayah.t || ayah.words.map(function (w) { return w.fr; }).join(' ')} »
         </p>
         {ayah.t && <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.3)', margin: '6px 0 0' }}>Traduction Muhammad Hamidullah</p>}
-        <p style={{ fontSize: 12, color: 'rgba(240,237,230,0.4)', margin: '10px 0 0' }}>Touche un mot pour l'entendre seul.</p>
+        <p style={{ fontSize: 12, color: 'rgba(240,237,230,0.4)', margin: '8px 0 0' }}>Touche un mot pour l'entendre seul.</p>
       </div>
 
       {/* Contrôles */}
-      <div style={{ position: 'sticky', bottom: 0, background: 'linear-gradient(0deg,#03070a 60%,transparent)', padding: '16px 0 24px', display: 'flex', gap: 10 }}>
-        <button onClick={togglePlay} aria-label={playing ? 'Pause' : 'Réécouter le verset'} style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: playing ? 'rgba(200,167,39,0.22)' : 'rgba(200,167,39,0.12)', color: GOLD, fontSize: playing ? 18 : 22, cursor: 'pointer' }}>{playing ? '❚❚' : '▶'}</button>
+      {/* Barre FIXE, pas sticky : html et body ont overflow-x:hidden, ce qui fait
+          du body le conteneur de défilement et rend position:sticky inopérant.
+          Sur mobile il fallait descendre pour trouver « Verset suivant ».
+          Calée au-dessus du bandeau cookies (--cookiebar) et de la barre iOS. */}
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'var(--cookiebar, 0px)', zIndex: 40, background: 'linear-gradient(0deg,#03070a 70%,rgba(3,7,10,0))', padding: '18px 16px calc(14px + env(safe-area-inset-bottom, 0px))' }}>
+      <div style={{ maxWidth: 608, margin: '0 auto', display: 'flex', gap: 10 }}>
+        <button onClick={togglePlay} aria-label={playing ? 'Pause' : 'Réécouter le verset'} style={{ flexShrink: 0, width: 52, height: 52, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: playing ? 'rgba(200,167,39,0.22)' : 'rgba(200,167,39,0.12)', color: GOLD, fontSize: playing ? 18 : 22, cursor: 'pointer' }}>{playing ? '❚❚' : '▶'}</button>
         {ai > 0 && (
-          <button onClick={function(){ setAuto(false); setAi(ai - 1); }} aria-label="Verset précédent" style={{ flexShrink: 0, width: 56, height: 56, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)', color: 'rgba(240,237,230,0.7)', fontSize: 20, cursor: 'pointer' }}>←</button>
+          <button onClick={function(){ setAuto(false); setAi(ai - 1); }} aria-label="Verset précédent" style={{ flexShrink: 0, width: 52, height: 52, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)', color: 'rgba(240,237,230,0.7)', fontSize: 20, cursor: 'pointer' }}>←</button>
         )}
         {!last ? (
-          <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
+          <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '15px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
         ) : (
-          <button onClick={onPlay} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: preview ? 'linear-gradient(135deg,#a8801a,#6d4f08)' : 'linear-gradient(135deg,#1f9455,#0d5730)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <button onClick={onPlay} style={{ flex: 1, padding: '15px', borderRadius: 16, border: 'none', background: preview ? 'linear-gradient(135deg,#a8801a,#6d4f08)' : 'linear-gradient(135deg,#1f9455,#0d5730)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
             {preview ? '🔓 Débloquer pour jouer →' : '🎮 Maintenant, joue →'}
           </button>
         )}
+      </div>
       </div>
     </div>
   );
@@ -8437,9 +8443,16 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
     : 'Que veut dire ce mot ?';
   const badge = { ar2fr: 'Lecture', listen: 'Écoute', fr2ar: 'Sens → mot', fill: 'Dans le verset' }[q.kind];
   const missed = picked != null && picked !== q.answer;
+  const missRef = React.useRef(null);
+  // Petits écrans (568 px) : la fiche peut tomber sous le bord, on l'amène à l'écran.
+  React.useEffect(function () {
+    if (missed && missRef.current && missRef.current.scrollIntoView) {
+      try { missRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {}
+    }
+  }, [missed]);
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '72px 16px 0', display: 'flex', flexDirection: 'column', minHeight: '100svh', position: 'relative' }}>
       {/* burst XP au centre quand bonne réponse */}
       {burst && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 50, pointerEvents: 'none', textAlign: 'center', animation: 'cmpBurst 0.9s ease-out forwards' }}>
@@ -8450,7 +8463,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
       <style>{'@keyframes cmpBurst{0%{transform:translate(-50%,-30%) scale(0.5);opacity:0}20%{transform:translate(-50%,-50%) scale(1.15);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}@keyframes cmpShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}@keyframes cmpPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}@keyframes cmpIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes cmpWave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}'}</style>
 
       {/* barre top */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
         <button onClick={onBack} aria-label="Quitter la partie" style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 20, cursor: 'pointer', padding: 4 }}>✕</button>
         <div style={{ flex: 1, display: 'flex', gap: 4 }}>
           {qs.map(function (_, k) {
@@ -8465,13 +8478,13 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
       </div>
 
       <div key={qi} style={{ animation: 'cmpIn .35s ease-out' }}>
-        <div style={{ textAlign: 'center', marginBottom: 14 }}>
-          <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: GOLD, padding: '4px 10px', borderRadius: 999, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', marginBottom: 10 }}>Manche {qi + 1} · {badge}</span>
+        <div style={{ textAlign: 'center', marginBottom: 12 }}>
+          <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: GOLD, padding: '4px 10px', borderRadius: 999, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', marginBottom: 8 }}>Manche {qi + 1} · {badge}</span>
           <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(240,237,230,0.75)', margin: 0 }}>{ask}</p>
         </div>
 
         {/* L'énoncé, selon la manche */}
-        <div style={{ textAlign: 'center', padding: '22px 18px', marginBottom: 20, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22, animation: shake ? 'cmpShake 0.4s ease-in-out' : 'none' }}>
+        <div style={{ textAlign: 'center', padding: '16px 14px', marginBottom: 14, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22, animation: shake ? 'cmpShake 0.4s ease-in-out' : 'none' }}>
           {q.kind === 'listen' && (
             <button onClick={function () { cmpPlayWord(w.s, w.a, w.p); }} aria-label="Réécouter le mot" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '14px 22px', borderRadius: 999, border: '1px solid rgba(230,200,74,0.5)', background: 'rgba(230,200,74,0.12)', color: GOLD, cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 800 }}>
               <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: 3, height: 22 }}>
@@ -8488,7 +8501,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
           )}
           {q.kind === 'ar2fr' && (
             <>
-              <span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 56, color: '#f7eecb', direction: 'rtl', lineHeight: 1.2, display: 'block' }}>{w.ar}</span>
+              <span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 'clamp(40px, 12vw, 54px)', color: '#f7eecb', direction: 'rtl', lineHeight: 1.25, display: 'block' }}>{w.ar}</span>
               {(w.tr || cmpPhon(w.ar)) && <div style={{ marginTop: 8, fontSize: 16, fontStyle: 'italic', color: 'rgba(240,237,230,0.6)' }}>{w.tr || cmpPhon(w.ar)}</div>}
             </>
           )}
@@ -8505,7 +8518,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
         </div>
 
         {/* options */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {q.options.map(function (opt, i) {
             const isAns = opt === q.answer;
             const isPick = opt === picked;
@@ -8517,7 +8530,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
             }
             return (
               <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null}
-                style={{ minHeight: 84, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
+                style={{ minHeight: 72, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, textAlign: 'center', padding: '10px 8px', borderRadius: 16, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 30 : 16, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
                 <span lang={optArabic ? 'ar' : undefined} style={{ lineHeight: 1.1 }}>{opt}</span>
                 {optArabic && cmpPhon(opt) && <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, fontStyle: 'italic', fontWeight: 500, color: 'rgba(240,237,230,0.5)', direction: 'ltr' }}>{cmpPhon(opt)}</span>}
                 {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: GREEN }}>✓</span>}
@@ -8529,23 +8542,23 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 
         {/* Après une erreur : la fiche du mot, et on attend le joueur. */}
         {missed && (
-          <div style={{ marginTop: 16, animation: 'cmpIn .3s ease-out' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 16, background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
-              <button onClick={function () { cmpPlayWord(w.s, w.a, w.p); }} aria-label="Réécouter le mot" style={{ flexShrink: 0, width: 42, height: 42, borderRadius: '50%', border: '1px solid rgba(74,222,128,0.45)', background: 'rgba(74,222,128,0.12)', color: GREEN, fontSize: 16, cursor: 'pointer' }}>▶</button>
-              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: '#f0ede6' }}><span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 24, fontWeight: 400, marginLeft: 8 }}>{w.ar}</span> {w.tr && <em style={{ fontWeight: 500, color: 'rgba(240,237,230,0.6)' }}>{w.tr}</em>}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: GREEN }}>= {w.fr}</div>
-              </div>
+          /* Fiche et bouton sur UNE ligne : empilés, le bouton « Continuer »
+             passait sous le bord de l'écran sur un téléphone de 667 px. */
+          <div ref={missRef} style={{ marginTop: 10, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, padding: '8px 8px 8px 10px', borderRadius: 16, background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)', animation: 'cmpIn .3s ease-out' }}>
+            <button onClick={function () { cmpPlayWord(w.s, w.a, w.p); }} aria-label="Réécouter le mot" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: '50%', border: '1px solid rgba(74,222,128,0.45)', background: 'rgba(74,222,128,0.12)', color: GREEN, fontSize: 14, cursor: 'pointer' }}>▶</button>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'left', lineHeight: 1.25 }}>
+              <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.65)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 20, color: '#f7eecb', marginLeft: 6 }}>{w.ar}</span> {w.tr && <em>{w.tr}</em>}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: GREEN }}>= {w.fr}</div>
             </div>
-            <button onClick={continueAfterMiss} style={{ width: '100%', marginTop: 12, padding: '15px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-              {qi >= qs.length - 1 ? 'Voir mon résultat →' : 'Continuer →'}
+            <button onClick={continueAfterMiss} style={{ flexShrink: 0, padding: '13px 14px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 14.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+              {qi >= qs.length - 1 ? 'Résultat →' : 'Suivant →'}
             </button>
           </div>
         )}
       </div>
 
       <div style={{ flex: 1 }} />
-      <div style={{ textAlign: 'center', padding: '20px 0 28px', fontSize: 14, color: 'rgba(240,237,230,0.4)' }}>
+      <div style={{ textAlign: 'center', padding: '14px 0 calc(18px + var(--cookiebar, 0px))', fontSize: 14, color: 'rgba(240,237,230,0.4)' }}>
         Question {qi + 1} / {qs.length} · <span style={{ color: GOLD, fontWeight: 700 }}>{score} pts</span>
       </div>
     </div>
