@@ -191,7 +191,7 @@ function emailBienvenueGratuit(prenom) {
      est un correspondant, pas un annonceur. */
   const lignes = [
     salut,
-    'Ton compte est prêt. Il est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, 5 sourates de Comprendre en entier, et une sourate de plus offerte chaque semaine. Ta progression est sauvegardée.',
+    'Ton compte est prêt. Il est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, Al-Fâtiha et Al-Ikhlâs en entier dans Comprendre, et l'écoute mot à mot de toutes les sourates. Ta progression est sauvegardée.',
     'Si tu ne sais pas par où commencer : Al-Fâtiha, mot à mot. Tu la récites dans chaque prière, et en quatre minutes tu vois enfin ce que chaque mot veut dire.',
     url,
     'Une question pour moi : qu’est-ce qui t’a amené sur le site ? Réponds simplement à cet e-mail, je lis tout.',
@@ -242,8 +242,8 @@ function emailDernierJour(prenom, finMs) {
       <h1 style="${h1}">Il te reste un jour<br>d'accès complet.</h1>
       <p style="${p}">${quandFr(finMs).heure ? (quandFr(finMs).mot === 'ce soir' ? 'Ce soir' : "Aujourd'hui") + ', vers ' + quandFr(finMs).heure : 'Demain, ' + dateFr(finMs)}, ton compte redevient gratuit. Rien ne sera perdu de ce que tu as appris — mais le rythme change.</p>
       ${colonnes(
-        ['Toute ta progression, définitivement', '5 sourates en entier, dont Al-Fâtiha', 'Une partie de Quiz par jour', 'Une partie de Blind Test par jour', 'Une sourate Pro offerte chaque semaine'],
-        ['Les 33 autres sourates en mot-à-mot', 'Le Quiz sans limite', 'Le Blind Test sans limite']
+        ['Toute ta progression, définitivement', 'Al-Fâtiha et Al-Ikhlâs en entier', 'Une partie de Quiz par jour', 'Une partie de Blind Test par jour'],
+        ['Le jeu sur les 36 autres sourates', 'Le Quiz sans limite', 'Le Blind Test sans limite']
       )}
       <p style="${p}">Si tu veux garder l'accès entier, c'est maintenant qu'il faut le dire — demain le site aura déjà changé.</p>
       ${PRIX}
@@ -266,7 +266,7 @@ function emailFin(prenom) {
       <h1 style="${h1}">Tes deux jours<br>sont passés.</h1>
       <p style="${p}">Ton compte reste actif et ta progression est intacte. Ce que tu as appris ne t'est pas repris : tu peux continuer, simplement à un rythme plus lent.</p>
       ${colonnes(
-        ['Une partie de Quiz par jour', 'Une partie de Blind Test par jour', '5 sourates, dont Al-Fâtiha, toujours', 'Une sourate Pro offerte chaque semaine'],
+        ['Une partie de Quiz par jour', 'Une partie de Blind Test par jour', 'Al-Fâtiha et Al-Ikhlâs, toujours'],
         ['Le Juz ʿAmma complet, 38 sourates', 'Les 740 questions, tous niveaux', 'Les 114 sourates du Blind Test']
       )}
       <p style="${p}">Si les deux jours t'ont servi, l'abonnement rouvre tout. Sinon, reviens quand tu veux : la partie du jour t'attend, et elle restera gratuite.</p>

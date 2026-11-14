@@ -244,9 +244,9 @@ function useAuth() { return React.useContext(AuthContext); }
 
    Trois règles, et c'est tout :
    1. Quiz et Blind Test : tous les niveaux, une partie par jour.
-   2. Comprendre : les 5 sourates gratuites sans limite, plus une sourate Pro
-      qui change chaque semaine. On n'« absorbe » pas une sourate en une séance
-      — le rythme hebdomadaire colle à l'activité, et il crée un rendez-vous.
+   2. Comprendre : Al-Fâtiha et Al-Ikhlâs jouables sans limite (choix d'Ayoub,
+      14/11/2026 — avant : 5 sourates + une sourate Pro par semaine). L'écoute
+      et le mot-à-mot des 38 sourates restent libres : seul le jeu est payant.
    3. La progression, les statistiques et la série sont gratuites pour tous.
       Les cacher derrière le Pro supprimait le mécanisme même qui donne envie de
       payer : on ne s'attache pas à ce qu'on ne voit pas grandir.
@@ -519,8 +519,8 @@ function GuestGateModal({ onClose, context = 'default' }) {
      refusaient sans conséquence.
 
      Ce que la modale promet est ce que le compte gratuit donne vraiment :
-     une partie offerte chaque jour, 5 sourates, la progression gardée. */
-  const FEATS = ['✓ Gratuit, sans carte bancaire', '✓ 1 partie offerte chaque jour', '✓ 5 sourates de Comprendre en entier', '✓ Ta progression sauvegardée'];
+     une partie offerte chaque jour, Al-Fâtiha et Al-Ikhlâs, la progression gardée. */
+  const FEATS = ['✓ Gratuit, sans carte bancaire', '✓ 1 partie offerte chaque jour', '✓ Al-Fâtiha et Al-Ikhlâs en entier', '✓ Ta progression sauvegardée'];
   const GATE_COPY = {
     default: {
       emoji: '🎯',
@@ -629,7 +629,7 @@ function TrialWelcomeModal({ onClose, navigate }) {
         {/* Dire maintenant ce qui se referme : c'est ce qui donne leur valeur
             aux deux jours, et ça évite que le jour 3 passe pour une panne. */}
         <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11.5, color:'rgba(240,237,230,0.4)', lineHeight:1.5, margin:'0 0 18px' }}>
-          Tout ce qui porte l'étiquette <strong style={{ color:'#e6c84a' }}>PRO</strong> t'est ouvert pendant ces 2 jours. Ensuite, tu gardes chaque jour une partie de Quiz et une de Blind Test, 5 sourates, et une sourate Pro par semaine.
+          Tout ce qui porte l'étiquette <strong style={{ color:'#e6c84a' }}>PRO</strong> t'est ouvert pendant ces 2 jours. Ensuite, tu gardes chaque jour une partie de Quiz et une de Blind Test, et Al-Fâtiha et Al-Ikhlâs en entier.
         </p>
 
         {/* « Commencer » refermait la fenêtre et laissait la personne sur
@@ -2213,7 +2213,7 @@ function FeatureCards({ navigate }) {
       title: 'Comprends le Coran',
       hook: 'Tu pries en arabe depuis des années — sans vraiment comprendre les mots.',
       desc: "Apprends le Coran mot à mot. Le Juz 'Amma seul te donne plus de la moitié des mots du Coran — ils reviennent partout. Écoute, comprends, joue, et un jour tu comprends ta prière.",
-      free: '5 sourates offertes · mot à mot',
+      free: 'Al-Fâtiha et Al-Ikhlâs offertes · écoute de tout le Juz \'Amma',
       pro: "Le Juz 'Amma complet — 38 sourates, 571 versets",
       accent: { from:'rgba(30,22,4,0.97)', to:'rgba(8,6,1,0.99)', border:'rgba(200,167,39,0.32)', glow:'rgba(200,167,39,0.16)', line:'#c8a727' },
       page: 'comprendre',
@@ -2354,8 +2354,8 @@ function ComparisonTable({ navigate }) {
   { text: 'Tous les niveaux, tous les thèmes', ok: true },
   { text: 'Une partie de Quiz par jour', ok: true },
   { text: 'Une partie de Blind Test par jour', ok: true },
-  { text: '5 sourates de Comprendre, mot à mot', ok: true },
-  { text: 'Une sourate Pro offerte chaque semaine', ok: true },
+  { text: 'Al-Fâtiha et Al-Ikhlâs, mot à mot', ok: true },
+  { text: 'Écoute et mot-à-mot des 38 sourates', ok: true },
   { text: '🔒 Quiz illimités tous niveaux', ok: false },
   { text: '🔒 Blind Test sans limite', ok: false },
   /* La progression passe au gratuit. La cacher supprimait le mécanisme même
@@ -2705,7 +2705,7 @@ function FaqSection() {
   const faqs = [
     {
       q: 'Est-ce vraiment gratuit ? Sans carte bancaire ?',
-      a: 'Oui, sans limite de durée et sans carte bancaire. Le compte gratuit te donne 5 sourates de Comprendre en mot à mot, une partie de Quiz et une de Blind Test chaque jour, et une sourate Pro offerte chaque semaine. Et si le Pro ne te convient pas, tu es remboursé sous 14 jours. Tu passes à Pro seulement si tu veux tout, sans limite.'
+      a: 'Oui, sans limite de durée et sans carte bancaire. Le compte gratuit te donne Al-Fâtiha et Al-Ikhlâs à jouer sans limite, l’écoute et le mot-à-mot de toutes les sourates, et une partie de Quiz et une de Blind Test chaque jour. Et si le Pro ne te convient pas, tu es remboursé sous 14 jours. Tu passes à Pro seulement si tu veux tout, sans limite.'
     },
     {
       q: 'Je ne suis pas bon(ne) en islam — c\'est fait pour moi ?',
@@ -2942,7 +2942,7 @@ function StartPage({ navigate }) {
       icon: '📖', tag: 'NOUVEAU', tagColor: '#c8a727', tagRgb: '200,167,39',
       title: 'Comprends le Coran',
       desc: 'Apprends le Coran mot à mot, verset par verset, avec audio et phonétique. Quelques dizaines de mots suffisent à saisir une grande partie du Coran — comprends enfin ce que tu récites dans ta prière.',
-      free: ['5 sourates en entier, dont Al-Fâtiha', 'Une sourate Pro offerte chaque semaine', 'Écoute et mot-à-mot de toutes les sourates'],
+      free: ['Al-Fâtiha et Al-Ikhlâs en entier', 'Écoute et mot-à-mot de toutes les sourates'],
       pro: ["Le Juz 'Amma en entier — 38 sourates, 571 versets", 'Nouvelles sourates régulièrement', 'Suivi de progression complet'],
       cta: '📖 Essayer Comprendre le Coran', page: 'comprendre',
     },
@@ -7166,6 +7166,9 @@ const CMP_RECITER = 'Alafasy_128kbps'; // défaut si aucune préférence enregis
    Au passage, il faut 8 mois pour parcourir les 33 sourates ainsi, contre 38
    jours si on en offrait une par jour. */
 function cmpWeeklyId(data) {
+  // Désactivé le 14/11/2026 (choix d'Ayoub) : seules Al-Fâtiha et Al-Ikhlâs
+  // sont jouables en gratuit. Retirer ce return pour rétablir l'offre.
+  return null;
   if (!data || !data.surahs) return null;
   const locked = data.surahs.filter(function (s) { return !s.free; }).map(function (s) { return s.id; });
   return hmWeeklyPick(locked);
@@ -7989,7 +7992,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
             <span style={{ fontSize: 20, color: GOLD }}>›</span>
           </button>
           <p style={{ fontSize: 13, color: 'rgba(240,237,230,0.55)', textAlign: 'center', margin: '16px 0 0', lineHeight: 1.6 }}>
-            Ton compte gratuit t'ouvre <strong style={{ color: '#f0ede6' }}>5 sourates</strong> en entier et garde ta progression.{' '}
+            Ton compte gratuit t'ouvre <strong style={{ color: '#f0ede6' }}>Al-Fâtiha et Al-Ikhlâs</strong> en entier et garde ta progression.{' '}
             <button onClick={onSignup} style={{ background: 'none', border: 'none', padding: 0, color: GOLD, fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>Créer mon compte</button>
           </p>
         </div>
@@ -8708,7 +8711,7 @@ function ComprendreSection({ navigate }) {
         <button onClick={function(){ if (navigate) navigate('comprendre'); }} style={{ padding: '16px 40px', borderRadius: 100, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', boxShadow: '0 8px 30px rgba(200,167,39,0.35)' }}>
           Comprends le Coran →
         </button>
-        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>5 sourates gratuites · compte gratuit, sans carte</p>
+        <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.4)', marginTop: 14, fontFamily: 'Plus Jakarta Sans,sans-serif' }}>Al-Fâtiha et Al-Ikhlâs gratuites · compte gratuit, sans carte</p>
       </div>
     </section>
   );
