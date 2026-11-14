@@ -7174,6 +7174,26 @@ const cmpPad3 = function (n) { return String(n).padStart(3, '0'); };
 const cmpAyahAudio = function (surah, ayah, reciterId) {
   return 'https://everyayah.com/data/' + (reciterId || CMP_RECITER) + '/' + cmpPad3(surah) + cmpPad3(ayah) + '.mp3';
 };
+/* Récitation d'un mot isolé — enregistrements réels du mot-à-mot de quran.com
+   (une seule voix, pas le récitateur choisi : ce corpus n'existe que pour elle).
+   L'index du mot dans le verset correspond exactement à celui de quran.com, car
+   comprendre.json en est extrait (vérifié : 78:40 → 15 mots, 1:7 → 9 mots). */
+const cmpWordAudio = function (surah, ayah, pos) {
+  return 'https://audio.qurancdn.com/wbw/' + cmpPad3(surah) + '_' + cmpPad3(ayah) + '_' + cmpPad3(pos) + '.mp3';
+};
+// Un seul lecteur partagé pour les mots : deux mots touchés vite ne se superposent pas.
+let cmpWordPlayer = null;
+function cmpPlayWord(surah, ayah, pos) {
+  if (typeof Audio === 'undefined' || !surah || !ayah || !pos) return;
+  try {
+    if (!cmpWordPlayer) cmpWordPlayer = new Audio();
+    cmpWordPlayer.pause();
+    cmpWordPlayer.src = cmpWordAudio(surah, ayah, pos);
+    const p = cmpWordPlayer.play();
+    if (p && p.catch) p.catch(function () {});
+  } catch (e) {}
+}
+function cmpStopWord() { if (cmpWordPlayer) { try { cmpWordPlayer.pause(); } catch (e) {} } }
 
 /* Récitateur choisi pour « Comprendre ».
    Clé localStorage distincte de la progression (hm_comprendre_v1) : c'est une
@@ -7847,7 +7867,7 @@ function ComprendrePage({ navigate }) {
   return shell(
     <>
       {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
-      {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
+      {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} audioRef={audioRef} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
         if (!sourate.free && !isPro && sourate.id !== weeklyId) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
         setMode('play');
@@ -8090,47 +8110,158 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
 }
 
 // ── DÉCOUVERTE (reveal mot-à-mot + audio) ──
-function CmpDiscover({ sourate, playAyah, onPlay, onBack, preview }) {
+/* Les mots apparaissent au rythme de la récitation : la durée réelle du verset
+   (connue dès que l'audio charge) est répartie entre ses mots. L'ancien pas fixe
+   de 850 ms allait trop vite sur les versets lents et laissait des mots cachés
+   après la fin de l'audio sur les versets longs.
+   Le mot en cours brille : l'œil suit l'oreille, comme sur un karaoké — c'est ce
+   qui fait le lien entre le son récité et le sens. */
+function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
   const GOLD = '#e6c84a';
   const [ai, setAi] = React.useState(0);
   const [revealed, setRevealed] = React.useState(0); // nb de mots révélés sur l'ayah courant
+  const [playing, setPlaying] = React.useState(false);
+  const [auto, setAuto] = React.useState(false);     // lecture continue verset après verset
+  const [tapped, setTapped] = React.useState(-1);
+  const autoRef = React.useRef(false);
+  React.useEffect(function () { autoRef.current = auto; }, [auto]);
   const ayah = sourate.ayahs[ai];
+  const total = sourate.ayahs.length;
+  const last = ai >= total - 1;
+  const n = ayah.words.length;
 
   React.useEffect(function () {
-    setRevealed(0);
+    setRevealed(0); setTapped(-1);
+    const timers = [];
+    let scheduled = false;
+    function schedule(step, start) {
+      if (scheduled) return;
+      scheduled = true;
+      for (let i = 0; i < n; i++) {
+        (function (k) {
+          timers.push(setTimeout(function () { setRevealed(function (r) { return Math.max(r, k + 1); }); }, start + k * step));
+        })(i);
+      }
+    }
+    const a = audioRef && audioRef.current;
+    cmpStopWord();
     playAyah(sourate.surah, ayah.n);
-    const timers = ayah.words.map(function (_, i) {
-      return setTimeout(function () { setRevealed(function (r) { return Math.max(r, i + 1); }); }, 500 + i * 850);
-    });
-    return function () { timers.forEach(clearTimeout); };
+    // Filet de sécurité : audio bloqué ou réseau lent → on révèle quand même.
+    const fallback = setTimeout(function () { schedule(850, 0); }, 1500);
+    function onMeta() {
+      clearTimeout(fallback);
+      const d = a.duration;
+      if (!isFinite(d) || d <= 0) { schedule(850, 300); return; }
+      // Les récitateurs prolongent la dernière syllabe : on finit à ~88 %.
+      schedule(Math.max(260, (d * 1000 * 0.88) / n), 250);
+    }
+    function onPlayEv() { setPlaying(true); }
+    function onPause() { setPlaying(false); }
+    function onEnd() {
+      setPlaying(false);
+      setRevealed(n);
+      if (autoRef.current) {
+        if (ai < total - 1) timers.push(setTimeout(function () { setAi(function (x) { return Math.min(total - 1, x + 1); }); }, 900));
+        else setAuto(false);
+      }
+    }
+    if (a) {
+      a.addEventListener('loadedmetadata', onMeta);
+      a.addEventListener('play', onPlayEv);
+      a.addEventListener('pause', onPause);
+      a.addEventListener('ended', onEnd);
+      a.addEventListener('error', onPause);
+    }
+    return function () {
+      clearTimeout(fallback);
+      timers.forEach(clearTimeout);
+      if (a) {
+        a.removeEventListener('loadedmetadata', onMeta);
+        a.removeEventListener('play', onPlayEv);
+        a.removeEventListener('pause', onPause);
+        a.removeEventListener('ended', onEnd);
+        a.removeEventListener('error', onPause);
+      }
+    };
   }, [ai]);
 
-  const last = ai >= sourate.ayahs.length - 1;
-  const allRevealed = revealed >= ayah.words.length;
+  // En quittant l'écran, la récitation s'arrête : elle ne doit pas continuer
+  // sous le menu ou sous le jeu.
+  React.useEffect(function () {
+    return function () {
+      cmpStopWord();
+      const a = audioRef && audioRef.current;
+      if (a) { try { a.pause(); } catch (e) {} }
+    };
+  }, []);
+
+  function togglePlay() {
+    const a = audioRef && audioRef.current;
+    if (playing && a) { try { a.pause(); } catch (e) {} setAuto(false); return; }
+    cmpStopWord();
+    setTapped(-1);
+    playAyah(sourate.surah, ayah.n);
+    setRevealed(n);
+  }
+  function toggleAuto() {
+    const next = !auto;
+    setAuto(next);
+    if (next && !playing) {
+      cmpStopWord();
+      if (revealed >= n && !last) setAi(ai + 1);   // verset déjà écouté → on enchaîne
+      else playAyah(sourate.surah, ayah.n);
+    }
+  }
+  function tapWord(i) {
+    const a = audioRef && audioRef.current;
+    if (a) { try { a.pause(); } catch (e) {} }
+    setAuto(false);
+    setRevealed(n);
+    setTapped(i);
+    cmpPlayWord(sourate.surah, ayah.n, i + 1);
+  }
+
+  const allRevealed = revealed >= n;
+  // Mot qui « sonne » : le dernier révélé pendant la récitation, sinon celui touché.
+  const current = playing && !allRevealed ? revealed - 1 : tapped;
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>← Retour</button>
-        <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{sourate.name} · verset {ayah.n}/{sourate.ayahs.length}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 0' }}>← Retour</button>
+        <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}><span translate="no">{sourate.name}</span> · verset {ayah.n}/{total}</span>
+      </div>
+      {/* Avancement dans la sourate */}
+      <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: ((ai + (allRevealed ? 1 : 0.5)) / total * 100) + '%', background: 'linear-gradient(90deg,#a8801a,' + GOLD + ')', borderRadius: 4, transition: 'width .6s cubic-bezier(0.4,0,0.2,1)' }} />
       </div>
 
-      <div style={{ textAlign: 'center', margin: '10px 0 28px' }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap', margin: '18px 0 22px' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: GOLD, margin: 0 }}>
           {preview ? '✦ Aperçu Pro · découverte offerte' : 'Découverte · écoute & lis'}
         </p>
+        <button onClick={toggleAuto} aria-pressed={auto} style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit', color: auto ? '#06170d' : GOLD, background: auto ? GOLD : 'rgba(200,167,39,0.08)', border: '1px solid rgba(200,167,39,0.45)' }}>
+          {auto ? '■ Lecture continue' : '↻ Lecture continue'}
+        </button>
       </div>
 
-      {/* Mot-à-mot : RTL, chaque mot avec son sens dessous */}
-      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse', justifyContent: 'center', alignContent: 'flex-start', gap: '14px 12px', padding: '10px 0 30px' }}>
+      {/* Mot-à-mot : RTL, chaque mot avec son sens dessous. Touchable : le mot est récité seul. */}
+      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse', justifyContent: 'center', alignContent: 'flex-start', gap: '14px 12px', padding: '6px 0 18px' }}>
         {ayah.words.map(function (w, i) {
           const show = i < revealed;
+          const on = i === current;
           return (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', borderRadius: 16, background: show ? 'rgba(200,167,39,0.10)' : 'rgba(255,255,255,0.03)', border: '1px solid ' + (show ? 'rgba(200,167,39,0.4)' : 'rgba(255,255,255,0.06)'), opacity: show ? 1 : 0.35, transform: show ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)', transition: 'all 0.5s cubic-bezier(0.34,1.56,0.64,1)' }}>
-              <span style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 40, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
+            <button key={ai + '-' + i} onClick={function () { tapWord(i); }} aria-label={'Écouter ' + (w.tr || '') + ' : ' + w.fr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit',
+              background: on ? 'rgba(230,200,74,0.22)' : show ? 'rgba(200,167,39,0.10)' : 'rgba(255,255,255,0.03)',
+              border: '1px solid ' + (on ? GOLD : show ? 'rgba(200,167,39,0.4)' : 'rgba(255,255,255,0.06)'),
+              boxShadow: on ? '0 0 22px rgba(230,200,74,0.35)' : 'none',
+              opacity: show ? 1 : 0.35,
+              transform: on ? 'translateY(-2px) scale(1.06)' : show ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)',
+              transition: 'all 0.45s cubic-bezier(0.34,1.56,0.64,1)' }}>
+              <span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 40, color: '#f7eecb', lineHeight: 1, direction: 'rtl' }}>{w.ar}</span>
               <span style={{ fontSize: 12.5, color: show ? 'rgba(240,237,230,0.55)' : 'transparent', fontStyle: 'italic', fontWeight: 500, transition: 'color 0.4s' }}>{w.tr || cmpPhon(w.ar)}</span>
               <span style={{ fontSize: 14, color: show ? GOLD : 'transparent', fontWeight: 600, transition: 'color 0.4s' }}>{w.fr}</span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -8140,16 +8271,20 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack, preview }) {
           un recollage des gloses mot-à-mot : celles-ci servent à décomposer, pas
           à traduire — mises bout à bout elles donnent une phrase bancale. Le sens
           du verset vient donc toujours d'une traduction reconnue. */}
-      <div style={{ minHeight: 50, textAlign: 'center', opacity: allRevealed ? 1 : 0, transition: 'opacity 0.5s', marginBottom: 18 }}>
+      <div style={{ minHeight: 50, textAlign: 'center', opacity: allRevealed ? 1 : 0, transition: 'opacity 0.5s', marginBottom: 12 }}>
         <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 20, fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.5, margin: 0 }}>
           « {ayah.t || ayah.words.map(function (w) { return w.fr; }).join(' ')} »
         </p>
         {ayah.t && <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.3)', margin: '6px 0 0' }}>Traduction Muhammad Hamidullah</p>}
+        <p style={{ fontSize: 12, color: 'rgba(240,237,230,0.4)', margin: '10px 0 0' }}>Touche un mot pour l'entendre seul.</p>
       </div>
 
       {/* Contrôles */}
-      <div style={{ position: 'sticky', bottom: 0, background: 'linear-gradient(0deg,#03070a 60%,transparent)', padding: '16px 0 24px', display: 'flex', gap: 12 }}>
-        <button onClick={function(){ playAyah(sourate.surah, ayah.n); setRevealed(ayah.words.length); }} style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: 'rgba(200,167,39,0.12)', color: GOLD, fontSize: 22, cursor: 'pointer' }}>▶</button>
+      <div style={{ position: 'sticky', bottom: 0, background: 'linear-gradient(0deg,#03070a 60%,transparent)', padding: '16px 0 24px', display: 'flex', gap: 10 }}>
+        <button onClick={togglePlay} aria-label={playing ? 'Pause' : 'Réécouter le verset'} style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: playing ? 'rgba(200,167,39,0.22)' : 'rgba(200,167,39,0.12)', color: GOLD, fontSize: playing ? 18 : 22, cursor: 'pointer' }}>{playing ? '❚❚' : '▶'}</button>
+        {ai > 0 && (
+          <button onClick={function(){ setAuto(false); setAi(ai - 1); }} aria-label="Verset précédent" style={{ flexShrink: 0, width: 56, height: 56, borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)', color: 'rgba(240,237,230,0.7)', fontSize: 20, cursor: 'pointer' }}>←</button>
+        )}
         {!last ? (
           <button onClick={function(){ setAi(ai + 1); }} style={{ flex: 1, padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Verset suivant →</button>
         ) : (
@@ -8163,41 +8298,72 @@ function CmpDiscover({ sourate, playAyah, onPlay, onBack, preview }) {
 }
 
 // ── JEU ──
-function cmpBuildQuestions(sourate) {
-  // mots uniques de la sourate
+/* Quatre manches qui tournent, chacune entraîne un sens différent :
+   - ar2fr  : lire le mot arabe → trouver son sens ;
+   - listen : ENTENDRE le mot récité → le reconnaître (c'est ainsi qu'on le
+              rencontre dans la prière : à l'oreille, pas à l'écrit) ;
+   - fr2ar  : partir du sens → retrouver le mot ;
+   - fill   : le mot surligné DANS son verset → son sens (le mot en contexte,
+              comme il est réellement récité ; l'ancienne version annonçait ce
+              type mais affichait le mot isolé).
+   Les mots encore jamais réussis passent en premier : rejouer une sourate fait
+   avancer, au lieu de retomber au hasard sur des mots déjà sus. */
+const CMP_KINDS = ['ar2fr', 'listen', 'fr2ar', 'fill'];
+function cmpBuildQuestions(sourate, known) {
+  known = known || {};
   const seen = {};
   const words = [];
-  sourate.ayahs.forEach(function (a) { a.words.forEach(function (w) { if (!seen[w.ar]) { seen[w.ar] = 1; words.push(w); } }); });
+  sourate.ayahs.forEach(function (a) {
+    a.words.forEach(function (w, wi) {
+      if (seen[w.ar]) return;
+      seen[w.ar] = 1;
+      words.push({ ar: w.ar, fr: w.fr, tr: w.tr, s: sourate.surah, a: a.n, p: wi + 1, at: wi, verse: a.words.map(function (x) { return x.ar; }) });
+    });
+  });
   /* Les distracteurs viennent de la sourate elle-même quand elle est assez
      riche (plus exigeant : les mots se ressemblent). Les sourates très courtes
      (Al-Kawthar : 10 mots) n'offrent pas 3 mauvaises réponses crédibles — on
      puise alors dans tout le corpus chargé. */
-  const fallback = [];
-  if (words.length < 4 && cmpDataCache) {
+  let pool = words;
+  if (words.length < 6 && cmpDataCache) {
     const fseen = {};
+    pool = [];
     cmpDataCache.surahs.forEach(function (s) {
-      s.ayahs.forEach(function (a) { a.words.forEach(function (w) { if (!fseen[w.fr]) { fseen[w.fr] = 1; fallback.push(w); } }); });
+      s.ayahs.forEach(function (a) { a.words.forEach(function (w) { if (!fseen[w.fr]) { fseen[w.fr] = 1; pool.push(w); } }); });
     });
   }
-  const pool = words.length >= 4 ? words : fallback;
-  const qs = cmpShuffle(words).slice(0, Math.min(8, words.length)).map(function (w, idx) {
-    const type = idx % 3; // 0: ar→fr, 1: fr→ar, 2: complète (ar→fr aussi mais présenté en verset)
-    const distract = cmpShuffle(pool.filter(function (x) { return x.fr !== w.fr; })).slice(0, 3);
-    if (type === 1) {
-      const opts = cmpShuffle([w].concat(distract));
-      return { kind: 'fr2ar', ar: w.ar, prompt: w.fr, options: opts.map(function (o) { return o.ar; }), answer: w.ar };
-    }
+  // Tri stable : à connaissance égale, l'ordre mélangé est conservé.
+  const ordered = cmpShuffle(words).sort(function (x, y) { return (known[x.ar] || 0) - (known[y.ar] || 0); });
+  return ordered.slice(0, Math.min(8, words.length)).map(function (w, idx) {
+    let kind = CMP_KINDS[idx % CMP_KINDS.length];
+    if (kind === 'fill' && w.verse.length < 2) kind = 'ar2fr';
+    // Ni deux propositions au même sens, ni deux graphies d'un même mot :
+    // sinon deux réponses sont justes et le joueur est puni d'avoir raison.
+    const usedFr = {}, usedAr = {};
+    usedFr[w.fr] = 1; usedAr[cmpNorm(w.ar)] = 1;
+    const distract = [];
+    cmpShuffle(pool).forEach(function (x) {
+      if (distract.length >= 3) return;
+      const n = cmpNorm(x.ar);
+      if (usedFr[x.fr] || usedAr[n]) return;
+      usedFr[x.fr] = 1; usedAr[n] = 1;
+      distract.push(x);
+    });
     const opts = cmpShuffle([w].concat(distract));
-    return { kind: type === 2 ? 'fill' : 'ar2fr', ar: w.ar, prompt: w.ar, options: opts.map(function (o) { return o.fr; }), answer: w.fr };
+    const arabicOpts = kind === 'fr2ar' || kind === 'listen';
+    return {
+      kind: kind, w: w, ar: w.ar,
+      options: opts.map(function (o) { return arabicOpts ? o.ar : o.fr; }),
+      answer: arabicOpts ? w.ar : w.fr,
+    };
   });
-  return qs;
 }
 
 function CmpPlay({ sourate, st, onFinish, onBack }) {
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
   const RED = '#e8654a';
-  const [qs] = React.useState(function () { return cmpBuildQuestions(sourate); });
+  const [qs] = React.useState(function () { return cmpBuildQuestions(sourate, st && st.words); });
   const [qi, setQi] = React.useState(0);
   const [picked, setPicked] = React.useState(null);
   const [score, setScore] = React.useState(0);
@@ -8205,11 +8371,32 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
   const [results, setResults] = React.useState([]);
   const [burst, setBurst] = React.useState(null); // {xp, combo, ok}
   const [shake, setShake] = React.useState(false);
+  const pendingRef = React.useRef(null);
   const q = qs[qi];
+  const w = q.w;
+
+  // Manche « écoute » : le mot est récité dès que la question s'affiche.
+  React.useEffect(function () {
+    if (q.kind !== 'listen') return;
+    const t = setTimeout(function () { cmpPlayWord(w.s, w.a, w.p); }, 350);
+    return function () { clearTimeout(t); };
+  }, [qi]);
+  React.useEffect(function () { return function () { cmpStopWord(); if (pendingRef.current) clearTimeout(pendingRef.current); }; }, []);
 
   // vibration mobile + feedback visuel
   function haptic(ok) {
     if (navigator.vibrate) { try { navigator.vibrate(ok ? [20] : [30, 40, 30]); } catch (e) {} }
+  }
+
+  function advance(nr, lastGain) {
+    if (qi >= qs.length - 1) {
+      const correctCount = nr.filter(function (r) { return r.correct; }).length;
+      const scorePct = Math.round(correctCount / nr.length * 100);
+      const xp = score + lastGain + (scorePct === 100 ? 20 : 0);
+      onFinish({ xp: xp, correct: correctCount, total: nr.length, scorePct: scorePct, wordResults: nr });
+    } else {
+      setQi(qi + 1); setPicked(null);
+    }
   }
 
   function pick(opt) {
@@ -8217,6 +8404,8 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
     const correct = opt === q.answer;
     setPicked(opt);
     haptic(correct);
+    // Le mot juste est récité après chaque réponse : le son se fixe avec le sens.
+    cmpPlayWord(w.s, w.a, w.p);
     const nc = correct ? combo + 1 : 0;
     setCombo(nc);
     const gainXp = correct ? 10 + Math.min(10, (nc - 1) * 2) : 0;
@@ -8228,21 +8417,27 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
       setShake(true);
       setTimeout(function () { setShake(false); }, 500);
     }
-    const nr = results.concat([{ ar: q.ar, correct: correct }]);
+    const nr = results.concat([{ ar: w.ar, fr: w.fr, tr: w.tr, s: w.s, a: w.a, p: w.p, correct: correct }]);
     setResults(nr);
-    setTimeout(function () {
-      if (qi >= qs.length - 1) {
-        const correctCount = nr.filter(function (r) { return r.correct; }).length;
-        const scorePct = Math.round(correctCount / nr.length * 100);
-        const xp = score + gainXp + (scorePct === 100 ? 20 : 0);
-        onFinish({ xp: xp, correct: correctCount, total: nr.length, scorePct: scorePct, wordResults: nr });
-      } else {
-        setQi(qi + 1); setPicked(null);
-      }
-    }, correct ? 800 : 1400);
+    // Juste → on enchaîne. Faux → on attend le joueur : il doit avoir le temps
+    // de lire et d'entendre la bonne réponse, c'est là qu'il apprend.
+    if (correct) pendingRef.current = setTimeout(function () { advance(nr, gainXp); }, 1250);
+    else pendingRef.current = { nr: nr };
+  }
+  function continueAfterMiss() {
+    const p = pendingRef.current;
+    pendingRef.current = null;
+    if (p && p.nr) advance(p.nr, 0);
   }
 
-  const promptArabic = q.kind !== 'fr2ar';
+  const optArabic = q.kind === 'fr2ar' || q.kind === 'listen';
+  const ask = q.kind === 'fr2ar' ? 'Quel mot arabe veut dire…'
+    : q.kind === 'listen' ? 'Écoute bien : quel mot est récité ?'
+    : q.kind === 'fill' ? 'Dans ce verset, que veut dire le mot en or ?'
+    : 'Que veut dire ce mot ?';
+  const badge = { ar2fr: 'Lecture', listen: 'Écoute', fr2ar: 'Sens → mot', fill: 'Dans le verset' }[q.kind];
+  const missed = picked != null && picked !== q.answer;
+
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: '84px 20px 0', display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative' }}>
       {/* burst XP au centre quand bonne réponse */}
@@ -8252,55 +8447,101 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
           {burst.combo >= 2 && <div style={{ fontSize: 24, fontWeight: 900, color: GOLD, letterSpacing: 2 }}>🔥 COMBO x{burst.combo}</div>}
         </div>
       )}
-      <style>{'@keyframes cmpBurst{0%{transform:translate(-50%,-30%) scale(0.5);opacity:0}20%{transform:translate(-50%,-50%) scale(1.15);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}@keyframes cmpShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}@keyframes cmpPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}'}</style>
+      <style>{'@keyframes cmpBurst{0%{transform:translate(-50%,-30%) scale(0.5);opacity:0}20%{transform:translate(-50%,-50%) scale(1.15);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}@keyframes cmpShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}@keyframes cmpPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}@keyframes cmpIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes cmpWave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}'}</style>
 
       {/* barre top */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 26 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 20, cursor: 'pointer' }}>✕</button>
-        <div style={{ flex: 1, height: 10, background: 'rgba(255,255,255,0.08)', borderRadius: 6, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: (qi / qs.length * 100) + '%', background: 'linear-gradient(90deg,#4ade80,#22a35a)', borderRadius: 6, transition: 'width 0.5s cubic-bezier(0.4,0,0.2,1)', boxShadow: '0 0 12px rgba(74,222,128,0.5)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22 }}>
+        <button onClick={onBack} aria-label="Quitter la partie" style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 20, cursor: 'pointer', padding: 4 }}>✕</button>
+        <div style={{ flex: 1, display: 'flex', gap: 4 }}>
+          {qs.map(function (_, k) {
+            const r = results[k];
+            const bg = r ? (r.correct ? GREEN : RED) : k === qi ? 'rgba(230,200,74,0.55)' : 'rgba(255,255,255,0.09)';
+            return <div key={k} style={{ flex: 1, height: 8, borderRadius: 5, background: bg, transition: 'background .3s', boxShadow: r && r.correct ? '0 0 8px rgba(74,222,128,0.45)' : 'none' }} />;
+          })}
         </div>
         {combo > 1 && (
           <span style={{ fontSize: 15, fontWeight: 900, color: GOLD, padding: '6px 12px', borderRadius: 999, background: 'rgba(230,200,74,0.14)', border: '1px solid rgba(230,200,74,0.4)', animation: 'cmpPulse 0.6s ease-in-out infinite' }}>🔥 x{combo}</span>
         )}
       </div>
 
-      <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,237,230,0.5)', marginBottom: 18 }}>
-        {q.kind === 'fr2ar' ? 'Quel mot arabe veut dire…' : 'Que veut dire ce mot ?'}
-      </p>
+      <div key={qi} style={{ animation: 'cmpIn .35s ease-out' }}>
+        <div style={{ textAlign: 'center', marginBottom: 14 }}>
+          <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: GOLD, padding: '4px 10px', borderRadius: 999, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', marginBottom: 10 }}>Manche {qi + 1} · {badge}</span>
+          <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(240,237,230,0.75)', margin: 0 }}>{ask}</p>
+        </div>
 
-      {/* prompt avec shake si faux */}
-      <div style={{ textAlign: 'center', padding: '24px 20px', marginBottom: 26, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22, animation: shake ? 'cmpShake 0.4s ease-in-out' : 'none' }}>
-        <span style={{ fontFamily: promptArabic ? 'Amiri,Georgia,serif' : 'Cormorant Garamond,serif', fontSize: promptArabic ? 56 : 34, fontStyle: promptArabic ? 'normal' : 'italic', color: '#f7eecb', direction: promptArabic ? 'rtl' : 'ltr', lineHeight: 1.2, display: 'block' }}>
-          {promptArabic ? q.prompt : '« ' + q.prompt + ' »'}
-        </span>
-        {promptArabic && cmpPhon(q.prompt) && <div style={{ marginTop: 8, fontSize: 16, fontStyle: 'italic', color: 'rgba(240,237,230,0.6)', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>{cmpPhon(q.prompt)}</div>}
-      </div>
-
-      {/* options */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        {q.options.map(function (opt, i) {
-          const isAns = opt === q.answer;
-          const isPick = opt === picked;
-          let bg = 'linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))', bd = 'rgba(200,167,39,0.28)', col = '#f0ede6', tf = 'scale(1)';
-          if (picked != null) {
-            if (isAns) { bg = 'rgba(74,222,128,0.18)'; bd = GREEN; col = '#eafff1'; tf = isPick ? 'scale(1.04)' : 'scale(1)'; }
-            else if (isPick) { bg = 'rgba(232,101,74,0.18)'; bd = RED; col = '#ffe9e3'; tf = 'scale(0.96)'; }
-            else { bg = 'rgba(255,255,255,0.02)'; bd = 'rgba(255,255,255,0.08)'; tf = 'scale(0.98)'; }
-          }
-          const optArabic = q.kind === 'fr2ar';
-          return (
-            <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null}
-              onMouseEnter={function(e){ if (picked == null) e.currentTarget.style.transform = 'scale(1.03)'; }}
-              onMouseLeave={function(e){ if (picked == null) e.currentTarget.style.transform = 'scale(1)'; }}
-              style={{ minHeight: 84, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
-              <span style={{ lineHeight: 1.1 }}>{opt}</span>
-              {optArabic && cmpPhon(opt) && <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, fontStyle: 'italic', fontWeight: 500, color: 'rgba(240,237,230,0.5)', direction: 'ltr' }}>{cmpPhon(opt)}</span>}
-              {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: GREEN }}>✓</span>}
-              {picked != null && isPick && !isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: RED }}>✗</span>}
+        {/* L'énoncé, selon la manche */}
+        <div style={{ textAlign: 'center', padding: '22px 18px', marginBottom: 20, background: 'linear-gradient(160deg,rgba(200,167,39,0.1),rgba(255,255,255,0.02))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 22, animation: shake ? 'cmpShake 0.4s ease-in-out' : 'none' }}>
+          {q.kind === 'listen' && (
+            <button onClick={function () { cmpPlayWord(w.s, w.a, w.p); }} aria-label="Réécouter le mot" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '14px 22px', borderRadius: 999, border: '1px solid rgba(230,200,74,0.5)', background: 'rgba(230,200,74,0.12)', color: GOLD, cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 800 }}>
+              <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: 3, height: 22 }}>
+                {[0, 1, 2, 3, 4].map(function (k) { return <span key={k} style={{ width: 3, height: 22, borderRadius: 2, background: GOLD, animation: 'cmpWave 0.9s ease-in-out ' + (k * 0.12) + 's infinite' }} />; })}
+              </span>
+              Réécouter
             </button>
-          );
-        })}
+          )}
+          {q.kind === 'listen' && picked != null && (
+            <div lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 44, color: '#f7eecb', direction: 'rtl', lineHeight: 1.3, marginTop: 12 }}>{w.ar}</div>
+          )}
+          {q.kind === 'fr2ar' && (
+            <span style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 34, fontStyle: 'italic', color: '#f7eecb', lineHeight: 1.2, display: 'block' }}>« {w.fr} »</span>
+          )}
+          {q.kind === 'ar2fr' && (
+            <>
+              <span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 56, color: '#f7eecb', direction: 'rtl', lineHeight: 1.2, display: 'block' }}>{w.ar}</span>
+              {(w.tr || cmpPhon(w.ar)) && <div style={{ marginTop: 8, fontSize: 16, fontStyle: 'italic', color: 'rgba(240,237,230,0.6)' }}>{w.tr || cmpPhon(w.ar)}</div>}
+            </>
+          )}
+          {q.kind === 'fill' && (
+            <>
+              <p dir="rtl" lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 'clamp(24px, 7vw, 32px)', lineHeight: 1.9, color: 'rgba(240,237,230,0.45)', margin: 0 }}>
+                {w.verse.map(function (x, k) {
+                  return <span key={k} style={k === w.at ? { color: '#f7eecb', background: 'rgba(230,200,74,0.2)', borderBottom: '2px solid ' + GOLD, borderRadius: 6, padding: '0 6px' } : null}>{x}{k < w.verse.length - 1 ? ' ' : ''}</span>;
+                })}
+              </p>
+              <p style={{ fontSize: 11.5, color: 'rgba(240,237,230,0.38)', margin: '6px 0 0', letterSpacing: '0.06em' }}><span translate="no">{sourate.name}</span> · verset {w.a}{w.tr ? ' · ' : ''}<em style={{ color: 'rgba(240,237,230,0.6)' }}>{w.tr}</em></p>
+            </>
+          )}
+        </div>
+
+        {/* options */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {q.options.map(function (opt, i) {
+            const isAns = opt === q.answer;
+            const isPick = opt === picked;
+            let bg = 'linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))', bd = 'rgba(200,167,39,0.28)', col = '#f0ede6', tf = 'scale(1)';
+            if (picked != null) {
+              if (isAns) { bg = 'rgba(74,222,128,0.18)'; bd = GREEN; col = '#eafff1'; tf = isPick ? 'scale(1.04)' : 'scale(1)'; }
+              else if (isPick) { bg = 'rgba(232,101,74,0.18)'; bd = RED; col = '#ffe9e3'; tf = 'scale(0.96)'; }
+              else { bg = 'rgba(255,255,255,0.02)'; bd = 'rgba(255,255,255,0.08)'; tf = 'scale(0.98)'; }
+            }
+            return (
+              <button key={i} onClick={function(){ pick(opt); }} disabled={picked != null}
+                style={{ minHeight: 84, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, textAlign: 'center', padding: '14px', borderRadius: 18, background: bg, border: '2px solid ' + bd, color: col, cursor: picked != null ? 'default' : 'pointer', fontFamily: optArabic ? 'Amiri,Georgia,serif' : 'Plus Jakarta Sans,sans-serif', fontSize: optArabic ? 34 : 17, fontWeight: 700, direction: optArabic ? 'rtl' : 'ltr', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', transform: tf, boxShadow: picked != null && isAns ? '0 0 24px rgba(74,222,128,0.4)' : 'none' }}>
+                <span lang={optArabic ? 'ar' : undefined} style={{ lineHeight: 1.1 }}>{opt}</span>
+                {optArabic && cmpPhon(opt) && <span style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13, fontStyle: 'italic', fontWeight: 500, color: 'rgba(240,237,230,0.5)', direction: 'ltr' }}>{cmpPhon(opt)}</span>}
+                {picked != null && isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: GREEN }}>✓</span>}
+                {picked != null && isPick && !isAns && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 18, color: RED }}>✗</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Après une erreur : la fiche du mot, et on attend le joueur. */}
+        {missed && (
+          <div style={{ marginTop: 16, animation: 'cmpIn .3s ease-out' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 16, background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
+              <button onClick={function () { cmpPlayWord(w.s, w.a, w.p); }} aria-label="Réécouter le mot" style={{ flexShrink: 0, width: 42, height: 42, borderRadius: '50%', border: '1px solid rgba(74,222,128,0.45)', background: 'rgba(74,222,128,0.12)', color: GREEN, fontSize: 16, cursor: 'pointer' }}>▶</button>
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: '#f0ede6' }}><span lang="ar" style={{ fontFamily: 'Amiri,Georgia,serif', fontSize: 24, fontWeight: 400, marginLeft: 8 }}>{w.ar}</span> {w.tr && <em style={{ fontWeight: 500, color: 'rgba(240,237,230,0.6)' }}>{w.tr}</em>}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: GREEN }}>= {w.fr}</div>
+              </div>
+            </div>
+            <button onClick={continueAfterMiss} style={{ width: '100%', marginTop: 12, padding: '15px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+              {qi >= qs.length - 1 ? 'Voir mon résultat →' : 'Continuer →'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div style={{ flex: 1 }} />
@@ -8323,7 +8564,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
   function share() {
     // On partage la couverture réelle du Coran, pas un score interne : c'est le
     // seul chiffre qui veut dire quelque chose pour celui qui reçoit le message.
-    const txt = "J'apprends le Coran mot à mot sur Héritage Musulman — je lis déjà " + quranPct + "% des mots du Coran. 🌙";
+    const txt = "J'apprends le Coran mot à mot sur Héritage Musulman — je lis déjà " + cmpFmt(quranPct) + " % des mots du Coran. 🌙";
     if (navigator.share) { navigator.share({ text: txt, url: 'https://heritage-musulman.com' }).catch(function(){}); }
     else if (navigator.clipboard) { navigator.clipboard.writeText(txt + ' heritage-musulman.com'); }
   }
@@ -8359,6 +8600,27 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{mastered} mots appris · niveau {lvl.title}</div>
         </div>
       </div>
+
+      {/* Les mots de la partie : on les revoit et on les réécoute, ratés d'abord.
+          Sans ce récap, la partie se résumait à un score — rien à retenir. */}
+      {res.wordResults && res.wordResults[0] && res.wordResults[0].fr && (
+        <div style={{ textAlign: 'left', marginBottom: 24 }}>
+          <p style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(240,237,230,0.5)', margin: '0 0 10px', textAlign: 'center' }}>Les mots de cette partie</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+            {res.wordResults.slice().sort(function (x, y) { return (x.correct ? 1 : 0) - (y.correct ? 1 : 0); }).map(function (wr, k) {
+              return (
+                <button key={k} onClick={function () { cmpPlayWord(wr.s, wr.a, wr.p); }} aria-label={'Écouter ' + (wr.tr || '') + ' : ' + wr.fr} style={{ position: 'relative', padding: '10px 10px 9px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: wr.correct ? 'rgba(74,222,128,0.06)' : 'rgba(232,101,74,0.08)', border: '1px solid ' + (wr.correct ? 'rgba(74,222,128,0.28)' : 'rgba(232,101,74,0.35)') }}>
+                  <span style={{ position: 'absolute', top: 6, left: 9, fontSize: 12, fontWeight: 900, color: wr.correct ? GREEN : '#e8654a' }}>{wr.correct ? '✓' : '✗'}</span>
+                  <span style={{ position: 'absolute', top: 6, right: 9, fontSize: 11, color: 'rgba(240,237,230,0.4)' }}>▶</span>
+                  <span lang="ar" style={{ display: 'block', fontFamily: 'Amiri,Georgia,serif', fontSize: 25, lineHeight: 1.5, color: '#f7eecb', direction: 'rtl' }}>{wr.ar}</span>
+                  {wr.tr && <span style={{ display: 'block', fontSize: 11.5, fontStyle: 'italic', color: 'rgba(240,237,230,0.5)' }}>{wr.tr}</span>}
+                  <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: GOLD, lineHeight: 1.3 }}>{wr.fr}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Upsell au pic de dopamine — non-Pro uniquement */}
       {!isPro && (
