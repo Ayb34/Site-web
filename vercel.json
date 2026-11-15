@@ -118,7 +118,7 @@
     },
     {
       "source": "/blindtest",
-      "destination": "/?utm_source=tiktok&utm_medium=bio&utm_campaign=petit_compte",
+      "destination": "/?utm_source=tiktok&utm_medium=bio&utm_campaign=blindtest",
       "permanent": false
     }
   ]
