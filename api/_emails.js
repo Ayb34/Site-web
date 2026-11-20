@@ -191,7 +191,7 @@ function emailBienvenueGratuit(prenom) {
      est un correspondant, pas un annonceur. */
   const lignes = [
     salut,
-    'Ton compte est prêt. Il est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, Al-Fâtiha et Al-Ikhlâs en entier dans Comprendre, et l'écoute mot à mot de toutes les sourates. Ta progression est sauvegardée.',
+    'Ton compte est prêt. Il est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, Al-Fâtiha et Al-Ikhlâs en entier dans Comprendre, et l’écoute mot à mot de toutes les sourates. Ta progression est sauvegardée.',
     'Si tu ne sais pas par où commencer : Al-Fâtiha, mot à mot. Tu la récites dans chaque prière, et en quatre minutes tu vois enfin ce que chaque mot veut dire.',
     url,
     'Une question pour moi : qu’est-ce qui t’a amené sur le site ? Réponds simplement à cet e-mail, je lis tout.',
@@ -338,6 +338,48 @@ async function envoyer(destinataire, prenom, message) {
   return r.json().catch(() => ({}));
 }
 
+/* ── Relance d'un paiement non terminé ──
+   Envoyé par le webhook Stripe `checkout.session.expired`, 2 h après qu'une
+   page de paiement a été ouverte sans être validée (cf. expires_at dans
+   api/create-checkout.js). Le 19/11/2026, 28 inscrits en une nuit, une seule
+   page de paiement ouverte — 29,99 €, abandonnée — et personne pour le savoir.
+
+   Même écriture que la bienvenue : un mot d'une personne, pas une newsletter.
+   Aucune fausse urgence, aucune remise : on rappelle ce qui a été commencé,
+   on propose d'aider si quelque chose a coincé, et on le dit une seule fois.
+   Le lien porte `reprendre=<plan>` : le site rouvre directement le paiement. */
+function emailRelancePaiement(prenom, plan) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const mensuel = plan === 'monthly';
+  const url = SITE + '/?utm_source=email&utm_medium=lifecycle&utm_campaign=relance_paiement&reprendre='
+    + (mensuel ? 'monthly' : 'annual') + '#comprendre';
+  const prix = mensuel
+    ? '4,99 € par mois'
+    : '29,99 € pour un an, soit 2,50 € par mois';
+  const lignes = [
+    salut,
+    'Tu as commencé à t’abonner à Héritage Musulman, mais le paiement n’est pas allé jusqu’au bout.',
+    'Si quelque chose a coincé (carte refusée, page qui ne charge pas, Apple Pay…) ou si tu as une question sur l’abonnement, réponds simplement à cet e-mail : je te réponds moi-même.',
+    'Et si tu veux reprendre là où tu en étais, ce lien rouvre directement le paiement :',
+    url,
+    'Pour rappel : ' + prix + ', sans engagement, annulable à tout moment, et remboursé sous 14 jours si ça ne te convient pas.',
+    'C’est le seul rappel que tu recevras.',
+    'Ayoub\nHéritage Musulman',
+  ];
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map((l) => l === url
+    ? `<p style="margin:0 0 14px;"><a href="${url}">Reprendre mon abonnement</a></p>`
+    : `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`).join('\n')}
+</body></html>`;
+  return {
+    subject: 'Ton abonnement n’est pas allé au bout',
+    html,
+    text: lignes.join('\n\n'),
+    senderName: 'Ayoub · Héritage Musulman',
+  };
+}
+
 module.exports = {
   TRIAL_DAYS: 2,
   TRIAL_STOP,
@@ -346,6 +388,7 @@ module.exports = {
   emailReouverture,
   emailDernierJour,
   emailFin,
+  emailRelancePaiement,
   envoyer,
   dateFr,
 };

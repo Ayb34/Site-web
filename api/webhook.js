@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const admin = require('firebase-admin');
+const { emailRelancePaiement, envoyer } = require('./_emails');
 
 // Initialize Firebase Admin once
 if (!admin.apps.length) {
@@ -74,6 +75,36 @@ async function handler(req, res) {
           .doc(userRecord.uid)
           .set(data, { merge: true });
         console.log('isPro activated for:', email, '| type:', data.proType);
+      }
+    }
+
+    /* Page de paiement ouverte puis abandonnée → un e-mail de relance.
+       Conditions : un compte existe pour cette adresse, il n'est pas Pro (il a
+       pu payer entre-temps sur une autre page), et aucune relance depuis
+       30 jours. Le drapeau est posé AVANT l'envoi : Stripe rejoue un événement
+       qui a échoué, et un doublon coûterait plus cher qu'une relance manquée. */
+    if (event.type === 'checkout.session.expired') {
+      const session = event.data.object;
+      const email = session.customer_email ||
+        (session.customer_details && session.customer_details.email);
+      if (email) {
+        let userRecord = null;
+        try { userRecord = await admin.auth().getUserByEmail(email); } catch (e) {}
+        if (userRecord) {
+          const ref = db.collection('users').doc(userRecord.uid);
+          const doc = await ref.get();
+          const d = doc.exists ? doc.data() : {};
+          const derniere = d.mails && d.mails.relancePaiement;
+          const recente = derniere && Date.now() - derniere < 30 * 86400000;
+          if (!d.isPro && !recente) {
+            await ref.set({ mails: { relancePaiement: Date.now() } }, { merge: true });
+            let prenom = (userRecord.displayName || '').trim().split(/\s+/)[0] || '';
+            if (!/^[\p{L}][\p{L}'-]{1,19}$/u.test(prenom)) prenom = '';
+            const plan = session.metadata && session.metadata.plan === 'monthly' ? 'monthly' : 'annual';
+            await envoyer(email, prenom, emailRelancePaiement(prenom, plan));
+            console.log('Relance paiement envoyée :', userRecord.uid, plan);
+          }
+        }
       }
     }
 

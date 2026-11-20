@@ -36,6 +36,12 @@ module.exports = async (req, res) => {
       ? rawEmail
       : null;
 
+    /* Une page de paiement non validée expire au bout de 2 h (Stripe : 24 h
+       par défaut, minimum 30 min). L'expiration déclenche le webhook
+       `checkout.session.expired`, qui envoie l'e-mail de relance : 2 h, c'est
+       le soir même, quand l'envie est encore là — pas le lendemain. */
+    const expiresAt = Math.floor(Date.now() / 1000) + 2 * 3600;
+
     let session;
 
     if (method === 'paypal') {
@@ -56,6 +62,7 @@ module.exports = async (req, res) => {
           quantity: 1,
         }],
         metadata: { payment_method: 'paypal', duration_days: String(p.days), plan: plan },
+        expires_at: expiresAt,
         ui_mode: 'embedded',
         return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',
@@ -67,6 +74,7 @@ module.exports = async (req, res) => {
         mode: 'subscription',
         line_items: [{ price: plan === 'monthly' ? PRICE_MONTHLY : PRICE_ANNUAL, quantity: 1 }],
         payment_method_types: ['card'],
+        expires_at: expiresAt,
         ui_mode: 'embedded',
         return_url: `${origin}/?psid={CHECKOUT_SESSION_ID}#payment-success`,
         locale: 'fr',

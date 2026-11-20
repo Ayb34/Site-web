@@ -9015,6 +9015,29 @@ function App() {
     return function () { clearInterval(id); };
   }, [user, proResolved, isPro]);
 
+  /* Lien de l'e-mail « paiement non terminé » : /?reprendre=annual#comprendre.
+     Rouvre directement le paiement — après connexion si la personne n'est pas
+     connectée sur cet appareil —, une seule fois, puis retire le paramètre de
+     l'adresse pour qu'un rechargement ne le rouvre pas. */
+  const reprendreDone = React.useRef(false);
+  React.useEffect(function () {
+    if (reprendreDone.current || user === undefined || !proResolved) return;
+    var plan = null;
+    try { plan = new URLSearchParams(window.location.search).get('reprendre'); } catch (e) {}
+    if (!plan) return;
+    reprendreDone.current = true;
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      qs.delete('reprendre');
+      var q = qs.toString();
+      window.history.replaceState(null, '', window.location.pathname + (q ? '?' + q : '') + window.location.hash);
+    } catch (e) {}
+    if (isPro) return;
+    setQuickCheckoutPlan(plan === 'monthly' ? 'monthly' : 'annual');
+    if (!user) { setPendingCheckout('card'); setAuthMode('login'); setShowAuth(true); return; }
+    setQuickCheckoutMethod('card');
+  }, [user, proResolved, isPro]);
+
   /* `isPro` vu par toute l'interface = abonné OU en essai. Un seul drapeau à
      tester partout, donc aucun endroit ne peut oublier l'essai. `paidPro` reste
      disponible pour ce qui doit distinguer les deux. */
