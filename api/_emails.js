@@ -352,7 +352,7 @@ function emailBienvenueRattrapage(prenom) {
   const urlAbo = lien('bienvenue_rattrapage', 'subscription');
   const lignes = [
     salut,
-    'Merci d’avoir rejoint Héritage Musulman, ça compte vraiment pour moi. Le site grandit grâce à des personnes comme toi, et je suis heureux de t’y accueillir.',
+    'Bārakallāhu fīk d’avoir rejoint Héritage Musulman. Chaque personne qui s’inscrit me donne un peu plus de force pour continuer ce projet.',
     'Ton compte est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, Al-Fâtiha et Al-Ikhlâs en entier dans Comprendre, et l’écoute mot à mot de toutes les sourates. Ta progression est sauvegardée.',
     'Si tu ne sais pas par où commencer : Al-Fâtiha, mot à mot. Tu la récites dans chaque prière, et en quatre minutes tu vois ce que chaque mot veut dire.',
     urlCmp,
