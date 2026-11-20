@@ -16,7 +16,7 @@
    le site utilise pour afficher le mur. Les deux ne peuvent pas diverger. */
 
 const admin = require('firebase-admin');
-const { emailDernierJour, emailFin, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
+const { emailDernierJour, emailFin, emailBienvenueRattrapage, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -92,6 +92,40 @@ module.exports = async (req, res) => {
            drapeau n'est pas posé : le passage de demain réessaiera, tant que le
            compte reste dans la fenêtre. */
         bilan.erreurs.push(u.uid + ' : ' + e.message);
+      }
+    }
+
+    /* Rattrapage unique des bienvenues perdues (cf. emailBienvenueRattrapage).
+       Fenêtre de dates FIXE : seuls les comptes créés pendant la panne sont
+       concernés, et le drapeau mails.welcome — posé avant l'envoi — garantit
+       qu'aucun ne le reçoit deux fois. Hors de cette fenêtre, ce bloc ne fait
+       rien : il peut rester en place sans risque. */
+    const PANNE_DEBUT = Date.parse('2026-11-14T12:16:00Z');
+    const PANNE_FIN = Date.parse('2026-11-20T08:00:00Z');
+    bilan.rattrapage = 0;
+    let tok;
+    const perdus = [];
+    do {
+      const lot = await admin.auth().listUsers(1000, tok);
+      lot.users.forEach(function (u) {
+        const cree = Date.parse(u.metadata.creationTime);
+        if (cree >= PANNE_DEBUT && cree < PANNE_FIN && u.email && !/id\.gle$/.test(u.email)) perdus.push(u);
+      });
+      tok = lot.pageToken;
+    } while (tok);
+    for (const u of perdus) {
+      const ref = db.collection('users').doc(u.uid);
+      const doc = await ref.get();
+      const data = doc.exists ? doc.data() : {};
+      if (data.isPro || (data.mails && data.mails.welcome)) continue;
+      await ref.set({ mails: { welcome: true, welcomeRattrapage: Date.now() } }, { merge: true });
+      let prenom = (u.displayName || '').trim().split(/\s+/)[0] || '';
+      if (!/^[\p{L}][\p{L}'-]{1,19}$/u.test(prenom)) prenom = '';
+      try {
+        await envoyer(u.email, prenom, emailBienvenueRattrapage(prenom));
+        bilan.rattrapage += 1;
+      } catch (e) {
+        bilan.erreurs.push('rattrapage ' + u.uid + ' : ' + e.message);
       }
     }
 

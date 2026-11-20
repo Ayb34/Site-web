@@ -338,6 +338,51 @@ async function envoyer(destinataire, prenom, message) {
   return r.json().catch(() => ({}));
 }
 
+/* ── Bienvenue en retard (envoi unique, 21/11/2026) ──
+   Du 14/11 12:16 au 20/11 07:46 (UTC), une apostrophe droite dans ce fichier
+   l'a rendu illisible pour Node : aucune bienvenue n'est partie, 34 comptes
+   sans e-mail, dont ceux venus du Reel Instagram. Envoyé une seule fois par le
+   cron (fenêtre de dates fixe + drapeau mails.welcome).
+   À la demande d'Ayoub, ce mail dit aussi POURQUOI le site n'est pas
+   entièrement gratuit. Règle tenue : ce n'est jamais l'abonnement qui est
+   récompensé, c'est l'apprentissage — le site n'en est que le moyen. */
+function emailBienvenueRattrapage(prenom) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const urlCmp = lien('bienvenue_rattrapage', 'comprendre');
+  const urlAbo = lien('bienvenue_rattrapage', 'subscription');
+  const lignes = [
+    salut,
+    'Tu as créé ton compte sur Héritage Musulman ces derniers jours, et ce message aurait dû t’arriver tout de suite. Un bug de mon côté l’a bloqué : désolé pour le retard.',
+    'Ton compte est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, Al-Fâtiha et Al-Ikhlâs en entier dans Comprendre, et l’écoute mot à mot de toutes les sourates. Ta progression est sauvegardée.',
+    'Si tu ne sais pas par où commencer : Al-Fâtiha, mot à mot. Tu la récites dans chaque prière, et en quatre minutes tu vois ce que chaque mot veut dire.',
+    urlCmp,
+    '<b>Pourquoi tout n’est pas gratuit</b>',
+    'Je préfère te le dire franchement. Derrière Héritage Musulman, il n’y a pas une grande entreprise : il y a un musulman qui porte ce projet seul. Le site est sans publicité, et ce sont les abonnements qui le font vivre.',
+    'Chaque abonnement sert directement à l’améliorer : de nouvelles sourates à comprendre, de nouveaux quiz, de nouvelles activités. S’abonner, c’est aussi soutenir un musulman qui entreprend, plutôt qu’une grande plateforme.',
+    'Et pour ce que ça apporte, c’est sans doute l’un des meilleurs investissements que tu puisses faire : 29,99 € pour un an, soit 2,50 € par mois, pour comprendre mot à mot les sourates que tu récites chaque jour, dans chaque prière.',
+    'Le Prophète ﷺ a dit : « Quiconque emprunte un chemin en quête de science, Allah lui facilitera par là un chemin vers le Paradis. » (Muslim 2699). Ce n’est pas l’abonnement qui est récompensé, c’est l’effort d’apprendre. Le site n’est qu’un moyen de le rendre plus simple, chaque jour.',
+    urlAbo,
+    'Sans engagement, annulable à tout moment, et remboursé sous 14 jours si ça ne te convient pas. Et si tu préfères rester sur la version gratuite, elle est là pour ça.',
+    'Une question pour moi : qu’est-ce qui t’a amené sur le site ? Réponds simplement à cet e-mail, je lis tout.',
+    'Ayoub\nHéritage Musulman',
+  ];
+  const para = (l) => {
+    if (l === urlCmp) return `<p style="margin:0 0 14px;"><a href="${urlCmp}">Commencer par Al-Fâtiha</a></p>`;
+    if (l === urlAbo) return `<p style="margin:0 0 14px;"><a href="${urlAbo}">Voir l’abonnement</a></p>`;
+    return `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`;
+  };
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map(para).join('\n')}
+</body></html>`;
+  return {
+    subject: 'Ton compte Héritage Musulman est prêt (avec un peu de retard)',
+    html,
+    text: lignes.map((l) => l.replace(/<\/?b>/g, '')).join('\n\n'),
+    senderName: 'Ayoub · Héritage Musulman',
+  };
+}
+
 /* ── Relance d'un paiement non terminé ──
    Envoyé par le webhook Stripe `checkout.session.expired`, 2 h après qu'une
    page de paiement a été ouverte sans être validée (cf. expires_at dans
@@ -389,6 +434,7 @@ module.exports = {
   emailDernierJour,
   emailFin,
   emailRelancePaiement,
+  emailBienvenueRattrapage,
   envoyer,
   dateFr,
 };
