@@ -95,6 +95,11 @@ function hmLoadStripe() {
   if (window.Stripe) return Promise.resolve(window.Stripe);
   return hmLoadScript('https://js.stripe.com/v3/').then(function () { return window.Stripe; });
 }
+try {
+  const st = document.createElement('style');
+  st.textContent = '@keyframes hmPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}';
+  document.head.appendChild(st);
+} catch (e) {}
 window.addEventListener('load', function () {
   const go = function () { hmLoadStripe().catch(function () {}); };
   if ('requestIdleCallback' in window) window.requestIdleCallback(go, { timeout: 6000 });
@@ -128,7 +133,79 @@ const PRO_PER_DAY = '0,08€';          // 29,99 / 365
    tout le reste de la page, y compris le prix.
    Volontairement arrondi EN DESSOUS du réel (225 comptes au 06/09/2026) : une
    preuve sociale doit rester vraie même sans être remise à jour chaque semaine. */
-const MEMBERS_COUNT = '+240';
+const MEMBERS_COUNT = '+300'; // 304 comptes au 20/11/2026
+
+/* ═══ Offre de lancement du mensuel (choix d'Ayoub, 20/11/2026) ═══
+   Le mensuel à 4,99 € repasse à 7,90 € le lundi 23/11/2026 : l'échéance est
+   RÉELLE, ce n'est pas une fausse urgence. Le compte à rebours disparaît tout
+   seul à l'heure dite ; mais le prix affiché (PRO_MONTHLY) et le tarif Stripe
+   (api/create-checkout.js) doivent être changés ENSEMBLE ce jour-là — un écart
+   entre l'affiché et le débité serait pire que tout.
+   Un abonnement Stripe garde le prix auquel il a été souscrit : « tu gardes
+   4,99 € tant que ton abonnement reste actif » est donc vrai, à condition de
+   ne pas migrer les abonnés existants vers le nouveau tarif. */
+const PROMO_END = Date.parse('2026-11-22T23:00:00Z'); // lundi 23/11, 00:00 heure de Paris
+const PRO_MONTHLY_NEXT = '7,90€';
+function hmPromoOn() { return Date.now() < PROMO_END; }
+function hmDefaultPlan() { return hmPromoOn() ? 'monthly' : 'annual'; }
+function useCountdown(end) {
+  const [now, setNow] = React.useState(Date.now());
+  React.useEffect(function () {
+    if (Date.now() >= end) return;
+    const t = setInterval(function () { setNow(Date.now()); }, 1000);
+    return function () { clearInterval(t); };
+  }, [end]);
+  return Math.max(0, end - now);
+}
+function hmSplit(ms) {
+  const sec = Math.floor(ms / 1000);
+  return { j: Math.floor(sec / 86400), h: Math.floor(sec / 3600) % 24, m: Math.floor(sec / 60) % 60, s: sec % 60 };
+}
+const pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
+
+/* Compte à rebours de l'offre. `light` : sur fond blanc (fenêtre de paiement).
+   `compact` : une ligne, pour les encarts. */
+function PromoCountdown({ light, compact, style }) {
+  const left = useCountdown(PROMO_END);
+  if (left <= 0) return null;
+  const t = hmSplit(left);
+  const f = 'Plus Jakarta Sans,sans-serif';
+  if (compact) {
+    return (
+      <span style={Object.assign({ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: f, fontSize: 11.5, fontWeight: 800, color: light ? '#9a6b00' : '#ffd97a', background: light ? 'rgba(200,167,39,0.12)' : 'rgba(255,190,60,0.12)', border: '1px solid ' + (light ? 'rgba(200,167,39,0.35)' : 'rgba(255,190,60,0.35)'), borderRadius: 999, padding: '3px 10px', fontVariantNumeric: 'tabular-nums' }, style)}>
+        ⏳ {PRO_MONTHLY}/mois encore {t.j > 0 ? t.j + ' j ' : ''}{pad2(t.h)} h {pad2(t.m)} min {pad2(t.s)} s
+      </span>
+    );
+  }
+  const box = function (v, l) {
+    return (
+      <div style={{ flex: 1, minWidth: 0, background: light ? '#fff' : 'rgba(0,0,0,0.35)', border: '1px solid ' + (light ? 'rgba(200,167,39,0.35)' : 'rgba(255,200,90,0.25)'), borderRadius: 11, padding: '8px 2px 6px', textAlign: 'center' }}>
+        <div style={{ fontFamily: f, fontSize: 22, fontWeight: 900, lineHeight: 1, color: light ? '#1a1a1a' : '#ffe6a6', fontVariantNumeric: 'tabular-nums' }}>{pad2(v)}</div>
+        <div style={{ fontFamily: f, fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: light ? '#8a7a4a' : 'rgba(255,230,166,0.6)', marginTop: 4 }}>{l}</div>
+      </div>
+    );
+  };
+  return (
+    <div style={Object.assign({ position: 'relative', overflow: 'hidden', borderRadius: 16, padding: '13px 14px 12px', marginBottom: 14, textAlign: 'center', fontFamily: f,
+      background: light ? 'linear-gradient(135deg,#fff8e1,#fdf0c8)' : 'linear-gradient(135deg,rgba(255,176,32,0.16),rgba(200,120,10,0.08) 60%,rgba(200,167,39,0.12))',
+      border: '1px solid ' + (light ? 'rgba(200,167,39,0.5)' : 'rgba(255,190,60,0.45)'),
+      boxShadow: light ? 'none' : '0 0 30px rgba(255,170,40,0.10)' }, style)}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 10.5, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: light ? '#9a6b00' : '#ffc85a', marginBottom: 6 }}>
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: light ? '#e09a00' : '#ffb020', boxShadow: '0 0 0 3px rgba(255,176,32,0.25)', animation: 'hmPulse 1.6s ease-in-out infinite' }} />
+        Offre de lancement
+      </div>
+      <div style={{ fontSize: 14.5, fontWeight: 800, color: light ? '#1a1a1a' : '#fff', lineHeight: 1.35, marginBottom: 10 }}>
+        Le mensuel à <span style={{ color: light ? '#b07d00' : '#ffd97a' }}>{PRO_MONTHLY}</span> jusqu'à dimanche minuit
+      </div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 9 }}>
+        {box(t.j, 'jours')}{box(t.h, 'heures')}{box(t.m, 'min')}{box(t.s, 'sec')}
+      </div>
+      <div style={{ fontSize: 11.5, lineHeight: 1.5, color: light ? '#5c5130' : 'rgba(255,240,210,0.75)' }}>
+        Dès lundi, le mensuel passe à <strong style={{ color: light ? '#1a1a1a' : '#fff' }}>{PRO_MONTHLY_NEXT}</strong>. Abonné avant ? <strong style={{ color: light ? '#1a1a1a' : '#fff' }}>Tu gardes {PRO_MONTHLY}</strong> tant que ton abonnement reste actif.
+      </div>
+    </div>
+  );
+}
 
 /* Économie de l'annuel, comparée au mensuel — le seul autre prix réellement
    en vente. Plus de prix barré (retiré le 04/11/2026, choix d'Ayoub) : barrer
@@ -706,30 +783,41 @@ function TrialWelcomeModal({ onClose, navigate }) {
    sans calcul. Le bouton d'achat suit le plan choisi. */
 function ProPlanPicker({ plan, setPlan }) {
   const f = 'Plus Jakarta Sans,sans-serif';
+  const promo = hmPromoOn();
   const card = function (on) {
     return { flex: 1, position: 'relative', textAlign: 'center', cursor: 'pointer', fontFamily: f, borderRadius: 14, padding: '16px 8px 12px',
       background: on ? 'linear-gradient(160deg, rgba(200,167,39,0.18), rgba(200,167,39,0.05))' : 'rgba(255,255,255,0.03)',
       border: on ? '2px solid #c8a727' : '1px solid rgba(255,255,255,0.12)', color: '#f0ede6', transition: 'all .15s' };
   };
+  const badge = function (txt, bg) {
+    return <span style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 10.5, fontWeight: 900, letterSpacing: '0.04em', color: '#fff', background: bg, borderRadius: 999, padding: '3px 9px' }}>{txt}</span>;
+  };
+  const annual = (
+    <button key="a" type="button" role="radio" aria-checked={plan === 'annual'} onClick={function () { setPlan('annual'); }} style={card(plan === 'annual')}>
+      {badge(PRO_DISCOUNT + (promo ? ' · le moins cher' : ' · conseillé'), 'linear-gradient(135deg,#1f9455,#0d5730)')}
+      <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'rgba(240,237,230,0.65)', marginBottom: 3 }}>Annuel</span>
+      <span style={{ display: 'block', fontSize: 23, fontWeight: 900, color: plan === 'annual' ? '#e6c84a' : '#f0ede6', lineHeight: 1.1 }}>{PRO_EQ_MONTH}<span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(240,237,230,0.6)' }}>/mois</span></span>
+      <span style={{ display: 'block', fontSize: 11, color: 'rgba(240,237,230,0.55)', marginTop: 4 }}>{PRO_ANNUAL} par an</span>
+    </button>
+  );
+  const monthly = (
+    <button key="m" type="button" role="radio" aria-checked={plan === 'monthly'} onClick={function () { setPlan('monthly'); }} style={card(plan === 'monthly')}>
+      {promo && badge('Offre de lancement', 'linear-gradient(135deg,#e0900a,#a35f00)')}
+      <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'rgba(240,237,230,0.65)', marginBottom: 3 }}>Mensuel</span>
+      <span style={{ display: 'block', fontSize: 23, fontWeight: 900, color: plan === 'monthly' ? '#e6c84a' : '#f0ede6', lineHeight: 1.1 }}>{PRO_MONTHLY}<span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(240,237,230,0.6)' }}>/mois</span></span>
+      <span style={{ display: 'block', fontSize: 11, color: 'rgba(240,237,230,0.55)', marginTop: 4 }}>{promo ? PRO_MONTHLY_NEXT + ' dès lundi' : 'sans engagement'}</span>
+    </button>
+  );
   return (
     <div style={{ marginBottom: 16 }}>
-      <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10 }}>
-        <button type="button" role="radio" aria-checked={plan === 'annual'} onClick={function () { setPlan('annual'); }} style={card(plan === 'annual')}>
-          <span style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: 10.5, fontWeight: 900, letterSpacing: '0.04em', color: '#fff', background: 'linear-gradient(135deg,#1f9455,#0d5730)', borderRadius: 999, padding: '3px 9px' }}>{PRO_DISCOUNT} · conseillé</span>
-          <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'rgba(240,237,230,0.65)', marginBottom: 3 }}>Annuel</span>
-          <span style={{ display: 'block', fontSize: 23, fontWeight: 900, color: '#e6c84a', lineHeight: 1.1 }}>{PRO_EQ_MONTH}<span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(240,237,230,0.6)' }}>/mois</span></span>
-          <span style={{ display: 'block', fontSize: 11, color: 'rgba(240,237,230,0.55)', marginTop: 4 }}>{PRO_ANNUAL} par an</span>
-        </button>
-        <button type="button" role="radio" aria-checked={plan === 'monthly'} onClick={function () { setPlan('monthly'); }} style={card(plan === 'monthly')}>
-          <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'rgba(240,237,230,0.65)', marginBottom: 3 }}>Mensuel</span>
-          <span style={{ display: 'block', fontSize: 23, fontWeight: 900, color: plan === 'monthly' ? '#e6c84a' : '#f0ede6', lineHeight: 1.1 }}>{PRO_MONTHLY}<span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(240,237,230,0.6)' }}>/mois</span></span>
-          <span style={{ display: 'block', fontSize: 11, color: 'rgba(240,237,230,0.55)', marginTop: 4 }}>sans engagement</span>
-        </button>
+      <PromoCountdown />
+      <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10, marginTop: promo ? 4 : 0 }}>
+        {promo ? [monthly, annual] : [annual, monthly]}
       </div>
       <p style={{ fontFamily: f, fontSize: 11.5, color: 'rgba(240,237,230,0.5)', textAlign: 'center', margin: '9px 0 0', lineHeight: 1.5 }}>
         {plan === 'annual'
           ? <>Soit {PRO_PER_DAY} par jour · tu économises <strong style={{ color: '#4ade80' }}>{PRO_SAVE}</strong> sur l'année</>
-          : <>Annulable à tout moment · passe à l'annuel quand tu veux</>}
+          : <>Sans engagement · annulable en 1 clic · remboursé sous 14 jours</>}
       </p>
     </div>
   );
@@ -762,9 +850,15 @@ function ProBuyButton({ plan, onClick }) {
    Puis les preuves : un avis réel (repris de la section avis), le nombre de
    membres, et les garanties qui retirent le risque. */
 const PRO_GAINS = [
-  ['📖', "Plus d'un mot du Coran sur deux", "Les 38 sourates du Juz 'Amma, mot à mot : leurs mots reviennent dans tout le Coran."],
-  ['🕌', 'Ta prière, enfin comprise', 'Les sourates que tu récites dans la salât, comprises mot par mot.'],
+  ['🕌', 'Comprends chaque mot de ta prière', "Al-Falaq, An-Nâs, Al-Kawthar, Al-'Asr… les sourates que tu récites chaque jour, enfin comprises mot par mot."],
+  ['📖', "Plus d'un mot du Coran sur deux", "Les 38 sourates du Juz 'Amma : leurs mots reviennent dans tout le Coran. Tu les reconnaîtras partout."],
+  ['⏱️', '5 minutes par jour suffisent', 'Écoute, comprends, joue. Dans les transports, après le fajr, avant de dormir.'],
   ['∞', 'Quiz et Blind Test sans limite', '740 questions, 114 sourates : autant de parties que tu veux.'],
+];
+const PRO_AVIS = [
+  { t: 'Je le recommande, tout est complet et très bien expliqué.', n: 'Yacine' },
+  { t: "Très bon site instructif, il m'aide beaucoup à l'apprentissage.", n: 'Mathis' },
+  { t: 'Ta plateforme est magnifique.', n: 'Mohtar' },
 ];
 const PRO_HADITHS = [
   { t: "Quiconque emprunte un chemin en quête de science, Allah lui facilitera par là un chemin vers le Paradis.", s: 'Muslim 2699' },
@@ -777,7 +871,7 @@ function ProValue({ skipQuran }) {
   const label = function (t) {
     return <div style={{ fontFamily: f, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(200,167,39,0.85)', margin: '0 0 10px', textAlign: 'center' }}>{t}</div>;
   };
-  const gains = skipQuran ? PRO_GAINS.slice(1) : PRO_GAINS;
+  const gains = skipQuran ? PRO_GAINS.filter(function (g) { return g[0] !== '📖'; }) : PRO_GAINS;
   return (
     <div style={{ textAlign: 'left' }}>
       {label('Ce que tu y gagnes')}
@@ -815,16 +909,35 @@ function ProValue({ skipQuran }) {
         </div>
       </div>
 
-      <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
-        <p style={{ fontFamily: f, fontSize: 13, color: 'rgba(240,237,230,0.85)', lineHeight: 1.55, margin: '0 0 8px' }}>« Je le recommande, tout est complet et très bien expliqué. »</p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: f, fontSize: 12 }}>
-          <span style={{ fontWeight: 800, color: '#fff' }}>Yacine</span>
-          <span style={{ color: 'rgba(74,222,128,0.85)', fontWeight: 700 }}>✓ Membre</span>
-          <span style={{ marginLeft: 'auto', color: 'rgba(240,237,230,0.5)' }}>{MEMBERS_COUNT} membres</span>
+      {label('Ils apprennent déjà avec nous')}
+      <div style={{ textAlign: 'center', fontFamily: f, fontSize: 12.5, color: 'rgba(240,237,230,0.75)', marginBottom: 10 }}>
+        <strong style={{ color: '#fff' }}>{MEMBERS_COUNT} membres</strong> · avis de vrais membres du site
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+        {PRO_AVIS.map(function (a) {
+          return (
+            <div key={a.n} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '11px 14px' }}>
+              <p style={{ fontFamily: f, fontSize: 13, color: 'rgba(240,237,230,0.85)', lineHeight: 1.5, margin: '0 0 6px' }}>« {a.t} »</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: f, fontSize: 12 }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#1f6f4a,#0b1a11)', border: '1px solid rgba(200,167,39,0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: GOLD }}>{a.n[0]}</span>
+                <span style={{ fontWeight: 800, color: '#fff' }}>{a.n}</span>
+                <span style={{ color: 'rgba(74,222,128,0.85)', fontWeight: 700 }}>✓ Membre</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {label('Qui est derrière le site ?')}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(200,167,39,0.06)', border: '1px solid rgba(200,167,39,0.22)', borderRadius: 14, padding: '13px 14px', marginBottom: 18 }}>
+        <span style={{ width: 40, height: 40, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: f, fontWeight: 900, fontSize: 17, color: '#fff' }}>A</span>
+        <div style={{ fontFamily: f, fontSize: 12.5, color: 'rgba(240,237,230,0.78)', lineHeight: 1.55 }}>
+          <strong style={{ color: '#fff' }}>Ayoub, fondateur.</strong> Héritage Musulman est un projet indépendant que je porte seul : pas de grande entreprise, pas de publicité. Ton abonnement fait directement vivre et grandir le site. Une question ? <a href="mailto:contact.heritagemusulman@gmail.com" style={{ color: GOLD, fontWeight: 700 }}>Écris-moi</a>, je réponds moi-même.
         </div>
       </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontFamily: f, fontSize: 11.5, color: 'rgba(240,237,230,0.7)', marginBottom: 4 }}>
-        {['↩ Remboursé sous 14 jours', '✓ Annulable en 1 clic', '🔒 Paiement sécurisé', '🤲 Projet indépendant, sans pub'].map(function (t) {
+        {['↩ Remboursé sous 14 jours', '✓ Annulable en 1 clic', '🔒 Paiement Stripe · Apple Pay', '📚 Ce que tu apprends te reste'].map(function (t) {
           return <div key={t} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 9, padding: '8px 9px', textAlign: 'center', lineHeight: 1.35 }}>{t}</div>;
         })}
       </div>
@@ -872,7 +985,7 @@ function ProGateModal({ onClose, navigate, reason }) {
   React.useEffect(function () { if (endPending) hmTrialEndSeen(user.uid); }, [endPending]);
   const copy = PRO_GATE_COPY[effective] || null;
   const delay = effective === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
-  const [plan, setPlan] = React.useState('annual');
+  const [plan, setPlan] = React.useState(hmDefaultPlan());
   const overlayRef = React.useRef(null);
   React.useEffect(function () { hmFunnel('vue', 'gate-' + (effective || 'general')); }, []);
   React.useEffect(function () {
@@ -1198,6 +1311,7 @@ function SubscriptionPage({ navigate }) {
           {/* Le prix rapporté à la journée. Un abonnement annuel se compare mal
               dans l'absolu ; ramené au jour, il se compare à des dépenses que
               chacun connaît. */}
+          <PromoCountdown />
           <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.09), rgba(200,167,39,0.03))', border: '1px solid rgba(200,167,39,0.28)', borderRadius: 18, padding: '26px 24px', marginBottom: 26 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 7, marginBottom: 6 }}>
               <span style={{ fontFamily: 'Cinzel, serif', fontSize: 40, fontWeight: 700, color: '#e6c84a', lineHeight: 1 }}>{PRO_ANNUAL}</span>
@@ -1365,6 +1479,7 @@ function SubscriptionPage({ navigate }) {
         maxWidth: 420, width: '100%', marginBottom: 20, backdropFilter: 'blur(10px)',
         boxShadow: '0 0 60px rgba(200,167,39,0.06)' }}>
 
+        <PromoCountdown />
         {/* Badge */}
         <div style={{ display: 'inline-block', background: 'rgba(200,167,39,0.12)',
           border: '1px solid rgba(200,167,39,0.3)', borderRadius: 30, padding: '4px 14px',
@@ -2930,6 +3045,7 @@ function SoftPaywall({ navigate }) {
           <ProWhyGrid />
         </div>
 
+        <div style={{ maxWidth: 420, margin: '0 auto 18px' }}><PromoCountdown /></div>
         {/* Price anchor */}
         <div className="soft-paywall-price-row" style={{ marginBottom: 10, display:'flex', alignItems:'baseline', justifyContent:'center', flexWrap:'wrap', gap:6 }}>
           <span className="price-strike-new" style={{ fontFamily: 'Playfair Display, serif', fontSize: 38, fontWeight: 900, color: '#c8a727' }}>{PRO_ANNUAL}</span>
@@ -7014,7 +7130,7 @@ function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
   const [activeMethod, setActiveMethod] = React.useState(initialMethod || 'card');
   // L'annuel est pré-sélectionné : meilleur pour l'utilisateur (voir PRO_DISCOUNT) et pour
   // la trésorerie (encaissé d'un coup, pas de churn mensuel).
-  const [plan, setPlan] = React.useState(initialPlan === 'monthly' ? 'monthly' : 'annual');
+  const [plan, setPlan] = React.useState(initialPlan === 'monthly' || initialPlan === 'annual' ? initialPlan : hmDefaultPlan());
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const checkoutRef = React.useRef(null);
@@ -7148,9 +7264,12 @@ function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
           <button onClick={() => switchPlan('monthly')}
             style={{ flex: 1, padding: '11px 8px', borderRadius: 12, border: plan === 'monthly' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'monthly' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
             <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'monthly' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>{PRO_MONTHLY}<span style={{ fontSize: 11, fontWeight: 700 }}>/mois</span></span>
-            <span style={{ display: 'block', fontSize: 10.5, color: '#888', fontWeight: 600, marginTop: 2 }}>{PRO_YEAR_AT_MONTHLY} sur un an</span>
+            <span style={{ display: 'block', fontSize: 10.5, color: hmPromoOn() ? '#b07d00' : '#888', fontWeight: hmPromoOn() ? 800 : 600, marginTop: 2 }}>{hmPromoOn() ? 'Offre de lancement' : PRO_YEAR_AT_MONTHLY + ' sur un an'}</span>
           </button>
         </div>
+        {plan === 'monthly' && hmPromoOn() && (
+          <div style={{ padding: '10px 14px 0' }}><PromoCountdown light style={{ marginBottom: 0 }} /></div>
+        )}
 
         {/* Tabs méthode de paiement */}
         <div style={{ padding: '10px 14px 0', display: 'flex', gap: 8 }}>
@@ -7939,7 +8058,7 @@ function ComprendrePage({ navigate }) {
 function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }) {
   const { openQuickCheckout } = useAuth();
   React.useEffect(function () { hmFunnel('vue', src || 'cmp'); }, []);
-  const [plan, setPlan] = React.useState('annual');
+  const [plan, setPlan] = React.useState(hmDefaultPlan());
   const GOLD = '#e6c84a';
   const list = sourates || [];
   const lockedCount = list.filter(function (s) { return !s.free; }).length;
@@ -8175,7 +8294,7 @@ function CmpHubOffer({ list, maxQuranPct, onPro }) {
       <span style={{ fontSize: 22 }}>🔓</span>
       <span style={{ flex: 1, minWidth: 0 }}>
         <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {list.filter(function(s){return !s.free;}).length} autres sourates — jusqu'à {cmpFmt(maxQuranPct)}% du Coran</span>
-        <span style={{ display: 'block', fontSize: 12, color: '#e6c84a', fontWeight: 700 }}>{PRO_EQ_MONTH}/mois en annuel · sans engagement</span>
+        <span style={{ display: 'block', fontSize: 12, color: '#e6c84a', fontWeight: 700 }}>{hmPromoOn() ? PRO_MONTHLY + '/mois jusqu’à dimanche · puis ' + PRO_MONTHLY_NEXT : PRO_EQ_MONTH + '/mois en annuel · sans engagement'}</span>
       </span>
       <span style={{ color: '#e6c84a', fontSize: 20 }}>›</span>
     </button>
@@ -8737,7 +8856,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
           <span style={{ fontSize: 20 }}>🔓</span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: 'block', fontSize: 14, color: '#f0ede6', fontWeight: 800 }}>Passe de {cmpFmt(quranPct)}% à {cmpFmt(maxQuranPct)}% du Coran</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{list.filter(function(s){return !s.free;}).length} sourates de plus · <span style={{ color: GOLD, fontWeight: 700 }}>{PRO_EQ_MONTH}/mois</span> en annuel</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{list.filter(function(s){return !s.free;}).length} sourates de plus · <span style={{ color: GOLD, fontWeight: 700 }}>{hmPromoOn() ? PRO_MONTHLY + '/mois jusqu’à dimanche' : PRO_EQ_MONTH + '/mois en annuel'}</span></span>
           </span>
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
         </button>
@@ -8867,7 +8986,7 @@ function App() {
   const [authMode, setAuthMode] = React.useState('signup');
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
   // Plan choisi sur le mur : le formulaire de paiement s'ouvre déjà dessus.
-  const [quickCheckoutPlan, setQuickCheckoutPlan] = React.useState('annual');
+  const [quickCheckoutPlan, setQuickCheckoutPlan] = React.useState(hmDefaultPlan());
   const [showTrialWelcome, setShowTrialWelcome] = React.useState(false);
   // Méthode de paiement demandée par un visiteur non connecté : compte requis
   // avant le paiement (plutôt que payer en invité puis réclamer le compte
@@ -9148,7 +9267,7 @@ function App() {
     checkoutIntent: !!pendingCheckout,
     openQuickCheckout: (method, plan) => {
       hmFunnel('clic', hmFunnelLast);
-      setQuickCheckoutPlan(plan === 'monthly' ? 'monthly' : 'annual');
+      setQuickCheckoutPlan(plan === 'monthly' || plan === 'annual' ? plan : hmDefaultPlan());
       if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
       setQuickCheckoutMethod(method || 'card');
     },
