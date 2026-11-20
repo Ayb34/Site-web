@@ -352,7 +352,7 @@ function emailBienvenueRattrapage(prenom) {
   const urlAbo = lien('bienvenue_rattrapage', 'subscription');
   const lignes = [
     salut,
-    'Tu as créé ton compte sur Héritage Musulman ces derniers jours, et ce message aurait dû t’arriver tout de suite. Un bug de mon côté l’a bloqué : désolé pour le retard.',
+    'Merci d’avoir rejoint Héritage Musulman, ça compte vraiment pour moi. Le site grandit grâce à des personnes comme toi, et je suis heureux de t’y accueillir.',
     'Ton compte est gratuit et le reste : chaque jour une partie de Quiz et une de Blind Test, Al-Fâtiha et Al-Ikhlâs en entier dans Comprendre, et l’écoute mot à mot de toutes les sourates. Ta progression est sauvegardée.',
     'Si tu ne sais pas par où commencer : Al-Fâtiha, mot à mot. Tu la récites dans chaque prière, et en quatre minutes tu vois ce que chaque mot veut dire.',
     urlCmp,
@@ -376,7 +376,7 @@ function emailBienvenueRattrapage(prenom) {
 ${lignes.map(para).join('\n')}
 </body></html>`;
   return {
-    subject: 'Ton compte Héritage Musulman est prêt (avec un peu de retard)',
+    subject: 'Ton compte Héritage Musulman est prêt',
     html,
     text: lignes.map((l) => l.replace(/<\/?b>/g, '')).join('\n\n'),
     senderName: 'Ayoub · Héritage Musulman',
