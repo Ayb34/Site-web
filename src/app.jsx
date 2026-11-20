@@ -23,6 +23,51 @@ try {
   window._db = firebase.firestore();
 } catch (e) { console.warn('Firebase non configuré:', e.message); }
 
+/* ═══ Entonnoir de l'offre Pro (depuis le 20/11/2026) ═══
+   Le 19-20/11, 40 inscrits venus d'un Reel et UNE seule page de paiement
+   ouverte. Impossible de savoir si personne n'atteignait l'offre, ou si
+   l'offre ne convainquait pas : le site ne comptait rien entre « inscrit » et
+   « page Stripe ». On compte maintenant trois étapes, par endroit :
+     vue_<src>   l'offre s'affiche (gate-*, cmp, page, essai)
+     clic_<src>  on clique « s'abonner » depuis cet endroit
+     stripe      la page de paiement Stripe est créée
+   Rangé dans users/{uid}.funnel (compteurs + horodatage de la 1re fois).
+   Un visiteur non connecté est mis en attente dans le navigateur et versé sur
+   son compte à la connexion. Lecture : scripts/funnel-stats.js. */
+var hmFunnelLast = 'inconnu';
+function hmFunnel(evt, src) {
+  var key = (evt + (src ? '_' + src : '')).replace(/[^a-z0-9_-]/gi, '_').slice(0, 40);
+  if (evt === 'vue' && src) hmFunnelLast = src;
+  var u = window._auth && window._auth.currentUser;
+  if (!u || !window._db) {
+    try {
+      var q = JSON.parse(localStorage.getItem('hm_funnel_pending') || '[]');
+      if (q.length < 30) { q.push([key, Date.now()]); localStorage.setItem('hm_funnel_pending', JSON.stringify(q)); }
+    } catch (e) {}
+    return;
+  }
+  hmFunnelWrite(u.uid, [[key, Date.now()]]);
+}
+function hmFunnelWrite(uid, items) {
+  try {
+    var inc = firebase.firestore.FieldValue.increment;
+    var f = {};
+    items.forEach(function (it) {
+      f[it[0]] = inc(1);
+      f[it[0] + '_last'] = it[1];
+    });
+    window._db.collection('users').doc(uid).set({ funnel: f }, { merge: true }).catch(function () {});
+  } catch (e) {}
+}
+function hmFunnelFlush(uid) {
+  try {
+    var q = JSON.parse(localStorage.getItem('hm_funnel_pending') || '[]');
+    if (!q.length) return;
+    localStorage.removeItem('hm_funnel_pending');
+    hmFunnelWrite(uid, q);
+  } catch (e) {}
+}
+
 /* ═══ Scripts tiers chargés à la demande ═══
    Une promesse par adresse : deux appels simultanés partagent le même
    téléchargement au lieu d'en lancer deux. */
@@ -598,6 +643,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
    sa valeur aux deux jours. */
 function TrialWelcomeModal({ onClose, navigate }) {
   const { openQuickCheckout, user } = useAuth();
+  React.useEffect(function () { hmFunnel('vue', 'essai'); }, []);
   React.useEffect(function () { hmLockScroll(); return hmUnlockScroll; }, []);
   return (
     <ModalPortal><div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.84)', backdropFilter:'blur(10px)', zIndex:10002, display:'flex', alignItems:'center', justifyContent:'center', padding:16, animation:'overlayFade 0.25s ease-out' }}>
@@ -828,6 +874,7 @@ function ProGateModal({ onClose, navigate, reason }) {
   const delay = effective === 'weekly' ? hmWeeklyResetIn() : hmQuotaResetIn();
   const [plan, setPlan] = React.useState('annual');
   const overlayRef = React.useRef(null);
+  React.useEffect(function () { hmFunnel('vue', 'gate-' + (effective || 'general')); }, []);
   React.useEffect(function () {
     hmLockScroll();
     if (overlayRef.current) overlayRef.current.scrollTop = 0;
@@ -1115,6 +1162,7 @@ function AuthModal({ onClose, initialTab }) {
 /* --- Subscription Page --- */
 function SubscriptionPage({ navigate }) {
   const { user, openAuth } = useAuth();
+  React.useEffect(function () { hmFunnel('vue', 'page'); }, []);
   const firstName = user && user.displayName ? user.displayName.split(' ')[0] : null;
 
   /* Page vue par un visiteur NON connecté.
@@ -1233,6 +1281,7 @@ function SubscriptionPage({ navigate }) {
   };
 
   const openCheckout = async function(method) {
+    hmFunnel('clic', 'page');
     var myGen = ++genRef.current;
     setCheckoutLoading(true);
     setCheckoutError(null);
@@ -1255,6 +1304,7 @@ function SubscriptionPage({ navigate }) {
       var data = await res.json();
       if (data.error) throw new Error(data.error);
       if (myGen !== genRef.current) return;
+      hmFunnel('stripe');
       var checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
       if (myGen !== genRef.current) { try { checkout.destroy(); } catch (e) {} return; }
       destroyCheckout();
@@ -7024,6 +7074,7 @@ function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
       var data = await res.json();
       if (data.error) throw new Error(data.error);
       if (myGen !== genRef.current) return;  // supplanté pendant le fetch
+      hmFunnel('stripe');
       var checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
       if (myGen !== genRef.current) {        // supplanté pendant l'init -> on jette
         try { checkout.destroy(); } catch (e) {}
@@ -7887,6 +7938,7 @@ function ComprendrePage({ navigate }) {
 // ── Modal Pro contextuel « Comprendre » — vendu sur le bénéfice, pas sur le verrou ──
 function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
   const { openQuickCheckout } = useAuth();
+  React.useEffect(function () { hmFunnel('vue', 'cmp'); }, []);
   const [plan, setPlan] = React.useState('annual');
   const GOLD = '#e6c84a';
   const list = sourates || [];
@@ -8981,6 +9033,8 @@ function App() {
      campagne avait amené un inscrit. On les recopie donc sur le document
      utilisateur, une seule fois — la PREMIÈRE source gagne, celle qui a fait
      découvrir le site, et non la dernière visite avant l'inscription. */
+  React.useEffect(function () { if (user) hmFunnelFlush(user.uid); }, [user]);
+
   React.useEffect(function () {
     if (!user || !window._db) return;
     var attr = null;
@@ -9057,6 +9111,7 @@ function App() {
     openAuth: (mode) => { setAuthMode(mode === 'login' ? 'login' : 'signup'); setShowAuth(true); },
     checkoutIntent: !!pendingCheckout,
     openQuickCheckout: (method, plan) => {
+      hmFunnel('clic', hmFunnelLast);
       setQuickCheckoutPlan(plan === 'monthly' ? 'monthly' : 'annual');
       if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
       setQuickCheckoutMethod(method || 'card');
