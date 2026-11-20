@@ -7876,7 +7876,7 @@ function ComprendrePage({ navigate }) {
         setMode('play');
       }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'play' && sourate && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} />}
+      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} onNext={function(n){ openSourate(n); window.scrollTo({ top: 0, behavior: 'instant' }); }} />}
       {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
       {showPro && <CmpProModal quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
     </>
@@ -8569,13 +8569,25 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 }
 
 // ── RÉSULTAT ──
-function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onReplay, onHub, onPro }) {
+function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onReplay, onHub, onPro, onNext }) {
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
   const list = sourates || [];
   if (!res) { return <div style={{ padding: 100, textAlign: 'center', color: '#f0ede6' }}>—</div>; }
   const perfect = res.scorePct === 100;
   const newlyMastered = res.wordResults.filter(function (wr) { return wr.correct && (st.words[wr.ar] || 0) >= CMP_MASTER_THRESHOLD; });
+  /* « Sourate suivante » — le parcours comme des niveaux.
+     Avant, la fin de partie proposait « Rejouer » : on rejouait la Fâtiha ou on
+     partait, sans jamais voir qu'il existe 36 autres sourates. Le 19/11, 28
+     inscrits venus d'Instagram ont joué la Fâtiha une fois… et aucun n'a vu
+     l'offre. Maintenant le bouton principal mène à la suivante, dans l'ordre de
+     la liste : Fâtiha → Al-Ikhlâs (gratuite) → Al-Falaq, dont l'écoute et le sens
+     sont offerts, et dont le jeu ouvre l'offre Pro — au moment où l'on a envie
+     de continuer, pas sur une bannière. */
+  const idx = list.findIndex(function (x) { return x.id === sourate.id; });
+  const next = idx >= 0 ? list[idx + 1] : null;
+  const nextLocked = !!(next && !next.free && !isPro);
+  const nextWords = next ? next.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0) : 0;
 
   function share() {
     // On partage la couverture réelle du Coran, pas un score interne : c'est le
@@ -8586,20 +8598,20 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
   }
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto', padding: '90px 20px 0', textAlign: 'center' }}>
-      <div style={{ fontSize: 56, marginBottom: 10 }}>{perfect ? '🌟' : res.scorePct >= 60 ? '✨' : '📖'}</div>
-      <h2 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 30, color: '#f0ede6', margin: '0 0 6px' }}>
+    <div style={{ maxWidth: 560, margin: '0 auto', padding: '76px 16px calc(40px + var(--cookiebar, 0px))', textAlign: 'center' }}>
+      <div style={{ fontSize: 44, marginBottom: 6 }}>{perfect ? '🌟' : res.scorePct >= 60 ? '✨' : '📖'}</div>
+      <h2 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 'clamp(24px, 7vw, 30px)', color: '#f0ede6', margin: '0 0 4px' }}>
         {perfect ? 'Parfait, mâ shâ Allah !' : res.scorePct >= 60 ? 'Bien joué !' : 'Continue, tu progresses'}
       </h2>
-      <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', marginBottom: 28 }}>{sourate.name} · {res.correct}/{res.total} bonnes réponses</p>
+      <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', margin: '0 0 18px' }}><span translate="no">{sourate.name}</span> · {res.correct}/{res.total} bonnes réponses</p>
 
       {/* gains */}
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24 }}>
-        <div style={{ flex: 1, maxWidth: 150, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 18, padding: '18px 12px' }}>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 12 }}>
+        <div style={{ flex: 1, maxWidth: 150, background: 'rgba(200,167,39,0.1)', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 16, padding: '12px 10px' }}>
           <div style={{ fontSize: 26, fontWeight: 900, color: GOLD }}>+{res.xp}</div>
           <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>XP gagnés</div>
         </div>
-        <div style={{ flex: 1, maxWidth: 150, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 18, padding: '18px 12px' }}>
+        <div style={{ flex: 1, maxWidth: 150, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 16, padding: '12px 10px' }}>
           <div style={{ fontSize: 26, fontWeight: 900, color: GREEN }}>🔥 {st.streak || 0}</div>
           <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>jours d'affilée</div>
         </div>
@@ -8607,15 +8619,29 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
 
       {/* Jauge : ce que ça change vraiment. Le pourcentage de mots du Coran
           lisibles parle de lui-même — « 40 mots appris » ne dit rien. */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(74,222,128,0.09),rgba(255,255,255,0.015))', border: '1px solid rgba(74,222,128,0.28)', borderRadius: 20, padding: '20px', marginBottom: 26 }}>
-        <CmpRing pct={Math.min(100, (quranPct / (maxQuranPct || 100)) * 100)} size={84} stroke={9} color={GREEN}>
-          <span style={{ fontSize: 20, fontWeight: 900, color: GREEN }}>{cmpFmt(quranPct)}%</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(74,222,128,0.09),rgba(255,255,255,0.015))', border: '1px solid rgba(74,222,128,0.28)', borderRadius: 18, padding: '12px 16px', marginBottom: 14 }}>
+        <CmpRing pct={Math.min(100, (quranPct / (maxQuranPct || 100)) * 100)} size={68} stroke={8} color={GREEN}>
+          <span style={{ fontSize: 16, fontWeight: 900, color: GREEN }}>{cmpFmt(quranPct)}%</span>
         </CmpRing>
         <div style={{ textAlign: 'left' }}>
           <div style={{ fontSize: 15, color: '#f0ede6', fontWeight: 700 }}>Tu lis {cmpFmt(quranPct)}% des mots du Coran</div>
           <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{mastered} mots appris · niveau {lvl.title}</div>
         </div>
       </div>
+
+      {next && (
+        <div style={{ marginBottom: 24 }}>
+          <button onClick={function () { onNext(next); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '15px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset' }}>
+            <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#fff' }}>{next.surah}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>Sourate suivante</span>
+              <span translate="no" style={{ display: 'block', fontSize: 18, fontWeight: 900, color: '#fff', lineHeight: 1.25 }}>{next.name}</span>
+              <span style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{next.fr} · {nextWords} mots{nextLocked ? ' · écoute offerte' : ''}</span>
+            </span>
+            <span style={{ fontSize: 24, fontWeight: 900, color: '#fff' }}>→</span>
+          </button>
+        </div>
+      )}
 
       {/* Les mots de la partie : on les revoit et on les réécoute, ratés d'abord.
           Sans ce récap, la partie se résumait à un score — rien à retenir. */}
@@ -8652,7 +8678,9 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
 
       {/* actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <button onClick={onReplay} style={{ padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Rejouer cette sourate</button>
+        <button onClick={onReplay} style={next
+          ? { padding: '14px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.04)', color: '#f0ede6', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }
+          : { padding: '16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Rejouer cette sourate</button>
         <button onClick={share} style={{ padding: '14px', borderRadius: 16, border: '1px solid rgba(200,167,39,0.4)', background: 'rgba(200,167,39,0.08)', color: '#e6c84a', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>📤 Partager ma progression</button>
         <button onClick={onHub} style={{ padding: '12px', borderRadius: 16, border: 'none', background: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Retour au menu</button>
       </div>
