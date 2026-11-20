@@ -7920,25 +7920,25 @@ function ComprendrePage({ navigate }) {
 
   return shell(
     <>
-      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(){ setShowPro(true); }} reciter={reciter} onReciter={chooseReciter} />}
+      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} reciter={reciter} onReciter={chooseReciter} />}
       {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} audioRef={audioRef} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
         if (!sourate.free && !isPro && sourate.id !== weeklyId) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
         setMode('play');
       }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'play' && sourate && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(){ setShowPro(true); }} onNext={function(n){ openSourate(n); window.scrollTo({ top: 0, behavior: 'instant' }); }} />}
+      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} onNext={function(n){ openSourate(n); window.scrollTo({ top: 0, behavior: 'instant' }); }} />}
       {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
-      {showPro && <CmpProModal quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
+      {showPro && <CmpProModal src={typeof showPro === 'string' ? showPro : 'cmp'} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
     </>
   );
 }
 
 // ── HUB ──
 // ── Modal Pro contextuel « Comprendre » — vendu sur le bénéfice, pas sur le verrou ──
-function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered }) {
+function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }) {
   const { openQuickCheckout } = useAuth();
-  React.useEffect(function () { hmFunnel('vue', 'cmp'); }, []);
+  React.useEffect(function () { hmFunnel('vue', src || 'cmp'); }, []);
   const [plan, setPlan] = React.useState('annual');
   const GOLD = '#e6c84a';
   const list = sourates || [];
@@ -8086,6 +8086,10 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
         </div>
       </div>
 
+      {/* L'offre en haut du menu, sous la progression : la même bannière était
+          sous les 38 sourates, où aucun mobile n'arrivait. */}
+      {!isPro && <CmpHubOffer list={list} maxQuranPct={maxQuranPct} onPro={onPro} />}
+
         </>
       )}
 
@@ -8150,7 +8154,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
         })}
       </div>
       {/* Bannière upsell (non-Pro) — cliquable */}
-      {!isPro && (
+      {!isPro && guest && !(st.xp > 0) && (
         <button onClick={onPro} style={{ width: '100%', marginTop: 14, padding: '16px 18px', background: 'linear-gradient(135deg,rgba(200,167,39,0.16),rgba(200,167,39,0.06))', border: '1px solid rgba(200,167,39,0.45)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', boxShadow: '0 4px 24px rgba(200,167,39,0.12)' }}>
           <span style={{ fontSize: 24 }}>🔓</span>
           <span style={{ flex: 1 }}>
@@ -8161,6 +8165,20 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
         </button>
       )}
     </div>
+  );
+}
+
+function CmpHubOffer({ list, maxQuranPct, onPro }) {
+  React.useEffect(function () { hmFunnel('vue', 'carte-hub'); }, []);
+  return (
+    <button onClick={function () { hmFunnel('clic', 'carte-hub'); onPro('carte-hub'); }} style={{ width: '100%', marginBottom: 16, padding: '14px 16px', background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(200,167,39,0.05))', border: '1px solid rgba(200,167,39,0.42)', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+      <span style={{ fontSize: 22 }}>🔓</span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: 'block', fontSize: 14.5, color: '#f0ede6', fontWeight: 800 }}>Débloque les {list.filter(function(s){return !s.free;}).length} autres sourates — jusqu'à {cmpFmt(maxQuranPct)}% du Coran</span>
+        <span style={{ display: 'block', fontSize: 12, color: '#e6c84a', fontWeight: 700 }}>{PRO_EQ_MONTH}/mois en annuel · sans engagement</span>
+      </span>
+      <span style={{ color: '#e6c84a', fontSize: 20 }}>›</span>
+    </button>
   );
 }
 
@@ -8625,6 +8643,21 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
   const list = sourates || [];
+  /* Une seule fois dans la vie du compte (sur cet appareil) : après la 2e
+     partie terminée, l'offre s'ouvre d'elle-même, 1,5 s après le score — le
+     temps de voir son résultat. Fermer suffit, elle ne revient pas. C'est le
+     seul affichage non demandé ; tout le reste attend un clic. */
+  React.useEffect(function () {
+    if (isPro) return;
+    hmFunnel('vue', 'carte-resultat');
+    if ((st.plays || 0) < 2) return;
+    var deja = false;
+    try { deja = !!localStorage.getItem('hm_offre_auto_v1'); } catch (e) {}
+    if (deja) return;
+    try { localStorage.setItem('hm_offre_auto_v1', String(Date.now())); } catch (e) {}
+    var t = setTimeout(function () { onPro('auto-2e-partie'); }, 1500);
+    return function () { clearTimeout(t); };
+  }, []);
   if (!res) { return <div style={{ padding: 100, textAlign: 'center', color: '#f0ede6' }}>—</div>; }
   const perfect = res.scorePct === 100;
   const newlyMastered = res.wordResults.filter(function (wr) { return wr.correct && (st.words[wr.ar] || 0) >= CMP_MASTER_THRESHOLD; });
@@ -8682,7 +8715,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
       </div>
 
       {next && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: isPro ? 24 : 10 }}>
           <button onClick={function () { onNext(next); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '15px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset' }}>
             <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#fff' }}>{next.surah}</span>
             <span style={{ flex: 1, minWidth: 0 }}>
@@ -8693,6 +8726,21 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
             <span style={{ fontSize: 24, fontWeight: 900, color: '#fff' }}>→</span>
           </button>
         </div>
+      )}
+
+      {/* L'offre, au moment où l'on vient de réussir — juste sous la suite.
+          Elle était tout en bas, après la grille des mots : sur mobile personne
+          ne descendait jusque-là (20/11 : 31 joueurs, 7 vues de l'offre). Une
+          ligne sobre, pas une fenêtre : on peut l'ignorer et continuer. */}
+      {!isPro && (
+        <button onClick={function () { hmFunnel('clic', 'carte-resultat'); onPro('carte-resultat'); }} style={{ width: '100%', marginBottom: 24, padding: '12px 16px', background: 'rgba(200,167,39,0.07)', border: '1px solid rgba(200,167,39,0.38)', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 20 }}>🔓</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 14, color: '#f0ede6', fontWeight: 800 }}>Passe de {cmpFmt(quranPct)}% à {cmpFmt(maxQuranPct)}% du Coran</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{list.filter(function(s){return !s.free;}).length} sourates de plus · <span style={{ color: GOLD, fontWeight: 700 }}>{PRO_EQ_MONTH}/mois</span> en annuel</span>
+          </span>
+          <span style={{ color: GOLD, fontSize: 20 }}>›</span>
+        </button>
       )}
 
       {/* Les mots de la partie : on les revoit et on les réécoute, ratés d'abord.
@@ -8714,18 +8762,6 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
             })}
           </div>
         </div>
-      )}
-
-      {/* Upsell au pic de dopamine — non-Pro uniquement */}
-      {!isPro && (
-        <button onClick={onPro} style={{ width: '100%', marginBottom: 14, padding: '18px 20px', background: 'linear-gradient(135deg,rgba(200,167,39,0.18),rgba(200,167,39,0.07))', border: '1px solid rgba(200,167,39,0.5)', borderRadius: 18, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 6px 28px rgba(200,167,39,0.15)' }}>
-          <span style={{ fontSize: 28 }}>📖</span>
-          <span style={{ flex: 1 }}>
-            <span style={{ display: 'block', fontSize: 15, color: '#f0ede6', fontWeight: 800, marginBottom: 2 }}>Passe de {cmpFmt(quranPct)}% à {cmpFmt(maxQuranPct)}% du Coran</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{list.filter(function(s){return !s.free;}).length} sourates de plus t'attendent — <span style={{ color: GOLD, fontWeight: 700 }}>{PRO_ANNUAL}/an</span></span>
-          </span>
-          <span style={{ color: GOLD, fontSize: 22 }}>›</span>
-        </button>
       )}
 
       {/* actions */}
