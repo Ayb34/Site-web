@@ -383,6 +383,51 @@ ${lignes.map(para).join('\n')}
   };
 }
 
+/* ── Offre de lancement : 4,99 €/mois jusqu'au dimanche 22/11 minuit ──
+   Envoyé UNE fois (drapeau mails.offreLancement) aux inscrits depuis le 19/11
+   (Reel Instagram) qui ne sont pas Pro, à la demande d'Ayoub (21/11/2026).
+   L'échéance est réelle : le mensuel passe à 7,90 € le lundi 23/11.
+   Personnalisé : celui qui a déjà joué voit ce qu'il a déjà fait ; celui qui
+   n'a pas joué reçoit une invitation à essayer. Même écriture « personne à
+   personne » que la bienvenue : pas de gabarit, deux liens texte. */
+function emailOffreLancement(prenom, mots) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const urlSite = lien('offre_lancement', 'comprendre');
+  const urlPaye = SITE + '/?utm_source=email&utm_medium=lifecycle&utm_campaign=offre_lancement&reprendre=monthly#comprendre';
+  const debut = mots > 0
+    ? `Tu as commencé Comprendre le Coran il y a quelques jours, et tu as déjà reconnu ${mots} mot${mots > 1 ? 's' : ''} du Coran. Bārakallāhu fīk, c’est un vrai début.`
+    : 'Tu as créé ton compte il y a quelques jours, mais tu n’as pas encore essayé Comprendre le Coran. Ça prend trois minutes, et c’est gratuit.';
+  const lignes = [
+    salut,
+    debut,
+    'Chaque jour, tu récites Al-Fâtiha au moins 17 fois dans tes prières obligatoires. Imagine comprendre chaque mot, puis chaque sourate courte que tu récites après : Al-Ikhlâs, Al-Falaq, An-Nâs, Al-Kawthar, Al-‘Asr…',
+    urlSite,
+    '<b>Jusqu’à dimanche minuit : l’abonnement à 4,99 € par mois</b>',
+    'C’est l’offre de lancement du site. Dès lundi, le mensuel passe à 7,90 €. Si tu t’abonnes avant, tu gardes 4,99 € tant que ton abonnement reste actif.',
+    'Ce que ça t’ouvre : les 38 sourates du Juz ‘Amma en mot à mot, avec l’audio (plus d’un mot du Coran sur deux), et le Quiz et le Blind Test sans limite.',
+    urlPaye,
+    'Sans engagement, annulable en un clic, et remboursé sous 14 jours si ça ne te convient pas.',
+    'Le Prophète ﷺ a dit : « Celui qui lit le Coran en butant, et pour qui c’est difficile, aura deux récompenses. » (Bukhari 4937, Muslim 798). Ce n’est pas l’abonnement qui est récompensé, c’est l’effort d’apprendre. Le site est là pour te le rendre plus simple.',
+    'Derrière Héritage Musulman, il n’y a que moi : un projet indépendant, sans publicité, que chaque abonnement fait grandir. Une question ? Réponds simplement à cet e-mail, je te réponds moi-même.',
+    'Bārakallāhu fīk,\nAyoub\nHéritage Musulman',
+  ];
+  const para = (l) => {
+    if (l === urlSite) return `<p style="margin:0 0 14px;"><a href="${urlSite}">Continuer sur Comprendre le Coran</a></p>`;
+    if (l === urlPaye) return `<p style="margin:0 0 14px;"><a href="${urlPaye}"><b>Profiter de 4,99 € par mois</b></a></p>`;
+    return `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`;
+  };
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map(para).join('\n')}
+</body></html>`;
+  return {
+    subject: 'Comprendre ta prière : 4,99 € jusqu’à dimanche soir',
+    html,
+    text: lignes.map((l) => l.replace(/<\/?b>/g, '')).join('\n\n'),
+    senderName: 'Ayoub · Héritage Musulman',
+  };
+}
+
 /* ── Relance d'un paiement non terminé ──
    Envoyé par le webhook Stripe `checkout.session.expired`, 2 h après qu'une
    page de paiement a été ouverte sans être validée (cf. expires_at dans
@@ -435,6 +480,7 @@ module.exports = {
   emailFin,
   emailRelancePaiement,
   emailBienvenueRattrapage,
+  emailOffreLancement,
   envoyer,
   dateFr,
 };

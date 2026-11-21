@@ -16,7 +16,7 @@
    le site utilise pour afficher le mur. Les deux ne peuvent pas diverger. */
 
 const admin = require('firebase-admin');
-const { emailDernierJour, emailFin, emailBienvenueRattrapage, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
+const { emailDernierJour, emailFin, emailBienvenueRattrapage, emailOffreLancement, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -126,6 +126,43 @@ module.exports = async (req, res) => {
         bilan.rattrapage += 1;
       } catch (e) {
         bilan.erreurs.push('rattrapage ' + u.uid + ' : ' + e.message);
+      }
+    }
+
+    /* Offre de lancement (4,99 €/mois jusqu'au dimanche 22/11 minuit, Paris).
+       Une fois par compte, aux inscrits depuis le 19/11 qui ne sont pas Pro.
+       Ne part plus à moins de 3 h de la fin de l'offre : annoncer une offre
+       qui expire pendant qu'on lit le mail serait malhonnête. Au-delà, le
+       bloc ne fait plus rien et peut rester en place. */
+    const OFFRE_FIN = Date.parse('2026-11-22T23:00:00Z');
+    const OFFRE_DEBUT_INSCR = Date.parse('2026-11-18T23:00:00Z');
+    bilan.offre = 0;
+    if (Date.now() < OFFRE_FIN - 3 * 3600000) {
+      let tk;
+      const cibles = [];
+      do {
+        const lot = await admin.auth().listUsers(1000, tk);
+        lot.users.forEach(function (u) {
+          const cree = Date.parse(u.metadata.creationTime);
+          if (cree >= OFFRE_DEBUT_INSCR && u.email && !/id\.gle$/.test(u.email)) cibles.push(u);
+        });
+        tk = lot.pageToken;
+      } while (tk);
+      for (const u of cibles) {
+        const ref = db.collection('users').doc(u.uid);
+        const doc = await ref.get();
+        const data = doc.exists ? doc.data() : {};
+        if (data.isPro || (data.mails && data.mails.offreLancement)) continue;
+        await ref.set({ mails: { offreLancement: Date.now() } }, { merge: true });
+        let prenom = (u.displayName || '').trim().split(/\s+/)[0] || '';
+        if (!/^[\p{L}][\p{L}'-]{1,19}$/u.test(prenom)) prenom = '';
+        const mots = data.comprendre && data.comprendre.words ? Object.keys(data.comprendre.words).length : 0;
+        try {
+          await envoyer(u.email, prenom, emailOffreLancement(prenom, mots));
+          bilan.offre += 1;
+        } catch (e) {
+          bilan.erreurs.push('offre ' + u.uid + ' : ' + e.message);
+        }
       }
     }
 
