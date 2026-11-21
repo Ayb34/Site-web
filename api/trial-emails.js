@@ -166,6 +166,27 @@ module.exports = async (req, res) => {
       }
     }
 
+    /* Aperçu à la demande : un compte marqué mails.apercu = true (posé à la
+       main, depuis la console admin) reçoit une fois le dernier mail de
+       campagne, pour relecture. Aucune adresse dans le code. */
+    bilan.apercu = 0;
+    const apercus = await db.collection('users').where('mails.apercu', '==', true).get();
+    for (const d of apercus.docs) {
+      await d.ref.set({ mails: { apercu: false } }, { merge: true });
+      try {
+        const u = await admin.auth().getUser(d.id);
+        if (!u.email) continue;
+        let prenom = (u.displayName || '').trim().split(/\s+/)[0] || '';
+        if (!/^[\p{L}][\p{L}'-]{1,19}$/u.test(prenom)) prenom = '';
+        const data = d.data();
+        const mots = data.comprendre && data.comprendre.words ? Object.keys(data.comprendre.words).length : 0;
+        await envoyer(u.email, prenom, emailOffreLancement(prenom, mots));
+        bilan.apercu += 1;
+      } catch (e) {
+        bilan.erreurs.push('apercu ' + d.id + ' : ' + e.message);
+      }
+    }
+
     console.log('trial-emails', JSON.stringify(bilan));
     res.json(bilan);
   } catch (err) {
