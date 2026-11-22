@@ -19,6 +19,12 @@
 
 const SITE = 'https://heritage-musulman.com';
 const SENDER = { name: 'Héritage Musulman', email: 'contact@heritage-musulman.com' };
+/* Le domaine n'a pas de MX (vérifié le 22/11/2026) : contact@heritage-musulman.com
+   ne reçoit rien. Les réponses des membres, que nos e-mails sollicitent
+   (« réponds simplement à cet e-mail »), partaient dans le vide. Elles vont
+   désormais à la boîte Gmail réellement lue. À remettre sur contact@ le jour
+   où une redirection (MX) existe. */
+const REPLY_TO = 'contact.heritagemusulman@gmail.com';
 
 const OR = '#c8a727';
 const OR_CLAIR = '#e6c84a';
@@ -322,7 +328,7 @@ async function envoyer(destinataire, prenom, message) {
     headers: { 'api-key': cle, 'content-type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({
       sender: message.senderName ? { ...SENDER, name: message.senderName } : SENDER,
-      replyTo: { email: SENDER.email, name: message.senderName || SENDER.name },
+      replyTo: { email: REPLY_TO, name: message.senderName || SENDER.name },
       to: [prenom ? { email: destinataire, name: prenom } : { email: destinataire }],
       subject: message.subject,
       htmlContent: message.html,
