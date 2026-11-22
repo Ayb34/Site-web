@@ -809,15 +809,15 @@ function ProPlanPicker({ plan, setPlan }) {
     </button>
   );
   return (
-    <div style={{ marginBottom: 16 }}>
-      <PromoCountdown />
-      <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10, marginTop: promo ? 4 : 0 }}>
+    <div style={{ marginBottom: 14 }}>
+      {promo && <div style={{ textAlign: 'center', marginBottom: 16 }}><PromoCountdown compact /></div>}
+      <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10 }}>
         {promo ? [monthly, annual] : [annual, monthly]}
       </div>
       <p style={{ fontFamily: f, fontSize: 11.5, color: 'rgba(240,237,230,0.5)', textAlign: 'center', margin: '9px 0 0', lineHeight: 1.5 }}>
         {plan === 'annual'
           ? <>Soit {PRO_PER_DAY} par jour · tu économises <strong style={{ color: '#4ade80' }}>{PRO_SAVE}</strong> sur l'année</>
-          : <>Sans engagement · annulable en 1 clic · remboursé sous 14 jours</>}
+          : <>Sans engagement · tu arrêtes quand tu veux</>}
       </p>
     </div>
   );
@@ -865,82 +865,35 @@ const PRO_HADITHS = [
   { t: "Celui qui lit une lettre du Livre d'Allah obtient une bonne action, et la bonne action vaut dix fois autant.", s: 'Tirmidhi 2910' },
   { t: "Celui qui lit le Coran en butant, et pour qui c'est difficile, aura deux récompenses.", s: 'Bukhari 4937 · Muslim 798' },
 ];
+/* Version courte (22/11/2026, à la demande d'Ayoub : « trop d'infos, trop
+   long »). L'ancienne enchaînait six blocs — gains détaillés, trois hadiths,
+   budget, trois avis, fondateur, garanties — sous le prix : sur mobile, la
+   fenêtre faisait quatre écrans. On garde l'essentiel : ce que ça débloque, en
+   trois lignes, et un seul hadith. Les garanties restent dans le pied collant,
+   à côté du bouton, là où on les cherche. */
 function ProValue({ skipQuran }) {
-  const GOLD = '#e6c84a';
   const f = 'Plus Jakarta Sans,sans-serif';
-  const label = function (t) {
-    return <div style={{ fontFamily: f, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(200,167,39,0.85)', margin: '0 0 10px', textAlign: 'center' }}>{t}</div>;
-  };
-  const gains = skipQuran ? PRO_GAINS.filter(function (g) { return g[0] !== '📖'; }) : PRO_GAINS;
+  const items = [
+    'Comprends chaque mot de ta prière',
+    skipQuran ? 'Toutes les sourates du Juz ‘Amma, mot à mot' : 'Les 38 sourates du Juz ‘Amma, mot à mot',
+    'Quiz et Blind Test sans limite',
+  ];
   return (
     <div style={{ textAlign: 'left' }}>
-      {label('Ce que tu y gagnes')}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-        {gains.map(function (g) {
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, margin: '4px 0 16px', padding: '0 4px' }}>
+        {items.map(function (t) {
           return (
-            <div key={g[1]} style={{ display: 'flex', gap: 11, alignItems: 'flex-start', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,167,39,0.16)', borderRadius: 12, padding: '11px 13px' }}>
-              <span style={{ fontSize: 17, lineHeight: 1.3, flexShrink: 0, width: 20, textAlign: 'center', color: GOLD, fontWeight: 900 }}>{g[0]}</span>
-              <div>
-                <div style={{ fontFamily: f, fontSize: 13, fontWeight: 800, color: '#f0ede6', marginBottom: 2 }}>{g[1]}</div>
-                <div style={{ fontFamily: f, fontSize: 12, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>{g[2]}</div>
-              </div>
+            <div key={t} style={{ display: 'flex', gap: 10, alignItems: 'center', fontFamily: f, fontSize: 14, fontWeight: 700, color: '#f0ede6' }}>
+              <span style={{ width: 20, height: 20, flexShrink: 0, borderRadius: '50%', background: 'rgba(74,222,128,0.16)', color: '#4ade80', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900 }}>✓</span>
+              {t}
             </div>
           );
         })}
       </div>
-
-      {label('Un savoir qui ne se perd jamais')}
-      <div style={{ background: 'linear-gradient(160deg, rgba(200,167,39,0.10), rgba(200,167,39,0.03))', border: '1px solid rgba(200,167,39,0.28)', borderRadius: 14, padding: '6px 15px', marginBottom: 18 }}>
-        {PRO_HADITHS.map(function (h, i) {
-          return (
-            <figure key={h.s} style={{ margin: 0, padding: '11px 0', borderTop: i ? '1px solid rgba(200,167,39,0.14)' : 'none' }}>
-              <blockquote style={{ margin: 0, fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: 'italic', fontSize: 16.5, lineHeight: 1.45, color: '#f7eecb' }}>« {h.t} »</blockquote>
-              <figcaption style={{ fontFamily: f, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.06em', color: 'rgba(200,167,39,0.8)', marginTop: 5 }}>Prophète ﷺ — {h.s}</figcaption>
-            </figure>
-          );
-        })}
-      </div>
-
-      {label('Et pour ton budget')}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(74,222,128,0.07)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 12, padding: '12px 14px', marginBottom: 18 }}>
-        <span style={{ fontSize: 22, flexShrink: 0 }}>☕</span>
-        <div style={{ fontFamily: f, fontSize: 12.5, color: 'rgba(240,237,230,0.75)', lineHeight: 1.55 }}>
-          <strong style={{ color: '#fff' }}>{PRO_EQ_MONTH} par mois, moins qu'un café.</strong> Soit {PRO_PER_DAY} par jour pour un savoir qui t'accompagne toute ta vie — et ce que tu apprends te reste, même si tu arrêtes.
-        </div>
-      </div>
-
-      {label('Ils apprennent déjà avec nous')}
-      <div style={{ textAlign: 'center', fontFamily: f, fontSize: 12.5, color: 'rgba(240,237,230,0.75)', marginBottom: 10 }}>
-        <strong style={{ color: '#fff' }}>{MEMBERS_COUNT} membres</strong> · avis de vrais membres du site
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-        {PRO_AVIS.map(function (a) {
-          return (
-            <div key={a.n} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '11px 14px' }}>
-              <p style={{ fontFamily: f, fontSize: 13, color: 'rgba(240,237,230,0.85)', lineHeight: 1.5, margin: '0 0 6px' }}>« {a.t} »</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: f, fontSize: 12 }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#1f6f4a,#0b1a11)', border: '1px solid rgba(200,167,39,0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: GOLD }}>{a.n[0]}</span>
-                <span style={{ fontWeight: 800, color: '#fff' }}>{a.n}</span>
-                <span style={{ color: 'rgba(74,222,128,0.85)', fontWeight: 700 }}>✓ Membre</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {label('Qui est derrière le site ?')}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(200,167,39,0.06)', border: '1px solid rgba(200,167,39,0.22)', borderRadius: 14, padding: '13px 14px', marginBottom: 18 }}>
-        <span style={{ width: 40, height: 40, flexShrink: 0, borderRadius: '50%', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: f, fontWeight: 900, fontSize: 17, color: '#fff' }}>A</span>
-        <div style={{ fontFamily: f, fontSize: 12.5, color: 'rgba(240,237,230,0.78)', lineHeight: 1.55 }}>
-          <strong style={{ color: '#fff' }}>Ayoub, fondateur.</strong> Héritage Musulman est un projet indépendant que je porte seul : pas de grande entreprise, pas de publicité. Ton abonnement fait directement vivre et grandir le site. Une question ? <a href="mailto:contact.heritagemusulman@gmail.com" style={{ color: GOLD, fontWeight: 700 }}>Écris-moi</a>, je réponds moi-même.
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontFamily: f, fontSize: 11.5, color: 'rgba(240,237,230,0.7)', marginBottom: 4 }}>
-        {['↩ Remboursé sous 14 jours', '✓ Annulable en 1 clic', '🔒 Paiement Stripe · Apple Pay', '📚 Ce que tu apprends te reste'].map(function (t) {
-          return <div key={t} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 9, padding: '8px 9px', textAlign: 'center', lineHeight: 1.35 }}>{t}</div>;
-        })}
-      </div>
+      <figure style={{ margin: 0, padding: '11px 14px', borderRadius: 12, background: 'rgba(200,167,39,0.07)', borderLeft: '3px solid rgba(200,167,39,0.6)' }}>
+        <blockquote style={{ margin: 0, fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: 'italic', fontSize: 15.5, lineHeight: 1.4, color: '#f7eecb' }}>« {PRO_HADITHS[0].t} »</blockquote>
+        <figcaption style={{ fontFamily: f, fontSize: 10.5, fontWeight: 800, color: 'rgba(200,167,39,0.8)', marginTop: 4 }}>Prophète ﷺ — {PRO_HADITHS[0].s}</figcaption>
+      </figure>
     </div>
   );
 }
@@ -8246,18 +8199,10 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }
     <ModalPortal><div onClick={onClose} className="pro-sheet-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', animation: 'overlayFade 0.25s ease-out' }}>
       <div className="pro-modal-card pro-sheet" onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, maxWidth: 410, width: '100%', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div className="pro-modal-scroll" style={{ padding: '30px 26px 14px' }}>
-        <div className="pro-sheet-icon" style={{ fontSize: 40, marginBottom: 10 }}>📖</div>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
           Lis <span style={{ color: GOLD }}>{cmpFmt(maxQuranPct)}% des mots</span><br />du Coran.
         </h2>
-        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 14, color: 'rgba(240,237,230,0.6)', lineHeight: 1.7, margin: '0 0 16px' }}>
-          Pas une promesse : les mots du Juz 'Amma reviennent partout dans le Coran. En le terminant, <strong style={{ color: '#f0ede6' }}>plus d'un mot sur deux</strong> te sera familier — où que tu ouvres.
-        </p>
-
-        {/* Progression réelle → plafond réel. Les deux chiffres sont calculés sur
-            les 77 878 mots du Coran, pas sur une cible arbitraire : c'est ce qui
-            rend la promesse vérifiable au lieu d'être un argument de vente. */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(74,222,128,0.08))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 14, padding: '14px 16px', marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(74,222,128,0.08))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 14, padding: '12px 16px', margin: '14px 0 6px' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: 'rgba(240,237,230,0.55)', lineHeight: 1 }}>{cmpFmt(quranPct)}%</div>
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.45)', marginTop: 3 }}>tu lis aujourd'hui</div>
@@ -8268,11 +8213,8 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.55)', marginTop: 3 }}>en terminant le Juz 'Amma</div>
           </div>
         </div>
-        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.35)', margin: '0 0 16px' }}>
-          Calculé sur les 77 878 mots du Coran — pondéré par leur fréquence réelle.
-        </p>
-        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 12.5, color: 'rgba(240,237,230,0.65)', margin: '0 0 16px' }}>
-          {lockedCount} sourates de plus · {lockedVerses} versets mot à mot
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.4)', margin: '0 0 18px' }}>
+          {lockedCount} sourates de plus · calculé sur les 77 878 mots du Coran
         </p>
         <ProPlanPicker plan={plan} setPlan={setPlan} />
         <ProValue skipQuran />
@@ -8282,7 +8224,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }
         <div className="pro-modal-footer" style={{ padding: '12px 26px 16px' }}>
           <ProBuyButton plan={plan} onClick={function () { onClose(); openQuickCheckout('card', plan); }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
-            <span>✓ {MEMBERS_COUNT} membres</span><span>✓ Sans engagement</span><span>✓ Remboursé 14 jours</span>
+            <span>✓ Annulable en 1 clic</span><span>✓ Remboursé 14 jours</span><span>🔒 Stripe · Apple Pay</span>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.32)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
             Plus tard
