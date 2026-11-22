@@ -428,6 +428,41 @@ ${lignes.map(para).join('\n')}
   };
 }
 
+/* ── Rappel du verset du jour ──
+   Envoyé UNIQUEMENT aux comptes qui l'ont activé eux-mêmes dans Comprendre
+   (users/{uid}.rappel.on), et seulement les jours où ils n'ont pas encore joué.
+   Court, sans offre : c'est un rendez-vous, pas une relance commerciale.
+   Lien d'arrêt en une touche dans chaque e-mail. */
+function emailRappel(prenom, serie) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const urlSite = lien('rappel', 'comprendre');
+  const urlStop = SITE + '/?rappel=off#comprendre';
+  const lignes = [
+    salut,
+    serie > 0
+      ? `Hier, c’était ton ${serie === 1 ? '1er' : serie + 'e'} jour d’affilée. Ton verset du jour est prêt : deux minutes pour garder ta série.`
+      : 'Ton verset du jour est prêt : deux minutes pour l’écouter mot à mot et retenir ses mots.',
+    urlSite,
+    'Le Prophète ﷺ a dit : « L’œuvre la plus aimée d’Allah est la plus régulière, même si elle est peu abondante. » (Bukhari 6464, Muslim 783)',
+    'Bārakallāhu fīk,\nAyoub\nHéritage Musulman',
+  ];
+  const para = (l) => l === urlSite
+    ? `<p style="margin:0 0 14px;"><a href="${urlSite}"><b>Ouvrir mon verset du jour</b></a></p>`
+    : `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`;
+  const pied = `Tu reçois ce rappel parce que tu l’as activé sur le site. Pour l’arrêter : ${urlStop}`;
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map(para).join('\n')}
+<p style="margin:22px 0 0;font-size:12px;color:#777;">Tu reçois ce rappel parce que tu l’as activé sur le site. <a href="${urlStop}" style="color:#777;">Arrêter les rappels</a></p>
+</body></html>`;
+  return {
+    subject: serie > 0 ? `🔥 ${serie} jour${serie > 1 ? 's' : ''} d’affilée : ton verset du jour t’attend` : 'Ton verset du jour t’attend',
+    html,
+    text: lignes.join('\n\n') + '\n\n' + pied,
+    senderName: 'Ayoub · Héritage Musulman',
+  };
+}
+
 /* ── Relance d'un paiement non terminé ──
    Envoyé par le webhook Stripe `checkout.session.expired`, 2 h après qu'une
    page de paiement a été ouverte sans être validée (cf. expires_at dans
@@ -481,6 +516,7 @@ module.exports = {
   emailRelancePaiement,
   emailBienvenueRattrapage,
   emailOffreLancement,
+  emailRappel,
   envoyer,
   dateFr,
 };

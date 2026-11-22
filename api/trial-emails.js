@@ -16,7 +16,7 @@
    le site utilise pour afficher le mur. Les deux ne peuvent pas diverger. */
 
 const admin = require('firebase-admin');
-const { emailDernierJour, emailFin, emailBienvenueRattrapage, emailOffreLancement, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
+const { emailDernierJour, emailFin, emailBienvenueRattrapage, emailOffreLancement, emailRappel, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -184,6 +184,35 @@ module.exports = async (req, res) => {
         bilan.apercu += 1;
       } catch (e) {
         bilan.erreurs.push('apercu ' + d.id + ' : ' + e.message);
+      }
+    }
+
+    /* Rappel du verset du jour — opt-in uniquement (rappel.on posé par la
+       personne elle-même dans Comprendre). Un par jour au plus, et rien si elle
+       a déjà joué aujourd'hui. Jours comptés à l'heure de Paris, comme le site. */
+    bilan.rappel = 0;
+    const jourParis = function (offset) {
+      return new Date(Date.now() + (offset || 0) * JOUR).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    };
+    const auj = jourParis(0), hier = jourParis(-1);
+    const abonnes = await db.collection('users').where('rappel.on', '==', true).get();
+    for (const doc of abonnes.docs) {
+      const data = doc.data();
+      const cmp = data.comprendre || {};
+      if (cmp.lastDay === auj) continue;
+      if (data.mails && data.mails.rappelJour === auj) continue;
+      let u;
+      try { u = await admin.auth().getUser(doc.id); } catch (e) { continue; }
+      if (!u.email || /id\.gle$/.test(u.email)) continue;
+      await doc.ref.set({ mails: { rappelJour: auj } }, { merge: true });
+      let prenom = (u.displayName || '').trim().split(/\s+/)[0] || '';
+      if (!/^[\p{L}][\p{L}'-]{1,19}$/u.test(prenom)) prenom = '';
+      const serie = cmp.lastDay === hier ? (cmp.streak || 0) : 0;
+      try {
+        await envoyer(u.email, prenom, emailRappel(prenom, serie));
+        bilan.rappel += 1;
+      } catch (e) {
+        bilan.erreurs.push('rappel ' + doc.id + ' : ' + e.message);
       }
     }
 

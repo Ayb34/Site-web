@@ -2291,11 +2291,27 @@ function HeroIcon({ id, color }) {
 }
 
 function Hero({ navigate }) {
+  const { user } = useAuth();
+  /* Membre qui revient : l'accueil lui vend un site qu'il connaît déjà.
+     On lui montre d'abord son rendez-vous du jour, en une touche. */
+  const cst = user ? cmpLoad() : null;
+  const doneToday = !!(cst && cst.daily && cst.daily[hmDay(0)] != null);
+  const serie = cst ? cmpLiveStreak(cst) : 0;
   return (
     <section className="hero-section">
       <div className="hero-bg" aria-hidden="true" />
 
       <div className="hero-inner">
+        {user && (
+          <button onClick={function () { navigate('comprendre'); }} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', maxWidth: 420, margin: '0 auto 22px', padding: '12px 16px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', background: doneToday ? 'rgba(74,222,128,0.08)' : 'linear-gradient(135deg,rgba(230,200,74,0.2),rgba(230,200,74,0.06))', border: '1px solid ' + (doneToday ? 'rgba(74,222,128,0.35)' : 'rgba(230,200,74,0.55)') }}>
+            <span style={{ fontSize: 24 }}>{doneToday ? '✅' : '☀️'}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: '#f0ede6' }}>{doneToday ? 'Verset du jour fait' : 'Ton verset du jour t’attend'}</span>
+              <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{serie > 0 ? '🔥 ' + serie + ' jour' + (serie > 1 ? 's' : '') + ' d’affilée' : '2 minutes · commence ta série'}{doneToday ? ' · reviens demain' : ''}</span>
+            </span>
+            <span style={{ color: '#e6c84a', fontSize: 20, fontWeight: 900 }}>→</span>
+          </button>
+        )}
         {/* Preuve sociale avant le scroll (81 % des meilleurs heros la
             montrent, 41 % en moyenne). Chiffre arrondi en dessous du reel,
             voir MEMBERS_COUNT. */}
@@ -7471,9 +7487,133 @@ function cmpMerge(a, b) {
     best: best,
     totalCorrect: Math.max(a.totalCorrect || 0, b.totalCorrect || 0),
     plays: Math.max(a.plays || 0, b.plays || 0),
+    days: cmpUnion(a.days, b.days),
+    daily: cmpUnion(a.daily, b.daily),
   };
 }
-function cmpTodayStr() { return new Date().toISOString().slice(0, 10); }
+/* Jour LOCAL, pas UTC. Avec toISOString, une partie jouée à 0 h 30 à Paris
+   comptait pour la veille : la série se cassait chez ceux qui jouent le soir,
+   c'est-à-dire précisément ceux qui reviennent chaque jour. */
+function hmDay(offset) {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  if (offset) d.setDate(d.getDate() + offset);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function cmpTodayStr() { return hmDay(0); }
+function hmNextMidnight() { const d = new Date(); d.setHours(24, 0, 0, 0); return d.getTime(); }
+/* Série encore vivante : jouée aujourd'hui ou hier. Au-delà elle est cassée ;
+   afficher « 🔥 12 » à qui n'est pas venu depuis une semaine serait faux. */
+function cmpLiveStreak(st) {
+  if (!st || !st.lastDay) return 0;
+  return st.lastDay === hmDay(0) || st.lastDay === hmDay(-1) ? (st.streak || 0) : 0;
+}
+// Union de deux journaux {jour: valeur}, bornée aux 90 derniers jours.
+function cmpUnion(a, b) {
+  const out = {};
+  [a || {}, b || {}].forEach(function (o) { Object.keys(o).forEach(function (k) { out[k] = Math.max(out[k] == null ? -1 : out[k], o[k]); }); });
+  const keep = {};
+  Object.keys(out).sort().slice(-90).forEach(function (k) { keep[k] = out[k]; });
+  return keep;
+}
+
+/* ═══ Verset du jour ═══
+   La boucle qui manquait (22/11/2026) : 12 % des inscrits revenaient un autre
+   jour. Le site promettait une progression longue, mais rien n'attendait la
+   personne le lendemain. Désormais, chaque jour, un nouveau verset du Juz
+   'Amma : écoute mot à mot, puis 3 à 8 questions, deux minutes. Même verset
+   pour tout le monde le même jour (on peut en parler, le partager).
+   Il est tiré de TOUT le corpus, sourates Pro comprises : un verset par jour
+   n'ouvre pas la sourate, il en donne le goût, et « Toute la sourate » mène
+   ensuite à l'offre au moment où l'envie existe.
+   Versets d'au moins 3 mots (en dessous, ce n'est plus une séance). Le pas
+   premier 211 parcourt tous les versets avant de repasser par le même et
+   saute d'une sourate à l'autre au lieu de les dérouler dans l'ordre. */
+function cmpDailyPick(data, day) {
+  if (!data || !data.surahs) return null;
+  const pool = [];
+  data.surahs.forEach(function (s) { s.ayahs.forEach(function (a) { if (a.words.length >= 3) pool.push([s, a]); }); });
+  if (!pool.length) return null;
+  const n = Math.round((Date.parse(day + 'T12:00:00Z') - Date.parse('2026-11-22T12:00:00Z')) / 86400000);
+  const idx = (((n * 211) % pool.length) + pool.length) % pool.length;
+  const s = pool[idx][0], a = pool[idx][1];
+  return { id: 'jour', daily: day, surah: s.surah, name: s.name, fr: s.fr, free: true, parentId: s.id, ayahs: [a] };
+}
+const CMP_WEEKDAY = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+// Les 7 derniers jours, aujourd'hui à droite : on voit sa semaine d'un coup d'œil.
+function CmpWeek({ st, size }) {
+  const GOLD = '#e6c84a';
+  const sz = size || 30;
+  const days = (st && st.days) || {};
+  const cells = [];
+  for (let i = -6; i <= 0; i++) {
+    const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
+    const key = hmDay(i);
+    const on = !!days[key] || (i === 0 && st && st.lastDay === key) || (i === -1 && st && st.lastDay === key);
+    cells.push(
+      <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <div style={{ width: sz, height: sz, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: sz * 0.45, fontWeight: 900,
+          background: on ? 'linear-gradient(135deg,#e6c84a,#a8801a)' : 'rgba(255,255,255,0.05)',
+          border: i === 0 ? '2px solid ' + (on ? '#f7e08a' : 'rgba(230,200,74,0.6)') : '1px solid ' + (on ? 'transparent' : 'rgba(255,255,255,0.1)'),
+          color: on ? '#2a1d02' : 'rgba(240,237,230,0.3)' }}>{on ? '✓' : ''}</div>
+        <span style={{ fontSize: 10.5, fontWeight: 700, color: i === 0 ? GOLD : 'rgba(240,237,230,0.4)' }}>{i === 0 ? 'Auj.' : CMP_WEEKDAY[d.getDay()]}</span>
+      </div>
+    );
+  }
+  return <div style={{ display: 'flex', justifyContent: 'space-between', gap: 4 }}>{cells}</div>;
+}
+
+// Carte « Verset du jour » en tête du menu Comprendre.
+function CmpDaily({ st, daily, guest, onStart, rappel, onRappel, rappelNotice }) {
+  const GOLD = '#e6c84a';
+  const today = hmDay(0);
+  const done = !!(st.daily && st.daily[today] != null);
+  const streak = cmpLiveStreak(st);
+  const playedToday = st.lastDay === today;
+  const left = hmSplit(useCountdown(hmNextMidnight()));
+  const ayah = daily.ayahs[0];
+  const msg = done
+    ? 'Fait aujourd’hui, bārakallāhu fīk. Nouveau verset dans ' + left.h + ' h ' + pad2(left.m) + '.'
+    : streak > 0 && !playedToday
+      ? 'Joue aujourd’hui pour garder ta série de ' + streak + ' jour' + (streak > 1 ? 's' : '') + '.'
+      : streak > 0
+        ? streak + ' jour' + (streak > 1 ? 's' : '') + ' d’affilée · ajoute ton verset du jour.'
+        : 'Un verset par jour, deux minutes. Commence ta série aujourd’hui.';
+  return (
+    <div style={{ background: 'linear-gradient(160deg,rgba(230,200,74,0.13),rgba(255,255,255,0.02))', border: '1px solid rgba(230,200,74,0.45)', borderRadius: 22, padding: '18px 18px 16px', marginBottom: 16, boxShadow: done ? 'none' : '0 8px 30px rgba(168,128,26,0.16)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: GOLD }}>☀️ Verset du jour</div>
+          <div style={{ fontSize: 16.5, fontWeight: 900, color: '#f0ede6', marginTop: 3 }}><span translate="no">{daily.name}</span>, verset {ayah.n}</div>
+          <div style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.55)' }}>{daily.fr} · {ayah.words.length} mots · 2 minutes</div>
+        </div>
+        <div style={{ flexShrink: 0, textAlign: 'center', padding: '8px 12px', borderRadius: 14, background: streak > 0 ? 'rgba(255,138,76,0.14)' : 'rgba(255,255,255,0.04)', border: '1px solid ' + (streak > 0 ? 'rgba(255,138,76,0.4)' : 'rgba(255,255,255,0.1)') }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: streak > 0 ? '#ff8a4c' : 'rgba(240,237,230,0.35)', lineHeight: 1 }}>🔥 {streak}</div>
+          <div style={{ fontSize: 10, color: 'rgba(240,237,230,0.5)', marginTop: 3 }}>jour{streak > 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      <CmpWeek st={st} />
+      <p style={{ fontSize: 13.5, color: done ? '#4ade80' : '#f0ede6', fontWeight: 700, margin: '14px 0 12px', lineHeight: 1.45 }}>{done ? '✓ ' : ''}{msg}</p>
+      <button onClick={onStart} style={done
+        ? { width: '100%', padding: '12px', borderRadius: 14, border: '1px solid rgba(230,200,74,0.35)', background: 'rgba(230,200,74,0.06)', color: GOLD, fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }
+        : { width: '100%', padding: '15px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 6px 22px rgba(168,128,26,0.35)', color: '#fff', fontSize: 16, fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit' }}>
+        {done ? 'Revoir le verset du jour' : 'Commencer le verset du jour →'}
+      </button>
+      {!guest && (
+        <button onClick={function () { onRappel(!rappel); }} aria-pressed={rappel} style={{ width: '100%', marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', padding: '4px 2px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+          <span style={{ width: 36, height: 21, flexShrink: 0, borderRadius: 999, background: rappel ? '#1f9455' : 'rgba(255,255,255,0.14)', position: 'relative', transition: 'background .2s' }}>
+            <span style={{ position: 'absolute', top: 2.5, left: rappel ? 17.5 : 2.5, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
+          </span>
+          <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.75)', lineHeight: 1.35 }}>
+            {rappel ? 'Rappel activé : un e-mail le matin si tu n’as pas encore joué' : '🔔 M’envoyer un rappel le matin par e-mail'}
+          </span>
+        </button>
+      )}
+      {rappelNotice && <p style={{ fontSize: 12, color: 'rgba(240,237,230,0.55)', margin: '6px 0 0' }}>Rappels arrêtés. Tu peux les réactiver ici quand tu veux.</p>}
+    </div>
+  );
+}
+
 function cmpLearnedCount(words) {
   // mots vus correctement au moins une fois (progression visible dès la 1re partie)
   return Object.keys(words || {}).filter(function (k) { return (words[k] || 0) >= 1; }).length;
@@ -7943,6 +8083,14 @@ function ComprendrePage({ navigate }) {
     let cancelled = false;
     window._db.collection('users').doc(user.uid).get().then(function (doc) {
       if (cancelled || !doc.exists) return;
+      // Lien « Arrêter les rappels » des e-mails : /?rappel=off#comprendre
+      if (/[?&]rappel=off/.test(window.location.search)) {
+        toggleRappel(false); setRappelNotice(true);
+        try { history.replaceState(null, '', window.location.pathname + window.location.hash); } catch (e) {}
+      } else {
+        const rp = doc.data().rappel;
+        setRappel(!!(rp && rp.on));
+      }
       const remote = doc.data().comprendre;
       if (!remote) return;
       setSt(function (local) { const merged = cmpMerge(local, remote); cmpSave(merged); return merged; });
@@ -7960,6 +8108,27 @@ function ComprendrePage({ navigate }) {
   const [showGate, setShowGate] = React.useState(false);
   const [showPro, setShowPro] = React.useState(false);
   const weeklyId = cmpWeeklyId(data);
+  const todayStr = cmpTodayStr();
+  const daily = React.useMemo(function () { return cmpDailyPick(data, todayStr); }, [data, todayStr]);
+  /* Rappel quotidien par e-mail : uniquement si la personne l'active elle-même
+     (users/{uid}.rappel.on). Le cron n'écrit qu'aux comptes qui l'ont demandé. */
+  const [rappel, setRappel] = React.useState(false);
+  const [rappelNotice, setRappelNotice] = React.useState(false);
+  function toggleRappel(on) {
+    setRappel(on);
+    if (on) setRappelNotice(false);
+    hmFunnel(on ? 'rappel_on' : 'rappel_off', 'cmp');
+    if (user && window._db) {
+      window._db.collection('users').doc(user.uid).set({ rappel: { on: on, at: Date.now() } }, { merge: true })
+        .catch(function (e) { console.warn('[rappel] refusé:', e && e.code); });
+    }
+  }
+  function openDaily() {
+    if (!daily) return;
+    hmFunnel('vue', 'verset-jour');
+    setSourate(daily); setMode('discover');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
   // Invité : écouter et lire mot à mot, librement. Jouer demande un compte.
   const guestBlocked = !user;
 
@@ -7977,17 +8146,22 @@ function ComprendrePage({ navigate }) {
     // streak
     const today = cmpTodayStr();
     if (next.lastDay !== today) {
-      const y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const y = hmDay(-1);
       next.streak = next.lastDay === y ? (next.streak || 0) + 1 : 1;
       next.lastDay = today;
     }
+    next.days = cmpUnion(next.days, { [today]: 1 });
+    if (sourate.daily) next.daily = cmpUnion(next.daily, { [sourate.daily]: res.scorePct });
     next.xp = (next.xp || 0) + res.xp;
     next.totalCorrect = (next.totalCorrect || 0) + res.correct;
     res.wordResults.forEach(function (wr) {
       if (wr.correct) next.words[wr.ar] = Math.min(CMP_MASTER_THRESHOLD + 3, (next.words[wr.ar] || 0) + 1);
     });
-    const prevBest = next.best[sourate.id] || 0;
-    if (res.scorePct > prevBest) next.best[sourate.id] = res.scorePct;
+    // Le verset du jour n'est pas une sourate : il ne fixe pas de record.
+    if (!sourate.daily) {
+      const prevBest = next.best[sourate.id] || 0;
+      if (res.scorePct > prevBest) next.best[sourate.id] = res.scorePct;
+    }
     next.plays = (next.plays || 0) + 1;
     persist(next);
     // Sauvegarde sur le compte (suivi + cross-device).
@@ -8039,7 +8213,7 @@ function ComprendrePage({ navigate }) {
 
   return shell(
     <>
-      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} reciter={reciter} onReciter={chooseReciter} />}
+      {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} reciter={reciter} onReciter={chooseReciter} daily={daily} onDaily={openDaily} rappel={rappel} onRappel={toggleRappel} rappelNotice={rappelNotice} />}
       {mode === 'discover' && sourate && <CmpDiscover sourate={sourate} playAyah={playAyah} audioRef={audioRef} preview={!sourate.free && !isPro && sourate.id !== weeklyId} onPlay={function(){
         if (!sourate.free && !isPro && sourate.id !== weeklyId) { setShowPro(true); return; }
         if (guestBlocked) { setShowGate(true); return; }
@@ -8119,7 +8293,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }
   );
 }
 
-function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, trialing, guest, onTest, onSignup, weeklyId, onOpen, onBack, onPro, reciter, onReciter }) {
+function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, trialing, guest, onTest, onSignup, weeklyId, onOpen, onBack, onPro, reciter, onReciter, daily, onDaily, rappel, onRappel, rappelNotice }) {
   const GOLD = '#e6c84a';
   const list = sourates || [];
   const [openReciter, setOpenReciter] = React.useState(false);
@@ -8144,6 +8318,10 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
           lisait « 0 % · niveau 1 · 0 mot · 0 XP », puis 32 cadenas, et nulle
           part l'inscription. Le tableau ne s'affiche
           qu'une fois qu'il y a quelque chose à y montrer. */}
+      {daily && !(guest && !(st.xp > 0)) && (
+        <CmpDaily st={st} daily={daily} guest={guest} onStart={onDaily} rappel={rappel} onRappel={onRappel} rappelNotice={rappelNotice} />
+      )}
+
       {guest && !(st.xp > 0) ? (
         <div style={{ marginBottom: 24 }}>
           <button onClick={function () { const f = list.find(function (x) { return x.surah === 1; }); if (f) onOpen(f); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '17px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset', marginBottom: 12 }}>
@@ -8199,7 +8377,7 @@ function CmpHub({ st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro
           </div>
           <div style={{ display: 'flex', gap: 18 }}>
             <div><div style={{ fontSize: 20, fontWeight: 900, color: '#f0ede6' }}>{mastered}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>mots appris</div></div>
-            <div><div style={{ fontSize: 20, fontWeight: 900, color: '#ff8a4c' }}>🔥 {st.streak || 0}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>jours d'affilée</div></div>
+            <div><div style={{ fontSize: 20, fontWeight: 900, color: '#ff8a4c' }}>🔥 {cmpLiveStreak(st)}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>jours d'affilée</div></div>
             <div><div style={{ fontSize: 20, fontWeight: 900, color: '#f0ede6' }}>{st.xp || 0}</div><div style={{ fontSize: 11, color: 'rgba(240,237,230,0.45)' }}>XP</div></div>
           </div>
         </div>
@@ -8421,7 +8599,7 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '72px 16px calc(96px + var(--cookiebar, 0px) + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.5)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 0' }}>← Retour</button>
-        <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}><span translate="no">{sourate.name}</span> · verset {ayah.n}/{total}</span>
+        <span style={{ fontSize: 13, color: 'rgba(240,237,230,0.5)' }}>{sourate.daily ? <>☀️ Verset du jour · <span translate="no">{sourate.name}</span>, {ayah.n}</> : <><span translate="no">{sourate.name}</span> · verset {ayah.n}/{total}</>}</span>
       </div>
       {/* Avancement dans la sourate */}
       <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' }}>
@@ -8789,7 +8967,9 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
      sont offerts, et dont le jeu ouvre l'offre Pro — au moment où l'on a envie
      de continuer, pas sur une bannière. */
   const idx = list.findIndex(function (x) { return x.id === sourate.id; });
-  const next = idx >= 0 ? list[idx + 1] : null;
+  // Après le verset du jour, la suite naturelle est sa sourate entière.
+  const next = sourate.daily ? (list.find(function (x) { return x.id === sourate.parentId; }) || null) : (idx >= 0 ? list[idx + 1] : null);
+  const streakNow = cmpLiveStreak(st);
   const nextLocked = !!(next && !next.free && !isPro);
   const nextWords = next ? next.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0) : 0;
 
@@ -8807,7 +8987,17 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
       <h2 style={{ fontFamily: 'Cinzel,serif', fontWeight: 700, fontSize: 'clamp(24px, 7vw, 30px)', color: '#f0ede6', margin: '0 0 4px' }}>
         {perfect ? 'Parfait, mâ shâ Allah !' : res.scorePct >= 60 ? 'Bien joué !' : 'Continue, tu progresses'}
       </h2>
-      <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', margin: '0 0 18px' }}><span translate="no">{sourate.name}</span> · {res.correct}/{res.total} bonnes réponses</p>
+      <p style={{ fontSize: 15, color: 'rgba(240,237,230,0.55)', margin: '0 0 18px' }}>{sourate.daily ? '☀️ Verset du jour · ' : ''}<span translate="no">{sourate.name}</span> · {res.correct}/{res.total} bonnes réponses</p>
+
+      {/* Verset du jour : la semaine et le rendez-vous de demain, avant tout le reste.
+          C'est la raison de revenir ; le reste de l'écran est le même qu'après une sourate. */}
+      {sourate.daily && (
+        <div style={{ background: 'linear-gradient(160deg,rgba(255,138,76,0.12),rgba(255,255,255,0.02))', border: '1px solid rgba(255,138,76,0.4)', borderRadius: 18, padding: '14px 16px', marginBottom: 14, textAlign: 'left' }}>
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#ff8a4c', marginBottom: 10 }}>🔥 {streakNow} jour{streakNow > 1 ? 's' : ''} d’affilée</div>
+          <CmpWeek st={st} size={28} />
+          <p style={{ fontSize: 13.5, color: '#f0ede6', fontWeight: 700, margin: '12px 0 0', lineHeight: 1.45 }}>Reviens demain : un nouveau verset t’attend. {streakNow >= 3 ? 'Ta régularité, c’est ce qui fait rester les mots.' : 'Quelques minutes chaque jour valent mieux qu’une heure une fois.'}</p>
+        </div>
+      )}
 
       {/* gains */}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 12 }}>
@@ -8816,7 +9006,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
           <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>XP gagnés</div>
         </div>
         <div style={{ flex: 1, maxWidth: 150, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 16, padding: '12px 10px' }}>
-          <div style={{ fontSize: 26, fontWeight: 900, color: GREEN }}>🔥 {st.streak || 0}</div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: GREEN }}>🔥 {streakNow}</div>
           <div style={{ fontSize: 12, color: 'rgba(240,237,230,0.5)' }}>jours d'affilée</div>
         </div>
       </div>
@@ -8838,7 +9028,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
           <button onClick={function () { onNext(next); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', padding: '15px 18px', borderRadius: 18, border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: 'linear-gradient(135deg,#a8801a,#6d4f08)', boxShadow: '0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset' }}>
             <span style={{ width: 46, height: 46, flexShrink: 0, borderRadius: 14, background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#fff' }}>{next.surah}</span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>Sourate suivante</span>
+              <span style={{ display: 'block', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' }}>{sourate.daily ? 'Toute la sourate' : 'Sourate suivante'}</span>
               <span translate="no" style={{ display: 'block', fontSize: 18, fontWeight: 900, color: '#fff', lineHeight: 1.25 }}>{next.name}</span>
               <span style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{next.fr} · {nextWords} mots{nextLocked ? ' · écoute offerte' : ''}</span>
             </span>
