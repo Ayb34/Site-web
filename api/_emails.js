@@ -19,12 +19,10 @@
 
 const SITE = 'https://heritage-musulman.com';
 const SENDER = { name: 'Héritage Musulman', email: 'contact@heritage-musulman.com' };
-/* Le domaine n'a pas de MX (vérifié le 22/11/2026) : contact@heritage-musulman.com
-   ne reçoit rien. Les réponses des membres, que nos e-mails sollicitent
-   (« réponds simplement à cet e-mail »), partaient dans le vide. Elles vont
-   désormais à la boîte Gmail réellement lue. À remettre sur contact@ le jour
-   où une redirection (MX) existe. */
-const REPLY_TO = 'contact.heritagemusulman@gmail.com';
+/* Réponses : contact@heritage-musulman.com. Jusqu'au 22/11/2026 le domaine
+   n'avait pas de MX et ces réponses se perdaient. Depuis, ImprovMX (MX dans le
+   DNS Vercel) fait suivre tout @heritage-musulman.com vers la boîte Gmail. */
+const REPLY_TO = SENDER.email;
 
 const OR = '#c8a727';
 const OR_CLAIR = '#e6c84a';
