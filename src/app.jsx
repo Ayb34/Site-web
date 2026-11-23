@@ -1961,6 +1961,82 @@ function ProfilePage({ navigate }) {
           </div>
         )}
 
+        <DeleteAccountBlock navigate={navigate} />
+
+      </div>
+    </div>
+  );
+}
+
+/* Suppression définitive du compte, depuis le profil (site et app).
+   Exigée par Apple pour toute app où l'on crée un compte (règle 5.1.1(v)).
+   Deux étapes : ouvrir, puis taper SUPPRIMER pour éviter tout accident. */
+function DeleteAccountBlock({ navigate }) {
+  const [step, setStep] = React.useState('idle'); // idle | confirm | loading | done | error
+  const [typed, setTyped] = React.useState('');
+  const [err, setErr] = React.useState('');
+  const [appleSub, setAppleSub] = React.useState(false);
+  const FF = 'Plus Jakarta Sans, sans-serif';
+
+  const doDelete = async function () {
+    setStep('loading'); setErr('');
+    try {
+      var idToken = await window._auth.currentUser.getIdToken(true);
+      var res = await fetch(HM_API + '/api/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+        body: '{}',
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Erreur');
+      try {
+        Object.keys(localStorage).forEach(function (k) {
+          if (/^(hm_|quiz_score_|cmp_)/.test(k)) localStorage.removeItem(k);
+        });
+      } catch (e) {}
+      setAppleSub(!!data.appleSub);
+      setStep('done');
+      try { await window._auth.signOut(); } catch (e) {}
+      try { if (window.HMNative && window.HMNative.signOut) window.HMNative.signOut(); } catch (e) {}
+    } catch (e) {
+      setErr(e.message || 'Erreur');
+      setStep('error');
+    }
+  };
+
+  const box = { marginTop: 40, padding: '20px 22px', borderRadius: 14, border: '1px solid rgba(248,113,113,0.18)', background: 'rgba(248,113,113,0.04)', fontFamily: FF };
+  const small = { color: 'rgba(255,255,255,0.45)', fontSize: 13, lineHeight: 1.55, margin: '0 0 12px' };
+
+  if (step === 'done') {
+    return (
+      <div style={box}>
+        <p style={{ color: '#fff', fontWeight: 700, fontSize: 15, margin: '0 0 6px' }}>Ton compte a été supprimé.</p>
+        <p style={small}>Ta progression et tes données ont été effacées. Tout abonnement par carte a été arrêté.</p>
+        {appleSub && <p style={small}>Ton abonnement App Store se gère dans Réglages → ton nom → Abonnements : pense à le résilier là-bas.</p>}
+        <button onClick={() => navigate('home')} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', padding: '10px 18px', borderRadius: 10, fontSize: 14, cursor: 'pointer', fontFamily: FF }}>Retour à l'accueil</button>
+      </div>
+    );
+  }
+
+  if (step === 'idle') {
+    return (
+      <div style={{ marginTop: 40, textAlign: 'center' }}>
+        <button onClick={() => setStep('confirm')} style={{ background: 'none', border: 'none', color: 'rgba(248,113,113,0.7)', fontSize: 13, cursor: 'pointer', textDecoration: 'underline', fontFamily: FF }}>Supprimer mon compte</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={box}>
+      <p style={{ color: '#f87171', fontWeight: 800, fontSize: 15, margin: '0 0 8px' }}>Supprimer définitivement mon compte</p>
+      <p style={small}>Ta progression (mots appris, séries, scores) et ton compte seront effacés. C'est irréversible.</p>
+      <p style={small}>Un abonnement payé par carte sera arrêté immédiatement, sans remboursement automatique de la période en cours.{HM_NATIVE ? " Un abonnement App Store doit être résilié dans Réglages → ton nom → Abonnements." : ''}</p>
+      <p style={{ ...small, color: 'rgba(255,255,255,0.7)' }}>Pour confirmer, écris <strong>SUPPRIMER</strong> :</p>
+      <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="SUPPRIMER" autoCapitalize="characters" style={{ width: '100%', boxSizing: 'border-box', padding: '11px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.25)', color: '#fff', fontSize: 15, marginBottom: 12, fontFamily: FF }} />
+      {step === 'error' && <p style={{ color: '#f87171', fontSize: 13, margin: '0 0 12px' }}>{err}</p>}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <button disabled={typed.trim().toUpperCase() !== 'SUPPRIMER' || step === 'loading'} onClick={doDelete} style={{ flex: 1, minWidth: 140, background: typed.trim().toUpperCase() === 'SUPPRIMER' ? '#dc2626' : 'rgba(220,38,38,0.25)', border: 'none', color: '#fff', padding: '12px 16px', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: FF }}>{step === 'loading' ? 'Suppression…' : 'Supprimer mon compte'}</button>
+        <button onClick={() => { setStep('idle'); setTyped(''); }} style={{ flex: 1, minWidth: 120, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', padding: '12px 16px', borderRadius: 10, fontSize: 14, cursor: 'pointer', fontFamily: FF }}>Annuler</button>
       </div>
     </div>
   );
