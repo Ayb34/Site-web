@@ -11,11 +11,14 @@ const { useState, useEffect, useRef } = React;
    Apple natives, achats intégrés Apple au lieu de Stripe/PayPal (règle 3.1.1
    de l'App Store), rappel quotidien en notification locale. Le pont natif
    (app/native/bridge.js) expose `window.HMNative`.
-   `?app=1` force ce mode en local (localhost) pour l'aperçu, sans natif. */
+   `?app=1` ouvre un aperçu jouable dans le navigateur (avant la sortie de
+   l'app, pour Ayoub et les testeurs) ; `?app=0` en sort. Sans pont natif,
+   Google passe par la connexion web, et Apple, l'achat et les notifications
+   affichent un message d'aperçu. */
 const HM_CAP = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const HM_NATIVE = HM_CAP || (function () {
   try {
-    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return false;
+    if (/[?&]app=0\b/.test(location.search)) sessionStorage.removeItem('hm_app_preview');
     if (/[?&]app=1\b/.test(location.search)) sessionStorage.setItem('hm_app_preview', '1');
     return sessionStorage.getItem('hm_app_preview') === '1';
   } catch (e) { return false; }
@@ -1096,7 +1099,7 @@ function AuthModal({ onClose, initialTab }) {
     } finally { setLoading(false); }
   };
   const googleIn = async () => {
-    if (HM_NATIVE) return nativeIn('google');
+    if (HM_NATIVE && window.HMNative) return nativeIn('google');
     if (!window._auth || !window.firebase) { setError('Firebase non configuré.'); return; }
     setError(''); setLoading(true);
     const provider = new window.firebase.auth.GoogleAuthProvider();
