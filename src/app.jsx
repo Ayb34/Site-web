@@ -5,6 +5,31 @@
 
 const { useState, useEffect, useRef } = React;
 
+/* ═══ Mode app (iOS / Android, depuis le 23/11/2026) ═══
+   Le même code tourne sur le site et dans l'app (Capacitor, dossier ../app).
+   Dans l'app : accueil « Aujourd'hui » + barre d'onglets, connexion Google et
+   Apple natives, achats intégrés Apple au lieu de Stripe/PayPal (règle 3.1.1
+   de l'App Store), rappel quotidien en notification locale. Le pont natif
+   (app/native/bridge.js) expose `window.HMNative`.
+   `?app=1` force ce mode en local (localhost) pour l'aperçu, sans natif. */
+const HM_CAP = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const HM_NATIVE = HM_CAP || (function () {
+  try {
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return false;
+    if (/[?&]app=1\b/.test(location.search)) sessionStorage.setItem('hm_app_preview', '1');
+    return sessionStorage.getItem('hm_app_preview') === '1';
+  } catch (e) { return false; }
+})();
+/* Dans l'app, les fichiers sont servis en local (capacitor://localhost) : les
+   appels à l'API doivent viser le vrai domaine. Sur le site, chemin relatif. */
+const HM_PREVIEW_BUY = HM_NATIVE && !HM_CAP && /[?&]buy=1/.test(location.search);
+const HM_API = HM_CAP ? 'https://heritage-musulman.com' : '';
+if (HM_NATIVE) { try { document.documentElement.classList.add('hm-app'); } catch (e) {} }
+/* Garanties affichées près du prix. Dans l'app, c'est Apple qui encaisse et
+   rembourse : on ne promet pas un remboursement qu'on ne gère pas. */
+const HM_REFUND = HM_NATIVE ? 'Sans engagement' : 'Remboursé 14 jours';
+const HM_REFUND_LONG = HM_NATIVE ? 'Résiliable dans les réglages' : 'Satisfait ou remboursé 14 jours';
+
 /* ═══ Firebase ═══
    Initialisé ici et non plus dans index.html : les SDK y sont désormais
    différés pour ne plus bloquer le premier rendu, et un script inline
@@ -480,7 +505,7 @@ function hmSendWelcomeEmail() {
     const u = window._auth && window._auth.currentUser;
     if (!u) return;
     u.getIdToken().then(function (token) {
-      fetch('/api/welcome-email', {
+      fetch(HM_API + '/api/welcome-email', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + token },
       }).catch(function () {});
@@ -976,7 +1001,7 @@ function ProGateModal({ onClose, navigate, reason }) {
             <span style={{ color:'#4ade80', fontSize:12, flexShrink:0 }}>✓</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Annule quand tu veux</span>
             <span style={{ color:'rgba(255,255,255,0.25)' }}>·</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>Satisfait ou remboursé 14 jours</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.62)' }}>{HM_REFUND_LONG}</span>
           </div>
           <button onClick={onClose}
             style={{ background:'none', border:'none', color:'rgba(240,237,230,0.32)', fontSize:13, cursor:'pointer', fontFamily:'Plus Jakarta Sans,sans-serif' }}>
@@ -1055,7 +1080,23 @@ function AuthModal({ onClose, initialTab }) {
      le moment où l'on abandonne. Le même bouton sert à l'inscription et à la
      connexion — Firebase dit lui-même si le compte est neuf, et seul un compte
      neuf compte comme une inscription (pixel, écran de bienvenue). */
+  /* Dans l'app : connexion native (les popups OAuth sont bloquées dans une
+     WebView), puis le SDK web est connecté avec le jeton — même compte. */
+  const nativeIn = async (which) => {
+    if (!window.HMNative) { setError("Aperçu : la connexion " + (which === 'apple' ? 'Apple' : 'Google') + " s'ouvrira ici dans l'app."); return; }
+    setError(''); setLoading(true);
+    try {
+      const res = which === 'apple' ? await window.HMNative.signInApple() : await window.HMNative.signInGoogle();
+      const neuf = !!(res && res.additionalUserInfo && res.additionalUserInfo.isNewUser);
+      onAuthSuccess(neuf ? 'signup' : 'login');
+      onClose();
+    } catch (e) {
+      const m = String((e && (e.code || e.message)) || '');
+      if (!/cancel|annul|1001|12501/i.test(m)) setError(errorFr(e && e.code) || 'Connexion impossible, réessaie.');
+    } finally { setLoading(false); }
+  };
   const googleIn = async () => {
+    if (HM_NATIVE) return nativeIn('google');
     if (!window._auth || !window.firebase) { setError('Firebase non configuré.'); return; }
     setError(''); setLoading(true);
     const provider = new window.firebase.auth.GoogleAuthProvider();
@@ -1074,7 +1115,7 @@ function AuthModal({ onClose, initialTab }) {
       else setError(errorFr(e.code));
     } finally { setLoading(false); }
   };
-  const showGoogle = !hmInAppBrowser();
+  const showGoogle = HM_NATIVE || !hmInAppBrowser();
 
   const submit = async () => {
     if (!window._auth) { setError('Firebase non configuré.'); return; }
@@ -1177,6 +1218,18 @@ function AuthModal({ onClose, initialTab }) {
           <>
             {showGoogle && (
               <>
+                {/* Règle 4.8 de l'App Store : qui propose Google doit proposer Apple. */}
+                {HM_NATIVE && (
+                  <button onClick={function () { nativeIn('apple'); }} disabled={loading} style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    background: '#000', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', padding: '13px 16px',
+                    borderRadius: 10, fontSize: 15.5, fontWeight: 600, cursor: loading ? 'wait' : 'pointer',
+                    fontFamily: 'Plus Jakarta Sans, sans-serif', marginBottom: 10
+                  }}>
+                    <svg width="17" height="17" viewBox="0 0 384 512" fill="#fff" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                    Continuer avec Apple
+                  </button>
+                )}
                 <button onClick={googleIn} disabled={loading} style={{
                   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                   background: '#fff', border: '1px solid #dadce0', color: '#1f1f1f', padding: '13px 16px',
@@ -1312,7 +1365,7 @@ function SubscriptionPage({ navigate }) {
           </p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px 18px', marginBottom: 26 }}>
-            {['Sans engagement', 'Résiliable en 1 clic', 'Remboursé 14 jours'].map(function (t) {
+            {(HM_NATIVE ? ['Sans engagement', 'Résiliable à tout moment'] : ['Sans engagement', 'Résiliable en 1 clic', 'Remboursé 14 jours']).map(function (t) {
               return (
                 <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>
                   <span style={{ color: '#4ade80' }}>✓</span>{t}
@@ -1349,6 +1402,7 @@ function SubscriptionPage({ navigate }) {
 
   const openCheckout = async function(method) {
     hmFunnel('clic', 'page');
+    if (HM_NATIVE) { window.dispatchEvent(new CustomEvent('hm-buy', { detail: {} })); return; }
     var myGen = ++genRef.current;
     setCheckoutLoading(true);
     setCheckoutError(null);
@@ -1361,7 +1415,7 @@ function SubscriptionPage({ navigate }) {
     busyRef.current = true;
     try {
       var stripe = (await hmLoadStripe())('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
-      var res = await fetch('/api/create-checkout', {
+      var res = await fetch(HM_API + '/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // Même raison que dans QuickCheckoutModal : le paiement doit se rattacher
@@ -1494,8 +1548,8 @@ function SubscriptionPage({ navigate }) {
           <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.08)' }} />
         </div>
 
-        {/* PayPal — paiement unique 1 mois */}
-        <button
+        {/* PayPal — paiement unique 1 mois (jamais dans l'app) */}
+        {!HM_NATIVE && <button
           onClick={() => openCheckout('paypal')}
           style={{ width:'100%', background:'#FFC439', border:'none', color:'#003087', padding:'14px', borderRadius:12,
             fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'Plus Jakarta Sans, sans-serif',
@@ -1507,10 +1561,10 @@ function SubscriptionPage({ navigate }) {
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="#003087"><path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.99-.032.17a.804.804 0 0 1-.794.68H8.54a.483.483 0 0 1-.477-.558l.925-5.832.01-.07c.06-.372.382-.64.758-.64h1.482c3.102 0 5.533-1.258 6.243-4.895.312-1.588.05-2.85-.693-3.85a3.745 3.745 0 0 0-.72-.332z"/><path d="M18.14 7.7a6.143 6.143 0 0 0-.738-.16 9.294 9.294 0 0 0-1.476-.108H11.4a.804.804 0 0 0-.795.68L9.418 16.05l-.01.07a.805.805 0 0 0 .795.92h1.773c.37 0 .692-.267.76-.63l.63-3.99.04-.22a.804.804 0 0 1 .795-.68h.5c3.237 0 5.773-1.314 6.513-5.12.27-1.313.197-2.443-.327-3.327a3.83 3.83 0 0 0-1.747-.663 6.73 6.73 0 0 0-1.1 3.29z"/></svg>
           PayPal — 4,99€ · 1 mois
-        </button>
-        <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8 }}>
+        </button>}
+        {!HM_NATIVE && <p style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8 }}>
           Paiement unique · renouvellement manuel par email
-        </p>
+        </p>}
 
         {/* Trust */}
         <div className="sub-trust" style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
@@ -1575,7 +1629,7 @@ function ProfilePage({ navigate }) {
         /* Le serveur ne fait plus confiance à l'adresse envoyée : il résilie
            l'abonnement de l'utilisateur prouvé par ce jeton. */
         var idToken = await window._auth.currentUser.getIdToken();
-        var res = await fetch('/api/cancel-subscription', {
+        var res = await fetch(HM_API + '/api/cancel-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
           body: JSON.stringify({}),
@@ -3046,7 +3100,7 @@ function SoftPaywall({ navigate }) {
             <span style={{ color:'#4ade80', fontSize:14, flexShrink:0 }}>✓</span>
             <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Sans engagement — annule quand tu veux</span>
             <span style={{ color:'rgba(255,255,255,0.3)' }}>·</span>
-            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>Satisfait ou remboursé 14 jours</span>
+            <span style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.72)' }}>{HM_REFUND_LONG}</span>
           </div>
           <div style={{ fontFamily:'Plus Jakarta Sans,sans-serif', fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:8, textAlign:'center' }}>
             {PRO_PER_DAY} par jour — moins qu'un café par mois, pour un savoir qui te suit toute ta vie · 🔒 Paiement sécurisé
@@ -6269,7 +6323,7 @@ function PaymentSuccessPage({ navigate }) {
     if (user) return;
     var psid = new URLSearchParams(window.location.search).get('psid');
     if (!psid) return;
-    fetch('/api/session-email?sid=' + psid)
+    fetch(HM_API + '/api/session-email?sid=' + psid)
       .then(function(r){ return r.json(); })
       .then(function(d){ if (d.email) setPrefillEmail(d.email); })
       .catch(function(){});
@@ -6283,7 +6337,7 @@ function PaymentSuccessPage({ navigate }) {
     if (!psid || !window.hmPixel) return;
     var key = 'hm_purchase_tracked_' + psid;
     try { if (sessionStorage.getItem(key)) return; } catch (e) {}
-    fetch('/api/session-email?sid=' + psid)
+    fetch(HM_API + '/api/session-email?sid=' + psid)
       .then(function (r) { return r.json(); })
       .then(function (d) {
         try { sessionStorage.setItem(key, '1'); } catch (e) {}
@@ -7146,7 +7200,7 @@ function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
     busyRef.current = true;
     try {
       var stripe = (await hmLoadStripe())('pk_live_51TVoHLCI24S0XRebTf9xPgcK5lOEAiVaWRXMsWii5u9qGzI661YAxmE9o5AyC0jBZLsqIGh3NiyQNe4pXeUdpkoC00zU3o9AOV');
-      var res = await fetch('/api/create-checkout', {
+      var res = await fetch(HM_API + '/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // L'email du compte connecté est transmis à Stripe pour être pré-rempli
@@ -8224,7 +8278,7 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }
         <div className="pro-modal-footer" style={{ padding: '12px 26px 16px' }}>
           <ProBuyButton plan={plan} onClick={function () { onClose(); openQuickCheckout('card', plan); }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 11, color: 'rgba(240,237,230,0.5)' }}>
-            <span>✓ Annulable en 1 clic</span><span>✓ Remboursé 14 jours</span><span>🔒 Stripe · Apple Pay</span>
+            <span>✓ Annulable en 1 clic</span><span>✓ {HM_REFUND}</span><span>🔒 {HM_NATIVE ? 'App Store' : 'Stripe · Apple Pay'}</span>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(240,237,230,0.32)', fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif' }}>
             Plus tard
@@ -9085,6 +9139,312 @@ function ComprendreSection({ navigate }) {
 }
 
 /* ─── App ─── */
+/* ═══════════════════════════════════════════════════════════════════════
+   APP — écrans propres à l'application (HM_NATIVE)
+   Le site vend ; l'app fait revenir. L'accueil n'est donc pas une page de
+   vente mais « Aujourd'hui » : le verset du jour, la série, la semaine, et
+   les activités à un pouce. Le rappel quotidien est une notification locale.
+   ═══════════════════════════════════════════════════════════════════════ */
+const HM_NOTIF_KEY = 'hm_app_notif_v1';
+function hmNotifPref() {
+  try { return Object.assign({ on: false, hour: 19 }, JSON.parse(localStorage.getItem(HM_NOTIF_KEY) || '{}')); }
+  catch (e) { return { on: false, hour: 19 }; }
+}
+function hmAppScheduleDaily() {
+  const pref = hmNotifPref();
+  if (!window.HMNative) return Promise.resolve(false);
+  if (!pref.on) return window.HMNative.cancelDaily().then(function () { return false; }).catch(function () { return false; });
+  const st = cmpLoad();
+  const today = cmpTodayStr();
+  return window.HMNative.scheduleDaily({
+    hour: pref.hour, minute: 0,
+    streak: cmpLiveStreak(st),
+    doneToday: !!(st.daily && st.daily[today] != null),
+  }).catch(function () { return false; });
+}
+
+/* Styles de l'app, injectés seulement en mode app : le site n'en charge rien. */
+if (HM_NATIVE) {
+  try {
+    const el = document.createElement('style');
+    el.textContent = "html.hm-app, html.hm-app body { background:#0a1a13; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent; }\nhtml.hm-app body { padding-top:env(safe-area-inset-top); padding-bottom:calc(68px + env(safe-area-inset-bottom)); -webkit-user-select:none; user-select:none; }\nhtml.hm-app input, html.hm-app textarea { -webkit-user-select:text; user-select:text; }\n.app-tabbar { position:fixed; left:0; right:0; bottom:0; z-index:900; display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom)); background:rgba(8,20,14,0.92); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); border-top:1px solid rgba(230,200,74,0.14); }\nhtml.hm-app nav:has(.navbar-inner) { padding-top:env(safe-area-inset-top) !important; }\nhtml.hm-app .navbar-inner { justify-content:center !important; }\nhtml.hm-app .navbar-inner > :not(.navbar-logo) { display:none !important; }\n.app-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:0; padding:6px 0 2px; cursor:pointer; color:rgba(240,237,230,0.42); font:700 10.5px 'Plus Jakarta Sans',sans-serif; transition:color .15s; }\n.app-tab.on { color:#e6c84a; }\n.app-tab:active { transform:scale(.94); }\n.app-home { max-width:560px; margin:0 auto; padding:14px 16px 28px; display:flex; flex-direction:column; gap:14px; background:radial-gradient(120% 50% at 50% 0%, rgba(230,200,74,0.10), transparent 60%); min-height:100vh; box-sizing:border-box; }\n.app-head { display:flex; align-items:center; gap:12px; padding:6px 2px 2px; }\n.app-streak { display:flex; align-items:center; gap:4px; padding:7px 12px; border-radius:999px; font:900 15px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }\n.app-streak.on { color:#ffd27a; background:rgba(255,140,40,0.12); border-color:rgba(255,170,60,0.35); }\n.app-daily { text-align:left; width:100%; cursor:pointer; padding:20px 18px 18px; border-radius:22px; border:1px solid rgba(230,200,74,0.45); background:linear-gradient(150deg, rgba(230,200,74,0.20), rgba(168,128,26,0.06) 55%, rgba(10,26,19,0.4)); box-shadow:0 10px 34px rgba(0,0,0,0.35); }\n.app-daily.done { border-color:rgba(74,222,128,0.4); background:linear-gradient(150deg, rgba(74,222,128,0.14), rgba(10,26,19,0.4) 60%); }\n.app-daily:active, .app-act:active, .app-pro:active { transform:scale(.985); }\n.app-daily-cta { display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:11px 20px; border-radius:12px; font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 4px 18px rgba(168,128,26,0.35); }\n.app-daily.done .app-daily-cta { background:rgba(74,222,128,0.16); color:#86efac; box-shadow:none; }\n.app-card { padding:16px; border-radius:18px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); }\n.app-card-h { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-card-h span:last-child { font-size:12px; font-weight:700; }\n.app-stats { display:flex; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }\n.app-stats div { flex:1; text-align:center; display:flex; flex-direction:column; gap:2px; }\n.app-stats b { font:800 20px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-stats span { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }\n.app-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }\n.app-act { text-align:left; cursor:pointer; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.07); display:flex; flex-direction:column; gap:3px; }\n.app-act-ic { width:38px; height:38px; border-radius:12px; border:1px solid; display:flex; align-items:center; justify-content:center; margin-bottom:8px; flex-shrink:0; background:rgba(0,0,0,0.18); box-sizing:border-box; }\n.app-act-t { font:800 15px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act-d { font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-notif { display:flex; align-items:center; gap:12px; }\n.app-notif .app-act-ic { margin-bottom:0; }\n.app-hour { background:transparent; color:#e6c84a; border:0; font:800 12px 'Plus Jakarta Sans',sans-serif; padding:0; -webkit-appearance:none; appearance:none; text-decoration:underline dotted; cursor:pointer; }\n.app-hour option { background:#0a1a13; color:#f0ede6; }\n.app-switch { width:52px; height:31px; border-radius:999px; border:0; padding:2px; cursor:pointer; background:rgba(255,255,255,0.14); flex-shrink:0; transition:background .2s; }\n.app-switch span { display:block; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.35); transition:transform .2s; }\n.app-switch.on { background:#34c759; }\n.app-switch.on span { transform:translateX(21px); }\n.app-note { margin:-4px 4px 0; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); }\n.app-btn { width:100%; padding:15px; border-radius:14px; border:0; cursor:pointer; color:#fff; font:800 15.5px 'Plus Jakarta Sans',sans-serif; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 6px 22px rgba(168,128,26,0.38); }\n.app-btn:disabled { opacity:.6; }\n.app-link { background:none; border:0; cursor:pointer; margin-top:10px; padding:6px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-pro { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; width:100%; cursor:pointer; padding:16px; border-radius:18px; border:1px solid rgba(230,200,74,0.3); background:linear-gradient(135deg, rgba(230,200,74,0.10), rgba(255,255,255,0.02)); }\n.app-hadith { margin:6px 4px 0; padding:14px 16px; border-left:3px solid rgba(230,200,74,0.55); background:rgba(230,200,74,0.05); border-radius:0 14px 14px 0; }\n.app-hadith blockquote { margin:0; font:italic 600 16px/1.45 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }\n.app-hadith figcaption { margin-top:6px; font:800 10.5px 'Plus Jakarta Sans',sans-serif; color:rgba(230,200,74,0.75); }\n.app-sheet { width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-sizing:border-box; padding:10px 20px calc(18px + env(safe-area-inset-bottom)); background:linear-gradient(180deg,#123024,#0a1a13); border-radius:26px 26px 0 0; border:1px solid rgba(230,200,74,0.22); border-bottom:0; animation:appSheet .28s cubic-bezier(.2,.8,.2,1); }\n@keyframes appSheet { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }\n.app-sheet-grip { width:40px; height:5px; border-radius:3px; background:rgba(255,255,255,0.2); margin:0 auto 14px; }\n.app-plan { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 8px 12px; border-radius:16px; cursor:pointer; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.12); color:#f0ede6; }\n.app-plan.on { border-color:#e6c84a; background:rgba(230,200,74,0.10); box-shadow:0 0 0 3px rgba(230,200,74,0.12); }\n.app-plan-badge { position:absolute; top:-10px; padding:3px 9px; border-radius:999px; background:#e6c84a; color:#2a1d02; font:900 10.5px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-t { font:800 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); }\n.app-plan-p { font:900 22px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-s { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-legal { margin:14px 0 4px; font:500 10.5px/1.55 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.42); text-align:center; }\n.app-legal a { color:rgba(230,200,74,0.8); }\n";
+    document.head.appendChild(el);
+  } catch (e) {}
+}
+const APP_GOLD = '#e6c84a';
+const APP_F = 'Plus Jakarta Sans,sans-serif';
+
+function AppIcon({ id, size }) {
+  const sz = size || 22;
+  const c = { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
+  if (id === 'home') return <svg {...c}><path d="M12 3a6.5 6.5 0 1 0 8.5 8.5A7.5 7.5 0 1 1 12 3z" /><path d="M17 4.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" /></svg>;
+  if (id === 'comprendre') return <svg {...c}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" /><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" /></svg>;
+  if (id === 'blind-test') return <svg {...c}><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2" /></svg>;
+  if (id === 'quiz') return <svg {...c}><circle cx="12" cy="12" r="9.5" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6" /><circle cx="12" cy="17.2" r=".6" fill="currentColor" /></svg>;
+  if (id === 'profile') return <svg {...c}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>;
+  if (id === 'bell') return <svg {...c}><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8" /><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0" /></svg>;
+  if (id === 'mosque') return <svg {...c}><path d="M12 3c2.5 2 4.5 3.5 4.5 6H7.5C7.5 6.5 9.5 5 12 3z" /><path d="M5 21V12h14v9M3 21h18M10 21v-4a2 2 0 0 1 4 0v4" /></svg>;
+  return null;
+}
+
+function AppTabBar({ page, navigate }) {
+  const { user, openAuth } = useAuth();
+  const tabs = [
+    { id: 'home', label: "Aujourd'hui" },
+    { id: 'comprendre', label: 'Comprendre' },
+    { id: 'blind-test', label: 'Blind Test' },
+    { id: 'quiz', label: 'Quiz' },
+    { id: 'profile', label: 'Profil' },
+  ];
+  const cur = page.indexOf('quiz') === 0 ? 'quiz' : page;
+  return (
+    <nav className="app-tabbar" aria-label="Navigation">
+      {tabs.map(function (t) {
+        const on = cur === t.id;
+        return (
+          <button key={t.id} className={'app-tab' + (on ? ' on' : '')} aria-current={on ? 'page' : undefined}
+            onClick={function () {
+              if (window.HMNative) window.HMNative.tap();
+              if (t.id === 'profile' && !user) { openAuth('login'); return; }
+              navigate(t.id);
+            }}>
+            <AppIcon id={t.id} size={23} />
+            <span>{t.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+function AppHome({ navigate }) {
+  const { user, isPro, openAuth, openQuickCheckout } = useAuth();
+  const [st, setSt] = React.useState(cmpLoad);
+  const [notif, setNotif] = React.useState(hmNotifPref);
+  const [notifMsg, setNotifMsg] = React.useState('');
+  React.useEffect(function () {
+    function refresh() { setSt(cmpLoad()); }
+    window.addEventListener('hm-resume', refresh);
+    window.addEventListener('focus', refresh);
+    return function () { window.removeEventListener('hm-resume', refresh); window.removeEventListener('focus', refresh); };
+  }, []);
+  const today = cmpTodayStr();
+  const streak = cmpLiveStreak(st);
+  const doneToday = !!(st.daily && st.daily[today] != null);
+  const words = Object.keys(cmpKnownForms(st.words)).length;
+  const first = user && user.displayName ? user.displayName.split(' ')[0] : '';
+  const hour = new Date().getHours();
+  const hello = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour';
+
+  function toggleNotif() {
+    const next = Object.assign({}, notif, { on: !notif.on });
+    try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(next)); } catch (e) {}
+    setNotif(next);
+    if (!window.HMNative) { setNotifMsg(next.on ? 'Aperçu : dans l\'app, une notification arrivera chaque soir à ' + next.hour + ' h.' : ''); return; }
+    hmAppScheduleDaily().then(function (ok) {
+      if (next.on && !ok) {
+        const off = Object.assign({}, next, { on: false });
+        try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(off)); } catch (e) {}
+        setNotif(off);
+        setNotifMsg('Notifications refusées : active-les dans Réglages › Héritage Musulman.');
+      } else setNotifMsg(next.on ? 'C\'est noté : rappel chaque jour à ' + next.hour + ' h, sauf si tu as déjà fait ton verset.' : '');
+    });
+  }
+  function setHour(h) {
+    const next = Object.assign({}, notif, { hour: h });
+    try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(next)); } catch (e) {}
+    setNotif(next);
+    hmAppScheduleDaily();
+  }
+
+  const acts = [
+    { id: 'comprendre', title: 'Comprendre', desc: 'Le Coran mot à mot', color: APP_GOLD, bg: 'rgba(230,200,74,0.10)' },
+    { id: 'blind-test', title: 'Blind Test', desc: 'Reconnais la sourate', color: '#4ade80', bg: 'rgba(74,222,128,0.09)' },
+    { id: 'quiz', title: 'Quiz', desc: '740 questions', color: '#60a5fa', bg: 'rgba(96,165,250,0.10)' },
+    { id: 'test', title: 'Test Al-Fâtiha', desc: 'Ta prière, mot à mot', color: '#f0abfc', bg: 'rgba(240,171,252,0.09)', icon: 'mosque' },
+  ];
+
+  return (
+    <main className="app-home">
+      <header className="app-head">
+        <img src="/favicon-192.png" alt="" width="38" height="38" style={{ borderRadius: '50%' }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: APP_F, fontSize: 12.5, fontWeight: 700, color: 'rgba(240,237,230,0.5)' }}>{hello}{first ? ', ' + first : ''}</div>
+          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 21, fontWeight: 700, color: '#f0ede6', lineHeight: 1.15 }}>Aujourd'hui</div>
+        </div>
+        <div className={'app-streak' + (streak > 0 ? ' on' : '')} title="Jours d'affilée">
+          <span aria-hidden="true">🔥</span>{streak}
+        </div>
+      </header>
+
+      {/* Verset du jour : la raison de revenir chaque jour */}
+      <button className={'app-daily' + (doneToday ? ' done' : '')} onClick={function () { navigate('comprendre'); }}>
+        <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: doneToday ? '#4ade80' : APP_GOLD }}>
+          {doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}
+        </div>
+        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>
+          {doneToday ? 'Bravo, reviens demain' : 'Un verset, mot à mot'}
+        </div>
+        <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>
+          {doneToday ? 'Ta série continue. Tu peux réviser une sourate en attendant.' : 'Deux minutes : écoute, comprends chaque mot, puis joue.'}
+        </div>
+        <div className="app-daily-cta">{doneToday ? 'Réviser' : 'Commencer'} <span aria-hidden="true">→</span></div>
+      </button>
+
+      {/* Ta semaine */}
+      <section className="app-card">
+        <div className="app-card-h">
+          <span>Ta semaine</span>
+          <span style={{ color: streak > 0 ? APP_GOLD : 'rgba(240,237,230,0.4)' }}>{streak > 1 ? streak + ' jours d\'affilée' : streak === 1 ? '1 jour' : 'Commence ta série'}</span>
+        </div>
+        <CmpWeek st={st} size={34} />
+        <div className="app-stats">
+          <div><b>{words}</b><span>mots appris</span></div>
+          <div><b>{streak}</b><span>jours de série</span></div>
+          <div><b>{st.xp || 0}</b><span>points</span></div>
+        </div>
+      </section>
+
+      {/* Activités */}
+      <div className="app-grid">
+        {acts.map(function (a) {
+          return (
+            <button key={a.id} className="app-act" style={{ background: a.bg }} onClick={function () { if (window.HMNative) window.HMNative.tap(); navigate(a.id); }}>
+              <span className="app-act-ic" style={{ color: a.color, borderColor: a.color + '55' }}><AppIcon id={a.icon || a.id} size={22} /></span>
+              <span className="app-act-t">{a.title}</span>
+              <span className="app-act-d">{a.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Rappel quotidien */}
+      <section className="app-card app-notif">
+        <span className="app-act-ic" style={{ color: APP_GOLD, borderColor: 'rgba(230,200,74,0.35)' }}><AppIcon id="bell" size={20} /></span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6' }}>Rappel quotidien</div>
+          <div style={{ fontFamily: APP_F, fontSize: 12, color: 'rgba(240,237,230,0.5)', marginTop: 2 }}>
+            Chaque jour à{' '}
+            <select value={notif.hour} onChange={function (e) { setHour(+e.target.value); }} className="app-hour" aria-label="Heure du rappel">
+              {[7, 8, 9, 12, 13, 17, 18, 19, 20, 21, 22].map(function (h) { return <option key={h} value={h}>{h} h</option>; })}
+            </select>
+          </div>
+        </div>
+        <button role="switch" aria-checked={notif.on} aria-label="Rappel quotidien" className={'app-switch' + (notif.on ? ' on' : '')} onClick={toggleNotif}><span /></button>
+      </section>
+      {notifMsg && <p className="app-note">{notifMsg}</p>}
+
+      {!user && (
+        <section className="app-card" style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6', marginBottom: 4 }}>Garde ta progression</div>
+          <div style={{ fontFamily: APP_F, fontSize: 12.5, color: 'rgba(240,237,230,0.55)', marginBottom: 12 }}>Ton compte la synchronise entre l'app et le site.</div>
+          <button className="app-btn" onClick={function () { openAuth('signup'); }}>Créer mon compte gratuit</button>
+          <button className="app-link" onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
+        </section>
+      )}
+
+      {user && !isPro && (
+        <button className="app-pro" onClick={function () { openQuickCheckout(); }}>
+          <div>
+            <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', color: APP_GOLD }}>HÉRITAGE PRO</div>
+            <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6', marginTop: 3 }}>Les 38 sourates du Juz ‘Amma, sans limite</div>
+          </div>
+          <span aria-hidden="true" style={{ color: APP_GOLD, fontSize: 20 }}>→</span>
+        </button>
+      )}
+
+      <figure className="app-hadith">
+        <blockquote>« Les œuvres les plus aimées d'Allah sont les plus régulières, même si elles sont peu nombreuses. »</blockquote>
+        <figcaption>Prophète ﷺ — rapporté par al-Bukhârî (6464) et Muslim (783)</figcaption>
+      </figure>
+    </main>
+  );
+}
+
+/* Achat intégré (App Store). Remplace Stripe/PayPal dans l'app.
+   Le Pro est accordé par le webhook RevenueCat (api/revenuecat-webhook.js) sur
+   users/{uid}.isPro : l'onSnapshot d'App le voit passer tout seul. */
+function NativeBuyModal({ initialPlan, onClose, navigate }) {
+  const { user, isPro } = useAuth();
+  const [plan, setPlan] = React.useState(initialPlan === 'monthly' ? 'monthly' : 'annual');
+  const [prices, setPrices] = React.useState({ annual: PRO_ANNUAL, monthly: PRO_MONTHLY });
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState('');
+  const [done, setDone] = React.useState(false);
+  React.useEffect(function () { hmLockScroll(); return hmUnlockScroll; }, []);
+  React.useEffect(function () {
+    if (!window.HMNative || !user) return;
+    window.HMNative.prices(user.uid).then(function (p) { if (p) setPrices(function (o) { return Object.assign({}, o, p); }); }).catch(function () {});
+  }, [user]);
+  React.useEffect(function () { if (isPro && busy) { setBusy(false); setDone(true); } }, [isPro, busy]);
+
+  function buy() {
+    if (!window.HMNative) { setMsg('Aperçu : la fenêtre de paiement Apple s\'ouvrira ici dans l\'app.'); return; }
+    setBusy(true); setMsg('');
+    window.HMNative.purchase(plan, user && user.uid).then(function (r) {
+      if (r.ok) { setDone(true); setBusy(false); return; }
+      setBusy(false);
+      if (!r.cancelled) setMsg('L\'achat n\'a pas abouti. Aucun montant n\'a été débité.');
+    }).catch(function () { setBusy(false); setMsg('L\'App Store ne répond pas. Réessaie dans un instant.'); });
+  }
+  function restore() {
+    if (!window.HMNative) { setMsg('Aperçu : la restauration des achats passera par l\'App Store.'); return; }
+    setBusy(true); setMsg('');
+    window.HMNative.restore(user && user.uid).then(function (r) {
+      setBusy(false);
+      if (r.ok) setDone(true); else setMsg('Aucun abonnement trouvé sur ce compte Apple.');
+    }).catch(function () { setBusy(false); setMsg('Restauration impossible pour le moment.'); });
+  }
+
+  const opt = function (id, title, price, sub, badge) {
+    const on = plan === id;
+    return (
+      <button key={id} role="radio" aria-checked={on} onClick={function () { setPlan(id); }} className={'app-plan' + (on ? ' on' : '')}>
+        {badge && <span className="app-plan-badge">{badge}</span>}
+        <span className="app-plan-t">{title}</span>
+        <span className="app-plan-p">{price}</span>
+        <span className="app-plan-s">{sub}</span>
+      </button>
+    );
+  };
+
+  return (
+    <div className="pro-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.78)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <div onClick={function (e) { e.stopPropagation(); }} className="app-sheet">
+        {done ? (
+          <div style={{ textAlign: 'center', padding: '18px 0 6px' }}>
+            <div style={{ fontSize: 44 }}>🌙</div>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, color: '#f0ede6', margin: '10px 0 6px' }}>Bienvenue dans le Pro</h2>
+            <p style={{ fontFamily: APP_F, fontSize: 14, color: 'rgba(240,237,230,0.65)', lineHeight: 1.6, margin: '0 0 18px' }}>Toutes les sourates sont débloquées. Qu'Allah te facilite ton apprentissage.</p>
+            <button className="app-btn" onClick={function () { onClose(); navigate('comprendre'); }}>Commencer</button>
+          </div>
+        ) : (
+          <>
+            <div className="app-sheet-grip" />
+            <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', color: APP_GOLD, textAlign: 'center' }}>HÉRITAGE PRO</div>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 23, color: '#f0ede6', textAlign: 'center', margin: '6px 0 16px', lineHeight: 1.25 }}>Comprends tout le Juz ‘Amma</h2>
+            <ProValue />
+            <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10, margin: '18px 0 14px' }}>
+              {opt('annual', 'Annuel', prices.annual, 'soit ' + PRO_EQ_MONTH + '/mois', PRO_DISCOUNT)}
+              {opt('monthly', 'Mensuel', prices.monthly, 'par mois')}
+            </div>
+            <button className="app-btn" disabled={busy} onClick={buy}>{busy ? 'Connexion à l\'App Store…' : 'S\'abonner'}</button>
+            {msg && <p className="app-note" style={{ textAlign: 'center' }}>{msg}</p>}
+            <p className="app-legal">
+              Abonnement {plan === 'annual' ? 'annuel à ' + prices.annual : 'mensuel à ' + prices.monthly}, renouvelé automatiquement sauf résiliation au moins 24 h avant la fin de la période. Paiement débité sur ton compte Apple ; gère ou résilie ton abonnement dans Réglages › [ton nom] › Abonnements.
+              {' '}<a href="#cgu" onClick={function (e) { e.preventDefault(); onClose(); navigate('cgu'); }}>Conditions</a> · <a href="#confidentialite" onClick={function (e) { e.preventDefault(); onClose(); navigate('confidentialite'); }}>Confidentialité</a>
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+              <button className="app-link" disabled={busy} onClick={restore}>Restaurer mes achats</button>
+              <button className="app-link" onClick={onClose}>Plus tard</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [page, setPage] = React.useState(function () {
     // Stripe redirect with ?payment=success
@@ -9126,6 +9486,26 @@ function App() {
   // avant de définir son mot de passe). Une fois le compte créé ou connecté,
   // on enchaîne automatiquement sur le checkout mis en attente.
   const [pendingCheckout, setPendingCheckout] = React.useState(null);
+
+  /* Mode app : la page d'abonnement demande un achat par événement (elle n'a
+     pas accès à ce state). */
+  React.useEffect(function () {
+    if (!HM_NATIVE) return;
+    function onBuy(e) { const pl = e.detail && e.detail.plan; setQuickCheckoutPlan(pl || hmDefaultPlan()); setQuickCheckoutMethod('native'); }
+    window.addEventListener('hm-buy', onBuy);
+    // Aperçu local uniquement (?app=1&buy=1) : ouvre la fenêtre d'achat.
+    if (HM_PREVIEW_BUY) setTimeout(function () { onBuy({ detail: {} }); }, 300);
+    return function () { window.removeEventListener('hm-buy', onBuy); };
+  }, []);
+  /* Rappel quotidien : replanifié à l'ouverture et à chaque retour dans l'app,
+     pour que le texte suive la série et qu'un verset déjà fait ne sonne pas. */
+  React.useEffect(function () {
+    if (!HM_NATIVE) return;
+    function run() { hmAppScheduleDaily(); }
+    run();
+    window.addEventListener('hm-resume', run);
+    return function () { window.removeEventListener('hm-resume', run); };
+  }, []);
 
   // navigate wrapper — scroll to top even if page doesn't change (ex: logo click depuis home)
   const navigate = React.useCallback(function(p) {
@@ -9425,7 +9805,9 @@ function App() {
   const wrap = (children) => (
     <AuthContext.Provider value={authCtx}>
       {showAuth && <AuthModal initialTab={authMode} onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
-      {quickCheckoutMethod && <QuickCheckoutModal initialMethod={quickCheckoutMethod} initialPlan={quickCheckoutPlan} onClose={() => setQuickCheckoutMethod(null)} />}
+      {quickCheckoutMethod && (HM_NATIVE
+        ? <NativeBuyModal initialPlan={quickCheckoutPlan} onClose={() => setQuickCheckoutMethod(null)} navigate={navigate} />
+        : <QuickCheckoutModal initialMethod={quickCheckoutMethod} initialPlan={quickCheckoutPlan} onClose={() => setQuickCheckoutMethod(null)} />)}
       {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} navigate={navigate} />}
       <div className="nav-progress" aria-hidden="true" />
       {/* La cle change a chaque navigation, meme vers la meme page : React
@@ -9435,7 +9817,9 @@ function App() {
         {children}
       </div>
       {/* Le pixel n'est chargé qu'ici, au clic sur « Accepter » — jamais avant. */}
-      <RgpdBanner onAccept={function(){ if (window.hmPixel) window.hmPixel.init(); }} />
+      {/* Pas de bandeau cookies dans l'app : aucun pixel publicitaire n'y est chargé. */}
+      {!HM_NATIVE && <RgpdBanner onAccept={function(){ if (window.hmPixel) window.hmPixel.init(); }} />}
+      {HM_NATIVE && <AppTabBar page={page} navigate={navigate} />}
     </AuthContext.Provider>
   );
 
@@ -9463,6 +9847,7 @@ function App() {
   if (page === 'confidentialite') return wrap(<PolitiqueConfidentialitePage navigate={navigate} />);
 
   if (page !== 'home') return wrap(<NotFoundPage navigate={navigate} />);
+  if (HM_NATIVE) return wrap(<AppHome navigate={navigate} />);
 
   return wrap(
     <>
@@ -9531,4 +9916,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 requestAnimationFrame(() => {
   const loader = document.getElementById('app-loading');
   if (loader) { loader.classList.add('hidden'); setTimeout(() => loader.remove(), 500); }
+  try { window.dispatchEvent(new Event('hm-ready')); } catch (e) {}
 });
