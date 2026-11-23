@@ -446,6 +446,19 @@ function hmQuotaState() {
   if (!s || s.day !== hmToday()) return { day: hmToday(), used: {} };
   return s;
 }
+/* Activités jouées aujourd'hui (jour local), pour les « défis du jour » de
+   l'app. Distinct du quota : un abonné n'en consomme pas, mais joue quand même. */
+const HM_PLAYED_KEY = 'hm_played_v1';
+function hmPlayedToday() {
+  try { const o = JSON.parse(localStorage.getItem(HM_PLAYED_KEY) || '{}'); return o.day === hmDay(0) ? (o.kinds || {}) : {}; }
+  catch (e) { return {}; }
+}
+function hmPlayedMark(kind) {
+  try {
+    const kinds = hmPlayedToday(); kinds[kind] = 1;
+    localStorage.setItem(HM_PLAYED_KEY, JSON.stringify({ day: hmDay(0), kinds: kinds }));
+  } catch (e) {}
+}
 function hmQuotaUsed(kind) {
   return (hmQuotaState().used || {})[kind] || 0;
 }
@@ -1221,6 +1234,13 @@ function AuthModal({ onClose, initialTab }) {
           <>
             {showGoogle && (
               <>
+                {/* Déjà membre du site : « Masquer mon e-mail » d'Apple créerait un
+                    second compte vide. On le dit avant le choix, pas après. */}
+                {HM_NATIVE && (
+                  <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, background: 'rgba(230,200,74,0.08)', border: '1px solid rgba(230,200,74,0.25)', fontSize: 12.5, lineHeight: 1.5, color: 'rgba(240,237,230,0.8)', fontFamily: 'Plus Jakarta Sans, sans-serif', textAlign: 'left' }}>
+                    <strong style={{ color: '#e6c84a' }}>Déjà inscrit sur le site ?</strong> Connecte-toi de la même façon (Google ou e-mail) pour retrouver ta progression et ton abonnement.
+                  </p>
+                )}
                 {/* Règle 4.8 de l'App Store : qui propose Google doit proposer Apple. */}
                 {HM_NATIVE && (
                   <button onClick={function () { nativeIn('apple'); }} disabled={loading} style={{
@@ -3798,6 +3818,7 @@ function BlindTestPage({ navigate }) {
           localStorage.setItem(key, JSON.stringify({ correct: finalOk, total: SESSION_SIZE }));
         }
       }
+      hmPlayedMark('bt');
       setState('bilan');
       // Upsell au moment fort : la partie finie, on propose Pro aux non-abonnés.
       // Plafonné à 1 fois par session de navigation — au-delà, l'utilisateur
@@ -3865,7 +3886,7 @@ function BlindTestPage({ navigate }) {
       {showGuestGate && <GuestGateModal context="blindtest" onClose={function(){ setShowGuestGate(false); }} />}
 
       {/* ── Bouton Retour ── */}
-      <button onClick={() => { if (audioRef.current) audioRef.current.pause(); navigate('home'); }} style={{
+      <button onClick={() => { if (audioRef.current) audioRef.current.pause(); navigate('home'); }} className="hm-fixed-back" style={{
         position: 'fixed', top: 20, left: 20, zIndex: 200,
         background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
         color: '#fff', padding: '10px 18px', borderRadius: 12,
@@ -3875,7 +3896,7 @@ function BlindTestPage({ navigate }) {
 
       {/* ── Score live ── */}
       {score.total > 0 &&
-        <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 200, display: 'flex', gap: 8 }}>
+        <div className="hm-fixed-back" style={{ position: 'fixed', top: 20, right: 20, zIndex: 200, display: 'flex', gap: 8 }}>
           <div style={{ background: 'rgba(200,167,39,0.15)', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 10, padding: '7px 14px', color: '#c8a727', fontSize: 13, fontWeight: 700, backdropFilter: 'blur(8px)' }}>
             {score.ok}/{score.total}
           </div>
@@ -4196,7 +4217,7 @@ function QuizPage({ navigate }) {
 
       {/* ── Header ── */}
       <div style={{ textAlign: 'center', padding: '90px 20px 48px', maxWidth: 560, margin: '0 auto' }}>
-        <button onClick={() => navigate('home')} style={{
+        <button onClick={() => navigate('home')} className="hm-fixed-back" style={{
           position: 'fixed', top: 20, left: 20, zIndex: 200,
           background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
           color: '#fff', padding: '10px 18px', borderRadius: 12,
@@ -4509,11 +4530,19 @@ function QuizCategoryPage({ catKey, level, navigate }) {
     });
   }, [catKey, level]);
 
+  // Après une réponse, l'écran descend seul jusqu'au bouton « Question
+  // suivante » (sur mobile il est sous la ligne de flottaison) ; à la question
+  // suivante, il remonte sur l'énoncé.
+  const nextBtnRef = React.useRef(null);
   const pick = idx => {
     if (answered) return;
     setChosen(idx);
     setAnswered(true);
     if (idx === questions[current].correct) setScore(s => s + 1);
+    setTimeout(function () {
+      const el = nextBtnRef.current;
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 160);
   };
 
   const next = () => {
@@ -4532,11 +4561,14 @@ function QuizCategoryPage({ catKey, level, navigate }) {
         }
       }
       window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
+      hmPlayedMark('quiz');
       setDone(true);
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
       setCurrent(c => c + 1);
       setChosen(null);
       setAnswered(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -4712,7 +4744,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
               </p>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <button onClick={next}
+              <button onClick={next} ref={nextBtnRef}
                 style={{ background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none', color: '#f5edd8', padding: '15px 40px', borderRadius: 14, fontSize: 16, fontWeight: 800, cursor: 'pointer', transition: 'transform 0.18s', fontFamily: 'Plus Jakarta Sans, sans-serif' }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
@@ -5818,7 +5850,7 @@ function VideoCreatorPage({ navigate }) {
     <div className="fade-up" style={{ minHeight: '100vh', paddingBottom: 80, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
 
       {/* Fixed back button */}
-      <button onClick={() => navigate('home')} style={{ position: 'fixed', top: 20, left: 20, zIndex: 300, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 18px', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer', backdropFilter: 'blur(8px)', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>← Retour</button>
+      <button onClick={() => navigate('home')} className="hm-fixed-back" style={{ position: 'fixed', top: 20, left: 20, zIndex: 300, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '10px 18px', borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: 'pointer', backdropFilter: 'blur(8px)', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>← Retour</button>
 
       {/* Hidden elements */}
       <audio ref={audioRef} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onEnded={() => setIsPlaying(false)} />
@@ -8209,6 +8241,10 @@ function ComprendrePage({ navigate }) {
         .catch(function (e) { console.warn('[rappel] refusé:', e && e.code); });
     }
   }
+  // « Aujourd'hui » (app) ouvre directement le verset du jour.
+  React.useEffect(function () {
+    if (daily && hmWantDaily) { hmWantDaily = false; openDaily(); }
+  }, [daily]);
   function openDaily() {
     if (!daily) return;
     hmFunnel('vue', 'verset-jour');
@@ -8729,7 +8765,7 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
           du body le conteneur de défilement et rend position:sticky inopérant.
           Sur mobile il fallait descendre pour trouver « Verset suivant ».
           Calée au-dessus du bandeau cookies (--cookiebar) et de la barre iOS. */}
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'var(--cookiebar, 0px)', zIndex: 40, background: 'linear-gradient(0deg,#03070a 70%,rgba(3,7,10,0))', padding: '18px 16px calc(14px + env(safe-area-inset-bottom, 0px))' }}>
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: HM_NATIVE ? 'var(--hm-tab)' : 'var(--cookiebar, 0px)', zIndex: 40, background: 'linear-gradient(0deg,#03070a 70%,rgba(3,7,10,0))', padding: HM_NATIVE ? '18px 16px 10px' : '18px 16px calc(14px + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ maxWidth: 608, margin: '0 auto', display: 'flex', gap: 10 }}>
         <button onClick={togglePlay} aria-label={playing ? 'Pause' : 'Réécouter le verset'} style={{ flexShrink: 0, width: 52, height: 52, borderRadius: '50%', border: '1px solid rgba(200,167,39,0.4)', background: playing ? 'rgba(200,167,39,0.22)' : 'rgba(200,167,39,0.12)', color: GOLD, fontSize: playing ? 18 : 22, cursor: 'pointer' }}>{playing ? '❚❚' : '▶'}</button>
         {ai > 0 && (
@@ -9246,7 +9282,7 @@ function hmAppScheduleDaily() {
 if (HM_NATIVE) {
   try {
     const el = document.createElement('style');
-    el.textContent = "html.hm-app, html.hm-app body { background:#0a1a13; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent; }\nhtml.hm-app body { padding-top:env(safe-area-inset-top); padding-bottom:calc(68px + env(safe-area-inset-bottom)); -webkit-user-select:none; user-select:none; }\nhtml.hm-app input, html.hm-app textarea { -webkit-user-select:text; user-select:text; }\n.app-tabbar { position:fixed; left:0; right:0; bottom:0; z-index:900; display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom)); background:rgba(8,20,14,0.92); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); border-top:1px solid rgba(230,200,74,0.14); }\nhtml.hm-app nav:has(.navbar-inner) { padding-top:env(safe-area-inset-top) !important; }\nhtml.hm-app .navbar-inner { justify-content:center !important; }\nhtml.hm-app .navbar-inner > :not(.navbar-logo) { display:none !important; }\n.app-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:0; padding:6px 0 2px; cursor:pointer; color:rgba(240,237,230,0.42); font:700 10.5px 'Plus Jakarta Sans',sans-serif; transition:color .15s; }\n.app-tab.on { color:#e6c84a; }\n.app-tab:active { transform:scale(.94); }\n.app-home { max-width:560px; margin:0 auto; padding:14px 16px 28px; display:flex; flex-direction:column; gap:14px; background:radial-gradient(120% 50% at 50% 0%, rgba(230,200,74,0.10), transparent 60%); min-height:100vh; box-sizing:border-box; }\n.app-head { display:flex; align-items:center; gap:12px; padding:6px 2px 2px; }\n.app-streak { display:flex; align-items:center; gap:4px; padding:7px 12px; border-radius:999px; font:900 15px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }\n.app-streak.on { color:#ffd27a; background:rgba(255,140,40,0.12); border-color:rgba(255,170,60,0.35); }\n.app-daily { text-align:left; width:100%; cursor:pointer; padding:20px 18px 18px; border-radius:22px; border:1px solid rgba(230,200,74,0.45); background:linear-gradient(150deg, rgba(230,200,74,0.20), rgba(168,128,26,0.06) 55%, rgba(10,26,19,0.4)); box-shadow:0 10px 34px rgba(0,0,0,0.35); }\n.app-daily.done { border-color:rgba(74,222,128,0.4); background:linear-gradient(150deg, rgba(74,222,128,0.14), rgba(10,26,19,0.4) 60%); }\n.app-daily:active, .app-act:active, .app-pro:active { transform:scale(.985); }\n.app-daily-cta { display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:11px 20px; border-radius:12px; font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 4px 18px rgba(168,128,26,0.35); }\n.app-daily.done .app-daily-cta { background:rgba(74,222,128,0.16); color:#86efac; box-shadow:none; }\n.app-card { padding:16px; border-radius:18px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); }\n.app-card-h { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-card-h span:last-child { font-size:12px; font-weight:700; }\n.app-stats { display:flex; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }\n.app-stats div { flex:1; text-align:center; display:flex; flex-direction:column; gap:2px; }\n.app-stats b { font:800 20px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-stats span { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }\n.app-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }\n.app-act { text-align:left; cursor:pointer; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.07); display:flex; flex-direction:column; gap:3px; }\n.app-act-ic { width:38px; height:38px; border-radius:12px; border:1px solid; display:flex; align-items:center; justify-content:center; margin-bottom:8px; flex-shrink:0; background:rgba(0,0,0,0.18); box-sizing:border-box; }\n.app-act-t { font:800 15px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act-d { font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-notif { display:flex; align-items:center; gap:12px; }\n.app-notif .app-act-ic { margin-bottom:0; }\n.app-hour { background:transparent; color:#e6c84a; border:0; font:800 12px 'Plus Jakarta Sans',sans-serif; padding:0; -webkit-appearance:none; appearance:none; text-decoration:underline dotted; cursor:pointer; }\n.app-hour option { background:#0a1a13; color:#f0ede6; }\n.app-switch { width:52px; height:31px; border-radius:999px; border:0; padding:2px; cursor:pointer; background:rgba(255,255,255,0.14); flex-shrink:0; transition:background .2s; }\n.app-switch span { display:block; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.35); transition:transform .2s; }\n.app-switch.on { background:#34c759; }\n.app-switch.on span { transform:translateX(21px); }\n.app-note { margin:-4px 4px 0; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); }\n.app-btn { width:100%; padding:15px; border-radius:14px; border:0; cursor:pointer; color:#fff; font:800 15.5px 'Plus Jakarta Sans',sans-serif; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 6px 22px rgba(168,128,26,0.38); }\n.app-btn:disabled { opacity:.6; }\n.app-link { background:none; border:0; cursor:pointer; margin-top:10px; padding:6px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-pro { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; width:100%; cursor:pointer; padding:16px; border-radius:18px; border:1px solid rgba(230,200,74,0.3); background:linear-gradient(135deg, rgba(230,200,74,0.10), rgba(255,255,255,0.02)); }\n.app-hadith { margin:6px 4px 0; padding:14px 16px; border-left:3px solid rgba(230,200,74,0.55); background:rgba(230,200,74,0.05); border-radius:0 14px 14px 0; }\n.app-hadith blockquote { margin:0; font:italic 600 16px/1.45 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }\n.app-hadith figcaption { margin-top:6px; font:800 10.5px 'Plus Jakarta Sans',sans-serif; color:rgba(230,200,74,0.75); }\n.app-sheet { width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-sizing:border-box; padding:10px 20px calc(18px + env(safe-area-inset-bottom)); background:linear-gradient(180deg,#123024,#0a1a13); border-radius:26px 26px 0 0; border:1px solid rgba(230,200,74,0.22); border-bottom:0; animation:appSheet .28s cubic-bezier(.2,.8,.2,1); }\n@keyframes appSheet { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }\n.app-sheet-grip { width:40px; height:5px; border-radius:3px; background:rgba(255,255,255,0.2); margin:0 auto 14px; }\n.app-plan { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 8px 12px; border-radius:16px; cursor:pointer; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.12); color:#f0ede6; }\n.app-plan.on { border-color:#e6c84a; background:rgba(230,200,74,0.10); box-shadow:0 0 0 3px rgba(230,200,74,0.12); }\n.app-plan-badge { position:absolute; top:-10px; padding:3px 9px; border-radius:999px; background:#e6c84a; color:#2a1d02; font:900 10.5px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-t { font:800 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); }\n.app-plan-p { font:900 22px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-s { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-legal { margin:14px 0 4px; font:500 10.5px/1.55 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.42); text-align:center; }\n.app-legal a { color:rgba(230,200,74,0.8); }\n";
+    el.textContent = "html.hm-app, html.hm-app body { background:#0a1a13; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent; }\nhtml.hm-app { --hm-tab:calc(62px + env(safe-area-inset-bottom)); }\nhtml.hm-app body { padding-top:env(safe-area-inset-top); padding-bottom:var(--hm-tab); -webkit-user-select:none; user-select:none; }\nhtml.hm-app input, html.hm-app textarea { -webkit-user-select:text; user-select:text; }\n.app-tabbar { position:fixed; left:0; right:0; bottom:0; z-index:900; display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom)); background:rgba(8,20,14,0.92); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); border-top:1px solid rgba(230,200,74,0.14); }\nhtml.hm-app nav:has(.navbar-inner) { padding-top:env(safe-area-inset-top) !important; }\nhtml.hm-app .navbar-inner { justify-content:center !important; }\nhtml.hm-app .navbar-inner > :not(.navbar-logo) { display:none !important; }\n.app-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:0; padding:6px 0 2px; cursor:pointer; color:rgba(240,237,230,0.42); font:700 10.5px 'Plus Jakarta Sans',sans-serif; transition:color .15s; }\n.app-tab.on { color:#e6c84a; }\n.app-tab:active { transform:scale(.94); }\n.app-home { max-width:560px; margin:0 auto; padding:14px 16px 28px; display:flex; flex-direction:column; gap:14px; background:radial-gradient(120% 50% at 50% 0%, rgba(230,200,74,0.10), transparent 60%); min-height:100vh; box-sizing:border-box; }\n.app-head { display:flex; align-items:center; gap:12px; padding:6px 2px 2px; }\n.app-streak { display:flex; align-items:center; gap:4px; padding:7px 12px; border-radius:999px; font:900 15px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }\n.app-streak.on { color:#ffd27a; background:rgba(255,140,40,0.12); border-color:rgba(255,170,60,0.35); }\n.app-daily { text-align:left; width:100%; cursor:pointer; padding:20px 18px 18px; border-radius:22px; border:1px solid rgba(230,200,74,0.45); background:linear-gradient(150deg, rgba(230,200,74,0.20), rgba(168,128,26,0.06) 55%, rgba(10,26,19,0.4)); box-shadow:0 10px 34px rgba(0,0,0,0.35); }\n.app-daily.done { border-color:rgba(74,222,128,0.4); background:linear-gradient(150deg, rgba(74,222,128,0.14), rgba(10,26,19,0.4) 60%); }\n.app-daily:active, .app-act:active, .app-pro:active { transform:scale(.985); }\n.app-daily-cta { display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:11px 20px; border-radius:12px; font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 4px 18px rgba(168,128,26,0.35); }\n.app-daily.done .app-daily-cta { background:rgba(74,222,128,0.16); color:#86efac; box-shadow:none; }\n.app-card { padding:16px; border-radius:18px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); }\n.app-card-h { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-card-h span:last-child { font-size:12px; font-weight:700; }\n.app-stats { display:flex; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }\n.app-stats div { flex:1; text-align:center; display:flex; flex-direction:column; gap:2px; }\n.app-stats b { font:800 20px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-stats span { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }\n.app-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }\n.app-act { text-align:left; cursor:pointer; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.07); display:flex; flex-direction:column; gap:3px; }\n.app-act-ic { width:38px; height:38px; border-radius:12px; border:1px solid; display:flex; align-items:center; justify-content:center; margin-bottom:8px; flex-shrink:0; background:rgba(0,0,0,0.18); box-sizing:border-box; }\n.app-act-t { font:800 15px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act-d { font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-notif { display:flex; align-items:center; gap:12px; }\n.app-notif .app-act-ic { margin-bottom:0; }\n.app-hour { background:transparent; color:#e6c84a; border:0; font:800 12px 'Plus Jakarta Sans',sans-serif; padding:0; -webkit-appearance:none; appearance:none; text-decoration:underline dotted; cursor:pointer; }\n.app-hour option { background:#0a1a13; color:#f0ede6; }\n.app-switch { width:52px; height:31px; border-radius:999px; border:0; padding:2px; cursor:pointer; background:rgba(255,255,255,0.14); flex-shrink:0; transition:background .2s; }\n.app-switch span { display:block; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.35); transition:transform .2s; }\n.app-switch.on { background:#34c759; }\n.app-switch.on span { transform:translateX(21px); }\n.app-note { margin:-4px 4px 0; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); }\n.app-btn { width:100%; padding:15px; border-radius:14px; border:0; cursor:pointer; color:#fff; font:800 15.5px 'Plus Jakarta Sans',sans-serif; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 6px 22px rgba(168,128,26,0.38); }\n.app-btn:disabled { opacity:.6; }\n.app-link { background:none; border:0; cursor:pointer; margin-top:10px; padding:6px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-pro { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; width:100%; cursor:pointer; padding:16px; border-radius:18px; border:1px solid rgba(230,200,74,0.3); background:linear-gradient(135deg, rgba(230,200,74,0.10), rgba(255,255,255,0.02)); }\n.app-hadith { margin:6px 4px 0; padding:14px 16px; border-left:3px solid rgba(230,200,74,0.55); background:rgba(230,200,74,0.05); border-radius:0 14px 14px 0; }\n.app-hadith blockquote { margin:0; font:italic 600 16px/1.45 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }\n.app-hadith figcaption { margin-top:6px; font:800 10.5px 'Plus Jakarta Sans',sans-serif; color:rgba(230,200,74,0.75); }\n.app-sheet { width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-sizing:border-box; padding:10px 20px calc(18px + env(safe-area-inset-bottom)); background:linear-gradient(180deg,#123024,#0a1a13); border-radius:26px 26px 0 0; border:1px solid rgba(230,200,74,0.22); border-bottom:0; animation:appSheet .28s cubic-bezier(.2,.8,.2,1); }\n@keyframes appSheet { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }\n.app-sheet-grip { width:40px; height:5px; border-radius:3px; background:rgba(255,255,255,0.2); margin:0 auto 14px; }\n.app-plan { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 8px 12px; border-radius:16px; cursor:pointer; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.12); color:#f0ede6; }\n.app-plan.on { border-color:#e6c84a; background:rgba(230,200,74,0.10); box-shadow:0 0 0 3px rgba(230,200,74,0.12); }\n.app-plan-badge { position:absolute; top:-10px; padding:3px 9px; border-radius:999px; background:#e6c84a; color:#2a1d02; font:900 10.5px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-t { font:800 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); }\n.app-plan-p { font:900 22px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-s { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-legal { margin:14px 0 4px; font:500 10.5px/1.55 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.42); text-align:center; }\n.app-legal a { color:rgba(230,200,74,0.8); }\nhtml.hm-app nav:has(.navbar-inner) { background:rgba(8,20,14,0.94) !important; -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important; border-bottom:1px solid rgba(230,200,74,0.12) !important; box-shadow:none !important; }\nhtml.hm-app .navbar-inner { height:48px !important; }\nhtml.hm-app .navbar-logo img { width:74px !important; height:74px !important; }\nhtml.hm-app .sticky-upgrade-banner { bottom:var(--hm-tab) !important; padding-bottom:13px !important; }\nhtml.hm-app .hm-fixed-back { top:calc(env(safe-area-inset-top) + 10px) !important; }\n.app-daily-ar { font-family:Amiri,Georgia,serif; font-size:23px; line-height:1.9; color:#f7e7a8; direction:rtl; text-align:center; margin:12px 0 4px; }\n.app-risk { display:flex; align-items:center; gap:8px; margin-top:12px; padding:9px 12px; border-radius:12px; background:rgba(255,138,76,0.12); border:1px solid rgba(255,138,76,0.35); font:700 12.5px/1.35 'Plus Jakarta Sans',sans-serif; color:#ffc49b; }\n.app-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }\n.app-chip { padding:5px 10px; border-radius:999px; font:800 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.09); }\n.app-quest { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:0; padding:10px 2px; cursor:pointer; border-top:1px solid rgba(255,255,255,0.05); }\n.app-quest:first-of-type { border-top:0; }\n.app-quest-dot { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font:900 13px 'Plus Jakarta Sans',sans-serif; border:2px solid rgba(255,255,255,0.18); color:transparent; }\n.app-quest.ok .app-quest-dot { background:linear-gradient(135deg,#e6c84a,#a8801a); border-color:transparent; color:#2a1d02; }\n.app-quest-t { flex:1; min-width:0; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-quest.ok .app-quest-t { color:rgba(240,237,230,0.5); text-decoration:line-through; }\n.app-quest-go { font:800 12px 'Plus Jakarta Sans',sans-serif; color:#e6c84a; }\n.app-bar { height:6px; border-radius:3px; background:rgba(255,255,255,0.07); overflow:hidden; }\n.app-bar > i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#a8801a,#e6c84a); transition:width .6s ease; }\n@keyframes appPulse { 0%,100% { box-shadow:0 6px 22px rgba(168,128,26,0.35); } 50% { box-shadow:0 6px 30px rgba(230,200,74,0.6); } }\n.app-daily:not(.done) .app-daily-cta { animation:appPulse 2.4s ease-in-out infinite; }\n";
     document.head.appendChild(el);
   } catch (e) {}
 }
@@ -9296,24 +9332,49 @@ function AppTabBar({ page, navigate }) {
   );
 }
 
+/* Drapeau : « Aujourd'hui » demande à Comprendre d'ouvrir le verset du jour
+   dès que le corpus est chargé, au lieu d'atterrir sur le menu. */
+let hmWantDaily = false;
+
 function AppHome({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
+  const [played, setPlayed] = React.useState(hmPlayedToday);
+  const [data, setData] = React.useState(cmpDataCache);
   const [notif, setNotif] = React.useState(hmNotifPref);
   const [notifMsg, setNotifMsg] = React.useState('');
   React.useEffect(function () {
-    function refresh() { setSt(cmpLoad()); }
+    let off = false;
+    cmpLoadData().then(function (d) { if (!off) setData(d); }).catch(function () {});
+    function refresh() { setSt(cmpLoad()); setPlayed(hmPlayedToday()); }
     window.addEventListener('hm-resume', refresh);
     window.addEventListener('focus', refresh);
-    return function () { window.removeEventListener('hm-resume', refresh); window.removeEventListener('focus', refresh); };
+    return function () { off = true; window.removeEventListener('hm-resume', refresh); window.removeEventListener('focus', refresh); };
   }, []);
   const today = cmpTodayStr();
+  const daily = React.useMemo(function () { return cmpDailyPick(data, today); }, [data, today]);
+  const ayah = daily && daily.ayahs[0];
   const streak = cmpLiveStreak(st);
   const doneToday = !!(st.daily && st.daily[today] != null);
   const words = Object.keys(cmpKnownForms(st.words)).length;
+  const quranPct = cmpQuranPct(st.words, data);
+  const lvl = cmpLevel(st.xp);
+  const left = hmSplit(useCountdown(hmNextMidnight()));
   const first = user && user.displayName ? user.displayName.split(' ')[0] : '';
   const hour = new Date().getHours();
   const hello = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour';
+  // Série en jeu : jouée hier, pas encore aujourd'hui → elle s'arrête à minuit.
+  const atRisk = streak > 0 && st.lastDay !== today;
+
+  function go(id) { if (window.HMNative) window.HMNative.tap(); navigate(id); }
+  function startDaily() { if (window.HMNative) window.HMNative.tap(); hmWantDaily = !doneToday; navigate('comprendre'); }
+
+  const quests = [
+    { id: 'daily', t: 'Le verset du jour', ok: doneToday, go: startDaily },
+    { id: 'bt', t: 'Une partie de Blind Test', ok: !!played.bt, go: function () { go('blind-test'); } },
+    { id: 'quiz', t: 'Un quiz', ok: !!played.quiz, go: function () { go('quiz'); } },
+  ];
+  const questsDone = quests.filter(function (q) { return q.ok; }).length;
 
   function toggleNotif() {
     const next = Object.assign({}, notif, { on: !notif.on });
@@ -9356,21 +9417,59 @@ function AppHome({ navigate }) {
         </div>
       </header>
 
-      {/* Verset du jour : la raison de revenir chaque jour */}
-      <button className={'app-daily' + (doneToday ? ' done' : '')} onClick={function () { navigate('comprendre'); }}>
-        <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: doneToday ? '#4ade80' : APP_GOLD }}>
-          {doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}
+      {/* Verset du jour : la raison de revenir chaque jour. On montre le vrai
+          verset (texte du corpus) : on a envie de comprendre ce qu'on voit. */}
+      <button className={'app-daily' + (doneToday ? ' done' : '')} onClick={startDaily}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: doneToday ? '#4ade80' : APP_GOLD }}>
+            {doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}
+          </span>
+          {daily && <span translate="no" style={{ fontFamily: APP_F, fontSize: 11.5, fontWeight: 800, color: 'rgba(240,237,230,0.55)' }}>{daily.name} · {ayah.n}</span>}
         </div>
-        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>
-          {doneToday ? 'Bravo, reviens demain' : 'Un verset, mot à mot'}
+        {ayah ? <div className="app-daily-ar" lang="ar">{ayah.words.map(function (w) { return w.ar; }).join(' ')}</div> : <div style={{ height: 60 }} />}
+        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 21, fontWeight: 700, color: '#f0ede6', lineHeight: 1.25, textAlign: 'center' }}>
+          {doneToday ? 'Bravo, ta série continue' : 'Sauras-tu dire ce que veut dire chaque mot ?'}
         </div>
-        <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>
-          {doneToday ? 'Ta série continue. Tu peux réviser une sourate en attendant.' : 'Deux minutes : écoute, comprends chaque mot, puis joue.'}
+        {!doneToday && ayah && (
+          <div className="app-chips" style={{ justifyContent: 'center' }}>
+            <span className="app-chip">{ayah.words.length} mots à découvrir</span>
+            <span className="app-chip">2 minutes</span>
+            <span className="app-chip">🔥 +1 jour de série</span>
+          </div>
+        )}
+        {doneToday && (
+          <div style={{ fontFamily: APP_F, fontSize: 13, color: 'rgba(240,237,230,0.6)', textAlign: 'center', marginTop: 6 }}>
+            Nouveau verset dans {left.h} h {pad2(left.m)}.
+          </div>
+        )}
+        {atRisk && !doneToday && (
+          <div className="app-risk"><span aria-hidden="true">⏳</span>Ta série de {streak} jour{streak > 1 ? 's' : ''} s'arrête à minuit, dans {left.h} h {pad2(left.m)}.</div>
+        )}
+        <div style={{ textAlign: 'center' }}>
+          <div className="app-daily-cta">{doneToday ? 'Revoir le verset' : 'Jouer le verset du jour'} <span aria-hidden="true">→</span></div>
         </div>
-        <div className="app-daily-cta">{doneToday ? 'Réviser' : 'Commencer'} <span aria-hidden="true">→</span></div>
       </button>
 
-      {/* Ta semaine */}
+      {/* Défis du jour : trois petites victoires, toutes à portée de pouce */}
+      <section className="app-card">
+        <div className="app-card-h">
+          <span>Défis du jour</span>
+          <span style={{ color: questsDone === 3 ? '#4ade80' : APP_GOLD }}>{questsDone === 3 ? 'Journée complète ✓' : questsDone + ' / 3'}</span>
+        </div>
+        <div className="app-bar" style={{ marginBottom: 6 }}><i style={{ width: (questsDone / 3 * 100) + '%' }} /></div>
+        {quests.map(function (q) {
+          return (
+            <button key={q.id} className={'app-quest' + (q.ok ? ' ok' : '')} onClick={q.go}>
+              <span className="app-quest-dot">✓</span>
+              <span className="app-quest-t">{q.t}</span>
+              {!q.ok && <span className="app-quest-go">Go →</span>}
+            </button>
+          );
+        })}
+        {questsDone === 3 && <p className="app-note" style={{ margin: '6px 0 0', textAlign: 'center' }}>Mā shā' Allāh, tout est fait. Reviens demain pour de nouveaux défis.</p>}
+      </section>
+
+      {/* Ta progression */}
       <section className="app-card">
         <div className="app-card-h">
           <span>Ta semaine</span>
@@ -9379,8 +9478,12 @@ function AppHome({ navigate }) {
         <CmpWeek st={st} size={34} />
         <div className="app-stats">
           <div><b>{words}</b><span>mots appris</span></div>
-          <div><b>{streak}</b><span>jours de série</span></div>
-          <div><b>{st.xp || 0}</b><span>points</span></div>
+          <div><b>{cmpFmt(quranPct)} %</b><span>du Coran</span></div>
+          <div><b>Niv. {lvl.n}</b><span>{lvl.title}</span></div>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <div className="app-bar"><i style={{ width: Math.round(lvl.inLevel / lvl.need * 100) + '%' }} /></div>
+          <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 700, color: 'rgba(240,237,230,0.45)', marginTop: 6, textAlign: 'right' }}>{lvl.need - lvl.inLevel} points avant le niveau {lvl.n + 1}</div>
         </div>
       </section>
 
@@ -9388,7 +9491,7 @@ function AppHome({ navigate }) {
       <div className="app-grid">
         {acts.map(function (a) {
           return (
-            <button key={a.id} className="app-act" style={{ background: a.bg }} onClick={function () { if (window.HMNative) window.HMNative.tap(); navigate(a.id); }}>
+            <button key={a.id} className="app-act" style={{ background: a.bg }} onClick={function () { go(a.id); }}>
               <span className="app-act-ic" style={{ color: a.color, borderColor: a.color + '55' }}><AppIcon id={a.icon || a.id} size={22} /></span>
               <span className="app-act-t">{a.title}</span>
               <span className="app-act-d">{a.desc}</span>
