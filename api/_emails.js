@@ -172,7 +172,7 @@ const PRIX = `
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:22px 0 20px;">
     <tr><td align="center" bgcolor="${FOND_PRIX}" style="background-color:${FOND_PRIX};border:1px solid ${BORD_PRIX};border-radius:12px;padding:18px;">
       <div style="font-family:Georgia,serif;font-size:29px;color:${OR_CLAIR};">29,99&nbsp;€<span style="font-family:Arial,sans-serif;font-size:13px;color:${DOUX};"> / an</span></div>
-      <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${DOUX};padding-top:5px;">soit 2,50&nbsp;€ par mois — ou 4,99&nbsp;€ au mois, sans engagement</div>
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${DOUX};padding-top:5px;">soit 2,50&nbsp;€ par mois — ou 7,90&nbsp;€ au mois, sans engagement</div>
     </td></tr>
   </table>`;
 
@@ -483,7 +483,7 @@ function emailRelancePaiement(prenom, plan) {
   const url = SITE + '/?utm_source=email&utm_medium=lifecycle&utm_campaign=relance_paiement&reprendre='
     + (mensuel ? 'monthly' : 'annual') + '#comprendre';
   const prix = mensuel
-    ? '4,99 € par mois'
+    ? '7,90 € par mois'
     : '29,99 € pour un an, soit 2,50 € par mois';
   const lignes = [
     salut,

@@ -3,12 +3,12 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
 });
 
 // Tarifs Stripe (produit « Héritage Musulman — Abonnement Pro »)
-const PRICE_MONTHLY = 'price_1UCeGNCI24S0XRebJ13Trh7M'; //  4,99 € / mois
+const PRICE_MONTHLY = 'price_1Uew75CI24S0XRebghkQjoIG'; //  7,90 € / mois depuis le 23/11/2026 (ancien 4,99 € : price_1UCeGNCI24S0XRebJ13Trh7M, abonnés existants non migrés)
 const PRICE_ANNUAL  = 'price_1TyxGoCI24S0XRebIfNLuJFo'; // 29,99 € / an
 
 // Équivalents PayPal (paiement unique, pas d'abonnement)
 const PAYPAL_PLANS = {
-  monthly: { amount: 499,  days: 30,  label: 'Héritage Musulman Pro — 1 mois' },
+  monthly: { amount: 790,  days: 30,  label: 'Héritage Musulman Pro — 1 mois' },
   annual:  { amount: 2999, days: 365, label: 'Héritage Musulman Pro — 1 an' },
 };
 
