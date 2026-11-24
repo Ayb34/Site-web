@@ -3715,6 +3715,15 @@ function BlindTestPage({ navigate }) {
   const [reciterId, setReciterId] = React.useState(null);
   const [sessionCount, setSessionCount] = React.useState(0); // questions répondues
   const [sessionOk, setSessionOk] = React.useState(0); // bonnes réponses session
+  // Chaque manche : l'écran remonte quand le verset arrive, puis descend vers
+  // « Suivant » dès qu'on a répondu (24/11/2026, comme les quiz).
+  const btNextRef = React.useRef(null);
+  React.useEffect(function () { if (question) { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} } }, [question]);
+  React.useEffect(function () {
+    if (state !== 'answered') return;
+    const t = setTimeout(function () { if (btNextRef.current) { try { btNextRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {} } }, 160);
+    return function () { clearTimeout(t); };
+  }, [state]);
   const [showProGate, setShowProGate] = React.useState(false);
   const [showGuestGate, setShowGuestGate] = React.useState(false);
   const audioRef = React.useRef(null);
@@ -3816,6 +3825,7 @@ function BlindTestPage({ navigate }) {
         const prevData = prev ? JSON.parse(prev) : null;
         if (!prevData || finalOk > prevData.correct) {
           localStorage.setItem(key, JSON.stringify({ correct: finalOk, total: SESSION_SIZE }));
+          hmSyncScore(key, { correct: finalOk, total: SESSION_SIZE });
         }
       }
       hmPlayedMark('bt');
@@ -4153,7 +4163,7 @@ function BlindTestPage({ navigate }) {
                   {correct ? '✓ Bonne réponse !' : '✗ Mauvaise réponse'}
                 </p>
                 {!correct && <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, marginBottom: 16 }}>C'était <strong style={{ color: '#c8a727' }}>{question.surah.fr}</strong> ({question.surah.ar})</p>}
-                <button onClick={goNextOrBilan} style={{
+                <button onClick={goNextOrBilan} ref={btNextRef} style={{
                   background: 'linear-gradient(135deg,#a8801a,#6d4f08)', border: 'none',
                   color: '#fff', padding: '13px 32px', borderRadius: 12, fontSize: 15,
                   fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
@@ -4568,6 +4578,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
         const prevData = prev ? JSON.parse(prev) : null;
         if (!prevData || newScore > prevData.correct) {
           localStorage.setItem(storageKey, JSON.stringify({ correct: newScore, total: questions.length }));
+          hmSyncScore(storageKey, { correct: newScore, total: questions.length });
         }
       }
       window.dispatchEvent(new CustomEvent('heritage:pro-popup'));
@@ -8632,6 +8643,7 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
   const total = sourate.ayahs.length;
   const last = ai >= total - 1;
   const n = ayah.words.length;
+  React.useEffect(function () { if (ai > 0) { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} } }, [ai]);
 
   React.useEffect(function () {
     setRevealed(0); setTapped(-1);
@@ -8775,7 +8787,9 @@ function CmpDiscover({ sourate, playAyah, audioRef, onPlay, onBack, preview }) {
           à traduire — mises bout à bout elles donnent une phrase bancale. Le sens
           du verset vient donc toujours d'une traduction reconnue. */}
       <div style={{ minHeight: 50, textAlign: 'center', opacity: allRevealed ? 1 : 0, transition: 'opacity 0.5s', marginBottom: 12 }}>
-        <p style={{ fontFamily: 'Cormorant Garamond,serif', fontSize: 'clamp(17px, 4.6vw, 20px)', fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.45, margin: 0 }}>
+        <p style={HM_NATIVE
+          ? { fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 21, fontWeight: 600, color: '#f0ede6', lineHeight: 1.5, margin: '8px 0 0' }
+          : { fontFamily: 'Cormorant Garamond,serif', fontSize: 'clamp(17px, 4.6vw, 20px)', fontStyle: 'italic', color: 'rgba(240,237,230,0.8)', lineHeight: 1.45, margin: 0 }}>
           « {ayah.t || ayah.words.map(function (w) { return w.fr; }).join(' ')} »
         </p>
         {ayah.t && <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 10.5, color: 'rgba(240,237,230,0.3)', margin: '6px 0 0' }}>Traduction Muhammad Hamidullah</p>}
@@ -8883,6 +8897,7 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
   const pendingRef = React.useRef(null);
   const q = qs[qi];
   const w = q.w;
+  React.useEffect(function () { if (qi > 0) { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} } }, [qi]);
 
   // Manche « écoute » : le mot est récité dès que la question s'affiche.
   React.useEffect(function () {
@@ -9304,7 +9319,7 @@ function hmAppScheduleDaily() {
 if (HM_NATIVE) {
   try {
     const el = document.createElement('style');
-    el.textContent = "html.hm-app, html.hm-app body { background:#0a1a13; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent; }\nhtml.hm-app { --hm-tab:calc(62px + env(safe-area-inset-bottom)); }\nhtml.hm-app body { padding-top:env(safe-area-inset-top); padding-bottom:var(--hm-tab); -webkit-user-select:none; user-select:none; }\nhtml.hm-app input, html.hm-app textarea { -webkit-user-select:text; user-select:text; }\n.app-tabbar { position:fixed; left:0; right:0; bottom:0; z-index:900; display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom)); background:rgba(8,20,14,0.92); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); border-top:1px solid rgba(230,200,74,0.14); }\nhtml.hm-app nav:has(.navbar-inner) { padding-top:env(safe-area-inset-top) !important; }\nhtml.hm-app .navbar-inner { justify-content:center !important; }\nhtml.hm-app .navbar-inner > :not(.navbar-logo) { display:none !important; }\n.app-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:0; padding:6px 0 2px; cursor:pointer; color:rgba(240,237,230,0.42); font:700 10.5px 'Plus Jakarta Sans',sans-serif; transition:color .15s; }\n.app-tab.on { color:#e6c84a; }\n.app-tab:active { transform:scale(.94); }\n.app-home { max-width:560px; margin:0 auto; padding:10px 16px 20px; display:flex; flex-direction:column; gap:12px; background:radial-gradient(120% 50% at 50% 0%, rgba(230,200,74,0.10), transparent 60%); min-height:100vh; box-sizing:border-box; }\n.app-head { display:flex; align-items:center; gap:12px; padding:6px 2px 2px; }\n.app-streak { display:flex; align-items:center; gap:4px; padding:7px 12px; border-radius:999px; font:900 15px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }\n.app-streak.on { color:#ffd27a; background:rgba(255,140,40,0.12); border-color:rgba(255,170,60,0.35); }\n.app-daily { text-align:left; width:100%; cursor:pointer; padding:16px 18px; border-radius:22px; border:1px solid rgba(230,200,74,0.45); background:linear-gradient(150deg, rgba(230,200,74,0.20), rgba(168,128,26,0.06) 55%, rgba(10,26,19,0.4)); box-shadow:0 10px 34px rgba(0,0,0,0.35); }\n.app-daily.done { border-color:rgba(74,222,128,0.4); background:linear-gradient(150deg, rgba(74,222,128,0.14), rgba(10,26,19,0.4) 60%); }\n.app-daily:active, .app-act:active, .app-pro:active { transform:scale(.985); }\n.app-daily-cta { display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:11px 20px; border-radius:12px; font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 4px 18px rgba(168,128,26,0.35); }\n.app-daily.done .app-daily-cta { background:rgba(74,222,128,0.16); color:#86efac; box-shadow:none; }\n.app-card { padding:16px; border-radius:18px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); }\n.app-card-h { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-card-h span:last-child { font-size:12px; font-weight:700; }\n.app-stats { display:flex; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }\n.app-stats div { flex:1; text-align:center; display:flex; flex-direction:column; gap:2px; }\n.app-stats b { font:800 20px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-stats span { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }\n.app-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }\n.app-act { text-align:left; cursor:pointer; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.07); display:flex; flex-direction:column; gap:3px; }\n.app-act-ic { width:38px; height:38px; border-radius:12px; border:1px solid; display:flex; align-items:center; justify-content:center; margin-bottom:8px; flex-shrink:0; background:rgba(0,0,0,0.18); box-sizing:border-box; }\n.app-act-t { font:800 15px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act-d { font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-notif { display:flex; align-items:center; gap:12px; }\n.app-notif .app-act-ic { margin-bottom:0; }\n.app-hour { background:transparent; color:#e6c84a; border:0; font:800 12px 'Plus Jakarta Sans',sans-serif; padding:0; -webkit-appearance:none; appearance:none; text-decoration:underline dotted; cursor:pointer; }\n.app-hour option { background:#0a1a13; color:#f0ede6; }\n.app-switch { width:52px; height:31px; border-radius:999px; border:0; padding:2px; cursor:pointer; background:rgba(255,255,255,0.14); flex-shrink:0; transition:background .2s; }\n.app-switch span { display:block; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.35); transition:transform .2s; }\n.app-switch.on { background:#34c759; }\n.app-switch.on span { transform:translateX(21px); }\n.app-note { margin:-4px 4px 0; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); }\n.app-btn { width:100%; padding:15px; border-radius:14px; border:0; cursor:pointer; color:#fff; font:800 15.5px 'Plus Jakarta Sans',sans-serif; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 6px 22px rgba(168,128,26,0.38); }\n.app-btn:disabled { opacity:.6; }\n.app-link { background:none; border:0; cursor:pointer; margin-top:10px; padding:6px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-pro { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; width:100%; cursor:pointer; padding:16px; border-radius:18px; border:1px solid rgba(230,200,74,0.3); background:linear-gradient(135deg, rgba(230,200,74,0.10), rgba(255,255,255,0.02)); }\n.app-hadith { margin:6px 4px 0; padding:14px 16px; border-left:3px solid rgba(230,200,74,0.55); background:rgba(230,200,74,0.05); border-radius:0 14px 14px 0; }\n.app-hadith blockquote { margin:0; font:italic 600 16px/1.45 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }\n.app-hadith figcaption { margin-top:6px; font:800 10.5px 'Plus Jakarta Sans',sans-serif; color:rgba(230,200,74,0.75); }\n.app-sheet { width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-sizing:border-box; padding:10px 20px calc(18px + env(safe-area-inset-bottom)); background:linear-gradient(180deg,#123024,#0a1a13); border-radius:26px 26px 0 0; border:1px solid rgba(230,200,74,0.22); border-bottom:0; animation:appSheet .28s cubic-bezier(.2,.8,.2,1); }\n@keyframes appSheet { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }\n.app-sheet-grip { width:40px; height:5px; border-radius:3px; background:rgba(255,255,255,0.2); margin:0 auto 14px; }\n.app-plan { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 8px 12px; border-radius:16px; cursor:pointer; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.12); color:#f0ede6; }\n.app-plan.on { border-color:#e6c84a; background:rgba(230,200,74,0.10); box-shadow:0 0 0 3px rgba(230,200,74,0.12); }\n.app-plan-badge { position:absolute; top:-10px; padding:3px 9px; border-radius:999px; background:#e6c84a; color:#2a1d02; font:900 10.5px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-t { font:800 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); }\n.app-plan-p { font:900 22px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-s { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-legal { margin:14px 0 4px; font:500 10.5px/1.55 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.42); text-align:center; }\n.app-legal a { color:rgba(230,200,74,0.8); }\nhtml.hm-app nav:has(.navbar-inner) { background:rgba(8,20,14,0.94) !important; -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important; border-bottom:1px solid rgba(230,200,74,0.12) !important; box-shadow:none !important; }\nhtml.hm-app .navbar-inner { height:48px !important; }\nhtml.hm-app .navbar-logo img { width:74px !important; height:74px !important; }\nhtml.hm-app .sticky-upgrade-banner { bottom:var(--hm-tab) !important; padding-bottom:13px !important; }\nhtml.hm-app .hm-fixed-back { top:calc(env(safe-area-inset-top) + 10px) !important; }\n.app-daily-ar { font-family:Amiri,Georgia,serif; font-size:23px; line-height:1.9; color:#f7e7a8; direction:rtl; text-align:center; margin:12px 0 4px; }\n.app-risk { display:flex; align-items:center; gap:8px; margin-top:12px; padding:9px 12px; border-radius:12px; background:rgba(255,138,76,0.12); border:1px solid rgba(255,138,76,0.35); font:700 12.5px/1.35 'Plus Jakarta Sans',sans-serif; color:#ffc49b; }\n.app-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }\n.app-chip { padding:5px 10px; border-radius:999px; font:800 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.09); }\n.app-quest { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:0; padding:10px 2px; cursor:pointer; border-top:1px solid rgba(255,255,255,0.05); }\n.app-quest:first-of-type { border-top:0; }\n.app-quest-dot { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font:900 13px 'Plus Jakarta Sans',sans-serif; border:2px solid rgba(255,255,255,0.18); color:transparent; }\n.app-quest.ok .app-quest-dot { background:linear-gradient(135deg,#e6c84a,#a8801a); border-color:transparent; color:#2a1d02; }\n.app-quest-t { flex:1; min-width:0; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-quest.ok .app-quest-t { color:rgba(240,237,230,0.5); text-decoration:line-through; }\n.app-quest-go { font:800 12px 'Plus Jakarta Sans',sans-serif; color:#e6c84a; }\n.app-bar { height:6px; border-radius:3px; background:rgba(255,255,255,0.07); overflow:hidden; }\n.app-bar > i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#a8801a,#e6c84a); transition:width .6s ease; }\n@keyframes appPulse { 0%,100% { box-shadow:0 6px 22px rgba(168,128,26,0.35); } 50% { box-shadow:0 6px 30px rgba(230,200,74,0.6); } }\n.app-daily:not(.done) .app-daily-cta { animation:appPulse 2.4s ease-in-out infinite; }\nhtml.hm-app nav:has(.navbar-inner) { display:none !important; }\nhtml.hm-app, html.hm-app body { background:#061209; }\nhtml.hm-app body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(ellipse 140% 110% at 50% 0%, #0b2314 0%, #08190f 55%, #061209 100%); }\nhtml.hm-app .hm-fixed-score { top:calc(env(safe-area-inset-top) + 10px) !important; }\n.app-page { max-width:560px; margin:0 auto; padding:8px 18px 32px; box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-back { display:block; background:none; border:0; padding:8px 0; margin:0 auto 6px 0; cursor:pointer; color:rgba(240,237,230,0.5); font:600 14px 'Plus Jakarta Sans',sans-serif; }\n.app-ph { text-align:center; margin:0 0 20px; }\n.app-ph-eye { font:700 11.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.18em; text-transform:uppercase; color:#e6c84a; margin:0 0 10px; }\n.app-ph-t { font-family:Cinzel,serif; font-weight:700; font-size:29px; color:#f0ede6; line-height:1.15; margin:0 0 10px; }\n.app-ph-t span { color:#e6c84a; }\n.app-ph-sub { font:500 14.5px/1.6 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.55); margin:0 auto; max-width:440px; }\n.app-panel { display:flex; gap:14px; align-items:center; background:linear-gradient(160deg,rgba(200,167,39,0.08),rgba(255,255,255,0.02)); border:1px solid rgba(200,167,39,0.25); border-radius:22px; padding:16px; margin-bottom:6px; font-family:'Plus Jakarta Sans',sans-serif; }\n.app-panel-k { font-size:13px; color:rgba(240,237,230,0.55); margin-bottom:8px; }\n.app-panel-k b { color:#e6c84a; }\n.app-panel-stats { display:flex; gap:12px; margin-top:10px; }\n.app-panel-stats div { min-width:0; }\n.app-panel-stats b { display:block; font-size:17px; font-weight:900; color:#f0ede6; white-space:nowrap; }\n.app-panel-stats span { display:block; font-size:10.5px; color:rgba(240,237,230,0.45); }\n.app-sec { font:700 12px 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em; text-transform:uppercase; color:rgba(240,237,230,0.4); margin:22px 0 12px; }\n.app-row { width:100%; text-align:left; cursor:pointer; display:flex; align-items:center; gap:14px; background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015)); border:1px solid rgba(200,167,39,0.3); border-radius:18px; padding:14px 16px; font-family:'Plus Jakarta Sans',sans-serif; margin-bottom:10px; box-sizing:border-box; }\n.app-row.on { border:2px solid #e6c84a; padding:13px 15px; background:linear-gradient(160deg,rgba(230,200,74,0.14),rgba(255,255,255,0.02)); }\n.app-row:active { transform:scale(.985); }\n.app-row-n { width:48px; height:48px; flex-shrink:0; border-radius:14px; background:linear-gradient(135deg,#a8801a,#6d4f08); display:flex; align-items:center; justify-content:center; font:900 21px 'Plus Jakarta Sans',sans-serif; color:#fff; }\n.app-row-n.soft { background:rgba(200,167,39,0.1); border:1px solid rgba(200,167,39,0.3); color:#e6c84a; font-size:22px; box-sizing:border-box; }\n.app-row-t { display:block; font-family:Cinzel,serif; font-size:17px; font-weight:700; color:#f0ede6; }\n.app-row-d { display:block; font-size:12.5px; color:rgba(240,237,230,0.5); margin-top:2px; }\n.app-row-go { color:#e6c84a; font-size:22px; font-weight:800; flex-shrink:0; }\n.app-rec { width:100%; display:flex; align-items:center; gap:12px; margin-top:8px; background:rgba(255,255,255,0.035); border:1px solid rgba(200,167,39,0.22); border-radius:14px; padding:12px 16px; cursor:pointer; text-align:left; font-family:'Plus Jakarta Sans',sans-serif; box-sizing:border-box; }\n.app-rec-k { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:rgba(240,237,230,0.42); }\n.app-rec-v { display:block; font-size:14.5px; font-weight:700; color:#f0ede6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\n.app-rec-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }\n.app-rec-i { display:flex; align-items:center; gap:8px; text-align:left; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:12px; padding:11px 13px; cursor:pointer; font:600 13.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.8); }\n.app-rec-i.on { background:rgba(200,167,39,0.14); border-color:rgba(200,167,39,0.55); color:#f0ede6; font-weight:800; }\n.app-cta { display:block; width:100%; padding:17px; border:0; border-radius:16px; cursor:pointer; font:800 16.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset; }\n.app-cta:disabled { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.3); box-shadow:none; }\n.app-free { text-align:center; font:500 12.5px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); margin:12px 0 0; }\n.app-inline { background:none; border:0; padding:0; cursor:pointer; color:#e6c84a; font:700 13px 'Plus Jakarta Sans',sans-serif; text-decoration:underline; }\n.app-id { display:flex; align-items:center; gap:14px; padding:16px; margin-bottom:14px; border-radius:22px; border:1px solid rgba(200,167,39,0.25); background:linear-gradient(135deg,rgba(200,167,39,0.10),rgba(26,92,53,0.12)); font-family:'Plus Jakarta Sans',sans-serif; }\n.app-id-av { width:56px; height:56px; flex-shrink:0; border-radius:50%; background:linear-gradient(135deg,#a8801a,#6d4f08); display:flex; align-items:center; justify-content:center; font:800 23px 'Plus Jakarta Sans',sans-serif; color:#fff; }\n.app-id-n { font-family:Cinzel,serif; font-size:20px; font-weight:700; color:#f0ede6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\n.app-id-s { font-size:12.5px; color:rgba(240,237,230,0.5); margin-top:2px; }\n.app-id-pro { padding:4px 10px; border-radius:999px; background:linear-gradient(135deg,#a8801a,#6d4f08); color:#fff; font:900 10.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em; }\n.app-acts4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }\n.app-act4 { display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 2px 10px; border-radius:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.035); cursor:pointer; font:800 11.5px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act4:active { transform:scale(.96); }\n";
+    el.textContent = "html.hm-app, html.hm-app body { background:#0a1a13; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent; }\nhtml.hm-app { --hm-tab:calc(62px + env(safe-area-inset-bottom)); }\nhtml.hm-app body { padding-top:env(safe-area-inset-top); padding-bottom:var(--hm-tab); -webkit-user-select:none; user-select:none; }\nhtml.hm-app input, html.hm-app textarea { -webkit-user-select:text; user-select:text; }\n.app-tabbar { position:fixed; left:0; right:0; bottom:0; z-index:900; display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom)); background:rgba(8,20,14,0.92); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); border-top:1px solid rgba(230,200,74,0.14); }\nhtml.hm-app nav:has(.navbar-inner) { padding-top:env(safe-area-inset-top) !important; }\nhtml.hm-app .navbar-inner { justify-content:center !important; }\nhtml.hm-app .navbar-inner > :not(.navbar-logo) { display:none !important; }\n.app-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:0; padding:6px 0 2px; cursor:pointer; color:rgba(240,237,230,0.42); font:700 10.5px 'Plus Jakarta Sans',sans-serif; transition:color .15s; }\n.app-tab.on { color:#e6c84a; }\n.app-tab:active { transform:scale(.94); }\n.app-home { max-width:560px; margin:0 auto; padding:10px 16px 20px; display:flex; flex-direction:column; gap:12px; background:radial-gradient(120% 50% at 50% 0%, rgba(230,200,74,0.10), transparent 60%); min-height:100vh; box-sizing:border-box; }\n.app-head { display:flex; align-items:center; gap:12px; padding:6px 2px 2px; }\n.app-streak { display:flex; align-items:center; gap:4px; padding:7px 12px; border-radius:999px; font:900 15px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }\n.app-streak.on { color:#ffd27a; background:rgba(255,140,40,0.12); border-color:rgba(255,170,60,0.35); }\n.app-daily { text-align:left; width:100%; cursor:pointer; padding:16px 18px; border-radius:22px; border:1px solid rgba(230,200,74,0.45); background:linear-gradient(150deg, rgba(230,200,74,0.20), rgba(168,128,26,0.06) 55%, rgba(10,26,19,0.4)); box-shadow:0 10px 34px rgba(0,0,0,0.35); }\n.app-daily.done { border-color:rgba(74,222,128,0.4); background:linear-gradient(150deg, rgba(74,222,128,0.14), rgba(10,26,19,0.4) 60%); }\n.app-daily:active, .app-act:active, .app-pro:active { transform:scale(.985); }\n.app-daily-cta { display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:11px 20px; border-radius:12px; font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 4px 18px rgba(168,128,26,0.35); }\n.app-daily.done .app-daily-cta { background:rgba(74,222,128,0.16); color:#86efac; box-shadow:none; }\n.app-card { padding:16px; border-radius:18px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); }\n.app-card-h { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-card-h span:last-child { font-size:12px; font-weight:700; }\n.app-stats { display:flex; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }\n.app-stats div { flex:1; text-align:center; display:flex; flex-direction:column; gap:2px; }\n.app-stats b { font:800 20px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-stats span { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }\n.app-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }\n.app-act { text-align:left; cursor:pointer; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.07); display:flex; flex-direction:column; gap:3px; }\n.app-act-ic { width:38px; height:38px; border-radius:12px; border:1px solid; display:flex; align-items:center; justify-content:center; margin-bottom:8px; flex-shrink:0; background:rgba(0,0,0,0.18); box-sizing:border-box; }\n.app-act-t { font:800 15px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act-d { font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-notif { display:flex; align-items:center; gap:12px; }\n.app-notif .app-act-ic { margin-bottom:0; }\n.app-hour { background:transparent; color:#e6c84a; border:0; font:800 12px 'Plus Jakarta Sans',sans-serif; padding:0; -webkit-appearance:none; appearance:none; text-decoration:underline dotted; cursor:pointer; }\n.app-hour option { background:#0a1a13; color:#f0ede6; }\n.app-switch { width:52px; height:31px; border-radius:999px; border:0; padding:2px; cursor:pointer; background:rgba(255,255,255,0.14); flex-shrink:0; transition:background .2s; }\n.app-switch span { display:block; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.35); transition:transform .2s; }\n.app-switch.on { background:#34c759; }\n.app-switch.on span { transform:translateX(21px); }\n.app-note { margin:-4px 4px 0; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); }\n.app-btn { width:100%; padding:15px; border-radius:14px; border:0; cursor:pointer; color:#fff; font:800 15.5px 'Plus Jakarta Sans',sans-serif; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 6px 22px rgba(168,128,26,0.38); }\n.app-btn:disabled { opacity:.6; }\n.app-link { background:none; border:0; cursor:pointer; margin-top:10px; padding:6px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-pro { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; width:100%; cursor:pointer; padding:16px; border-radius:18px; border:1px solid rgba(230,200,74,0.3); background:linear-gradient(135deg, rgba(230,200,74,0.10), rgba(255,255,255,0.02)); }\n.app-hadith { margin:6px 4px 0; padding:14px 16px; border-left:3px solid rgba(230,200,74,0.55); background:rgba(230,200,74,0.05); border-radius:0 14px 14px 0; }\n.app-hadith blockquote { margin:0; font:italic 600 16px/1.45 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }\n.app-hadith figcaption { margin-top:6px; font:800 10.5px 'Plus Jakarta Sans',sans-serif; color:rgba(230,200,74,0.75); }\n.app-sheet { width:100%; max-width:520px; max-height:92vh; overflow-y:auto; box-sizing:border-box; padding:10px 20px calc(18px + env(safe-area-inset-bottom)); background:linear-gradient(180deg,#123024,#0a1a13); border-radius:26px 26px 0 0; border:1px solid rgba(230,200,74,0.22); border-bottom:0; animation:appSheet .28s cubic-bezier(.2,.8,.2,1); }\n@keyframes appSheet { from { transform:translateY(40px); opacity:0 } to { transform:none; opacity:1 } }\n.app-sheet-grip { width:40px; height:5px; border-radius:3px; background:rgba(255,255,255,0.2); margin:0 auto 14px; }\n.app-plan { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:16px 8px 12px; border-radius:16px; cursor:pointer; background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.12); color:#f0ede6; }\n.app-plan.on { border-color:#e6c84a; background:rgba(230,200,74,0.10); box-shadow:0 0 0 3px rgba(230,200,74,0.12); }\n.app-plan-badge { position:absolute; top:-10px; padding:3px 9px; border-radius:999px; background:#e6c84a; color:#2a1d02; font:900 10.5px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-t { font:800 13px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); }\n.app-plan-p { font:900 22px 'Plus Jakarta Sans',sans-serif; }\n.app-plan-s { font:600 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); }\n.app-legal { margin:14px 0 4px; font:500 10.5px/1.55 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.42); text-align:center; }\n.app-legal a { color:rgba(230,200,74,0.8); }\nhtml.hm-app nav:has(.navbar-inner) { background:rgba(8,20,14,0.94) !important; -webkit-backdrop-filter:blur(16px) !important; backdrop-filter:blur(16px) !important; border-bottom:1px solid rgba(230,200,74,0.12) !important; box-shadow:none !important; }\nhtml.hm-app .navbar-inner { height:48px !important; }\nhtml.hm-app .navbar-logo img { width:74px !important; height:74px !important; }\nhtml.hm-app .sticky-upgrade-banner { bottom:var(--hm-tab) !important; padding-bottom:13px !important; }\nhtml.hm-app .hm-fixed-back { top:calc(env(safe-area-inset-top) + 10px) !important; }\n.app-daily-ar { font-family:Amiri,Georgia,serif; font-size:23px; line-height:1.9; color:#f7e7a8; direction:rtl; text-align:center; margin:12px 0 4px; }\n.app-risk { display:flex; align-items:center; gap:8px; margin-top:12px; padding:9px 12px; border-radius:12px; background:rgba(255,138,76,0.12); border:1px solid rgba(255,138,76,0.35); font:700 12.5px/1.35 'Plus Jakarta Sans',sans-serif; color:#ffc49b; }\n.app-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }\n.app-chip { padding:5px 10px; border-radius:999px; font:800 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.75); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.09); }\n.app-quest { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:0; padding:10px 2px; cursor:pointer; border-top:1px solid rgba(255,255,255,0.05); }\n.app-quest:first-of-type { border-top:0; }\n.app-quest-dot { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font:900 13px 'Plus Jakarta Sans',sans-serif; border:2px solid rgba(255,255,255,0.18); color:transparent; }\n.app-quest.ok .app-quest-dot { background:linear-gradient(135deg,#e6c84a,#a8801a); border-color:transparent; color:#2a1d02; }\n.app-quest-t { flex:1; min-width:0; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-quest.ok .app-quest-t { color:rgba(240,237,230,0.5); text-decoration:line-through; }\n.app-quest-go { font:800 12px 'Plus Jakarta Sans',sans-serif; color:#e6c84a; }\n.app-bar { height:6px; border-radius:3px; background:rgba(255,255,255,0.07); overflow:hidden; }\n.app-bar > i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#a8801a,#e6c84a); transition:width .6s ease; }\n@keyframes appPulse { 0%,100% { box-shadow:0 6px 22px rgba(168,128,26,0.35); } 50% { box-shadow:0 6px 30px rgba(230,200,74,0.6); } }\n.app-daily:not(.done) .app-daily-cta { animation:appPulse 2.4s ease-in-out infinite; }\nhtml.hm-app nav:has(.navbar-inner) { display:none !important; }\nhtml.hm-app { background:#061209 !important; }\nhtml.hm-app body { background:transparent !important; }\nhtml.hm-app body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(ellipse 140% 110% at 50% 0%, #0b2314 0%, #08190f 55%, #061209 100%); }\nhtml.hm-app .hm-fixed-score { top:calc(env(safe-area-inset-top) + 10px) !important; }\n.app-page { max-width:560px; margin:0 auto; padding:8px 18px 32px; box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-back { display:block; background:none; border:0; padding:8px 0; margin:0 auto 6px 0; cursor:pointer; color:rgba(240,237,230,0.5); font:600 14px 'Plus Jakarta Sans',sans-serif; }\n.app-ph { text-align:center; margin:0 0 20px; }\n.app-ph-eye { font:700 11.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.18em; text-transform:uppercase; color:#e6c84a; margin:0 0 10px; }\n.app-ph-t { font-family:Cinzel,serif; font-weight:700; font-size:29px; color:#f0ede6; line-height:1.15; margin:0 0 10px; }\n.app-ph-t span { color:#e6c84a; }\n.app-ph-sub { font:500 14.5px/1.6 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.55); margin:0 auto; max-width:440px; }\n.app-panel { display:flex; gap:14px; align-items:center; background:linear-gradient(160deg,rgba(200,167,39,0.08),rgba(255,255,255,0.02)); border:1px solid rgba(200,167,39,0.25); border-radius:22px; padding:16px; margin-bottom:6px; font-family:'Plus Jakarta Sans',sans-serif; }\n.app-panel-k { font-size:13px; color:rgba(240,237,230,0.55); margin-bottom:8px; }\n.app-panel-k b { color:#e6c84a; }\n.app-panel-stats { display:flex; gap:12px; margin-top:10px; }\n.app-panel-stats div { min-width:0; }\n.app-panel-stats b { display:block; font-size:17px; font-weight:900; color:#f0ede6; white-space:nowrap; }\n.app-panel-stats span { display:block; font-size:10.5px; color:rgba(240,237,230,0.45); }\n.app-sec { font:700 12px 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em; text-transform:uppercase; color:rgba(240,237,230,0.4); margin:22px 0 12px; }\n.app-row { width:100%; text-align:left; cursor:pointer; display:flex; align-items:center; gap:14px; background:linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015)); border:1px solid rgba(200,167,39,0.3); border-radius:18px; padding:14px 16px; font-family:'Plus Jakarta Sans',sans-serif; margin-bottom:10px; box-sizing:border-box; }\n.app-row.on { border:2px solid #e6c84a; padding:13px 15px; background:linear-gradient(160deg,rgba(230,200,74,0.14),rgba(255,255,255,0.02)); }\n.app-row:active { transform:scale(.985); }\n.app-row-n { width:48px; height:48px; flex-shrink:0; border-radius:14px; background:linear-gradient(135deg,#a8801a,#6d4f08); display:flex; align-items:center; justify-content:center; font:900 21px 'Plus Jakarta Sans',sans-serif; color:#fff; }\n.app-row-n.soft { background:rgba(200,167,39,0.1); border:1px solid rgba(200,167,39,0.3); color:#e6c84a; font-size:22px; box-sizing:border-box; }\n.app-row-t { display:block; font-family:Cinzel,serif; font-size:17px; font-weight:700; color:#f0ede6; }\n.app-row-d { display:block; font-size:12.5px; color:rgba(240,237,230,0.5); margin-top:2px; }\n.app-row-go { color:#e6c84a; font-size:22px; font-weight:800; flex-shrink:0; }\n.app-rec { width:100%; display:flex; align-items:center; gap:12px; margin-top:8px; background:rgba(255,255,255,0.035); border:1px solid rgba(200,167,39,0.22); border-radius:14px; padding:12px 16px; cursor:pointer; text-align:left; font-family:'Plus Jakarta Sans',sans-serif; box-sizing:border-box; }\n.app-rec-k { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:rgba(240,237,230,0.42); }\n.app-rec-v { display:block; font-size:14.5px; font-weight:700; color:#f0ede6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\n.app-rec-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }\n.app-rec-i { display:flex; align-items:center; gap:8px; text-align:left; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:12px; padding:11px 13px; cursor:pointer; font:600 13.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.8); }\n.app-rec-i.on { background:rgba(200,167,39,0.14); border-color:rgba(200,167,39,0.55); color:#f0ede6; font-weight:800; }\n.app-cta { display:block; width:100%; padding:17px; border:0; border-radius:16px; cursor:pointer; font:800 16.5px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 8px 28px rgba(168,128,26,0.35), 0 1px 0 rgba(255,255,255,0.22) inset; }\n.app-cta:disabled { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.3); box-shadow:none; }\n.app-free { text-align:center; font:500 12.5px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); margin:12px 0 0; }\n.app-inline { background:none; border:0; padding:0; cursor:pointer; color:#e6c84a; font:700 13px 'Plus Jakarta Sans',sans-serif; text-decoration:underline; }\n.app-id { display:flex; align-items:center; gap:14px; padding:16px; margin-bottom:14px; border-radius:22px; border:1px solid rgba(200,167,39,0.25); background:linear-gradient(135deg,rgba(200,167,39,0.10),rgba(26,92,53,0.12)); font-family:'Plus Jakarta Sans',sans-serif; }\n.app-id-av { width:56px; height:56px; flex-shrink:0; border-radius:50%; background:linear-gradient(135deg,#a8801a,#6d4f08); display:flex; align-items:center; justify-content:center; font:800 23px 'Plus Jakarta Sans',sans-serif; color:#fff; }\n.app-id-n { font-family:Cinzel,serif; font-size:20px; font-weight:700; color:#f0ede6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\n.app-id-s { font-size:12.5px; color:rgba(240,237,230,0.5); margin-top:2px; }\n.app-id-pro { padding:4px 10px; border-radius:999px; background:linear-gradient(135deg,#a8801a,#6d4f08); color:#fff; font:900 10.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em; }\n.app-acts4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }\n.app-act4 { display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 2px 10px; border-radius:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.035); cursor:pointer; font:800 11.5px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-act4:active { transform:scale(.96); }\n.app-feat { display:flex; align-items:center; gap:14px; padding:16px 14px; border-radius:20px; cursor:pointer; background:linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015)); border:1px solid rgba(200,167,39,0.28); }\n.app-feat:active { transform:scale(.985); }\n.app-feat-ic { width:54px; height:54px; flex-shrink:0; border-radius:16px; border:1px solid; display:flex; align-items:center; justify-content:center; box-sizing:border-box; }\n.app-feat-t { display:block; font-family:Cinzel,serif; font-size:16.5px; font-weight:700; color:#f0ede6; line-height:1.2; }\n.app-feat-d { display:block; font:500 12.5px/1.4 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.55); margin-top:3px; }\n.app-feat-p { display:block; font:800 11.5px 'Plus Jakarta Sans',sans-serif; color:#e6c84a; margin-top:4px; }\n.app-feat-go { flex-shrink:0; padding:10px 16px; border:0; border-radius:12px; cursor:pointer; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#a8801a,#6d4f08); box-shadow:0 4px 16px rgba(168,128,26,0.35); }\n.app-dh { display:flex; align-items:center; gap:12px; margin:24px 0 10px; }\n.app-dh-t { flex:1; font-family:Cinzel,serif; font-size:18px; font-weight:700; color:#f0ede6; }\n.app-dh-go { background:none; border:1px solid rgba(230,200,74,0.45); color:#e6c84a; border-radius:999px; padding:6px 14px; cursor:pointer; font:800 12.5px 'Plus Jakarta Sans',sans-serif; }\n.app-kv { display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.05); font:600 13.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); }\n.app-kv b { color:#f0ede6; font-weight:800; }\n.app-sub { margin:14px 0 4px; font:700 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em; text-transform:uppercase; color:rgba(240,237,230,0.4); }\n.app-pl { padding:9px 0 4px; }\n.app-pl-h { display:flex; justify-content:space-between; gap:10px; margin-bottom:6px; font:700 13.5px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }\n.app-pl-h b { font-size:12px; color:#e6c84a; font-weight:800; white-space:nowrap; }\n.app-lv3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }\n.app-lv3-h { display:flex; justify-content:space-between; margin-bottom:5px; font:700 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.55); }\n.app-lv3-h b { color:#e6c84a; }\n.app-empty { margin:10px 0 2px; font:500 12.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }\n";
     document.head.appendChild(el);
   } catch (e) {}
 }
@@ -9504,17 +9519,85 @@ function AppQuizHome({ cats, scores, onPick, isPro, user, openAuth, navigate }) 
   );
 }
 
-/* Profil — identité, progression des trois activités, abonnement, réglages. */
+/* ═══ Progression liée au compte (app) ═══
+   24/11/2026, choix d'Ayoub : dans l'app, sans compte on ne joue pas et on ne
+   voit aucune progression. Les scores Quiz et Blind Test, qui ne vivaient que
+   dans le navigateur, suivent désormais le compte (users/{uid}.scores) ; à la
+   déconnexion l'appareil est vidé, à la connexion il est rechargé. Sans ça, la
+   progression d'un compte restait visible après déconnexion et se mélangeait
+   au compte suivant. */
+const HM_PROGRESS_KEYS = /^(quiz_score_|quiz_seen_|blindtest_score_)/;
+function hmSyncScore(key, obj) {
+  try {
+    const u = window._auth && window._auth.currentUser;
+    if (!u || !window._db) return;
+    const f = {}; f[key] = obj;
+    window._db.collection('users').doc(u.uid).set({ scores: f }, { merge: true }).catch(function () {});
+  } catch (e) {}
+}
+function hmWipeLocalProgress() {
+  try {
+    localStorage.removeItem(CMP_KEY);
+    localStorage.removeItem('hm_played_v1');
+    Object.keys(localStorage).forEach(function (k) { if (HM_PROGRESS_KEYS.test(k)) localStorage.removeItem(k); });
+  } catch (e) {}
+  try { window.dispatchEvent(new Event('hm-resume')); } catch (e) {}
+}
+function hmPullProgress(uid) {
+  if (!window._db) return;
+  window._db.collection('users').doc(uid).get().then(function (doc) {
+    const d = doc.exists ? doc.data() : {};
+    if (d.comprendre) cmpSave(cmpMerge(cmpLoad(), d.comprendre));
+    const remote = d.scores || {};
+    Object.keys(remote).forEach(function (k) {
+      if (!/^(quiz_score_|blindtest_score_)/.test(k)) return;
+      const r = remote[k], l = appReadScore(k);
+      if (r && r.total && (!l || r.correct > l.correct)) { try { localStorage.setItem(k, JSON.stringify({ correct: r.correct, total: r.total })); } catch (e) {} }
+    });
+    const up = {};
+    try {
+      Object.keys(localStorage).forEach(function (k) {
+        if (!/^(quiz_score_|blindtest_score_)/.test(k)) return;
+        const l = appReadScore(k), r = remote[k];
+        if (l && (!r || l.correct > r.correct)) up[k] = l;
+      });
+    } catch (e) {}
+    if (Object.keys(up).length) doc.ref.set({ scores: up }, { merge: true }).catch(function () {});
+    try { window.dispatchEvent(new Event('hm-resume')); } catch (e) {}
+  }).catch(function () {});
+}
+
+/* Écran affiché à la place d'une activité quand on n'est pas connecté. */
+function AppGate({ page, navigate }) {
+  const { openAuth } = useAuth();
+  const what = page === 'blind-test' ? 'au Blind Test' : page.indexOf('quiz') === 0 ? 'aux quiz' : page === 'test' ? 'au test Al-Fâtiha' : page === 'profile' ? 'et voir ta progression' : 'à Comprendre le Coran';
+  return (
+    <main className="app-page" style={{ textAlign: 'center', paddingTop: 40 }}>
+      <img src="/favicon-192.png" alt="" width="72" height="72" style={{ borderRadius: '50%', margin: '0 auto 18px', display: 'block' }} />
+      <p className="app-ph-eye">◆ Compte gratuit</p>
+      <h1 className="app-ph-t">Connecte-toi<br /><span>pour jouer.</span></h1>
+      <p className="app-ph-sub" style={{ marginBottom: 24 }}>Pour jouer {what}, crée ton compte gratuit : il garde ta progression, ta série et tes scores, dans l'app comme sur le site.</p>
+      <button className="app-cta" onClick={function () { openAuth('signup'); }}>Créer mon compte gratuit</button>
+      <button className="app-link" style={{ display: 'block', margin: '10px auto 0' }} onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
+      <button className="app-back" style={{ margin: '22px auto 0' }} onClick={function () { navigate('home'); }}>← Accueil</button>
+    </main>
+  );
+}
+
+/* Profil — identité, progression détaillée des activités, abonnement, réglages. */
 function AppProfile({ navigate }) {
   const { user, isPro, logout, openAuth, openQuickCheckout } = useAuth();
   const [data, setData] = React.useState(null);
+  const [cats, setCats] = React.useState(null);
   const [st, setSt] = React.useState(cmpLoad);
   const [notif, setNotif] = React.useState(hmNotifPref);
   const [notifMsg, setNotifMsg] = React.useState('');
+  const [, setTick] = React.useState(0);
   React.useEffect(function () {
     let alive = true;
     cmpLoadData().then(function (d) { if (alive) setData(d); }).catch(function () {});
-    function refresh() { setSt(cmpLoad()); }
+    fetch('./questions.json').then(function (r) { return r.json(); }).then(function (raw) { if (alive) setCats(quizWithMelange(raw)); }).catch(function () {});
+    function refresh() { setSt(cmpLoad()); setTick(function (t) { return t + 1; }); }
     window.addEventListener('hm-resume', refresh);
     return function () { alive = false; window.removeEventListener('hm-resume', refresh); };
   }, []);
@@ -9545,73 +9628,127 @@ function AppProfile({ navigate }) {
   const quranPct = cmpQuranPct(st.words, data);
   const lvl = cmpLevel(st.xp);
   const streak = cmpLiveStreak(st);
+  const daysPlayed = Object.keys(st.days || {}).length;
+  const dailyDone = Object.keys(st.daily || {}).length;
 
-  // Quiz : toutes les catégories jouées, Mélange comprise.
-  const qs = [];
-  try {
-    Object.keys(localStorage).forEach(function (k) { if (k.indexOf('quiz_score_') === 0) { const s = appReadScore(k); if (s) qs.push(s); } });
-  } catch (e) {}
-  const qAvg = qs.length ? Math.round(qs.reduce(function (a, s) { return a + s.correct / s.total * 100; }, 0) / qs.length) : 0;
+  // Comprendre, sourate par sourate : mots appris et meilleur score.
+  const surahRows = ((data && data.surahs) || []).map(function (s) {
+    const forms = {};
+    s.ayahs.forEach(function (a) { a.words.forEach(function (w) { forms[w.ar] = 1; }); });
+    const all = Object.keys(forms);
+    const known = all.filter(function (k) { return (st.words[k] || 0) >= 1; }).length;
+    return { id: s.id, name: s.name, total: all.length, known: known, best: st.best[s.id] || 0 };
+  }).filter(function (r) { return r.best > 0; });
+
+  // Quiz, catégorie par catégorie et niveau par niveau.
+  const LV = [{ id: 'debutant', label: 'Débutant' }, { id: 'amateur', label: 'Amateur' }, { id: 'avance', label: 'Avancé' }];
+  const quizRows = cats ? Object.keys(cats).map(function (k) {
+    return { key: k, cat: cats[k], lv: LV.map(function (l) { return Object.assign({}, l, { s: appReadScore('quiz_score_' + k + '_' + l.id) }); }) };
+  }) : [];
+  const quizAll = [];
+  quizRows.forEach(function (r) { r.lv.forEach(function (l) { if (l.s) quizAll.push(l.s); }); });
+  const qAvg = quizAll.length ? Math.round(quizAll.reduce(function (a, s) { return a + s.correct / s.total * 100; }, 0) / quizAll.length) : 0;
   const bt = appBtScores();
-  const btBest = bt.reduce(function (m, l) { return l.score ? Math.max(m, l.score.correct) : m; }, 0);
+  const btPlayed = bt.filter(function (l) { return l.score; }).length;
 
   const name = (user && user.displayName) || '';
   const initial = (name || (user && user.email) || '?')[0].toUpperCase();
   const since = user && user.metadata && user.metadata.creationTime
     ? new Date(user.metadata.creationTime).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : null;
+  const pctOf = function (s) { return s ? Math.round(s.correct / s.total * 100) : 0; };
+
+  if (!user) return <AppGate page="profile" navigate={navigate} />;
 
   return (
     <main className="app-page">
       <AppBack onClick={function () { navigate('home'); }} />
 
       <div className="app-id">
-        <div className="app-id-av">{user ? initial : '☾'}</div>
+        <div className="app-id-av">{initial}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="app-id-n">{user ? (name || 'Mon compte') : 'Invité'}</div>
-          <div className="app-id-s">{user ? (since ? 'Membre depuis ' + since : 'Membre') : 'Ta progression reste sur cet appareil'}</div>
+          <div className="app-id-n">{name || 'Mon compte'}</div>
+          <div className="app-id-s">{since ? 'Membre depuis ' + since : 'Membre'}</div>
         </div>
         {isPro && <span className="app-id-pro">PRO</span>}
       </div>
-
-      {!user && (
-        <div className="app-card" style={{ textAlign: 'center', marginBottom: 14 }}>
-          <div style={{ fontSize: 14.5, fontWeight: 800, color: '#f0ede6', marginBottom: 4 }}>Garde ta progression</div>
-          <div style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.55)', marginBottom: 12 }}>Ton compte la synchronise entre l'app et le site.</div>
-          <button className="app-btn" onClick={function () { openAuth('signup'); }}>Créer mon compte gratuit</button>
-          <button className="app-link" onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
-        </div>
-      )}
 
       <AppPanel pct={pct} ringTop={pct + '%'} ringSub={<>du vocabulaire<br />Juz ‘Amma</>}
         line={<>Niveau {lvl.n} · <b>{lvl.title}</b></>}
         bar={lvl.inLevel / lvl.need * 100}
         stats={[{ v: mastered, k: 'mots appris' }, { v: '🔥 ' + streak, k: 'jours d\'affilée', color: '#ff8a4c' }, { v: cmpFmt(quranPct) + '%', k: 'du Coran', color: '#4ade80' }]} />
 
-      <p className="app-sec">Tes activités</p>
-      <button className="app-row" onClick={function () { navigate('comprendre'); }}>
-        <span className="app-row-n soft"><AppIcon id="comprendre" size={22} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span className="app-row-t">Comprendre</span>
-          <span className="app-row-d">{mastered} mots appris · {st.xp || 0} points</span>
-        </span>
-        <span className="app-row-go">›</span>
-      </button>
-      <button className="app-row" onClick={function () { navigate('quiz'); }}>
-        <span className="app-row-n soft"><AppIcon id="quiz" size={22} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span className="app-row-t">Quiz</span>
-          <span className="app-row-d">{qs.length ? qs.length + ' niveaux joués · moyenne ' + qAvg + '%' : 'Pas encore joué'}</span>
-        </span>
-        <span className="app-row-go">›</span>
-      </button>
-      <button className="app-row" onClick={function () { navigate('blind-test'); }}>
-        <span className="app-row-n soft"><AppIcon id="blind-test" size={22} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span className="app-row-t">Blind Test</span>
-          <span className="app-row-d">{bt.some(function (l) { return l.score; }) ? bt.filter(function (l) { return l.score; }).map(function (l) { return l.label + ' ' + l.score.correct + '/' + l.score.total; }).join(' · ') : 'Pas encore joué'}</span>
-        </span>
-        <span className="app-row-go">›</span>
-      </button>
+      {/* ── Comprendre ── */}
+      <div className="app-dh">
+        <span className="app-row-n soft" style={{ width: 40, height: 40, fontSize: 18 }}><AppIcon id="comprendre" size={20} /></span>
+        <span className="app-dh-t">Comprendre</span>
+        <button className="app-dh-go" onClick={function () { navigate('comprendre'); }}>Jouer ›</button>
+      </div>
+      <div className="app-card">
+        <div className="app-kv"><span>Points</span><b>{st.xp || 0}</b></div>
+        <div className="app-kv"><span>Jours joués</span><b>{daysPlayed}</b></div>
+        <div className="app-kv"><span>Versets du jour faits</span><b>{dailyDone}</b></div>
+        <div className="app-kv"><span>Sourates jouées</span><b>{surahRows.length}{data ? '/' + data.surahs.length : ''}</b></div>
+        {surahRows.length > 0 && <div className="app-sub">Sourate par sourate</div>}
+        {surahRows.map(function (r) {
+          return (
+            <div key={r.id} className="app-pl">
+              <div className="app-pl-h"><span>{r.name}</span><b>{r.known}/{r.total} mots{r.best ? ' · record ' + r.best + '%' : ''}</b></div>
+              <div className="app-bar"><i style={{ width: Math.round(r.known / r.total * 100) + '%' }} /></div>
+            </div>
+          );
+        })}
+        {surahRows.length === 0 && <p className="app-empty">Aucune sourate jouée pour l'instant.</p>}
+      </div>
+
+      {/* ── Quiz ── */}
+      <div className="app-dh">
+        <span className="app-row-n soft" style={{ width: 40, height: 40, fontSize: 18 }}><AppIcon id="quiz" size={20} /></span>
+        <span className="app-dh-t">Quiz</span>
+        <button className="app-dh-go" onClick={function () { navigate('quiz'); }}>Jouer ›</button>
+      </div>
+      <div className="app-card">
+        <div className="app-kv"><span>Niveaux joués</span><b>{quizAll.length}/{quizRows.length * 3 || 27}</b></div>
+        <div className="app-kv"><span>Score moyen</span><b>{qAvg}%</b></div>
+        {quizRows.filter(function (r) { return r.lv.some(function (l) { return l.s; }); }).map(function (r) {
+          return (
+            <div key={r.key} className="app-pl">
+              <div className="app-pl-h"><span>{r.cat.icon} {r.cat.title}</span></div>
+              <div className="app-lv3">
+                {r.lv.map(function (l) {
+                  return (
+                    <div key={l.id}>
+                      <div className="app-lv3-h"><span>{l.label}</span><b>{l.s ? l.s.correct + '/' + l.s.total : '—'}</b></div>
+                      <div className="app-bar"><i style={{ width: pctOf(l.s) + '%' }} /></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        {quizAll.length === 0 && <p className="app-empty">Aucun quiz joué pour l'instant.</p>}
+      </div>
+
+      {/* ── Blind Test ── */}
+      <div className="app-dh">
+        <span className="app-row-n soft" style={{ width: 40, height: 40, fontSize: 18 }}><AppIcon id="blind-test" size={20} /></span>
+        <span className="app-dh-t">Blind Test</span>
+        <button className="app-dh-go" onClick={function () { navigate('blind-test'); }}>Jouer ›</button>
+      </div>
+      <div className="app-card">
+        <div className="app-kv"><span>Niveaux joués</span><b>{btPlayed}/3</b></div>
+        <div className="app-lv3" style={{ marginTop: 10 }}>
+          {bt.map(function (l) {
+            return (
+              <div key={l.id}>
+                <div className="app-lv3-h"><span>{l.label}</span><b>{l.score ? l.score.correct + '/' + l.score.total : '—'}</b></div>
+                <div className="app-bar"><i style={{ width: pctOf(l.score) + '%' }} /></div>
+              </div>
+            );
+          })}
+        </div>
+        <p className="app-empty" style={{ marginTop: 10 }}>Meilleure partie sur 10 sourates, par niveau.</p>
+      </div>
 
       <p className="app-sec">Abonnement</p>
       {isPro ? (
@@ -9648,30 +9785,33 @@ function AppProfile({ navigate }) {
       <div style={{ display: 'flex', justifyContent: 'center', gap: 18, flexWrap: 'wrap', margin: '18px 0 0' }}>
         <button className="app-inline" onClick={function () { navigate('cgu'); }}>Conditions</button>
         <button className="app-inline" onClick={function () { navigate('confidentialite'); }}>Confidentialité</button>
-        {user && <button className="app-inline" onClick={logout}>Se déconnecter</button>}
+        <button className="app-inline" onClick={logout}>Se déconnecter</button>
       </div>
-      {user && <DeleteAccountBlock navigate={navigate} />}
+      <DeleteAccountBlock navigate={navigate} />
     </main>
   );
 }
 
 function AppHome({ navigate }) {
-  /* Retour à la version du 23/11 au matin (choix d'Ayoub, 24/11) : verset du
-     jour et progression mis en avant, le tout sur un seul écran, sans défiler.
-     Les activités tiennent sur une ligne ; le hadith est parti. */
+  /* « Aujourd'hui » (24/11/2026, choix d'Ayoub) : verset du jour et semaine en
+     tête, puis chaque activité mise en avant avec son bouton « Jouer ».
+     Sans compte : aucune progression affichée, et chaque « Jouer » propose de
+     s'inscrire ou de se connecter. */
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
   const [notif, setNotif] = React.useState(hmNotifPref);
   const [notifMsg, setNotifMsg] = React.useState('');
+  const [, setTick] = React.useState(0);
   React.useEffect(function () {
-    function refresh() { setSt(cmpLoad()); }
+    function refresh() { setSt(cmpLoad()); setTick(function (t) { return t + 1; }); }
     window.addEventListener('hm-resume', refresh);
     window.addEventListener('focus', refresh);
     return function () { window.removeEventListener('hm-resume', refresh); window.removeEventListener('focus', refresh); };
   }, []);
+  const guest = !user;
   const today = cmpTodayStr();
-  const streak = cmpLiveStreak(st);
-  const doneToday = !!(st.daily && st.daily[today] != null);
+  const streak = guest ? 0 : cmpLiveStreak(st);
+  const doneToday = !guest && !!(st.daily && st.daily[today] != null);
   const words = cmpLearnedCount(st.words);
   const first = user && user.displayName ? user.displayName.split(' ')[0] : '';
   const hour = new Date().getHours();
@@ -9697,13 +9837,23 @@ function AppHome({ navigate }) {
     setNotif(next);
     hmAppScheduleDaily();
   }
-  function go(id) { if (window.HMNative) window.HMNative.tap(); navigate(id); }
+  function play(id) {
+    if (window.HMNative) window.HMNative.tap();
+    if (guest) { openAuth('signup'); return; }
+    navigate(id);
+  }
+
+  // Petite ligne de progression sous chaque activité (compte connecté).
+  const qs = [];
+  if (!guest) { try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('quiz_score_') === 0) { const s = appReadScore(k); if (s) qs.push(s); } }); } catch (e) {} }
+  const qAvg = qs.length ? Math.round(qs.reduce(function (a, s) { return a + s.correct / s.total * 100; }, 0) / qs.length) : 0;
+  const btBest = guest ? 0 : appBtScores().reduce(function (m, l) { return l.score ? Math.max(m, l.score.correct) : m; }, 0);
 
   const acts = [
-    { id: 'comprendre', title: 'Comprendre', color: APP_GOLD },
-    { id: 'blind-test', title: 'Blind Test', color: '#4ade80' },
-    { id: 'quiz', title: 'Quiz', color: '#60a5fa' },
-    { id: 'test', title: 'Test Fâtiha', color: '#f0abfc', icon: 'mosque' },
+    { id: 'comprendre', title: 'Comprendre le Coran', desc: 'Le Coran mot à mot, un verset à la fois', color: APP_GOLD, prog: words ? words + ' mots appris' : '' },
+    { id: 'blind-test', title: 'Blind Test', desc: 'Écoute un verset, devine la sourate', color: '#4ade80', prog: btBest ? 'Record ' + btBest + '/10' : '' },
+    { id: 'quiz', title: 'Quiz islamiques', desc: '740 questions, 9 thèmes, 3 niveaux', color: '#60a5fa', prog: qs.length ? qs.length + ' niveaux · moyenne ' + qAvg + '%' : '' },
+    { id: 'test', title: 'Test Al-Fâtiha', desc: 'Combien de mots de ta prière comprends-tu ?', color: '#f0abfc', icon: 'mosque', prog: '' },
   ];
 
   return (
@@ -9714,76 +9864,85 @@ function AppHome({ navigate }) {
           <div style={{ fontFamily: APP_F, fontSize: 12.5, fontWeight: 700, color: 'rgba(240,237,230,0.5)' }}>{hello}{first ? ', ' + first : ''}</div>
           <div style={{ fontFamily: 'Cinzel,serif', fontSize: 21, fontWeight: 700, color: '#f0ede6', lineHeight: 1.15 }}>Aujourd'hui</div>
         </div>
-        <div className={'app-streak' + (streak > 0 ? ' on' : '')} title="Jours d'affilée">
-          <span aria-hidden="true">🔥</span>{streak}
-        </div>
+        {!guest && (
+          <div className={'app-streak' + (streak > 0 ? ' on' : '')} title="Jours d'affilée">
+            <span aria-hidden="true">🔥</span>{streak}
+          </div>
+        )}
       </header>
 
-      {/* Verset du jour : la raison de revenir chaque jour */}
-      <button className={'app-daily' + (doneToday ? ' done' : '')} onClick={function () { if (!doneToday) hmWantDaily = true; go('comprendre'); }}>
-        <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: doneToday ? '#4ade80' : APP_GOLD }}>
-          {doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}
-        </div>
-        <div style={{ fontFamily: 'Cinzel,serif', fontSize: 23, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>
-          {doneToday ? 'Bravo, reviens demain' : 'Un verset, mot à mot'}
-        </div>
-        <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>
-          {doneToday ? 'Ta série continue. Tu peux réviser une sourate en attendant.' : 'Deux minutes : écoute, comprends chaque mot, puis joue.'}
-        </div>
-        <div className="app-daily-cta">{doneToday ? 'Réviser' : 'Commencer'} <span aria-hidden="true">→</span></div>
-      </button>
+      {guest ? (
+        <section className="app-daily" style={{ cursor: 'default' }}>
+          <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: APP_GOLD }}>◆ Bienvenue</div>
+          <div style={{ fontFamily: 'Cinzel,serif', fontSize: 22, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>Comprends ce que tu récites</div>
+          <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>Crée ton compte gratuit pour jouer : ta progression, ta série et tes scores sont gardés.</div>
+          <button className="app-daily-cta" style={{ border: 0, cursor: 'pointer' }} onClick={function () { openAuth('signup'); }}>Créer mon compte <span aria-hidden="true">→</span></button>
+          <button className="app-link" style={{ display: 'block', marginTop: 6, padding: '6px 0' }} onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
+        </section>
+      ) : (
+        <>
+          {/* Verset du jour : la raison de revenir chaque jour */}
+          <button className={'app-daily' + (doneToday ? ' done' : '')} onClick={function () { if (!doneToday) hmWantDaily = true; play('comprendre'); }}>
+            <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: doneToday ? '#4ade80' : APP_GOLD }}>
+              {doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}
+            </div>
+            <div style={{ fontFamily: 'Cinzel,serif', fontSize: 23, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>
+              {doneToday ? 'Bravo, reviens demain' : 'Un verset, mot à mot'}
+            </div>
+            <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>
+              {doneToday ? 'Ta série continue. Tu peux réviser une sourate en attendant.' : 'Deux minutes : écoute, comprends chaque mot, puis joue.'}
+            </div>
+            <div className="app-daily-cta">{doneToday ? 'Réviser' : 'Commencer'} <span aria-hidden="true">→</span></div>
+          </button>
 
-      {/* Ta semaine */}
-      <section className="app-card">
-        <div className="app-card-h">
-          <span>Ta semaine</span>
-          <span style={{ color: streak > 0 ? APP_GOLD : 'rgba(240,237,230,0.4)' }}>{streak > 1 ? streak + ' jours d\'affilée' : streak === 1 ? '1 jour' : 'Commence ta série'}</span>
-        </div>
-        <CmpWeek st={st} size={32} />
-        <div className="app-stats">
-          <div><b>{words}</b><span>mots appris</span></div>
-          <div><b>{streak}</b><span>jours de série</span></div>
-          <div><b>{st.xp || 0}</b><span>points</span></div>
-        </div>
-      </section>
+          <section className="app-card">
+            <div className="app-card-h">
+              <span>Ta semaine</span>
+              <span style={{ color: streak > 0 ? APP_GOLD : 'rgba(240,237,230,0.4)' }}>{streak > 1 ? streak + ' jours d\'affilée' : streak === 1 ? '1 jour' : 'Commence ta série'}</span>
+            </div>
+            <CmpWeek st={st} size={32} />
+            <div className="app-stats">
+              <div><b>{words}</b><span>mots appris</span></div>
+              <div><b>{streak}</b><span>jours de série</span></div>
+              <div><b>{st.xp || 0}</b><span>points</span></div>
+            </div>
+          </section>
+        </>
+      )}
 
-      {/* Activités : une seule ligne */}
-      <div className="app-acts4">
-        {acts.map(function (a) {
-          return (
-            <button key={a.id} className="app-act4" onClick={function () { go(a.id); }}>
-              <span className="app-act-ic" style={{ color: a.color, borderColor: a.color + '55', marginBottom: 0 }}><AppIcon id={a.icon || a.id} size={21} /></span>
-              <span>{a.title}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Rappel quotidien */}
-      <section className="app-card app-notif" style={{ padding: '12px 14px' }}>
-        <span className="app-act-ic" style={{ color: APP_GOLD, borderColor: 'rgba(230,200,74,0.35)' }}><AppIcon id="bell" size={20} /></span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6' }}>Rappel quotidien</div>
-          <div style={{ fontFamily: APP_F, fontSize: 12, color: 'rgba(240,237,230,0.5)', marginTop: 2 }}>
-            Chaque jour à{' '}
-            <select value={notif.hour} onChange={function (e) { setHour(+e.target.value); }} className="app-hour" aria-label="Heure du rappel">
-              {[7, 8, 9, 12, 13, 17, 18, 19, 20, 21, 22].map(function (h) { return <option key={h} value={h}>{h} h</option>; })}
-            </select>
+      {/* Activités : chacune mise en avant, avec son bouton Jouer */}
+      <p className="app-sec" style={{ margin: '8px 2px 0' }}>Tes activités</p>
+      {acts.map(function (a) {
+        return (
+          <div key={a.id} className="app-feat" onClick={function () { play(a.id); }}>
+            <span className="app-feat-ic" style={{ color: a.color, borderColor: a.color + '66', background: a.color + '14' }}><AppIcon id={a.icon || a.id} size={26} /></span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="app-feat-t">{a.title}</span>
+              <span className="app-feat-d">{a.desc}</span>
+              {!guest && a.prog && <span className="app-feat-p">{a.prog}</span>}
+            </span>
+            <button className="app-feat-go" onClick={function (e) { e.stopPropagation(); play(a.id); }}>Jouer</button>
           </div>
-        </div>
-        <button role="switch" aria-checked={notif.on} aria-label="Rappel quotidien" className={'app-switch' + (notif.on ? ' on' : '')} onClick={toggleNotif}><span /></button>
-      </section>
+        );
+      })}
+
+      {!guest && (
+        <section className="app-card app-notif" style={{ padding: '12px 14px' }}>
+          <span className="app-act-ic" style={{ color: APP_GOLD, borderColor: 'rgba(230,200,74,0.35)' }}><AppIcon id="bell" size={20} /></span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6' }}>Rappel quotidien</div>
+            <div style={{ fontFamily: APP_F, fontSize: 12, color: 'rgba(240,237,230,0.5)', marginTop: 2 }}>
+              Chaque jour à{' '}
+              <select value={notif.hour} onChange={function (e) { setHour(+e.target.value); }} className="app-hour" aria-label="Heure du rappel">
+                {[7, 8, 9, 12, 13, 17, 18, 19, 20, 21, 22].map(function (h) { return <option key={h} value={h}>{h} h</option>; })}
+              </select>
+            </div>
+          </div>
+          <button role="switch" aria-checked={notif.on} aria-label="Rappel quotidien" className={'app-switch' + (notif.on ? ' on' : '')} onClick={toggleNotif}><span /></button>
+        </section>
+      )}
       {notifMsg && <p className="app-note">{notifMsg}</p>}
 
-      {!user && (
-        <button className="app-pro" onClick={function () { openAuth('signup'); }}>
-          <div>
-            <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6' }}>Garde ta progression</div>
-            <div style={{ fontFamily: APP_F, fontSize: 12, color: 'rgba(240,237,230,0.55)', marginTop: 2 }}>Compte gratuit, synchronisé avec le site</div>
-          </div>
-          <span aria-hidden="true" style={{ color: APP_GOLD, fontSize: 20 }}>→</span>
-        </button>
-      )}
       {user && !isPro && (
         <button className="app-pro" onClick={function () { openQuickCheckout(); }}>
           <div>
@@ -10109,6 +10268,16 @@ function App() {
     return unsub;
   }, []);
 
+  const prevUserRef = React.useRef(undefined);
+  React.useEffect(function () {
+    if (!HM_NATIVE) return;
+    const prev = prevUserRef.current;
+    prevUserRef.current = user;
+    if (user === undefined) return;
+    if (!user) { if (prev) hmWipeLocalProgress(); return; }
+    if (!prev || prev.uid !== user.uid) hmPullProgress(user.uid);
+  }, [user]);
+
   // Écoute statut Pro depuis Firestore
   React.useEffect(function() {
     if (!user || !window._db) { setIsPro(false); setProResolved(!user); return; }
@@ -10263,6 +10432,10 @@ function App() {
     </AuthContext.Provider>
   );
 
+  if (HM_NATIVE && (page === 'comprendre' || page === 'blind-test' || page === 'test' || page === 'quiz' || page.indexOf('quiz-') === 0)) {
+    if (user === undefined) return wrap(<div style={{ minHeight: '100vh' }} />);
+    if (!user) return wrap(<AppGate page={page} navigate={navigate} />);
+  }
   if (page === 'blind-test') return wrap(<BlindTestPage navigate={navigate} />);
   if (page === 'quiz') return wrap(<QuizPage navigate={navigate} />);
   if (page.startsWith('quiz-')) {
