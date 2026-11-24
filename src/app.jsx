@@ -3800,6 +3800,7 @@ function BlindTestPage({ navigate }) {
 
   function answer(choice) {
     if (state !== 'playing') return;
+    if (!user) hmAppTrialTake('bt');
     const correct = choice.n === question.surah.n;
     setChosen(choice.n);
     setState('answered');
@@ -4556,6 +4557,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   const nextBtnRef = React.useRef(null);
   const pick = idx => {
     if (answered) return;
+    if (!user) hmAppTrialTake('quiz');
     setChosen(idx);
     setAnswered(true);
     if (idx === questions[current].correct) setScore(s => s + 1);
@@ -7970,6 +7972,7 @@ function TestPage({ navigate }) {
 
   function start() {
     if (!data) return;
+    if (!user) hmAppTrialTake('test');
     setQs(testBuild(data)); setI(0); setAnswers([]); setPicked(null); setShared('');
     setPhase('play');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -8366,6 +8369,21 @@ function ComprendrePage({ navigate }) {
     );
   }
 
+  if (HM_NATIVE && !user) {
+    const fat = sourates.find(function (x) { return x.surah === 1; });
+    if (fat) {
+      const taste = Object.assign({}, fat, { ayahs: fat.ayahs.slice(0, 2) });
+      return shell(
+        <>
+          <CmpTrialMark />
+          <CmpDiscover sourate={taste} playAyah={playAyah} audioRef={audioRef} preview={false}
+            onPlay={function () { setShowGate(true); }} onBack={function () { navigate('home'); }} />
+          {showGate && <GuestGateModal context="comprendre" onClose={function () { setShowGate(false); }} />}
+        </>
+      );
+    }
+  }
+
   return shell(
     <>
       {mode === 'hub' && <CmpHub st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} trialing={trialing} guest={!user} onTest={function(){ navigate('test'); }} onSignup={function(){ openAuth('signup'); }} weeklyId={weeklyId} onOpen={openSourate} onBack={function(){ navigate('home'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} reciter={reciter} onReciter={chooseReciter} daily={daily} onDaily={openDaily} rappel={rappel} onRappel={toggleRappel} rappelNotice={rappelNotice} />}
@@ -8380,6 +8398,11 @@ function ComprendrePage({ navigate }) {
       {showPro && <CmpProModal src={typeof showPro === 'string' ? showPro : 'cmp'} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
     </>
   );
+}
+
+function CmpTrialMark() {
+  React.useEffect(function () { hmAppTrialTake('cmp'); }, []);
+  return null;
 }
 
 // ── HUB ──
@@ -9373,6 +9396,31 @@ function AppTabBar({ page, navigate }) {
    dès que le corpus est chargé, au lieu d'atterrir sur le menu. */
 let hmWantDaily = false;
 
+/* Essai sans compte dans l'app (24/11/2026, choix d'Ayoub). Apple refuse
+   qu'un compte soit exigé avant d'avoir pu essayer (règle 5.1.1 v) ; Ayoub ne
+   veut pas qu'on puisse tout faire sans compte. Donc UN essai par activité et
+   par téléphone, une fois pour toutes (pas chaque jour) : 1 manche de Blind
+   Test, 1 question de quiz, 2 versets d'Al-Fâtiha, le Test Fâtiha. Rien n'est
+   enregistré sans compte. `hmTrialLive` laisse finir l'essai en cours : on ne
+   ferme la porte qu'en revenant sur l'activité. */
+const HM_APP_TRIAL_KEY = 'hm_app_trial_v1';
+let hmTrialLive = '';
+function hmAppTrialKind(page) {
+  if (page === 'blind-test') return 'bt';
+  if (page === 'quiz' || page.indexOf('quiz-') === 0) return 'quiz';
+  if (page === 'comprendre') return 'cmp';
+  if (page === 'test') return 'test';
+  return '';
+}
+function hmAppTrialUsed(kind) {
+  try { return !!JSON.parse(localStorage.getItem(HM_APP_TRIAL_KEY) || '{}')[kind]; } catch (e) { return false; }
+}
+function hmAppTrialTake(kind) {
+  if (!HM_NATIVE) return;
+  try { const o = JSON.parse(localStorage.getItem(HM_APP_TRIAL_KEY) || '{}'); o[kind] = 1; localStorage.setItem(HM_APP_TRIAL_KEY, JSON.stringify(o)); } catch (e) {}
+  hmTrialLive = kind;
+}
+
 /* ═══ App : Blind Test, Quiz et Profil au style de « Comprendre » ═══
    24/11/2026, choix d'Ayoub : dans l'app, la page Comprendre (fond vert
    profond, titres Cinzel, progression en anneau, lignes à pastille dorée)
@@ -9575,8 +9623,12 @@ function AppGate({ page, navigate }) {
     <main className="app-page" style={{ textAlign: 'center', paddingTop: 40 }}>
       <img src="/favicon-192.png" alt="" width="72" height="72" style={{ borderRadius: '50%', margin: '0 auto 18px', display: 'block' }} />
       <p className="app-ph-eye">◆ Compte gratuit</p>
-      <h1 className="app-ph-t">Connecte-toi<br /><span>pour jouer.</span></h1>
-      <p className="app-ph-sub" style={{ marginBottom: 24 }}>Pour jouer {what}, crée ton compte gratuit : il garde ta progression, ta série et tes scores, dans l'app comme sur le site.</p>
+      {page === 'profile'
+        ? <h1 className="app-ph-t">Connecte-toi<br /><span>pour ta progression.</span></h1>
+        : <h1 className="app-ph-t">Tu as eu<br /><span>un aperçu.</span></h1>}
+      <p className="app-ph-sub" style={{ marginBottom: 24 }}>{page === 'profile'
+        ? <>Crée ton compte gratuit : il garde ta progression, ta série et tes scores, dans l'app comme sur le site.</>
+        : <>Pour continuer {what}, crée ton compte gratuit : il garde ta progression, ta série et tes scores. Ça prend 10 secondes.</>}</p>
       <button className="app-cta" onClick={function () { openAuth('signup'); }}>Créer mon compte gratuit</button>
       <button className="app-link" style={{ display: 'block', margin: '10px auto 0' }} onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
       <button className="app-back" style={{ margin: '22px auto 0' }} onClick={function () { navigate('home'); }}>← Accueil</button>
@@ -9839,7 +9891,6 @@ function AppHome({ navigate }) {
   }
   function play(id) {
     if (window.HMNative) window.HMNative.tap();
-    if (guest) { openAuth('signup'); return; }
     navigate(id);
   }
 
@@ -9875,7 +9926,7 @@ function AppHome({ navigate }) {
         <section className="app-daily" style={{ cursor: 'default' }}>
           <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: APP_GOLD }}>◆ Bienvenue</div>
           <div style={{ fontFamily: 'Cinzel,serif', fontSize: 22, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>Comprends ce que tu récites</div>
-          <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>Crée ton compte gratuit pour jouer : ta progression, ta série et tes scores sont gardés.</div>
+          <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>Essaie chaque activité, puis crée ton compte gratuit pour continuer et garder ta progression.</div>
           <button className="app-daily-cta" style={{ border: 0, cursor: 'pointer' }} onClick={function () { openAuth('signup'); }}>Créer mon compte <span aria-hidden="true">→</span></button>
           <button className="app-link" style={{ display: 'block', marginTop: 6, padding: '6px 0' }} onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
         </section>
@@ -9920,6 +9971,7 @@ function AppHome({ navigate }) {
               <span className="app-feat-t">{a.title}</span>
               <span className="app-feat-d">{a.desc}</span>
               {!guest && a.prog && <span className="app-feat-p">{a.prog}</span>}
+              {guest && <span className="app-feat-p" style={hmAppTrialUsed(hmAppTrialKind(a.id)) ? { color: 'rgba(240,237,230,0.4)' } : null}>{hmAppTrialUsed(hmAppTrialKind(a.id)) ? 'Essai fait · compte gratuit pour continuer' : 'Essai gratuit'}</span>}
             </span>
             <button className="app-feat-go" onClick={function (e) { e.stopPropagation(); play(a.id); }}>Jouer</button>
           </div>
@@ -10434,8 +10486,10 @@ function App() {
 
   if (HM_NATIVE && (page === 'comprendre' || page === 'blind-test' || page === 'test' || page === 'quiz' || page.indexOf('quiz-') === 0)) {
     if (user === undefined) return wrap(<div style={{ minHeight: '100vh' }} />);
-    if (!user) return wrap(<AppGate page={page} navigate={navigate} />);
+    const kind = hmAppTrialKind(page);
+    if (!user && hmAppTrialUsed(kind) && hmTrialLive !== kind) return wrap(<AppGate page={page} navigate={navigate} />);
   }
+  if (HM_NATIVE && hmAppTrialKind(page) !== hmTrialLive) hmTrialLive = '';
   if (page === 'blind-test') return wrap(<BlindTestPage navigate={navigate} />);
   if (page === 'quiz') return wrap(<QuizPage navigate={navigate} />);
   if (page.startsWith('quiz-')) {
