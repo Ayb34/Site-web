@@ -7259,12 +7259,17 @@ function StickyUpgradeBanner({ navigate }) {
 }
 
 /* ─── QuickCheckoutModal — Option A : checkout direct sans auth ─── */
-function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
+function QuickCheckoutModal({ onClose, initialMethod, initialPlan, planPicked }) {
   const { user } = useAuth();
   const [activeMethod, setActiveMethod] = React.useState(initialMethod || 'card');
   // L'annuel est pré-sélectionné : meilleur pour l'utilisateur (voir PRO_DISCOUNT) et pour
   // la trésorerie (encaissé d'un coup, pas de churn mensuel).
   const [plan, setPlan] = React.useState(initialPlan === 'monthly' || initialPlan === 'annual' ? initialPlan : hmDefaultPlan());
+  /* Formule déjà choisie dans la fenêtre Pro → on ne remontre pas les deux
+     cartes annuel/mensuel (24/11/2026, choix d'Ayoub) : 3 abandons sur 3 pages
+     de paiement ouvertes, sans aucune carte saisie. Un lien discret permet
+     encore de changer. Ouvert d'ailleurs (bannière, profil…), le choix reste. */
+  const [showPlans, setShowPlans] = React.useState(!planPicked);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const checkoutRef = React.useRef(null);
@@ -7388,7 +7393,14 @@ function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
         </div>
 
         {/* Choix du plan — annuel mis en avant */}
-        <div style={{ padding: '12px 14px 0', display: 'flex', gap: 8 }}>
+        {!showPlans && (
+          <div style={{ padding: '10px 14px 0', textAlign: 'center' }}>
+            <button onClick={function () { setShowPlans(true); switchPlan(plan === 'annual' ? 'monthly' : 'annual'); }} style={{ background: 'none', border: 'none', color: '#888', fontSize: 11.5, textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', padding: 2 }}>
+              {plan === 'annual' ? 'Préférer le mensuel (' + PRO_MONTHLY + '/mois)' : 'Préférer l’annuel (' + PRO_EQ_MONTH + '/mois)'}
+            </button>
+          </div>
+        )}
+        {showPlans && <div style={{ padding: '12px 14px 0', display: 'flex', gap: 8 }}>
           <button onClick={() => switchPlan('annual')}
             style={{ flex: 1, position: 'relative', padding: '11px 8px', borderRadius: 12, border: plan === 'annual' ? '2px solid #c8a727' : '1px solid #e5e5e5', background: plan === 'annual' ? 'rgba(200,167,39,0.08)' : '#fff', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans,sans-serif', transition: 'all 0.15s', textAlign: 'center' }}>
             <span style={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 20, whiteSpace: 'nowrap' }}>{PRO_DISCOUNT}</span>
@@ -7400,7 +7412,7 @@ function QuickCheckoutModal({ onClose, initialMethod, initialPlan }) {
             <span style={{ display: 'block', fontSize: 15, fontWeight: 900, color: plan === 'monthly' ? '#1a1a1a' : '#444', lineHeight: 1.1 }}>{PRO_MONTHLY}<span style={{ fontSize: 11, fontWeight: 700 }}>/mois</span></span>
             <span style={{ display: 'block', fontSize: 10.5, color: hmPromoOn() ? '#b07d00' : '#888', fontWeight: hmPromoOn() ? 800 : 600, marginTop: 2 }}>{hmPromoOn() ? 'Offre de lancement' : PRO_YEAR_AT_MONTHLY + ' sur un an'}</span>
           </button>
-        </div>
+        </div>}
         {plan === 'monthly' && hmPromoOn() && (
           <div style={{ padding: '10px 14px 0' }}><PromoCountdown light style={{ marginBottom: 0 }} /></div>
         )}
@@ -9661,6 +9673,9 @@ function App() {
   const [quickCheckoutMethod, setQuickCheckoutMethod] = React.useState(null);
   // Plan choisi sur le mur : le formulaire de paiement s'ouvre déjà dessus.
   const [quickCheckoutPlan, setQuickCheckoutPlan] = React.useState(hmDefaultPlan());
+  // true quand la formule a déjà été choisie dans la fenêtre Pro (ProValue) :
+  // l'écran de paiement ne la redemande pas.
+  const [quickCheckoutPicked, setQuickCheckoutPicked] = React.useState(false);
   const [showTrialWelcome, setShowTrialWelcome] = React.useState(false);
   // Méthode de paiement demandée par un visiteur non connecté : compte requis
   // avant le paiement (plutôt que payer en invité puis réclamer le compte
@@ -9962,6 +9977,7 @@ function App() {
     openQuickCheckout: (method, plan) => {
       hmFunnel('clic', hmFunnelLast);
       setQuickCheckoutPlan(plan === 'monthly' || plan === 'annual' ? plan : hmDefaultPlan());
+      setQuickCheckoutPicked(plan === 'monthly' || plan === 'annual');
       if (!user) { setPendingCheckout(method || 'card'); setShowAuth(true); return; }
       setQuickCheckoutMethod(method || 'card');
     },
@@ -9989,7 +10005,7 @@ function App() {
       {showAuth && <AuthModal initialTab={authMode} onClose={() => { setShowAuth(false); setPendingCheckout(null); }} />}
       {quickCheckoutMethod && (HM_NATIVE
         ? <NativeBuyModal initialPlan={quickCheckoutPlan} onClose={() => setQuickCheckoutMethod(null)} navigate={navigate} />
-        : <QuickCheckoutModal initialMethod={quickCheckoutMethod} initialPlan={quickCheckoutPlan} onClose={() => setQuickCheckoutMethod(null)} />)}
+        : <QuickCheckoutModal initialMethod={quickCheckoutMethod} initialPlan={quickCheckoutPlan} planPicked={quickCheckoutPicked} onClose={() => setQuickCheckoutMethod(null)} />)}
       {showTrialWelcome && <TrialWelcomeModal onClose={() => setShowTrialWelcome(false)} navigate={navigate} />}
       <div className="nav-progress" aria-hidden="true" />
       {/* La cle change a chaque navigation, meme vers la meme page : React
