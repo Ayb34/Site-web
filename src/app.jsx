@@ -10564,13 +10564,35 @@ function NativeBuyModal({ initialPlan, onClose, navigate }) {
     if (!window.HMNative || !user) return;
     window.HMNative.prices(user.uid).then(function (p) { if (p) setPrices(function (o) { return Object.assign({}, o, p); }); }).catch(function () {});
   }, [user]);
+  // Aperçu navigateur uniquement : `&trial=1` simule l'essai gratuit et le mensuel App Store.
+  React.useEffect(function () {
+    if (!window.HMNative && /[?&]trial=1/.test(location.search)) setPrices({ annual: '29,99 €', monthly: '9,99 €', annualNum: 29.99, monthlyNum: 9.99, trialDays: 7 });
+  }, []);
+  /* Essai gratuit (offre de lancement Apple), affiché seulement si le compte
+     Apple y a droit, et seulement sur l'annuel. */
+  const trialDays = plan === 'annual' ? (prices.trialDays || 0) : 0;
+  const hasTrial = (prices.trialDays || 0) > 0;
+  // Remise calculée sur les vrais prix App Store (le mensuel de l'app diffère du site).
+  const discount = prices.annualNum && prices.monthlyNum
+    ? '−' + Math.floor((1 - prices.annualNum / (prices.monthlyNum * 12)) * 100) + '%'
+    : PRO_DISCOUNT;
+  const [trialStarted, setTrialStarted] = React.useState(false);
   React.useEffect(function () { if (isPro && busy) { setBusy(false); setDone(true); } }, [isPro, busy]);
 
   function buy() {
     if (!window.HMNative) { setMsg('Aperçu : la fenêtre de paiement Apple s\'ouvrira ici dans l\'app.'); return; }
     setBusy(true); setMsg('');
+    const withTrial = trialDays > 0;
     window.HMNative.purchase(plan, user && user.uid).then(function (r) {
-      if (r.ok) { setDone(true); setBusy(false); return; }
+      if (r.ok) {
+        setDone(true); setBusy(false);
+        if (withTrial) {
+          setTrialStarted(true);
+          // Rappel 2 jours avant la fin de l'essai (demande l'autorisation ici, au bon moment).
+          if (window.HMNative.trialReminder) window.HMNative.trialReminder(user && user.uid, true).catch(function () {});
+        }
+        return;
+      }
       setBusy(false);
       if (!r.cancelled) setMsg('L\'achat n\'a pas abouti. Aucun montant n\'a été débité.');
     }).catch(function () { setBusy(false); setMsg('L\'App Store ne répond pas. Réessaie dans un instant.'); });
@@ -10602,8 +10624,8 @@ function NativeBuyModal({ initialPlan, onClose, navigate }) {
         {done ? (
           <div style={{ textAlign: 'center', padding: '18px 0 6px' }}>
             <div style={{ fontSize: 44 }}>🌙</div>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, color: '#f0ede6', margin: '10px 0 6px' }}>Bienvenue dans le Pro</h2>
-            <p style={{ fontFamily: APP_F, fontSize: 14, color: 'rgba(240,237,230,0.65)', lineHeight: 1.6, margin: '0 0 18px' }}>Toutes les sourates sont débloquées. Qu'Allah te facilite ton apprentissage.</p>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, color: '#f0ede6', margin: '10px 0 6px' }}>{trialStarted ? 'Ton essai Pro commence' : 'Bienvenue dans le Pro'}</h2>
+            <p style={{ fontFamily: APP_F, fontSize: 14, color: 'rgba(240,237,230,0.65)', lineHeight: 1.6, margin: '0 0 18px' }}>Toutes les sourates sont débloquées.{trialStarted ? ' On te prévient 2 jours avant la fin de l’essai.' : ''} Qu'Allah te facilite ton apprentissage.</p>
             <button className="app-btn" onClick={function () { onClose(); navigate('comprendre'); }}>Commencer</button>
           </div>
         ) : (
@@ -10617,13 +10639,14 @@ function NativeBuyModal({ initialPlan, onClose, navigate }) {
             })()}
             <ProValue />
             <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10, margin: '18px 0 14px' }}>
-              {opt('annual', 'Annuel', prices.annual, 'soit ' + PRO_EQ_MONTH + '/mois', PRO_DISCOUNT)}
+              {opt('annual', 'Annuel', prices.annual, hasTrial ? prices.trialDays + ' jours gratuits' : 'soit ' + PRO_EQ_MONTH + '/mois', discount)}
               {opt('monthly', 'Mensuel', prices.monthly, 'par mois')}
             </div>
-            <button className="app-btn" disabled={busy} onClick={buy}>{busy ? 'Connexion à l\'App Store…' : 'S\'abonner'}</button>
+            <button className="app-btn" disabled={busy} onClick={buy}>{busy ? 'Connexion à l’App Store…' : trialDays ? 'Commencer mes ' + trialDays + ' jours gratuits' : 'S’abonner'}</button>
+            {trialDays > 0 && <p className="app-note" style={{ textAlign: 'center', marginTop: 8 }}>0 € aujourd’hui, puis {prices.annual}/an. Annulable à tout moment, rappel 2 jours avant la fin.</p>}
             {msg && <p className="app-note" style={{ textAlign: 'center' }}>{msg}</p>}
             <p className="app-legal">
-              Abonnement {plan === 'annual' ? 'annuel à ' + prices.annual : 'mensuel à ' + prices.monthly}, renouvelé automatiquement sauf résiliation au moins 24 h avant la fin de la période. Paiement débité sur ton compte Apple ; gère ou résilie ton abonnement dans Réglages › [ton nom] › Abonnements.
+              {trialDays ? 'Essai gratuit de ' + trialDays + ' jours, puis abonnement annuel à ' + prices.annual : 'Abonnement ' + (plan === 'annual' ? 'annuel à ' + prices.annual : 'mensuel à ' + prices.monthly)}, renouvelé automatiquement sauf résiliation au moins 24 h avant la fin {trialDays ? 'de l’essai ou de la période' : 'de la période'}. Paiement débité sur ton compte Apple ; gère ou résilie ton abonnement dans Réglages › [ton nom] › Abonnements.
               {' '}<a href="#cgu" onClick={function (e) { e.preventDefault(); onClose(); navigate('cgu'); }}>Conditions</a> · <a href="#confidentialite" onClick={function (e) { e.preventDefault(); onClose(); navigate('confidentialite'); }}>Confidentialité</a>
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
@@ -10701,6 +10724,12 @@ function App() {
     window.addEventListener('hm-resume', run);
     return function () { window.removeEventListener('hm-resume', run); };
   }, []);
+  /* Essai Pro en cours : rappel 2 jours avant la fin, replanifié à chaque
+     ouverture (sans redemander l'autorisation des notifications). */
+  React.useEffect(function () {
+    if (!HM_NATIVE || !user || !window.HMNative || !window.HMNative.trialReminder) return;
+    window.HMNative.trialReminder(user.uid, false).catch(function () {});
+  }, [user && user.uid]);
 
   // navigate wrapper — scroll to top even if page doesn't change (ex: logo click depuis home)
   const navigate = React.useCallback(function(p) {
