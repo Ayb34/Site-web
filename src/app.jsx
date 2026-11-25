@@ -4115,7 +4115,9 @@ function BlindTestPage({ navigate }) {
 
             {/* Carte lecteur */}
             <div style={{ background: 'linear-gradient(135deg,rgba(200,167,39,0.08) 0%,rgba(26,92,53,0.1) 100%)', border: '1px solid rgba(200,167,39,0.2)', borderRadius: 22, padding: '28px 24px', marginBottom: 20, textAlign: 'center' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: '5px 14px', marginBottom: 24 }}>
+              {/* Pastille sur sa propre ligne : en inline-flex, elle se collait à
+                  gauche du bouton lecture et décentrait toute la carte. */}
+              <div style={{ display: 'flex', width: 'fit-content', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 20, padding: '5px 14px', margin: '0 auto 24px' }}>
                 <span style={{ fontSize: 13 }}>🎙</span>
                 <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13 }}>{question.reciter.name}</span>
                 <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>· verset {question.ayah}</span>
