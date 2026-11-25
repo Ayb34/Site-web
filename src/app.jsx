@@ -161,7 +161,7 @@ const PRO_PER_DAY = '0,08€';          // 29,99 / 365
    tout le reste de la page, y compris le prix.
    Volontairement arrondi EN DESSOUS du réel (225 comptes au 06/09/2026) : une
    preuve sociale doit rester vraie même sans être remise à jour chaque semaine. */
-const MEMBERS_COUNT = '+300'; // 304 comptes au 20/11/2026
+const MEMBERS_COUNT = '+350'; // 363 comptes au 25/11/2026
 
 /* ═══ Offre de lancement du mensuel (choix d'Ayoub, 20/11/2026) ═══
    Le mensuel à 4,99 € repasse à 7,90 € le lundi 23/11/2026 : l'échéance est
@@ -3726,6 +3726,12 @@ function BlindTestPage({ navigate }) {
   }, [state]);
   const [showProGate, setShowProGate] = React.useState(false);
   const [showGuestGate, setShowGuestGate] = React.useState(false);
+  // App : inscrit depuis l'écran « compte » après sa manche d'essai, on enchaîne
+  // directement sur la manche suivante.
+  const gateAuthRef = React.useRef(false);
+  React.useEffect(function () {
+    if (HM_NATIVE && user && gateAuthRef.current) { gateAuthRef.current = false; setShowGuestGate(false); goNextOrBilan(); }
+  }, [user]);
   const audioRef = React.useRef(null);
 
   /* Une partie par jour pour qui ne paie pas — mais sur les 114 sourates et les
@@ -3814,6 +3820,7 @@ function BlindTestPage({ navigate }) {
   function goNextOrBilan() {
     // Invité : une manche pour goûter, la suivante demande un compte.
     if (!user) {
+      gateAuthRef.current = true;
       setShowGuestGate(true);
       return;
     }
@@ -4515,6 +4522,10 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   const QUIZ_SIZE = 10;
   const LABELS = ['A', 'B', 'C', 'D'];
   const [showGuestGate, setShowGuestGate] = React.useState(false);
+  const gateAuthRef = React.useRef(false);
+  React.useEffect(function () {
+    if (HM_NATIVE && user && gateAuthRef.current) { gateAuthRef.current = false; setShowGuestGate(false); next(); }
+  }, [user]);
   const LEVEL_META = {
     debutant: { label: 'Débutant', icon: '🌱', color: '#4ade80' },
     amateur:  { label: 'Amateur',  icon: '⭐', color: '#60a5fa' },
@@ -4570,6 +4581,7 @@ function QuizCategoryPage({ catKey, level, navigate }) {
   const next = () => {
     // Invité : une question pour goûter, la suivante demande un compte.
     if (!user && current + 1 < questions.length) {
+      gateAuthRef.current = true;
       setShowGuestGate(true);
       return;
     }
@@ -7616,7 +7628,14 @@ const CMP_KEY = 'hm_comprendre_v1';
 function cmpLoad() {
   try {
     const raw = localStorage.getItem(CMP_KEY);
-    if (raw) return JSON.parse(raw);
+    const o = raw ? JSON.parse(raw) : null;
+    // Un état partiel (ancienne version, synchro incomplète) ne doit jamais
+    // faire planter l'écran : on complète les champs lus partout.
+    if (o && typeof o === 'object') {
+      if (!o.words || typeof o.words !== 'object') o.words = {};
+      if (!o.best || typeof o.best !== 'object') o.best = {};
+      return o;
+    }
   } catch (e) {}
   return { xp: 0, streak: 0, lastDay: null, words: {}, best: {}, totalCorrect: 0 };
 }
@@ -8281,6 +8300,27 @@ function ComprendrePage({ navigate }) {
   React.useEffect(function () {
     if (daily && hmWantDaily) { hmWantDaily = false; openDaily(); }
   }, [daily]);
+  // « Aujourd'hui » ou une inscription (app) ouvre directement une sourate.
+  React.useEffect(function () {
+    if (!data || !user || !hmWantOpen) return;
+    const w = hmWantOpen; hmWantOpen = null;
+    const s = (data.surahs || []).find(function (x) { return x.surah === w.surah; });
+    if (!s) return;
+    setSourate(s); setMode(w.mode === 'play' ? 'play' : 'discover');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [data, user]);
+  /* App, essai sans compte : la personne a écouté 2 versets d'Al-Fâtiha, a
+     touché « Maintenant, joue » et s'est inscrite. On lance tout de suite la
+     partie, sans repasser par le menu (25/11/2026 : la moitié des inscrits ne
+     jouait jamais). */
+  const tasteGateRef = React.useRef(false);
+  React.useLayoutEffect(function () {
+    if (!HM_NATIVE || !user || !data || !tasteGateRef.current) return;
+    tasteGateRef.current = false;
+    setShowGate(false);
+    const s = (data.surahs || []).find(function (x) { return x.surah === 1; });
+    if (s) { setSourate(s); setMode('play'); window.scrollTo({ top: 0, behavior: 'instant' }); }
+  }, [user, data]);
   function openDaily() {
     if (!daily) return;
     hmFunnel('vue', 'verset-jour');
@@ -8377,7 +8417,7 @@ function ComprendrePage({ navigate }) {
         <>
           <CmpTrialMark />
           <CmpDiscover sourate={taste} playAyah={playAyah} audioRef={audioRef} preview={false}
-            onPlay={function () { setShowGate(true); }} onBack={function () { navigate('home'); }} />
+            onPlay={function () { tasteGateRef.current = true; setShowGate(true); }} onBack={function () { navigate('home'); }} />
           {showGate && <GuestGateModal context="comprendre" onClose={function () { setShowGate(false); }} />}
         </>
       );
@@ -9182,6 +9222,8 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
         </div>
       </div>
 
+      {HM_NATIVE && <AppRappelAsk />}
+
       {/* Jauge : ce que ça change vraiment. Le pourcentage de mots du Coran
           lisibles parle de lui-même — « 40 mots appris » ne dit rien. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, background: 'linear-gradient(160deg,rgba(74,222,128,0.09),rgba(255,255,255,0.015))', border: '1px solid rgba(74,222,128,0.28)', borderRadius: 18, padding: '12px 16px', marginBottom: 14 }}>
@@ -9359,6 +9401,7 @@ function AppIcon({ id, size }) {
   if (id === 'profile') return <svg {...c}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>;
   if (id === 'bell') return <svg {...c}><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8" /><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0" /></svg>;
   if (id === 'mosque') return <svg {...c}><path d="M12 3c2.5 2 4.5 3.5 4.5 6H7.5C7.5 6.5 9.5 5 12 3z" /><path d="M5 21V12h14v9M3 21h18M10 21v-4a2 2 0 0 1 4 0v4" /></svg>;
+  if (id === 'share') return <svg {...c}><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="M12 15V3" /><path d="M7 8l5-5 5 5" /></svg>;
   return null;
 }
 
@@ -9395,6 +9438,9 @@ function AppTabBar({ page, navigate }) {
 /* Drapeau : « Aujourd'hui » demande à Comprendre d'ouvrir le verset du jour
    dès que le corpus est chargé, au lieu d'atterrir sur le menu. */
 let hmWantDaily = false;
+/* Même principe pour une sourate : la première leçon (Al-Fâtiha) depuis
+   « Aujourd'hui », ou juste après une inscription. */
+let hmWantOpen = null; // { surah: 1, mode: 'discover' | 'play' }
 
 /* Essai sans compte dans l'app (24/11/2026, choix d'Ayoub). Apple refuse
    qu'un compte soit exigé avant d'avoir pu essayer (règle 5.1.1 v) ; Ayoub ne
@@ -9844,43 +9890,387 @@ function AppProfile({ navigate }) {
   );
 }
 
+/* ═══ « Aujourd'hui » : le tableau de bord de l'app (25/11/2026) ═══
+   Demande d'Ayoub : un vrai tableau de bord, beau et animé, qui donne envie
+   de rester et de jouer, et qui convertit. L'ordre suit ce qui fait revenir
+   puis payer :
+   1. la salutation et la série (la raison de revenir) ;
+   2. la séance du jour en grand : première leçon Al-Fâtiha pour un compte
+      neuf (7 inscrits sur 15 ne jouaient jamais, 24/11), sinon le verset du
+      jour. Un seul bouton, deux minutes ;
+   3. la progression : anneau du Juz 'Amma, niveau, part du Coran lue, semaine ;
+   4. les défis du jour (verset, Blind Test, quiz) : quoi faire aujourd'hui ;
+   5. les activités, chacune avec sa progression et son bouton « Jouer » ;
+   6. un hadith du jour sur l'importance capitale d'apprendre sa religion ;
+   7. l'offre Pro chiffrée honnêtement : où tu en es, le plafond gratuit, le
+      plafond Pro, en vraie part des mots du Coran ;
+   8. le rappel quotidien et l'invitation d'un proche.
+   Sans compte : aucune progression, une grande carte « Commencer » qui mène à
+   l'essai (2 versets d'Al-Fâtiha), puis l'inscription. */
+
+/* Hadiths sur la valeur du savoir religieux et du Coran. Tous authentiques et
+   numérotés ; un par jour, le même pour tout le monde. */
+const APP_HADITHS = [
+  { t: "Celui à qui Allah veut du bien, Il lui donne la compréhension de la religion.", s: 'Bukhari 71 · Muslim 1037' },
+  { t: "Quiconque emprunte un chemin en quête de science, Allah lui facilitera par là un chemin vers le Paradis.", s: 'Muslim 2699' },
+  { t: "Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.", s: 'Bukhari 5027' },
+  { t: "Lisez le Coran, car il viendra le Jour de la Résurrection intercéder pour ses compagnons.", s: 'Muslim 804' },
+  { t: "La recherche du savoir est une obligation pour tout musulman.", s: 'Ibn Mâjah 224' },
+  { t: "Celui qui lit une lettre du Livre d'Allah obtient une bonne action, et la bonne action vaut dix fois autant.", s: 'Tirmidhi 2910' },
+  { t: "Quand l'homme meurt, ses œuvres s'arrêtent, sauf trois : une aumône continue, une science dont on tire profit, ou un enfant vertueux qui invoque pour lui.", s: 'Muslim 1631' },
+  { t: "Celui qui lit le Coran en butant, et pour qui c'est difficile, aura deux récompenses.", s: 'Bukhari 4937 · Muslim 798' },
+  { t: "Allah élève par ce Livre des peuples, et Il en abaisse d'autres.", s: 'Muslim 817' },
+];
+
+/* Styles du tableau de bord (préfixe ah-). Gabarit littéral : plusieurs
+   lignes permises, contrairement à la chaîne des styles de l'app. */
+const APP_HOME_CSS = `
+.ah { max-width:560px; margin:0 auto; padding:4px 16px 30px; display:flex; flex-direction:column; gap:14px; box-sizing:border-box; min-height:100vh; font-family:'Plus Jakarta Sans',sans-serif; color:#f0ede6; background:radial-gradient(120% 34% at 50% 0%, rgba(230,200,74,0.11), transparent 70%); }
+@keyframes ahUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+.ah > * { animation:ahUp .65s cubic-bezier(.2,.8,.2,1) both; }
+.ah > :nth-child(2) { animation-delay:.07s; }
+.ah > :nth-child(3) { animation-delay:.14s; }
+.ah > :nth-child(4) { animation-delay:.21s; }
+.ah > :nth-child(5) { animation-delay:.28s; }
+.ah > :nth-child(6) { animation-delay:.35s; }
+.ah > :nth-child(7) { animation-delay:.42s; }
+.ah > :nth-child(8) { animation-delay:.49s; }
+.ah > :nth-child(n+9) { animation-delay:.56s; }
+
+.ah-top { display:flex; align-items:center; gap:12px; padding:10px 2px 2px; }
+.ah-logo { width:44px; height:44px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 1px rgba(230,200,74,0.4), 0 6px 18px rgba(0,0,0,0.45); }
+.ah-hello { flex:1; min-width:0; }
+.ah-salam { font:italic 700 16px/1.2 'Cormorant Garamond',Georgia,serif; color:#e6c84a; letter-spacing:.01em; }
+.ah-name { font:700 22px/1.2 Cinzel,serif; color:#f0ede6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ah-date { font:600 11.5px/1.35 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); margin-top:2px; }
+.ah-pchip { display:inline-block; padding:3px 8px; border-radius:999px; background:linear-gradient(135deg,#f7e08a,#a8801a); color:#2a1d02; font:900 9.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.12em; vertical-align:4px; margin-left:7px; }
+.ah-streak { display:flex; align-items:center; gap:5px; padding:8px 13px; border-radius:999px; flex-shrink:0; font:900 16px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.09); }
+.ah-streak.on { color:#ffd27a; background:linear-gradient(135deg,rgba(255,140,40,0.24),rgba(255,140,40,0.06)); border-color:rgba(255,170,60,0.5); box-shadow:0 0 20px rgba(255,140,40,0.2); }
+.ah-flame { display:inline-block; }
+.ah-streak.on .ah-flame { animation:ahFlame 1.8s ease-in-out infinite; transform-origin:50% 85%; }
+@keyframes ahFlame { 0%,100% { transform:scale(1) rotate(-4deg); } 50% { transform:scale(1.18) rotate(4deg); } }
+
+.ah-hero { position:relative; overflow:hidden; display:block; width:100%; text-align:left; cursor:pointer; padding:20px 18px 18px; border-radius:26px; border:1px solid rgba(230,200,74,0.5); background:radial-gradient(120% 90% at 100% 0%, rgba(230,200,74,0.24), transparent 55%), linear-gradient(160deg,#1b4029 0%,#0f2819 58%,#0a1c12 100%); box-shadow:0 18px 44px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09); color:#f0ede6; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+.ah-hero:active { transform:scale(.985); }
+.ah-hero.done { border-color:rgba(74,222,128,0.45); background:radial-gradient(120% 90% at 100% 0%, rgba(74,222,128,0.2), transparent 55%), linear-gradient(160deg,#173826 0%,#0e2618 60%,#0a1c12 100%); }
+.ah-star { position:absolute; right:-36px; top:-36px; width:156px; height:156px; color:rgba(230,200,74,0.17); animation:ahSpin 90s linear infinite; pointer-events:none; }
+@keyframes ahSpin { to { transform:rotate(360deg); } }
+.ah-eye { position:relative; font:800 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.15em; text-transform:uppercase; color:#e6c84a; }
+.ah-hero.done .ah-eye { color:#4ade80; }
+.ah-hero-t { position:relative; font:700 25px/1.2 Cinzel,serif; color:#f0ede6; margin:8px 0 4px; }
+.ah-hero-t span { color:#e6c84a; }
+.ah-hero-s { position:relative; font:600 13.5px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.62); }
+.ah-ar { position:relative; font-family:Amiri,Georgia,serif; font-size:25px; line-height:1.9; color:#f7e7a8; direction:rtl; text-align:center; margin:12px 2px 0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 0 18px rgba(230,200,74,0.28); }
+.ah-cta { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:16px; padding:15px; border-radius:16px; border:0; cursor:pointer; box-sizing:border-box; font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#bf951f,#7a5a0c); box-shadow:0 8px 26px rgba(168,128,26,0.45), inset 0 1px 0 rgba(255,255,255,0.25); }
+.ah-cta::after { content:''; position:absolute; top:0; bottom:0; left:0; width:45%; background:linear-gradient(100deg,transparent,rgba(255,255,255,0.34),transparent); transform:translateX(-130%) skewX(-18deg); animation:ahShine 3.6s ease-in-out 1.2s infinite; }
+@keyframes ahShine { 0% { transform:translateX(-130%) skewX(-18deg); } 55%,100% { transform:translateX(260%) skewX(-18deg); } }
+.ah-hero.done .ah-cta { background:rgba(74,222,128,0.13); color:#86efac; box-shadow:none; border:1px solid rgba(74,222,128,0.35); }
+.ah-hero.done .ah-cta::after { display:none; }
+.ah-risk { position:relative; display:flex; align-items:center; gap:8px; margin-top:12px; padding:9px 12px; border-radius:12px; background:rgba(255,138,76,0.13); border:1px solid rgba(255,138,76,0.4); font:700 12.5px/1.35 'Plus Jakarta Sans',sans-serif; color:#ffc49b; }
+.ah-link { position:relative; display:block; width:100%; margin-top:8px; padding:8px; background:none; border:0; cursor:pointer; font:700 13.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.62); }
+.ah-proof { margin:-4px 0 0; text-align:center; font:700 12px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.48); }
+.ah-proof b { color:#e6c84a; }
+
+.ah-card { position:relative; padding:16px; border-radius:22px; background:linear-gradient(160deg,rgba(255,255,255,0.055),rgba(255,255,255,0.015)); border:1px solid rgba(230,200,74,0.17); box-shadow:0 10px 30px rgba(0,0,0,0.22); }
+.ah-h { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.ah-h-t { font:700 17px Cinzel,serif; color:#f0ede6; }
+.ah-h-k { font:800 12px 'Plus Jakarta Sans',sans-serif; color:#e6c84a; }
+.ah-h-go { background:none; border:1px solid rgba(230,200,74,0.4); color:#e6c84a; border-radius:999px; padding:5px 12px; cursor:pointer; font:800 12px 'Plus Jakarta Sans',sans-serif; }
+.ah-sec { margin:8px 4px -4px; font:700 11.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:rgba(240,237,230,0.42); }
+
+.ah-prog-top { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+.ah-ring { position:relative; flex-shrink:0; }
+.ah-ring svg { display:block; overflow:visible; }
+.ah-ring-c { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.ah-ring-v { font:900 27px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; line-height:1; }
+.ah-ring-v small { font-size:15px; color:#e6c84a; margin-left:1px; }
+.ah-ring-k { font:700 10px/1.2 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.5); margin-top:5px; }
+.ah-side { flex:1; min-width:0; }
+.ah-lvl { display:flex; align-items:baseline; justify-content:space-between; gap:8px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }
+.ah-lvl span { font-size:11px; color:rgba(240,237,230,0.5); font-weight:700; }
+.ah-bar { height:7px; border-radius:4px; background:rgba(255,255,255,0.07); overflow:hidden; margin-top:7px; }
+.ah-bar > i { display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,#a8801a,#f7e08a); transition:width 1.3s cubic-bezier(.2,.8,.2,1); }
+.ah-quran { margin-top:12px; padding:9px 11px; border-radius:14px; background:rgba(74,222,128,0.07); border:1px solid rgba(74,222,128,0.22); font:600 12px/1.4 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.72); }
+.ah-quran b { color:#4ade80; font-weight:900; font-size:15px; }
+.ah-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); }
+.ah-stats div { text-align:center; display:flex; flex-direction:column; gap:3px; }
+.ah-stats b { font:900 19px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }
+.ah-stats span { font:600 10.5px/1.2 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); }
+
+.ah-qbar { height:6px; border-radius:3px; background:rgba(255,255,255,0.07); overflow:hidden; margin:-4px 0 6px; }
+.ah-qbar > i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#1f9455,#4ade80); transition:width 1s cubic-bezier(.2,.8,.2,1); }
+.ah-q { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:0; border-top:1px solid rgba(255,255,255,0.05); padding:11px 2px; cursor:pointer; font-family:inherit; }
+.ah-q.first { border-top:0; }
+.ah-q-dot { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:2px solid rgba(230,200,74,0.35); font:900 14px 'Plus Jakarta Sans',sans-serif; color:transparent; box-sizing:border-box; }
+.ah-q.ok .ah-q-dot { background:linear-gradient(135deg,#f7e08a,#a8801a); border-color:transparent; color:#2a1d02; animation:ahPop .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ahPop { 0% { transform:scale(.3); opacity:0; } 70% { transform:scale(1.18); opacity:1; } 100% { transform:scale(1); } }
+.ah-q-t { flex:1; min-width:0; font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }
+.ah-q-t small { display:block; font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); margin-top:2px; }
+.ah-q.ok .ah-q-t { color:rgba(240,237,230,0.55); }
+.ah-q-go { flex-shrink:0; padding:6px 13px; border-radius:999px; font:800 12px 'Plus Jakarta Sans',sans-serif; color:#2a1d02; background:#e6c84a; }
+.ah-q.ok .ah-q-go { background:none; color:#4ade80; padding:6px 0; }
+.ah-q-all { margin:8px 0 0; padding:10px 12px; border-radius:12px; text-align:center; background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.28); font:800 13px 'Plus Jakarta Sans',sans-serif; color:#86efac; }
+
+.ah-act { position:relative; overflow:hidden; display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:16px 14px; border-radius:22px; cursor:pointer; border:1px solid; box-sizing:border-box; color:#f0ede6; box-shadow:0 10px 28px rgba(0,0,0,0.22); -webkit-tap-highlight-color:transparent; }
+.ah-act:active { transform:scale(.985); }
+.ah-act-ic { width:56px; height:56px; flex-shrink:0; border-radius:18px; display:flex; align-items:center; justify-content:center; border:1px solid; box-sizing:border-box; }
+.ah-act-x { flex:1; min-width:0; }
+.ah-act-t { display:block; font:700 16.5px/1.2 Cinzel,serif; color:#f0ede6; }
+.ah-act-d { display:block; font:500 12.5px/1.4 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.58); margin-top:3px; }
+.ah-act-p { display:block; font:800 11.5px/1.3 'Plus Jakarta Sans',sans-serif; margin-top:6px; }
+.ah-act-bar { display:block; height:5px; border-radius:3px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:6px; }
+.ah-act-bar > i { display:block; height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(.2,.8,.2,1); }
+.ah-act-go { flex-shrink:0; padding:10px 15px; border-radius:13px; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#bf951f,#7a5a0c); box-shadow:0 4px 16px rgba(168,128,26,0.35); }
+
+.ah-hadith { position:relative; overflow:hidden; padding:18px 18px 14px; border-radius:22px; border:1px solid rgba(230,200,74,0.3); background:radial-gradient(90% 70% at 0% 0%, rgba(230,200,74,0.13), transparent 60%), linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.012)); cursor:pointer; }
+.ah-hq { margin:0; position:relative; animation:ahFade .5s ease both; min-height:104px; }
+@keyframes ahFade { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.ah-hq-mark { position:absolute; right:-8px; bottom:-74px; font:700 150px/1 'Cormorant Garamond',Georgia,serif; color:rgba(230,200,74,0.1); pointer-events:none; }
+.ah-hq blockquote { position:relative; margin:0; font:italic 600 19.5px/1.42 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }
+.ah-hq figcaption { margin-top:10px; font:800 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.04em; color:rgba(230,200,74,0.88); }
+.ah-dots { display:flex; justify-content:center; gap:6px; margin-top:14px; }
+.ah-dots button { width:6px; height:6px; padding:0; border:0; border-radius:3px; background:rgba(240,237,230,0.22); cursor:pointer; transition:width .3s, background .3s; }
+.ah-dots button.on { width:18px; background:#e6c84a; }
+
+.ah-pro { position:relative; overflow:hidden; display:block; width:100%; text-align:left; padding:20px 18px 18px; border-radius:26px; cursor:pointer; color:#f0ede6; border:1px solid rgba(230,200,74,0.6); background:radial-gradient(100% 80% at 100% 0%, rgba(230,200,74,0.26), transparent 55%), linear-gradient(150deg,#2c240b 0%,#17150b 45%,#0b1a11 100%); box-shadow:0 16px 40px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08); box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+.ah-pro:active { transform:scale(.985); }
+.ah-pro-eye { position:relative; font:900 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.16em; color:#e6c84a; }
+.ah-pro-t { position:relative; font:700 22px/1.2 Cinzel,serif; margin:7px 0 5px; }
+.ah-pro-t span { color:#e6c84a; }
+.ah-pro-s { position:relative; font:600 13px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.66); }
+.ah-scale { position:relative; height:12px; border-radius:6px; background:rgba(255,255,255,0.08); margin:20px 12px 10px 0; }
+.ah-scale-free { position:absolute; left:0; top:0; bottom:0; border-radius:6px; background:rgba(255,255,255,0.16); }
+.ah-scale-me { position:absolute; left:0; top:0; bottom:0; border-radius:6px; background:linear-gradient(90deg,#1f9455,#4ade80); box-shadow:0 0 12px rgba(74,222,128,0.55); transition:width 1.5s cubic-bezier(.2,.8,.2,1); }
+.ah-scale-pro { position:absolute; right:-12px; top:-6px; width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,#f7e08a,#a8801a); box-shadow:0 0 16px rgba(230,200,74,0.65); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:#2a1d02; }
+.ah-scale-k { position:relative; display:flex; justify-content:space-between; gap:6px; font:700 11px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.55); }
+.ah-scale-k b { display:block; font:900 16px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; margin-top:1px; }
+.ah-scale-k .me b { color:#4ade80; }
+.ah-scale-k .pro { text-align:right; }
+.ah-scale-k .pro b { color:#e6c84a; }
+.ah-pro-k { position:relative; margin-top:8px; font:600 11.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.45); text-align:center; }
+
+.ah-row { display:flex; align-items:center; gap:12px; }
+.ah-ic { width:42px; height:42px; flex-shrink:0; border-radius:14px; display:flex; align-items:center; justify-content:center; color:#e6c84a; background:rgba(230,200,74,0.1); border:1px solid rgba(230,200,74,0.3); box-sizing:border-box; }
+.ah-row-x { flex:1; min-width:0; text-align:left; }
+.ah-row-t { font:800 14.5px 'Plus Jakarta Sans',sans-serif; color:#f0ede6; }
+.ah-row-d { font:600 12px/1.45 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.52); margin-top:2px; }
+.ah-share { display:block; width:100%; text-align:left; cursor:pointer; font-family:inherit; color:inherit; }
+.ah-share-q { display:block; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); font:italic 600 15px/1.4 'Cormorant Garamond',Georgia,serif; color:#f7eecb; }
+.ah-share-q small { display:block; margin-top:4px; font:800 10.5px 'Plus Jakarta Sans',sans-serif; font-style:normal; color:rgba(230,200,74,0.8); }
+.ah-note { margin:-6px 6px 0; font:600 12px/1.5 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.62); }
+.ah-foot { text-align:center; font:italic 600 14px 'Cormorant Garamond',Georgia,serif; color:rgba(240,237,230,0.38); margin:6px 0 0; }
+
+.ah-ask { margin:0 0 14px; padding:14px; border-radius:18px; border:1px solid rgba(230,200,74,0.42); background:linear-gradient(160deg,rgba(230,200,74,0.13),rgba(255,255,255,0.02)); text-align:left; animation:ahUp .6s cubic-bezier(.2,.8,.2,1) .5s both; }
+.ah-ask-b { display:flex; gap:8px; margin-top:12px; }
+.ah-ask-yes { flex:1; padding:12px; border:0; border-radius:12px; cursor:pointer; font:800 14px 'Plus Jakarta Sans',sans-serif; color:#fff; background:linear-gradient(135deg,#bf951f,#7a5a0c); box-shadow:0 4px 16px rgba(168,128,26,0.35); }
+.ah-ask-no { padding:12px 14px; border-radius:12px; cursor:pointer; font:700 13.5px 'Plus Jakarta Sans',sans-serif; color:rgba(240,237,230,0.6); background:none; border:1px solid rgba(255,255,255,0.12); }
+.ah-ask-msg { margin:0 0 14px; font:700 13px/1.5 'Plus Jakarta Sans',sans-serif; color:#86efac; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ah *, .ah > *, .ah-ask { animation:none !important; transition:none !important; }
+}
+`;
+if (HM_NATIVE) {
+  try {
+    const el = document.createElement('style');
+    el.textContent = APP_HOME_CSS;
+    document.head.appendChild(el);
+  } catch (e) {}
+}
+
+function appReduced() {
+  try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
+}
+function appDayIndex() { return Math.floor(Date.parse(hmDay(0) + 'T12:00:00Z') / 86400000); }
+/* « Mardi 25 novembre · 4 joumada ath-thania 1448 ». Le calendrier hégirien
+   vient du système (Umm al-Qura) ; s'il n'est pas disponible, on n'affiche que
+   la date grégorienne plutôt qu'une date fausse. */
+function appDateLabel() {
+  const d = new Date();
+  let g = '';
+  try { g = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (e) {}
+  g = g ? g.charAt(0).toUpperCase() + g.slice(1) : '';
+  let h = '';
+  try {
+    const f = new Intl.DateTimeFormat('fr-FR-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+    if (/islamic/.test(f.resolvedOptions().calendar || '')) h = f.format(d).replace(/\s*(AH|A\.H\.|apr\.? ?l[’']?H[ée]g\.?|ap\.? ?H\.?)\s*$/i, '').trim();
+  } catch (e) {}
+  return h ? g + ' · ' + h : g;
+}
+/* Part des mots du Coran lisible en terminant les seules sourates gratuites :
+   le plafond du compte gratuit, calculé sur le corpus et non promis. */
+function appFreeCeil(data) {
+  if (!data || !data.surahs) return 0;
+  const w = {};
+  data.surahs.forEach(function (s) { if (s.free) s.ayahs.forEach(function (a) { a.words.forEach(function (x) { w[x.ar] = 1; }); }); });
+  return cmpQuranPct(w, data);
+}
+/* Chiffre qui monte jusqu'à sa valeur à l'ouverture. */
+function AppCount({ n, dec }) {
+  const to = Number(n) || 0;
+  const [v, setV] = React.useState(function () { return appReduced() ? to : 0; });
+  React.useEffect(function () {
+    if (!to || appReduced()) { setV(to); return; }
+    let raf = 0, t0 = 0;
+    const from = 0;
+    function step(t) {
+      if (!t0) t0 = t;
+      const p = Math.min(1, (t - t0) / 1000);
+      setV(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) raf = requestAnimationFrame(step);
+    }
+    raf = requestAnimationFrame(step);
+    // Filet : si l'animation est suspendue (app en arrière-plan, onglet
+    // caché), le chiffre ne doit jamais rester figé à mi-course.
+    const done = setTimeout(function () { cancelAnimationFrame(raf); setV(to); }, 1300);
+    return function () { cancelAnimationFrame(raf); clearTimeout(done); };
+  }, [to]);
+  return <>{dec ? cmpFmt(v) : Math.round(v).toLocaleString('fr-FR')}</>;
+}
+/* Anneau doré qui se remplit à l'ouverture. */
+function AppRing({ pct, size, stroke, children }) {
+  const [v, setV] = React.useState(0);
+  React.useEffect(function () {
+    const t = setTimeout(function () { setV(pct); }, appReduced() ? 0 : 150);
+    return function () { clearTimeout(t); };
+  }, [pct]);
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const p = Math.max(0, Math.min(1, (v || 0) / 100));
+  return (
+    <div className="ah-ring" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }} aria-hidden="true">
+        <defs>
+          <linearGradient id="ahRingG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#f7e08a" />
+            <stop offset="100%" stopColor="#a8801a" />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} />
+        {p > 0 && <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#ahRingG)" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - p)} style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(.2,.8,.2,1)', filter: 'drop-shadow(0 0 6px rgba(230,200,74,0.45))' }} />}
+      </svg>
+      <div className="ah-ring-c">{children}</div>
+    </div>
+  );
+}
+/* Étoile à huit branches, motif de fond des grandes cartes. */
+function AppStar() {
+  return (
+    <svg className="ah-star" viewBox="0 0 100 100" aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeWidth="1.2">
+        <rect x="21" y="21" width="58" height="58" />
+        <rect x="21" y="21" width="58" height="58" transform="rotate(45 50 50)" />
+        <circle cx="50" cy="50" r="17" />
+        <circle cx="50" cy="50" r="40" strokeDasharray="2 4" />
+      </g>
+    </svg>
+  );
+}
+
+/* Fin de partie (app) : proposer le rappel quotidien au moment de la réussite,
+   une seule fois. C'est la notification qui fait revenir le lendemain. */
+const HM_NOTIF_ASK_KEY = 'hm_notif_ask_v1';
+function AppRappelAsk() {
+  const [pref, setPref] = React.useState(hmNotifPref);
+  const [hidden, setHidden] = React.useState(function () { try { return !!localStorage.getItem(HM_NOTIF_ASK_KEY); } catch (e) { return false; } });
+  const [msg, setMsg] = React.useState('');
+  if (!HM_NATIVE) return null;
+  if (msg) return <p className="ah-ask-msg">{msg}</p>;
+  if (pref.on || hidden) return null;
+  function later() { try { localStorage.setItem(HM_NOTIF_ASK_KEY, '1'); } catch (e) {} setHidden(true); }
+  function on() {
+    const next = Object.assign({}, pref, { on: true });
+    try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(next)); localStorage.setItem(HM_NOTIF_ASK_KEY, '1'); } catch (e) {}
+    setPref(next);
+    if (!window.HMNative) { setMsg('Aperçu : dans l’app, un rappel arrivera chaque jour à ' + next.hour + ' h.'); return; }
+    hmAppScheduleDaily().then(function (ok) {
+      if (ok) { setMsg('C’est noté : un rappel chaque jour à ' + next.hour + ' h. L’heure se change dans « Aujourd’hui ».'); return; }
+      const off = Object.assign({}, next, { on: false });
+      try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(off)); } catch (e) {}
+      setPref(off);
+      setMsg('Notifications refusées : tu peux les activer dans Réglages › Héritage Musulman.');
+    });
+  }
+  return (
+    <div className="ah-ask">
+      <div className="ah-row">
+        <span className="ah-ic"><AppIcon id="bell" size={20} /></span>
+        <div className="ah-row-x">
+          <div className="ah-row-t">Garde ta série</div>
+          <div className="ah-row-d">Un rappel chaque jour à {pref.hour} h, seulement si tu n’as pas encore fait ton verset.</div>
+        </div>
+      </div>
+      <div className="ah-ask-b">
+        <button className="ah-ask-yes" onClick={on}>Activer le rappel</button>
+        <button className="ah-ask-no" onClick={later}>Plus tard</button>
+      </div>
+    </div>
+  );
+}
+
 function AppHome({ navigate }) {
-  /* « Aujourd'hui » (24/11/2026, choix d'Ayoub) : verset du jour et semaine en
-     tête, puis chaque activité mise en avant avec son bouton « Jouer ».
-     Sans compte : aucune progression affichée, et chaque « Jouer » propose de
-     s'inscrire ou de se connecter. */
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
+  const [data, setData] = React.useState(cmpDataCache);
   const [notif, setNotif] = React.useState(hmNotifPref);
   const [notifMsg, setNotifMsg] = React.useState('');
+  const [shareMsg, setShareMsg] = React.useState('');
+  const [hi, setHi] = React.useState(function () { return appDayIndex() % APP_HADITHS.length; });
+  const [scaleOn, setScaleOn] = React.useState(false);
   const [, setTick] = React.useState(0);
+  const touchX = React.useRef(null);
   React.useEffect(function () {
+    let alive = true;
+    cmpLoadData().then(function (d) { if (alive) setData(d); }).catch(function () {});
     function refresh() { setSt(cmpLoad()); setTick(function (t) { return t + 1; }); }
     window.addEventListener('hm-resume', refresh);
     window.addEventListener('focus', refresh);
-    return function () { window.removeEventListener('hm-resume', refresh); window.removeEventListener('focus', refresh); };
+    const t = setTimeout(function () { setScaleOn(true); }, appReduced() ? 0 : 400);
+    return function () { alive = false; clearTimeout(t); window.removeEventListener('hm-resume', refresh); window.removeEventListener('focus', refresh); };
   }, []);
   const guest = !user;
+  React.useEffect(function () { if (user && !isPro) hmFunnel('vue', 'accueil-app'); }, [user, isPro]);
+
   const today = cmpTodayStr();
+  const daily = React.useMemo(function () { return cmpDailyPick(data, today); }, [data, today]);
+  const freeCeil = React.useMemo(function () { return appFreeCeil(data); }, [data]);
   const streak = guest ? 0 : cmpLiveStreak(st);
   const doneToday = !guest && !!(st.daily && st.daily[today] != null);
-  const words = cmpLearnedCount(st.words);
-  const first = user && user.displayName ? user.displayName.split(' ')[0] : '';
-  const hour = new Date().getHours();
-  const hello = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour';
+  const playedToday = st.lastDay === today;
+  const first = !guest && !(st.plays > 0) && !doneToday;
+  const words = guest ? 0 : cmpLearnedCount(st.words);
+  const colPct = guest || !data ? 0 : cmpCollectionPct(st.words);
+  const quranPct = guest || !data ? 0 : cmpQuranPct(st.words, data);
+  const maxPct = data ? cmpMaxQuranPct(data) : 0;
+  const lvl = cmpLevel(st.xp);
+  const dailyCount = Object.keys(st.daily || {}).length;
+  const fatiha = data && data.surahs ? data.surahs.find(function (x) { return x.surah === 1; }) : null;
+  const nSurahs = data && data.surahs ? data.surahs.length : 38;
+  const firstName = user && user.displayName ? user.displayName.trim().split(/\s+/)[0] : '';
+  const played = guest ? {} : hmPlayedToday();
+  const cmpTried = hmAppTrialUsed('cmp');
+  const leftMs = Math.max(0, hmNextMidnight() - Date.now());
+
+  function tap() { if (window.HMNative) window.HMNative.tap(); }
+  function play(id) { tap(); navigate(id); }
+  function openDaily() { tap(); if (!doneToday) hmWantDaily = true; navigate('comprendre'); }
+  function openFirst() { tap(); hmWantOpen = { surah: 1, mode: 'discover' }; navigate('comprendre'); }
+  function guestGo() { tap(); if (cmpTried) openAuth('signup'); else navigate('comprendre'); }
+  function buyPro() { tap(); hmFunnelLast = 'accueil-app'; openQuickCheckout(); }
+  function nextHadith(step) { setHi(function (i) { return (i + (step || 1) + APP_HADITHS.length) % APP_HADITHS.length; }); }
 
   function toggleNotif() {
     const next = Object.assign({}, notif, { on: !notif.on });
     try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(next)); } catch (e) {}
     setNotif(next);
-    if (!window.HMNative) { setNotifMsg(next.on ? 'Aperçu : dans l\'app, une notification arrivera chaque jour à ' + next.hour + ' h.' : ''); return; }
+    if (!window.HMNative) { setNotifMsg(next.on ? 'Aperçu : dans l’app, une notification arrivera chaque jour à ' + next.hour + ' h.' : ''); return; }
     hmAppScheduleDaily().then(function (ok) {
       if (next.on && !ok) {
         const off = Object.assign({}, next, { on: false });
         try { localStorage.setItem(HM_NOTIF_KEY, JSON.stringify(off)); } catch (e) {}
         setNotif(off);
         setNotifMsg('Notifications refusées : active-les dans Réglages › Héritage Musulman.');
-      } else setNotifMsg(next.on ? 'C\'est noté : rappel chaque jour à ' + next.hour + ' h, sauf si tu as déjà fait ton verset.' : '');
+      } else setNotifMsg(next.on ? 'C’est noté : rappel chaque jour à ' + next.hour + ' h, sauf si tu as déjà fait ton verset.' : '');
     });
   }
   function setHour(h) {
@@ -9889,121 +10279,248 @@ function AppHome({ navigate }) {
     setNotif(next);
     hmAppScheduleDaily();
   }
-  function play(id) {
-    if (window.HMNative) window.HMNative.tap();
-    navigate(id);
+  function share() {
+    tap();
+    const url = 'https://heritage-musulman.com/?utm_source=app&utm_medium=partage';
+    const text = 'J’apprends à comprendre le Coran mot à mot avec Héritage Musulman. Essaie, c’est gratuit :';
+    if (navigator.share) { navigator.share({ title: 'Héritage Musulman', text: text, url: url }).catch(function () {}); return; }
+    try { navigator.clipboard.writeText(text + ' ' + url); setShareMsg('Lien copié : colle-le dans un message.'); } catch (e) {}
   }
 
-  // Petite ligne de progression sous chaque activité (compte connecté).
+  // Progression par activité (compte connecté).
   const qs = [];
   if (!guest) { try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('quiz_score_') === 0) { const s = appReadScore(k); if (s) qs.push(s); } }); } catch (e) {} }
   const qAvg = qs.length ? Math.round(qs.reduce(function (a, s) { return a + s.correct / s.total * 100; }, 0) / qs.length) : 0;
-  const btBest = guest ? 0 : appBtScores().reduce(function (m, l) { return l.score ? Math.max(m, l.score.correct) : m; }, 0);
+  const btBest = guest ? null : appBtScores().reduce(function (m, l) { return l.score && (!m || l.score.correct > m.correct) ? { correct: l.score.correct, label: l.label } : m; }, null);
+  const test = guest ? null : hmRead(HM_TEST_KEY, null);
 
   const acts = [
-    { id: 'comprendre', title: 'Comprendre le Coran', desc: 'Le Coran mot à mot, un verset à la fois', color: APP_GOLD, prog: words ? words + ' mots appris' : '' },
-    { id: 'blind-test', title: 'Blind Test', desc: 'Écoute un verset, devine la sourate', color: '#4ade80', prog: btBest ? 'Record ' + btBest + '/10' : '' },
-    { id: 'quiz', title: 'Quiz islamiques', desc: '740 questions, 9 thèmes, 3 niveaux', color: '#60a5fa', prog: qs.length ? qs.length + ' niveaux · moyenne ' + qAvg + '%' : '' },
-    { id: 'test', title: 'Test Al-Fâtiha', desc: 'Combien de mots de ta prière comprends-tu ?', color: '#f0abfc', icon: 'mosque', prog: '' },
+    { id: 'comprendre', title: 'Comprendre le Coran', desc: 'Le Coran mot à mot, un verset à la fois', color: '#e6c84a',
+      line: words ? words + ' mots appris · ' + colPct + ' % du Juz ‘Amma' : 'Commence par Al-Fâtiha', bar: colPct },
+    { id: 'blind-test', title: 'Blind Test', desc: 'Écoute un verset, devine la sourate', color: '#4ade80',
+      line: btBest ? 'Record ' + btBest.correct + '/10 · ' + btBest.label : 'Pas encore joué', bar: btBest ? btBest.correct * 10 : 0 },
+    { id: 'quiz', title: 'Quiz islamiques', desc: '740 questions, 9 thèmes, 3 niveaux', color: '#60a5fa',
+      line: qs.length ? qs.length + (qs.length > 1 ? ' niveaux joués' : ' niveau joué') + ' · moyenne ' + qAvg + ' %' : 'Pas encore joué', bar: qAvg },
+    { id: 'test', title: 'Test Al-Fâtiha', desc: 'Combien de mots de ta prière comprends-tu ?', color: '#f0abfc', icon: 'mosque',
+      line: test && test.pct != null ? 'Ton score : ' + test.pct + ' %' : 'Une minute pour le savoir', bar: test && test.pct != null ? test.pct : 0 },
   ];
+  const quests = [
+    { k: 'daily', t: 'Le verset du jour', d: '2 minutes, mot à mot', ok: doneToday, go: openDaily },
+    { k: 'bt', t: 'Une partie de Blind Test', d: '10 manches : devine la sourate', ok: !!played.bt, go: function () { play('blind-test'); } },
+    { k: 'quiz', t: 'Un quiz', d: '10 questions sur l’islam', ok: !!played.quiz, go: function () { play('quiz'); } },
+  ];
+  const nQ = quests.filter(function (q) { return q.ok; }).length;
+  const h = APP_HADITHS[hi];
+  const pctOf = function (x) { return maxPct ? Math.max(0, Math.min(100, x / maxPct * 100)) : 0; };
+
+  // Carte principale : texte arabe tiré du corpus (jamais écrit à la main).
+  const heroAyah = guest || first ? (fatiha && fatiha.ayahs[0]) : (daily && daily.ayahs[0]);
+  const heroAr = heroAyah ? heroAyah.words.map(function (w) { return w.ar; }).join(' ') : '';
 
   return (
-    <main className="app-home">
-      <header className="app-head">
-        <img src="/favicon-192.png" alt="" width="38" height="38" style={{ borderRadius: '50%' }} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: APP_F, fontSize: 12.5, fontWeight: 700, color: 'rgba(240,237,230,0.5)' }}>{hello}{first ? ', ' + first : ''}</div>
-          <div style={{ fontFamily: 'Cinzel,serif', fontSize: 21, fontWeight: 700, color: '#f0ede6', lineHeight: 1.15 }}>Aujourd'hui</div>
+    <main className="ah">
+      <header className="ah-top">
+        <img className="ah-logo" src="/favicon-192.png" alt="" width="44" height="44" />
+        <div className="ah-hello">
+          <div className="ah-salam">As-salâmu ‘alaykum{firstName ? ',' : ''}</div>
+          <div className="ah-name">{firstName || 'Bienvenue'}{isPro && !guest && <span className="ah-pchip">PRO</span>}</div>
+          <div className="ah-date">{appDateLabel()}</div>
         </div>
         {!guest && (
-          <div className={'app-streak' + (streak > 0 ? ' on' : '')} title="Jours d'affilée">
-            <span aria-hidden="true">🔥</span>{streak}
+          <div className={'ah-streak' + (streak > 0 ? ' on' : '')} title="Jours d'affilée">
+            <span className="ah-flame" aria-hidden="true">🔥</span>{streak}
           </div>
         )}
       </header>
 
       {guest ? (
-        <section className="app-daily" style={{ cursor: 'default' }}>
-          <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: APP_GOLD }}>◆ Bienvenue</div>
-          <div style={{ fontFamily: 'Cinzel,serif', fontSize: 22, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>Comprends ce que tu récites</div>
-          <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>Essaie chaque activité, puis crée ton compte gratuit pour continuer et garder ta progression.</div>
-          <button className="app-daily-cta" style={{ border: 0, cursor: 'pointer' }} onClick={function () { openAuth('signup'); }}>Créer mon compte <span aria-hidden="true">→</span></button>
-          <button className="app-link" style={{ display: 'block', marginTop: 6, padding: '6px 0' }} onClick={function () { openAuth('login'); }}>J'ai déjà un compte</button>
-        </section>
+        <div className="ah-hero" role="button" tabIndex={0} onClick={guestGo}>
+          <AppStar />
+          <div className="ah-eye">◆ Bienvenue</div>
+          <div className="ah-hero-t">Comprends ce que <span>tu récites</span></div>
+          <div className="ah-hero-s">{cmpTried
+            ? 'Tu as eu un aperçu d’Al-Fâtiha. Crée ton compte gratuit pour jouer et garder ta progression.'
+            : 'Commence par Al-Fâtiha : écoute chaque mot et découvre son sens. Deux minutes, sans compte.'}</div>
+          {heroAr && !cmpTried && <div className="ah-ar" lang="ar">{heroAr}</div>}
+          <span className="ah-cta">{cmpTried ? 'Créer mon compte gratuit' : 'Commencer'} <span aria-hidden="true">→</span></span>
+          <button className="ah-link" onClick={function (e) { e.stopPropagation(); openAuth('login'); }}>J’ai déjà un compte</button>
+        </div>
       ) : (
-        <>
-          {/* Verset du jour : la raison de revenir chaque jour */}
-          <button className={'app-daily' + (doneToday ? ' done' : '')} onClick={function () { if (!doneToday) hmWantDaily = true; play('comprendre'); }}>
-            <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: doneToday ? '#4ade80' : APP_GOLD }}>
-              {doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}
-            </div>
-            <div style={{ fontFamily: 'Cinzel,serif', fontSize: 23, fontWeight: 700, color: '#f0ede6', margin: '8px 0 4px', lineHeight: 1.2 }}>
-              {doneToday ? 'Bravo, reviens demain' : 'Un verset, mot à mot'}
-            </div>
-            <div style={{ fontFamily: APP_F, fontSize: 13.5, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5 }}>
-              {doneToday ? 'Ta série continue. Tu peux réviser une sourate en attendant.' : 'Deux minutes : écoute, comprends chaque mot, puis joue.'}
-            </div>
-            <div className="app-daily-cta">{doneToday ? 'Réviser' : 'Commencer'} <span aria-hidden="true">→</span></div>
-          </button>
+        <div className={'ah-hero' + (doneToday ? ' done' : '')} role="button" tabIndex={0} onClick={first ? openFirst : openDaily}>
+          <AppStar />
+          <div className="ah-eye">{first ? '◆ Ta première leçon' : doneToday ? '✓ Verset du jour fait' : '☀️ Verset du jour'}</div>
+          <div className="ah-hero-t">{first
+            ? <>Al-Fâtiha, <span>mot à mot</span></>
+            : doneToday ? <>Bārakallāhu <span>fīk</span></>
+            : daily ? <span translate="no" style={{ color: '#f0ede6' }}>{daily.name}</span> : 'Un verset, mot à mot'}</div>
+          <div className="ah-hero-s">{first
+            ? 'La sourate de chacune de tes prières. Écoute chaque mot, découvre son sens, puis joue.'
+            : doneToday ? 'Nouveau verset dans ' + Math.floor(leftMs / 3600000) + ' h ' + pad2(Math.floor(leftMs % 3600000 / 60000)) + '. En attendant, révise une sourate.'
+            : daily ? 'Verset ' + daily.ayahs[0].n + ' · ' + daily.ayahs[0].words.length + ' mots à comprendre · 2 minutes' : 'Écoute, comprends chaque mot, puis joue.'}</div>
+          {heroAr && !doneToday && <div className="ah-ar" lang="ar">{heroAr}</div>}
+          {!first && !doneToday && streak > 0 && !playedToday && (
+            <div className="ah-risk"><span aria-hidden="true">🔥</span> Joue aujourd’hui pour garder ta série de {streak} jour{streak > 1 ? 's' : ''}.</div>
+          )}
+          <span className="ah-cta">{first ? 'Commencer la leçon' : doneToday ? 'Réviser une sourate' : 'Commencer'} <span aria-hidden="true">→</span></span>
+        </div>
+      )}
+      {guest && <p className="ah-proof"><b>{MEMBERS_COUNT} membres</b> apprennent déjà avec Héritage</p>}
 
-          <section className="app-card">
-            <div className="app-card-h">
-              <span>Ta semaine</span>
-              <span style={{ color: streak > 0 ? APP_GOLD : 'rgba(240,237,230,0.4)' }}>{streak > 1 ? streak + ' jours d\'affilée' : streak === 1 ? '1 jour' : 'Commence ta série'}</span>
+      {!guest && (
+        <section className="ah-card">
+          <div className="ah-h">
+            <span className="ah-h-t">Ta progression</span>
+            <button className="ah-h-go" onClick={function () { play('profile'); }}>Détails ›</button>
+          </div>
+          <div className="ah-prog-top">
+            <AppRing pct={colPct} size={118} stroke={11}>
+              <span className="ah-ring-v"><AppCount n={colPct} /><small>%</small></span>
+              <span className="ah-ring-k">du Juz ‘Amma<br />compris</span>
+            </AppRing>
+            <div className="ah-side">
+              <div className="ah-lvl">Niveau {lvl.n} <span>{lvl.need - lvl.inLevel} pts avant le {lvl.n + 1}</span></div>
+              <div className="ah-bar"><i style={{ width: (scaleOn ? lvl.inLevel / lvl.need * 100 : 0) + '%' }} /></div>
+              <div className="ah-quran">Tu lis <b><AppCount n={quranPct} dec /> %</b> des mots du Coran</div>
             </div>
-            <CmpWeek st={st} size={32} />
-            <div className="app-stats">
-              <div><b>{words}</b><span>mots appris</span></div>
-              <div><b>{streak}</b><span>jours de série</span></div>
-              <div><b>{st.xp || 0}</b><span>points</span></div>
-            </div>
-          </section>
-        </>
+          </div>
+          <CmpWeek st={st} size={31} />
+          <div className="ah-stats">
+            <div><b><AppCount n={words} /></b><span>mots appris</span></div>
+            <div><b><AppCount n={streak} /></b><span>jours de série</span></div>
+            <div><b><AppCount n={st.xp || 0} /></b><span>points</span></div>
+            <div><b><AppCount n={dailyCount} /></b><span>versets du jour</span></div>
+          </div>
+        </section>
       )}
 
-      {/* Activités : chacune mise en avant, avec son bouton Jouer */}
-      <p className="app-sec" style={{ margin: '8px 2px 0' }}>Tes activités</p>
+      {!guest && (
+        <section className="ah-card">
+          <div className="ah-h">
+            <span className="ah-h-t">Défis du jour</span>
+            <span className="ah-h-k">{nQ}/3</span>
+          </div>
+          <div className="ah-qbar"><i style={{ width: (scaleOn ? nQ / 3 * 100 : 0) + '%' }} /></div>
+          {quests.map(function (q, i) {
+            return (
+              <button key={q.k} className={'ah-q' + (q.ok ? ' ok' : '') + (i === 0 ? ' first' : '')} onClick={q.go}>
+                <span className="ah-q-dot">{q.ok ? '✓' : ''}</span>
+                <span className="ah-q-t">{q.t}<small>{q.d}</small></span>
+                <span className="ah-q-go">{q.ok ? 'Fait' : 'Go ›'}</span>
+              </button>
+            );
+          })}
+          {nQ === 3 && <p className="ah-q-all">Journée complète, mâ shâ Allah. À demain !</p>}
+        </section>
+      )}
+
+      {!guest && !notif.on && (
+        <section className="ah-card ah-row">
+          <span className="ah-ic"><AppIcon id="bell" size={20} /></span>
+          <div className="ah-row-x">
+            <div className="ah-row-t">Active ton rappel quotidien</div>
+            <div className="ah-row-d">Chaque jour à{' '}
+              <select value={notif.hour} onChange={function (e) { setHour(+e.target.value); }} className="app-hour" aria-label="Heure du rappel">
+                {[7, 8, 9, 12, 13, 17, 18, 19, 20, 21, 22].map(function (hh) { return <option key={hh} value={hh}>{hh} h</option>; })}
+              </select>, pour ne pas casser ta série.
+            </div>
+          </div>
+          <button role="switch" aria-checked={notif.on} aria-label="Rappel quotidien" className={'app-switch' + (notif.on ? ' on' : '')} onClick={toggleNotif}><span /></button>
+        </section>
+      )}
+      {!guest && !notif.on && notifMsg && <p className="ah-note">{notifMsg}</p>}
+
+      <p className="ah-sec">{guest ? 'Essaie chaque activité' : 'Tes activités'}</p>
       {acts.map(function (a) {
+        const tried = guest && hmAppTrialUsed(hmAppTrialKind(a.id));
         return (
-          <div key={a.id} className="app-feat" onClick={function () { play(a.id); }}>
-            <span className="app-feat-ic" style={{ color: a.color, borderColor: a.color + '66', background: a.color + '14' }}><AppIcon id={a.icon || a.id} size={26} /></span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="app-feat-t">{a.title}</span>
-              <span className="app-feat-d">{a.desc}</span>
-              {!guest && a.prog && <span className="app-feat-p">{a.prog}</span>}
-              {guest && <span className="app-feat-p" style={hmAppTrialUsed(hmAppTrialKind(a.id)) ? { color: 'rgba(240,237,230,0.4)' } : null}>{hmAppTrialUsed(hmAppTrialKind(a.id)) ? 'Essai fait · compte gratuit pour continuer' : 'Essai gratuit'}</span>}
+          <div key={a.id} className="ah-act" role="button" tabIndex={0} onClick={function () { play(a.id); }}
+            style={{ borderColor: a.color + '4d', background: 'radial-gradient(90% 120% at 0% 0%, ' + a.color + '24, transparent 60%), linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012))' }}>
+            <span className="ah-act-ic" style={{ color: a.color, borderColor: a.color + '66', background: a.color + '17', boxShadow: '0 0 22px ' + a.color + '26' }}><AppIcon id={a.icon || a.id} size={27} /></span>
+            <span className="ah-act-x">
+              <span className="ah-act-t">{a.title}</span>
+              <span className="ah-act-d">{a.desc}</span>
+              {guest
+                ? <span className="ah-act-p" style={{ color: tried ? 'rgba(240,237,230,0.42)' : a.color }}>{tried ? 'Essai fait · compte gratuit pour continuer' : 'Essai gratuit, sans compte'}</span>
+                : <span className="ah-act-p" style={{ color: a.color }}>{a.line}</span>}
+              {!guest && a.bar > 0 && <span className="ah-act-bar"><i style={{ width: (scaleOn ? Math.max(3, Math.min(100, a.bar)) : 0) + '%', background: a.color }} /></span>}
             </span>
-            <button className="app-feat-go" onClick={function (e) { e.stopPropagation(); play(a.id); }}>Jouer</button>
+            <span className="ah-act-go">Jouer</span>
           </div>
         );
       })}
 
-      {!guest && (
-        <section className="app-card app-notif" style={{ padding: '12px 14px' }}>
-          <span className="app-act-ic" style={{ color: APP_GOLD, borderColor: 'rgba(230,200,74,0.35)' }}><AppIcon id="bell" size={20} /></span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: APP_F, fontSize: 14.5, fontWeight: 800, color: '#f0ede6' }}>Rappel quotidien</div>
-            <div style={{ fontFamily: APP_F, fontSize: 12, color: 'rgba(240,237,230,0.5)', marginTop: 2 }}>
-              Chaque jour à{' '}
+      <section className="ah-hadith" onClick={function () { nextHadith(1); }}
+        onTouchStart={function (e) { touchX.current = e.touches[0].clientX; }}
+        onTouchEnd={function (e) { const x0 = touchX.current; touchX.current = null; if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) { e.preventDefault(); nextHadith(dx < 0 ? 1 : -1); } }}>
+        <div className="ah-h">
+          <span className="ah-h-t">Pourquoi apprendre ?</span>
+          <span className="ah-h-k">Hadith du jour</span>
+        </div>
+        <figure key={hi} className="ah-hq">
+          <span className="ah-hq-mark" aria-hidden="true">”</span>
+          <blockquote>« {h.t} »</blockquote>
+          <figcaption>Le Prophète ﷺ · {h.s}</figcaption>
+        </figure>
+        <div className="ah-dots">
+          {APP_HADITHS.map(function (_, i) {
+            return <button key={i} className={i === hi ? 'on' : ''} aria-label={'Hadith ' + (i + 1)} onClick={function (e) { e.stopPropagation(); setHi(i); }} />;
+          })}
+        </div>
+      </section>
+
+      {!guest && !isPro && data && (
+        <div className="ah-pro" role="button" tabIndex={0} onClick={buyPro}>
+          <AppStar />
+          <div className="ah-pro-eye">✦ HÉRITAGE PRO</div>
+          <div className="ah-pro-t">Comprends tout le <span>Juz ‘Amma</span></div>
+          <div className="ah-pro-s">Les {nSurahs} sourates mot à mot, et le Quiz et le Blind Test sans limite.</div>
+          <div className="ah-scale" aria-hidden="true">
+            <span className="ah-scale-free" style={{ width: pctOf(freeCeil) + '%' }} />
+            <span className="ah-scale-me" style={{ width: (scaleOn && quranPct > 0 ? Math.max(2, pctOf(quranPct)) : 0) + '%' }} />
+            <span className="ah-scale-pro">✦</span>
+          </div>
+          <div className="ah-scale-k">
+            <span className="me">Toi aujourd’hui<b>{cmpFmt(quranPct)} %</b></span>
+            {freeCeil > quranPct && <span>Gratuit<b>{cmpFmt(freeCeil)} %</b></span>}
+            <span className="pro">Avec Pro<b>{cmpFmt(maxPct)} %</b></span>
+          </div>
+          <div className="ah-pro-k">part des mots du Coran que tu sais lire</div>
+          <span className="ah-cta">Découvrir le Pro <span aria-hidden="true">→</span></span>
+        </div>
+      )}
+
+      {!guest && notif.on && (
+        <section className="ah-card ah-row">
+          <span className="ah-ic"><AppIcon id="bell" size={20} /></span>
+          <div className="ah-row-x">
+            <div className="ah-row-t">Rappel quotidien</div>
+            <div className="ah-row-d">Chaque jour à{' '}
               <select value={notif.hour} onChange={function (e) { setHour(+e.target.value); }} className="app-hour" aria-label="Heure du rappel">
-                {[7, 8, 9, 12, 13, 17, 18, 19, 20, 21, 22].map(function (h) { return <option key={h} value={h}>{h} h</option>; })}
+                {[7, 8, 9, 12, 13, 17, 18, 19, 20, 21, 22].map(function (hh) { return <option key={hh} value={hh}>{hh} h</option>; })}
               </select>
             </div>
           </div>
           <button role="switch" aria-checked={notif.on} aria-label="Rappel quotidien" className={'app-switch' + (notif.on ? ' on' : '')} onClick={toggleNotif}><span /></button>
         </section>
       )}
-      {notifMsg && <p className="app-note">{notifMsg}</p>}
+      {!guest && notif.on && notifMsg && <p className="ah-note">{notifMsg}</p>}
 
-      {user && !isPro && (
-        <button className="app-pro" onClick={function () { openQuickCheckout(); }}>
-          <div>
-            <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', color: APP_GOLD }}>HÉRITAGE PRO</div>
-            <div style={{ fontFamily: APP_F, fontSize: 14, fontWeight: 800, color: '#f0ede6', marginTop: 3 }}>Les 38 sourates du Juz ‘Amma, sans limite</div>
-          </div>
-          <span aria-hidden="true" style={{ color: APP_GOLD, fontSize: 20 }}>→</span>
+      {!guest && (
+        <button className="ah-card ah-share" onClick={share}>
+          <span className="ah-row">
+            <span className="ah-ic"><AppIcon id="share" size={20} /></span>
+            <span className="ah-row-x">
+              <span className="ah-row-t" style={{ display: 'block' }}>Invite un proche</span>
+              <span className="ah-row-d" style={{ display: 'block' }}>Partage l’app à quelqu’un qui veut comprendre le Coran.</span>
+            </span>
+            <span style={{ color: '#e6c84a', fontSize: 20, fontWeight: 800 }}>›</span>
+          </span>
+          <span className="ah-share-q">« Celui qui indique un bien a la même récompense que celui qui l’accomplit. »<small>Le Prophète ﷺ · Muslim 1893</small></span>
         </button>
       )}
+      {shareMsg && <p className="ah-note">{shareMsg}</p>}
+
+      <p className="ah-foot">Qu’Allah te facilite ton apprentissage.</p>
     </main>
   );
 }
@@ -10070,6 +10587,10 @@ function NativeBuyModal({ initialPlan, onClose, navigate }) {
             <div className="app-sheet-grip" />
             <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', color: APP_GOLD, textAlign: 'center' }}>HÉRITAGE PRO</div>
             <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 23, color: '#f0ede6', textAlign: 'center', margin: '6px 0 16px', lineHeight: 1.25 }}>Comprends tout le Juz ‘Amma</h2>
+            {cmpDataCache && (function () {
+              const me = cmpQuranPct(cmpLoad().words, cmpDataCache), mx = cmpMaxQuranPct(cmpDataCache);
+              return mx ? <p style={{ fontFamily: APP_F, fontSize: 13.5, lineHeight: 1.5, color: 'rgba(240,237,230,0.7)', textAlign: 'center', margin: '-8px 0 16px' }}>Aujourd’hui, tu lis <b style={{ color: '#4ade80' }}>{cmpFmt(me)} %</b> des mots du Coran.<br />Avec Pro : jusqu’à <b style={{ color: APP_GOLD }}>{cmpFmt(mx)} %</b>.</p> : null;
+            })()}
             <ProValue />
             <div role="radiogroup" aria-label="Choisis ton abonnement" style={{ display: 'flex', gap: 10, margin: '18px 0 14px' }}>
               {opt('annual', 'Annuel', prices.annual, 'soit ' + PRO_EQ_MONTH + '/mois', PRO_DISCOUNT)}
@@ -10320,6 +10841,19 @@ function App() {
     return unsub;
   }, []);
 
+  /* App : une inscription faite hors d'une activité (accueil, profil) mène
+     tout de suite à la première leçon, Al-Fâtiha. Le 24/11, 7 inscrits sur 15
+     n'avaient jamais joué. On attend que le compte soit chargé (`user`) : la
+     confirmation d'inscription peut arriver avant lui. */
+  const [afterAuth, setAfterAuth] = React.useState(0);
+  const firstLessonRef = React.useRef(false);
+  React.useEffect(function () {
+    if (!HM_NATIVE || !user || !firstLessonRef.current) return;
+    firstLessonRef.current = false;
+    hmWantOpen = { surah: 1, mode: 'discover' };
+    navigate('comprendre');
+  }, [user, afterAuth]);
+
   const prevUserRef = React.useRef(undefined);
   React.useEffect(function () {
     if (!HM_NATIVE) return;
@@ -10457,6 +10991,10 @@ function App() {
         setPendingCheckout(null);
         return;
       }
+      if (HM_NATIVE && type === 'signup') {
+        const onAct = page === 'comprendre' || page === 'blind-test' || page === 'test' || page === 'quiz' || page.indexOf('quiz-') === 0;
+        if (!onAct) { firstLessonRef.current = true; setAfterAuth(function (n) { return n + 1; }); }
+      }
       /* Plus d'écran de bienvenue à l'inscription : sans essai, il n'y a rien
          à annoncer, et il couperait la partie que la personne veut reprendre.
          Les derniers comptes en essai le voient encore (cf. effet plus haut). */
@@ -10578,7 +11116,25 @@ function App() {
   } catch (e) {}
 })();
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* Filet de sécurité : une erreur de rendu ne laisse jamais un écran vide
+   (dans l'app, un écran noir = rejet Apple et utilisateur perdu). */
+class HmBoundary extends React.Component {
+  constructor(p) { super(p); this.state = { err: false }; }
+  static getDerivedStateFromError() { return { err: true }; }
+  componentDidCatch(e) { try { console.error('[HM] rendu', e); } catch (x) {} }
+  render() {
+    if (!this.state.err) return this.props.children;
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, padding: 24, textAlign: 'center', background: '#0b1f17', color: '#f0ede6', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif" }}>
+        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22 }}>Un petit souci d’affichage</div>
+        <div style={{ fontSize: 14.5, color: 'rgba(240,237,230,0.7)', maxWidth: 300, lineHeight: 1.5 }}>Ta progression est intacte. Reviens à l’accueil pour continuer.</div>
+        <button onClick={function () { try { history.replaceState(null, '', location.pathname + location.search); } catch (x) {} location.reload(); }}
+          style={{ marginTop: 6, padding: '13px 26px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg,#e6c84a,#b8941f)', color: '#1a1408', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>Revenir à l’accueil</button>
+      </div>
+    );
+  }
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<HmBoundary><App /></HmBoundary>);
 // Hide loading screen once React is mounted
 requestAnimationFrame(() => {
   const loader = document.getElementById('app-loading');
