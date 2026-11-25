@@ -7892,7 +7892,9 @@ function cmpMaxQuranPct(data) {
   Object.keys(data.freq).forEach(function (n) { tot += data.freq[n] || 0; });
   return Math.round(tot / data.quranTotal * 1000) / 10;
 }
-const CMP_LEVELS = ['Débutant', 'Apprenti', 'Étudiant', 'Connaisseur', 'Savant', 'Hâfiz'];
+/* Pas de titres religieux (« Hâfiz » = qui a mémorisé tout le Coran, « Savant ») :
+   un niveau de jeu ne doit jamais les décerner. */
+const CMP_LEVELS = ['Débutant', 'Apprenti', 'Étudiant', 'Connaisseur', 'Assidu', 'Persévérant'];
 function cmpLevel(xp) {
   const lv = Math.floor((xp || 0) / 120);
   return { n: lv + 1, title: CMP_LEVELS[Math.min(lv, CMP_LEVELS.length - 1)], inLevel: (xp || 0) % 120, need: 120 };
