@@ -50,7 +50,7 @@
 <!-- ── Preload critiques ── -->
 <link rel="preload" as="script" href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"/>
-<link rel="preload" as="script" href="/app.js?v=41"/>
+<link rel="preload" as="script" href="/app.js?v=42"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" crossorigin="anonymous"/>
 <link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous"/>
@@ -72,7 +72,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
-<script src="/app.js?v=41" defer></script>
+<script src="/app.js?v=42" defer></script>
 <!-- ── Pixel publicitaire (Meta) ──
      Chargé UNIQUEMENT après consentement explicite : en France, déposer un
      cookie publicitaire avant l'accord de l'utilisateur est une infraction
@@ -219,6 +219,10 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { overflow-x: hidden; width: 100%; }
+  /* overflow-x sur html ET body : le body devient une zone qui coupe son contenu.
+     Sur iPhone, WebKit y coupe aussi les éléments fixes (fenêtres, barre d'onglets) :
+     une page courte laissait une bande vide en bas de l'écran. */
+  body { min-height: 100vh; }
 
   /* ── Loading screen — visible avant que React monte ── */
   #app-loading {
