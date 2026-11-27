@@ -9223,6 +9223,21 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
     var t = setTimeout(function () { onPro('auto-2e-partie'); }, 1500);
     return function () { clearTimeout(t); };
   }, []);
+  /* App : note App Store proposée après une partie réussie (≥ 80 %), à partir
+     de la 3e partie, au plus une fois tous les 60 jours. iOS décide seul de
+     l'afficher. Jamais le jour où l'offre s'ouvre d'elle-même. */
+  React.useEffect(function () {
+    if (!HM_NATIVE || !res || res.scorePct < 80 || (st.plays || 0) < 3) return;
+    if (!(window.HMNative && window.HMNative.requestReview)) return;
+    var now = Date.now(), last = 0, offre = 0;
+    try { last = +localStorage.getItem('hm_review_ask_v1') || 0; offre = +localStorage.getItem('hm_offre_auto_v1') || 0; } catch (e) {}
+    if (now - last < 60 * 86400000 || now - offre < 60000) return;
+    var t = setTimeout(function () {
+      try { localStorage.setItem('hm_review_ask_v1', String(Date.now())); } catch (e) {}
+      window.HMNative.requestReview();
+    }, 2500);
+    return function () { clearTimeout(t); };
+  }, []);
   if (!res) { return <div style={{ padding: 100, textAlign: 'center', color: '#f0ede6' }}>—</div>; }
   const perfect = res.scorePct === 100;
   const newlyMastered = res.wordResults.filter(function (wr) { return wr.correct && (st.words[wr.ar] || 0) >= CMP_MASTER_THRESHOLD; });
