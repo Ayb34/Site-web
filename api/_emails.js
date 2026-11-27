@@ -332,6 +332,7 @@ async function envoyer(destinataire, prenom, message) {
       htmlContent: message.html,
       // Une version texte : un message HTML seul est un signal « marketing ».
       ...(message.text ? { textContent: message.text } : {}),
+      ...(message.headers ? { headers: message.headers } : {}),
     }),
   });
 
@@ -509,6 +510,52 @@ ${lignes.map((l) => l === url
   };
 }
 
+/* ── E-mail du vendredi (Jumu’a) ──
+   Demandé par Ayoub le 27/11/2026 : chaque vendredi, un mot aux inscrits sans
+   abonnement pour souhaiter un bon vendredi et donner envie de revenir
+   apprendre. Pas une relance commerciale : un rendez-vous, comme le rappel.
+   Une seule ligne parle de Pro, en P.-S., sans prix barré ni urgence.
+   Lien d'arrêt personnel (signé) dans chaque envoi + en-tête List-Unsubscribe.
+   Le hadith change chaque semaine ; tous sont authentiques et référencés. */
+const JUMUA_HADITHS = [
+  { t: 'Le meilleur jour sur lequel le soleil se soit levé est le vendredi.', s: 'Muslim 854' },
+  { t: 'Le meilleur d’entre vous est celui qui apprend le Coran et l’enseigne.', s: 'Bukhari 5027' },
+  { t: 'L’œuvre la plus aimée d’Allah est la plus régulière, même si elle est peu abondante.', s: 'Bukhari 6464, Muslim 783' },
+  { t: 'Celui qui emprunte un chemin à la recherche d’une science, Allah lui facilite par cela un chemin vers le Paradis.', s: 'Muslim 2699' },
+];
+function emailJumua(prenom, mots, semaine, urlStop) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const url = lien('jumua', 'comprendre');
+  const h = JUMUA_HADITHS[Math.abs(semaine) % JUMUA_HADITHS.length];
+  const progres = mots > 0
+    ? `Tu as déjà appris ${mots} mot${mots > 1 ? 's' : ''} du Coran sur Héritage Musulman. Ils restent si on les revoit : prends quelques minutes aujourd’hui pour ton verset du jour et pour en ajouter de nouveaux.`
+    : 'Tu n’as pas encore commencé « Comprendre le Coran » : lance-toi avec Al-Fâtiha, la sourate que tu récites à chaque prière. Deux minutes suffisent pour comprendre ses premiers mots.';
+  const lignes = [
+    salut,
+    'Jumu’a mubārak ! Qu’Allah accepte tes prières et ton vendredi.',
+    progres,
+    url,
+    `Le Prophète ﷺ a dit : « ${h.t} » (${h.s})`,
+    'Le verset du jour, Al-Fâtiha, Al-Ikhlâs et une partie par jour de Quiz et de Blind Test restent gratuits. P.-S. : si tu veux comprendre toutes les sourates de ta prière, Héritage Pro les ouvre toutes.',
+    'Bon vendredi,\nAyoub\nHéritage Musulman',
+  ];
+  const para = (l) => l === url
+    ? `<p style="margin:0 0 14px;"><a href="${url}"><b>Continuer mon apprentissage</b></a></p>`
+    : `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`;
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map(para).join('\n')}
+<p style="margin:22px 0 0;font-size:12px;color:#777;">Tu reçois cet e-mail du vendredi parce que tu as un compte sur Héritage Musulman. <a href="${urlStop}" style="color:#777;">Ne plus recevoir l’e-mail du vendredi</a></p>
+</body></html>`;
+  return {
+    subject: prenom ? `Jumu’a mubārak ${prenom}` : 'Jumu’a mubārak',
+    html,
+    text: lignes.join('\n\n') + '\n\nNe plus recevoir l’e-mail du vendredi : ' + urlStop,
+    senderName: 'Ayoub · Héritage Musulman',
+    headers: { 'List-Unsubscribe': `<${urlStop}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
+  };
+}
+
 module.exports = {
   TRIAL_DAYS: 2,
   TRIAL_STOP,
@@ -521,6 +568,7 @@ module.exports = {
   emailBienvenueRattrapage,
   emailOffreLancement,
   emailRappel,
+  emailJumua,
   envoyer,
   dateFr,
 };

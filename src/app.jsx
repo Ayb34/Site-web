@@ -8464,7 +8464,7 @@ function ComprendrePage({ navigate }) {
         setMode('play');
       }} onBack={function(){ setMode('hub'); }} />}
       {mode === 'play' && sourate && <CmpPlay sourate={sourate} st={st} onFinish={function(res){ commitResult(res); window.__cmpLastRes = res; setMode('result'); }} onBack={function(){ setMode('hub'); }} />}
-      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} onNext={function(n){ openSourate(n); hmScrollTop(); }} />}
+      {mode === 'result' && sourate && <CmpResult res={window.__cmpLastRes} sourate={sourate} st={st} pct={pct} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} lvl={lvl} isPro={isPro} onReplay={function(){ if (guestBlocked) { setShowGate(true); return; } setMode('discover'); }} onHub={function(){ setMode('hub'); }} onPro={function(src){ setShowPro(typeof src === 'string' ? src : true); }} onNext={function(n){ openSourate(n); hmScrollTop(); }} rappel={rappel} onRappel={user ? toggleRappel : null} />}
       {showGate && <GuestGateModal context="comprendre" onClose={function(){ setShowGate(false); }} />}
       {showPro && <CmpProModal src={typeof showPro === 'string' ? showPro : 'cmp'} quranPct={quranPct} maxQuranPct={maxQuranPct} sourates={sourates} mastered={mastered} onClose={function(){ setShowPro(false); }} />}
     </>
@@ -8496,8 +8496,11 @@ function CmpProModal({ onClose, quranPct, maxQuranPct, sourates, mastered, src }
       <div className="pro-modal-card pro-sheet" onClick={function (e) { e.stopPropagation(); }} style={{ background: 'linear-gradient(145deg,#0a1f12,#071510)', border: '1px solid rgba(200,167,39,0.35)', borderRadius: 22, maxWidth: 410, width: '100%', textAlign: 'center', boxShadow: '0 0 80px rgba(200,167,39,0.12), 0 40px 60px rgba(0,0,0,0.6)', animation: 'proPop 0.38s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div className="pro-modal-scroll" style={{ padding: '30px 26px 14px' }}>
         <h2 style={{ fontFamily: 'Cinzel,serif', fontSize: 22, color: '#f0ede6', margin: '0 0 8px', lineHeight: 1.25 }}>
-          Lis <span style={{ color: GOLD }}>{cmpFmt(maxQuranPct)}% des mots</span><br />du Coran.
+          Comprends les sourates<br /><span style={{ color: GOLD }}>de ta prière.</span>
         </h2>
+        <p style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 13.5, color: 'rgba(240,237,230,0.7)', margin: '0 0 4px', lineHeight: 1.5 }}>
+          <span translate="no">Al-Falaq, An-Nâs, Al-Kawthar, Al-‘Asr</span>… celles que tu récites chaque jour, mot à mot.
+        </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, background: 'linear-gradient(135deg,rgba(200,167,39,0.14),rgba(74,222,128,0.08))', border: '1px solid rgba(200,167,39,0.3)', borderRadius: 14, padding: '12px 16px', margin: '14px 0 6px' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: 'Plus Jakarta Sans,sans-serif', fontSize: 26, fontWeight: 900, color: 'rgba(240,237,230,0.55)', lineHeight: 1 }}>{cmpFmt(quranPct)}%</div>
@@ -9178,7 +9181,30 @@ function CmpPlay({ sourate, st, onFinish, onBack }) {
 }
 
 // ── RÉSULTAT ──
-function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onReplay, onHub, onPro, onNext }) {
+/* Proposé sur l'écran de résultat, une seule fois par appareil : le 27/11, aucun
+   des 11 nouveaux inscrits n'avait activé le rappel (il n'existait que dans le
+   menu de Comprendre). Même interrupteur que le menu : users/{uid}.rappel.on. */
+function CmpRappelAsk({ rappel, onRappel }) {
+  const KEY = 'hm_rappel_ask_v1';
+  const [hidden, setHidden] = React.useState(function () { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } });
+  const [done, setDone] = React.useState(false);
+  if (!onRappel) return null;
+  if (done) return <p style={{ fontSize: 13.5, color: '#4ade80', fontWeight: 700, margin: '0 0 14px' }}>✓ C’est noté : un e-mail demain si tu n’as pas encore fait ton verset.</p>;
+  if (rappel || hidden) return null;
+  function close() { try { localStorage.setItem(KEY, '1'); } catch (e) {} setHidden(true); }
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 16, padding: '14px 16px', marginBottom: 14, textAlign: 'left' }}>
+      <div style={{ fontSize: 15, fontWeight: 800, color: '#f0ede6', marginBottom: 4 }}>📩 Je te rappelle demain ?</div>
+      <div style={{ fontSize: 13, color: 'rgba(240,237,230,0.6)', lineHeight: 1.5, marginBottom: 12 }}>Un e-mail par jour avec ton verset, seulement si tu n’as pas encore joué. Arrêt en un clic.</div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button onClick={function () { onRappel(true); close(); setDone(true); }} style={{ flex: 1, padding: '11px 12px', borderRadius: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#a8801a,#6d4f08)' }}>Oui, rappelle-moi</button>
+        <button onClick={close} style={{ padding: '11px 14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.14)', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, color: 'rgba(240,237,230,0.6)' }}>Non merci</button>
+      </div>
+    </div>
+  );
+}
+
+function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onReplay, onHub, onPro, onNext, rappel, onRappel }) {
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
   const list = sourates || [];
@@ -9210,7 +9236,13 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
      de continuer, pas sur une bannière. */
   const idx = list.findIndex(function (x) { return x.id === sourate.id; });
   // Après le verset du jour, la suite naturelle est sa sourate entière.
-  const next = sourate.daily ? (list.find(function (x) { return x.id === sourate.parentId; }) || null) : (idx >= 0 ? list[idx + 1] : null);
+  /* 27/11/2026 : après Al-Fâtiha on proposait Al-Ikhlâs (gratuite). Les inscrits
+     faisaient 1 à 3 parties et partaient sans jamais croiser la première
+     sourate payante. Al-Falaq, récitée dans la prière, vient maintenant juste
+     après : écoute offerte, le jeu ouvre l'offre au moment où l'envie est là.
+     Al-Ikhlâs reste gratuite dans le menu. */
+  const falaq = sourate.id === 'fatiha' ? list.find(function (x) { return x.id === 'falaq'; }) : null;
+  const next = sourate.daily ? (list.find(function (x) { return x.id === sourate.parentId; }) || null) : (falaq || (idx >= 0 ? list[idx + 1] : null));
   const streakNow = cmpLiveStreak(st);
   const nextLocked = !!(next && !next.free && !isPro);
   const nextWords = next ? next.ayahs.reduce(function (n, a) { return n + a.words.length; }, 0) : 0;
@@ -9254,6 +9286,7 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
       </div>
 
       {HM_NATIVE && <AppRappelAsk />}
+      {!HM_NATIVE && !isPro && <CmpRappelAsk rappel={rappel} onRappel={onRappel} />}
 
       {/* Jauge : ce que ça change vraiment. Le pourcentage de mots du Coran
           lisibles parle de lui-même — « 40 mots appris » ne dit rien. */}
@@ -9289,8 +9322,8 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
         <button onClick={function () { hmFunnel('clic', 'carte-resultat'); onPro('carte-resultat'); }} style={{ width: '100%', marginBottom: 24, padding: '12px 16px', background: 'rgba(200,167,39,0.07)', border: '1px solid rgba(200,167,39,0.38)', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 20 }}>🔓</span>
           <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: 'block', fontSize: 14, color: '#f0ede6', fontWeight: 800 }}>Passe de {cmpFmt(quranPct)}% à {cmpFmt(maxQuranPct)}% du Coran</span>
-            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}>{list.filter(function(s){return !s.free;}).length} sourates de plus · <span style={{ color: GOLD, fontWeight: 700 }}>{hmPromoOn() ? PRO_MONTHLY + '/mois jusqu’à dimanche' : PRO_EQ_MONTH + '/mois en annuel'}</span></span>
+            <span style={{ display: 'block', fontSize: 14, color: '#f0ede6', fontWeight: 800 }}>Comprends les sourates de ta prière</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: 'rgba(240,237,230,0.6)' }}><span translate="no">Al-Falaq, An-Nâs, Al-Kawthar, Al-‘Asr</span>… · <span style={{ color: GOLD, fontWeight: 700 }}>{hmPromoOn() ? PRO_MONTHLY + '/mois jusqu’à dimanche' : PRO_EQ_MONTH + '/mois en annuel'}</span></span>
           </span>
           <span style={{ color: GOLD, fontSize: 20 }}>›</span>
         </button>

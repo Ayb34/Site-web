@@ -3,6 +3,10 @@
     {
       "path": "/api/trial-emails",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/jumua-email",
+      "schedule": "0 12 * * 5"
     }
   ],
   "headers": [
