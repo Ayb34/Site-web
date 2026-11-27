@@ -10309,6 +10309,52 @@ function AppRappelAsk() {
   );
 }
 
+/* ── Accueil en 3 questions (app, 1re ouverture) ──
+   Avant la 1re leçon : objectif, niveau, temps par jour. Ça engage la
+   personne, et la fenêtre Pro parle ensuite de SON objectif. Réponses en local
+   (hm_onboard_v1) + événements d'entonnoir, remontés au compte à l'inscription. */
+const HM_ONBOARD_KEY = 'hm_onboard_v1';
+const HM_GOALS = {
+  priere: 'Comprends les sourates de ta prière',
+  coran: 'Comprends tout le Juz ‘Amma, mot à mot',
+  arabe: 'Apprends les mots les plus fréquents du Coran',
+  enfants: 'Apprends pour mieux transmettre',
+};
+function hmOnboard() { try { return JSON.parse(localStorage.getItem(HM_ONBOARD_KEY) || 'null'); } catch (e) { return null; } }
+function AppOnboard({ onDone }) {
+  const [step, setStep] = React.useState(0);
+  const [ans, setAns] = React.useState({});
+  const Q = [
+    { k: 'goal', t: 'Pourquoi veux-tu apprendre ?', o: [['priere', '🤲 Comprendre ma prière'], ['coran', '📖 Comprendre le Coran'], ['arabe', '🔤 Apprendre l’arabe du Coran'], ['enfants', '🌱 Transmettre à mes enfants']] },
+    { k: 'level', t: 'Où en es-tu avec l’arabe ?', o: [['zero', 'Je ne le lis pas'], ['lit', 'Je le lis sans comprendre'], ['mots', 'Je comprends quelques mots']] },
+    { k: 'min', t: 'Combien de temps par jour ?', o: [['2', '2 minutes · tranquille'], ['5', '5 minutes · régulier'], ['10', '10 minutes · motivé']] },
+  ];
+  const q = Q[step];
+  function pick(v) {
+    if (window.HMNative && window.HMNative.tap) window.HMNative.tap();
+    const next = Object.assign({}, ans, { [q.k]: v });
+    setAns(next);
+    hmFunnel('onb', q.k + '-' + v);
+    if (step < Q.length - 1) { setStep(step + 1); return; }
+    try { localStorage.setItem(HM_ONBOARD_KEY, JSON.stringify(Object.assign({ at: Date.now() }, next))); } catch (e) {}
+    onDone(next);
+  }
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 20000, background: 'linear-gradient(170deg,#0a1f12,#03110a)', display: 'flex', flexDirection: 'column', padding: 'calc(24px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom))', boxSizing: 'border-box', fontFamily: APP_F }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 34 }}>
+        {Q.map(function (_, i) { return <span key={i} style={{ flex: 1, height: 5, borderRadius: 3, background: i <= step ? APP_GOLD : 'rgba(255,255,255,0.12)' }} />; })}
+      </div>
+      <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 27, color: '#f0ede6', lineHeight: 1.25, margin: '0 0 24px' }}>{q.t}</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {q.o.map(function (o) {
+          return <button key={o[0]} onClick={function () { pick(o[0]); }} style={{ textAlign: 'left', padding: '17px 18px', borderRadius: 16, border: '1px solid rgba(200,167,39,0.32)', background: 'rgba(255,255,255,0.04)', color: '#f0ede6', fontSize: 16.5, fontWeight: 700, fontFamily: APP_F, cursor: 'pointer' }}>{o[1]}</button>;
+        })}
+      </div>
+      {step > 0 && <button onClick={function () { setStep(step - 1); }} style={{ marginTop: 22, background: 'none', border: 'none', color: 'rgba(240,237,230,0.45)', fontSize: 14, fontFamily: APP_F, cursor: 'pointer' }}>← Retour</button>}
+    </div>
+  );
+}
+
 function AppHome({ navigate }) {
   const { user, isPro, openAuth, openQuickCheckout } = useAuth();
   const [st, setSt] = React.useState(cmpLoad);
@@ -10355,8 +10401,13 @@ function AppHome({ navigate }) {
   function tap() { if (window.HMNative) window.HMNative.tap(); }
   function play(id) { tap(); navigate(id); }
   function openDaily() { tap(); if (!doneToday) hmWantDaily = true; navigate('comprendre'); }
-  function openFirst() { tap(); hmWantOpen = { surah: 1, mode: 'discover' }; navigate('comprendre'); }
-  function guestGo() { tap(); if (cmpTried) openAuth('signup'); else navigate('comprendre'); }
+  const [onboard, setOnboard] = React.useState(false);
+  function openFirst() {
+    tap();
+    if (!hmOnboard()) { setOnboard(true); return; }
+    hmWantOpen = { surah: 1, mode: 'discover' }; navigate('comprendre');
+  }
+  function guestGo() { tap(); if (cmpTried) openAuth('signup'); else if (!hmOnboard()) setOnboard(true); else navigate('comprendre'); }
   function buyPro() { tap(); hmFunnelLast = 'accueil-app'; openQuickCheckout(); }
   function nextHadith(step) { setHi(function (i) { return (i + (step || 1) + APP_HADITHS.length) % APP_HADITHS.length; }); }
 
@@ -10417,6 +10468,8 @@ function AppHome({ navigate }) {
   // Carte principale : texte arabe tiré du corpus (jamais écrit à la main).
   const heroAyah = guest || first ? (fatiha && fatiha.ayahs[0]) : (daily && daily.ayahs[0]);
   const heroAr = heroAyah ? heroAyah.words.map(function (w) { return w.ar; }).join(' ') : '';
+
+  if (onboard) return <AppOnboard onDone={function () { setOnboard(false); if (!guest) hmWantOpen = { surah: 1, mode: 'discover' }; navigate('comprendre'); }} />;
 
   return (
     <main className="ah">
@@ -10709,7 +10762,7 @@ function NativeBuyModal({ initialPlan, onClose, navigate }) {
           <>
             <div className="app-sheet-grip" />
             <div style={{ fontFamily: APP_F, fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', color: APP_GOLD, textAlign: 'center' }}>HÉRITAGE PRO</div>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 23, color: '#f0ede6', textAlign: 'center', margin: '6px 0 16px', lineHeight: 1.25 }}>Comprends tout le Juz ‘Amma</h2>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 23, color: '#f0ede6', textAlign: 'center', margin: '6px 0 16px', lineHeight: 1.25 }}>{HM_GOALS[(hmOnboard() || {}).goal] || HM_GOALS.priere}</h2>
             {cmpDataCache && (function () {
               const me = cmpQuranPct(cmpLoad().words, cmpDataCache), mx = cmpMaxQuranPct(cmpDataCache);
               return mx ? <p style={{ fontFamily: APP_F, fontSize: 13.5, lineHeight: 1.5, color: 'rgba(240,237,230,0.7)', textAlign: 'center', margin: '-8px 0 16px' }}>Aujourd’hui, tu lis <b style={{ color: '#4ade80' }}>{cmpFmt(me)} %</b> des mots du Coran.<br />Avec Pro : jusqu’à <b style={{ color: APP_GOLD }}>{cmpFmt(mx)} %</b>.</p> : null;
