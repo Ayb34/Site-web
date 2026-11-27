@@ -702,7 +702,7 @@ function GuestGateModal({ onClose, context = 'default' }) {
 
      Ce que la modale promet est ce que le compte gratuit donne vraiment :
      une partie offerte chaque jour, Al-Fâtiha et Al-Ikhlâs, la progression gardée. */
-  const FEATS = ['✓ Gratuit, sans carte bancaire', '✓ 1 partie offerte chaque jour', '✓ Al-Fâtiha et Al-Ikhlâs en entier', '✓ Ta progression sauvegardée'];
+  const FEATS = [HM_NATIVE ? '✓ Gratuit' : '✓ Gratuit, sans carte bancaire', '✓ 1 partie offerte chaque jour', '✓ Al-Fâtiha et Al-Ikhlâs en entier', '✓ Ta progression sauvegardée'];
   const GATE_COPY = {
     default: {
       emoji: '🎯',
@@ -1206,7 +1206,7 @@ function AuthModal({ onClose, initialTab }) {
             modale ne disait que « Créer un compte » — un effort sans contrepartie. */}
         {tab === 'signup' && !checkoutIntent && !forgotMode && (
           <p style={{ textAlign: 'center', color: 'rgba(240,237,230,0.75)', fontSize: 13.5, lineHeight: 1.5, margin: '-12px 0 18px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-            <strong style={{ color: '#e6c84a' }}>Gratuit, sans carte bancaire</strong><br />1 partie offerte chaque jour · ta progression gardée
+            <strong style={{ color: '#e6c84a' }}>{HM_NATIVE ? 'Compte gratuit' : 'Gratuit, sans carte bancaire'}</strong><br />1 partie offerte chaque jour · ta progression gardée
           </p>
         )}
         {checkoutIntent && !forgotMode && (
@@ -8222,7 +8222,7 @@ function TestPage({ navigate }) {
       ) : (
         <>
           <button style={btnGold} onClick={function () { openAuth('signup'); }}>Voir mes mots — créer mon compte →</button>
-          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>Gratuit, sans carte bancaire. Tes mots manqués et ta progression gardés.</p>
+          <p style={{ fontSize: 12.5, color: 'rgba(240,237,230,0.5)', margin: '10px 0 14px', lineHeight: 1.55 }}>{HM_NATIVE ? 'Gratuit.' : 'Gratuit, sans carte bancaire.'} Tes mots manqués et ta progression gardés.</p>
           <button style={Object.assign({}, btnGhost, { marginBottom: 10 })} onClick={function () { navigate('comprendre'); }}>Apprendre la Fâtiha gratuitement</button>
         </>
       )}
@@ -9205,6 +9205,7 @@ function CmpRappelAsk({ rappel, onRappel }) {
 }
 
 function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mastered, lvl, isPro, onReplay, onHub, onPro, onNext, rappel, onRappel }) {
+  const { openQuickCheckout } = useAuth();
   const GOLD = '#e6c84a';
   const GREEN = '#4ade80';
   const list = sourates || [];
@@ -9215,12 +9216,18 @@ function CmpResult({ res, sourate, st, pct, quranPct, maxQuranPct, sourates, mas
   React.useEffect(function () {
     if (isPro) return;
     hmFunnel('vue', 'carte-resultat');
-    if ((st.plays || 0) < 2) return;
+    /* App (27/11/2026) : l'essai de 7 jours est offert dès la 1re partie
+       terminée — il ne coûte rien sur le moment, c'est le meilleur argument,
+       et la plupart des gens partaient avant la 2e sourate. Site : 2e partie. */
+    if ((st.plays || 0) < (HM_NATIVE ? 1 : 2)) return;
     var deja = false;
     try { deja = !!localStorage.getItem('hm_offre_auto_v1'); } catch (e) {}
     if (deja) return;
     try { localStorage.setItem('hm_offre_auto_v1', String(Date.now())); } catch (e) {}
-    var t = setTimeout(function () { onPro('auto-2e-partie'); }, 1500);
+    var t = setTimeout(function () {
+      if (HM_NATIVE) { hmFunnel('vue', 'auto-1re-partie'); openQuickCheckout('card', 'annual'); }
+      else onPro('auto-2e-partie');
+    }, 1800);
     return function () { clearTimeout(t); };
   }, []);
   /* App : note App Store proposée après une partie réussie (≥ 80 %), à partir
@@ -10523,7 +10530,7 @@ function AppHome({ navigate }) {
       )}
       {!guest && !notif.on && notifMsg && <p className="ah-note">{notifMsg}</p>}
 
-      <p className="ah-sec">{guest ? 'Essaie chaque activité' : 'Tes activités'}</p>
+      <p className="ah-sec">{guest ? 'Ou découvre une autre activité' : 'Tes activités'}</p>
       {acts.map(function (a) {
         const tried = guest && hmAppTrialUsed(hmAppTrialKind(a.id));
         return (
@@ -10534,7 +10541,7 @@ function AppHome({ navigate }) {
               <span className="ah-act-t">{a.title}</span>
               <span className="ah-act-d">{a.desc}</span>
               {guest
-                ? <span className="ah-act-p" style={{ color: tried ? 'rgba(240,237,230,0.42)' : a.color }}>{tried ? 'Essai fait · compte gratuit pour continuer' : 'Essai gratuit, sans compte'}</span>
+                ? (tried ? <span className="ah-act-p" style={{ color: 'rgba(240,237,230,0.42)' }}>Essai fait · compte gratuit pour continuer</span> : null)
                 : <span className="ah-act-p" style={{ color: a.color }}>{a.line}</span>}
               {!guest && a.bar > 0 && <span className="ah-act-bar"><i style={{ width: (scaleOn ? Math.max(3, Math.min(100, a.bar)) : 0) + '%', background: a.color }} /></span>}
             </span>
