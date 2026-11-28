@@ -36,28 +36,31 @@ module.exports = async (req, res) => {
     const email = decoded.email;
     if (!email) return res.status(400).json({ error: 'Compte sans adresse e-mail' });
 
-    // Find customer by email
-    const customers = await stripe.customers.list({ email, limit: 1 });
+    /* Chaque paiement crée un client Stripe : une adresse peut en avoir
+       plusieurs. On cherche l'abonnement vivant sur tous, essai gratuit
+       compris (statut `trialing` — l'ancien filtre `active` ne le voyait pas,
+       et la résiliation pendant l'essai aurait échoué). */
+    const customers = await stripe.customers.list({ email, limit: 20 });
     if (!customers.data.length) return res.status(404).json({ error: 'Aucun abonnement trouvé' });
 
-    const customerId = customers.data[0].id;
+    let vivant = null;
+    for (const c of customers.data) {
+      const subs = await stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 10 });
+      vivant = subs.data.find(function (s) { return ['trialing', 'active', 'past_due'].indexOf(s.status) !== -1; });
+      if (vivant) break;
+    }
 
-    // Find active subscription
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: 'active',
-      limit: 1,
-    });
+    if (!vivant) return res.status(404).json({ error: 'Aucun abonnement actif' });
 
-    if (!subscriptions.data.length) return res.status(404).json({ error: 'Aucun abonnement actif' });
-
-    // Cancel at period end (user keeps access until end of billing period)
-    const subscription = await stripe.subscriptions.update(subscriptions.data[0].id, {
+    // Cancel at period end (user keeps access until end of billing period).
+    // En essai, la fin de période = la fin de l'essai : rien n'est prélevé.
+    const subscription = await stripe.subscriptions.update(vivant.id, {
       cancel_at_period_end: true,
     });
 
-    const endDate = new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR');
-    res.json({ success: true, endDate });
+    const fin = subscription.status === 'trialing' && subscription.trial_end ? subscription.trial_end : subscription.current_period_end;
+    const endDate = new Date(fin * 1000).toLocaleDateString('fr-FR');
+    res.json({ success: true, endDate, trial: subscription.status === 'trialing' });
   } catch (err) {
     console.error('Cancel error:', err.message);
     res.status(500).json({ error: err.message });

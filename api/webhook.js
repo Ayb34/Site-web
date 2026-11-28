@@ -69,6 +69,21 @@ async function handler(req, res) {
         } else {
           data.proType = 'stripe_subscription';
           data.proPlan = (session.metadata && session.metadata.plan) || 'annual';
+          /* Essai gratuit de 7 jours (depuis le 28/11/2026) : Pro tout de
+             suite, carte enregistrée, premier prélèvement à la fin de l'essai.
+             On garde l'abonnement et la date de fin pour l'e-mail de rappel
+             (api/trial-emails.js) et pour le profil. */
+          data.proTrial = false;
+          if (session.subscription) {
+            data.proSubId = String(session.subscription);
+            try {
+              const sub = await stripe.subscriptions.retrieve(String(session.subscription));
+              if (sub.status === 'trialing' && sub.trial_end) {
+                data.proTrial = true;
+                data.proTrialEnd = new Date(sub.trial_end * 1000).toISOString();
+              }
+            } catch (e) { console.error('Lecture abonnement:', e.message); }
+          }
         }
         await db
           .collection('users')
@@ -108,6 +123,31 @@ async function handler(req, res) {
       }
     }
 
+    /* Abonnement modifié : fin d'essai payée (on retire le drapeau d'essai) ou
+       prélèvement définitivement refusé (`unpaid`, `incomplete_expired`) → Pro
+       retiré. `past_due` garde l'accès le temps des nouvelles tentatives de
+       Stripe. Ne touche qu'un Pro Stripe : un abonnement Apple reste intact. */
+    if (event.type === 'customer.subscription.updated') {
+      const sub = event.data.object;
+      const avant = (event.data.previous_attributes || {}).status;
+      const customer = await stripe.customers.retrieve(sub.customer);
+      let userRecord = null;
+      if (customer.email) { try { userRecord = await admin.auth().getUserByEmail(customer.email); } catch (e) {} }
+      if (userRecord) {
+        const ref = db.collection('users').doc(userRecord.uid);
+        const d = (await ref.get()).data() || {};
+        if (d.proType === 'stripe_subscription') {
+          if (sub.status === 'active' && avant === 'trialing') {
+            await ref.set({ proTrial: false, proTrialConverted: new Date().toISOString() }, { merge: true });
+            console.log('Essai converti :', userRecord.uid);
+          } else if (['unpaid', 'incomplete_expired', 'canceled'].indexOf(sub.status) !== -1) {
+            await ref.set({ isPro: false, proTrial: false }, { merge: true });
+            console.log('isPro retiré (statut ' + sub.status + ') :', userRecord.uid);
+          }
+        }
+      }
+    }
+
     // Abonnement annulé → désactiver Pro
     if (event.type === 'customer.subscription.deleted') {
       const subscription = event.data.object;
@@ -118,7 +158,7 @@ async function handler(req, res) {
         await db
           .collection('users')
           .doc(userRecord.uid)
-          .set({ isPro: false }, { merge: true });
+          .set({ isPro: false, proTrial: false }, { merge: true });
         console.log('isPro deactivated for:', email);
       }
     }

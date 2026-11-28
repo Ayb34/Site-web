@@ -16,7 +16,8 @@
    le site utilise pour afficher le mur. Les deux ne peuvent pas diverger. */
 
 const admin = require('firebase-admin');
-const { emailDernierJour, emailFin, emailBienvenueRattrapage, emailOffreLancement, emailRappel, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
+const { emailDernierJour, emailFin, emailBienvenueRattrapage, emailOffreLancement, emailRappel, emailSequence, emailFinEssai, lienStop, envoyer, TRIAL_DAYS, TRIAL_STOP } = require('./_emails');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -213,6 +214,90 @@ module.exports = async (req, res) => {
         bilan.rappel += 1;
       } catch (e) {
         bilan.erreurs.push('rappel ' + doc.id + ' : ' + e.message);
+      }
+    }
+
+    const prenomDe = function (u) {
+      let p = (u.displayName || '').trim().split(/\s+/)[0] || '';
+      return /^[\p{L}][\p{L}'-]{1,19}$/u.test(p) ? p : '';
+    };
+    const motsDe = function (data) {
+      return data.comprendre && data.comprendre.words ? Object.keys(data.comprendre.words).length : 0;
+    };
+
+    /* Fin de l'essai gratuit Stripe (7 jours, depuis le 28/11/2026) : un
+       e-mail 2 à 3 jours avant le premier prélèvement (cf. emailFinEssai).
+       Rien si l'essai est déjà résilié ou terminé : on relit l'abonnement chez
+       Stripe, la source de vérité. */
+    bilan.finEssai = 0;
+    const essais = await db.collection('users').where('proTrial', '==', true).get();
+    for (const doc of essais.docs) {
+      const data = doc.data();
+      const fin = Date.parse(data.proTrialEnd || '');
+      if (isNaN(fin) || fin - maintenant <= 0 || fin - maintenant > 3 * JOUR) continue;
+      if (data.mails && data.mails.finEssai) continue;
+      if (data.proSubId) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(data.proSubId);
+          if (sub.status !== 'trialing' || sub.cancel_at_period_end) continue;
+        } catch (e) { bilan.erreurs.push('finEssai ' + doc.id + ' : ' + e.message); continue; }
+      }
+      let u;
+      try { u = await admin.auth().getUser(doc.id); } catch (e) { continue; }
+      if (!u.email) continue;
+      await doc.ref.set({ mails: { finEssai: Date.now() } }, { merge: true });
+      try {
+        await envoyer(u.email, prenomDe(u), emailFinEssai(prenomDe(u), fin, motsDe(data)));
+        bilan.finEssai += 1;
+      } catch (e) {
+        bilan.erreurs.push('finEssai ' + doc.id + ' : ' + e.message);
+      }
+    }
+
+    /* Séquence d'accueil J+1 / J+3 / J+6 (cf. emailSequence), pour les comptes
+       créés depuis SEQ_DEBUT : les anciens inscrits ne la reçoivent pas.
+       Au plus un e-mail par personne et par jour : si deux étapes sont dues
+       (cron manqué), seule la plus récente part, l'autre est marquée passée.
+       Pas le vendredi (l'e-mail de Jumu'a part ce jour-là) : l'étape part le
+       lendemain. Qui a activé le rappel quotidien reçoit déjà son verset : il
+       n'a que l'étape 6. Drapeaux posés AVANT l'envoi (pas de doublon). */
+    const SEQ_DEBUT = Date.parse('2026-11-28T00:00:00Z');
+    bilan.seq = 0;
+    const jourSem = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Paris', weekday: 'short' });
+    if (jourSem !== 'Fri') {
+      let ts;
+      const nouveaux = [];
+      do {
+        const lot = await admin.auth().listUsers(1000, ts);
+        lot.users.forEach(function (u) {
+          const cree = Date.parse(u.metadata.creationTime);
+          const e = (u.email || '').toLowerCase();
+          if (!(cree >= SEQ_DEBUT) || maintenant - cree < JOUR || maintenant - cree > 9 * JOUR) return;
+          if (!e || /id\.gle$|privaterelay\.appleid\.com$|^review@heritage-musulman\.com$/.test(e)) return;
+          nouveaux.push({ u, cree });
+        });
+        ts = lot.pageToken;
+      } while (ts);
+      for (const { u, cree } of nouveaux) {
+        const ref = db.collection('users').doc(u.uid);
+        const doc = await ref.get();
+        const data = doc.exists ? doc.data() : {};
+        const m = data.mails || {};
+        if (data.isPro || m.seqOff) continue;
+        const jours = Math.floor((maintenant - cree) / JOUR);
+        const dues = [1, 3, 6].filter(function (k) { return jours >= k && !m['seq' + k]; });
+        if (!dues.length) continue;
+        const etape = dues[dues.length - 1];
+        const flags = {};
+        dues.forEach(function (k) { flags['seq' + k] = Date.now(); });
+        await ref.set({ mails: flags }, { merge: true });
+        if (etape !== 6 && data.rappel && data.rappel.on) continue;
+        try {
+          await envoyer(u.email, prenomDe(u), emailSequence(etape, prenomDe(u), motsDe(data), lienStop('seq', u.uid)));
+          bilan.seq += 1;
+        } catch (e) {
+          bilan.erreurs.push('seq' + etape + ' ' + u.uid + ' : ' + e.message);
+        }
       }
     }
 

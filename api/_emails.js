@@ -556,8 +556,130 @@ ${lignes.map(para).join('\n')}
   };
 }
 
+/* Signature des liens d'arrêt (?stop=<uid>&k=<liste>&t=<signature>), vérifiée
+   par api/jumua-email.js. `k` = la liste concernée ('jumua' ou 'seq'). */
+function signer(k, uid) {
+  return require('crypto').createHmac('sha256', process.env.CRON_SECRET || '').update(k + ':' + uid).digest('hex').slice(0, 24);
+}
+function lienStop(k, uid) {
+  return SITE + '/api/jumua-email?stop=' + encodeURIComponent(uid) + (k === 'jumua' ? '' : '&k=' + k) + '&t=' + signer(k, uid);
+}
+
+/* Petit gabarit commun des e-mails « lettre » (pas de mise en page lourde :
+   un mot d'une personne). `cta` = { url, texte } remplace la ligne égale à url. */
+function lettre(lignes, cta, pied, piedTexte) {
+  const para = (l) => cta && l === cta.url
+    ? `<p style="margin:0 0 14px;"><a href="${cta.url}"><b>${cta.texte}</b></a></p>`
+    : `<p style="margin:0 0 14px;">${l.replace(/\n/g, '<br>')}</p>`;
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222;">
+${lignes.map(para).join('\n')}
+${pied ? `<p style="margin:22px 0 0;font-size:12px;color:#777;">${pied}</p>` : ''}
+</body></html>`;
+  return { html, text: lignes.join('\n\n') + (piedTexte ? '\n\n' + piedTexte : '') };
+}
+
+/* ── Séquence d'accueil : J+1, J+3, J+6 (28/11/2026) ──
+   Pour tous les nouveaux inscrits non abonnés. Le 28/11 : 3,6 % des inscrits
+   revenaient un 2e jour. Trois rendez-vous, pas trois relances :
+     1 — le verset du jour existe, et le rappel quotidien (opt-in, 1 clic) ;
+     3 — ce qu'on a appris s'efface si on ne le revoit pas (ou : la 1re leçon) ;
+     6 — les sourates de la prière, et l'essai gratuit de 7 jours.
+   Un seul lien d'arrêt pour les trois, signé, + List-Unsubscribe. */
+function emailSequence(etape, prenom, mots, urlStop) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const sign = 'Bārakallāhu fīk,\nAyoub\nHéritage Musulman';
+  let subject, lignes, cta;
+  if (etape === 1) {
+    const url = lien('seq1', 'comprendre');
+    const urlRappel = SITE + '/?utm_source=email&utm_medium=lifecycle&utm_campaign=seq1_rappel&rappel=on#comprendre';
+    subject = 'Ton verset du jour est prêt';
+    cta = { url, texte: 'Ouvrir mon verset du jour' };
+    lignes = [
+      salut,
+      'Merci d’avoir créé ton compte sur Héritage Musulman.',
+      'Chaque jour, un nouveau verset t’attend dans « Comprendre le Coran » : tu l’écoutes, tu le lis mot à mot, et tu retiens ses mots. Deux minutes suffisent.',
+      url,
+      `Pour ne pas oublier, tu peux recevoir ton verset chaque matin par e-mail (un clic, et un clic pour l’arrêter) : ${urlRappel}`,
+      'Le Prophète a dit : « L’œuvre la plus aimée d’Allah est la plus régulière, même si elle est peu abondante. » (Bukhari 6464, Muslim 783)',
+      sign,
+    ];
+  } else if (etape === 3) {
+    const url = lien('seq3', 'comprendre');
+    if (mots > 0) {
+      subject = `Tu as appris ${mots} mot${mots > 1 ? 's' : ''} du Coran : ne les perds pas`;
+      cta = { url, texte: 'Revoir mes mots' };
+      lignes = [
+        salut,
+        `Tu as déjà appris ${mots} mot${mots > 1 ? 's' : ''} du Coran. Un mot qu’on ne revoit pas s’efface en quelques jours ; un mot revu au bon moment reste.`,
+        'Une partie de deux minutes suffit pour les garder, et ton verset du jour t’en apprend de nouveaux.',
+        url,
+        sign,
+      ];
+    } else {
+      subject = 'Ta première leçon t’attend (2 minutes)';
+      cta = { url, texte: 'Commencer avec Al-Fâtiha' };
+      lignes = [
+        salut,
+        'Tu n’as pas encore commencé « Comprendre le Coran ». Le plus simple : Al-Fâtiha, la sourate que tu récites à chaque prière.',
+        'Tu écoutes chaque verset, tu vois le sens de chaque mot, puis un petit jeu t’aide à les retenir. En deux minutes, tu comprends ses premiers mots.',
+        url,
+        sign,
+      ];
+    }
+  } else {
+    const url = SITE + '/?utm_source=email&utm_medium=lifecycle&utm_campaign=seq6&reprendre=annual#comprendre';
+    subject = 'Comprends les sourates de ta prière';
+    cta = { url, texte: 'Essayer 7 jours gratuitement' };
+    lignes = [
+      salut,
+      'Al-Fâtiha, Al-Ikhlâs, Al-Falaq, An-Nâs, Al-Kawthar, Al-‘Asr… Ce sont les sourates que l’on récite le plus souvent dans la prière.',
+      mots > 0
+        ? `Tu as déjà appris ${mots} mot${mots > 1 ? 's' : ''}. Al-Fâtiha et Al-Ikhlâs restent gratuites ; avec Héritage Pro, tu comprends aussi toutes les autres, mot à mot, et tu joues sans limite.`
+        : 'Al-Fâtiha et Al-Ikhlâs sont gratuites ; avec Héritage Pro, tu comprends aussi toutes les autres, mot à mot, et tu joues sans limite.',
+      'Tu peux l’essayer gratuitement pendant 7 jours : 0 € aujourd’hui, un e-mail te prévient avant la fin, et tu résilies en 1 clic depuis ton profil si ça ne te convient pas.',
+      url,
+      'Le Prophète a dit : « Celui qui emprunte un chemin à la recherche d’une science, Allah lui facilite par cela un chemin vers le Paradis. » (Muslim 2699)',
+      sign,
+    ];
+  }
+  const { html, text } = lettre(lignes, cta,
+    `Tu reçois ces quelques e-mails parce que tu viens de créer ton compte sur Héritage Musulman. <a href="${urlStop}" style="color:#777;">Ne plus les recevoir</a>`,
+    'Ne plus recevoir ces e-mails : ' + urlStop);
+  return {
+    subject, html, text,
+    senderName: 'Ayoub · Héritage Musulman',
+    headers: { 'List-Unsubscribe': `<${urlStop}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
+  };
+}
+
+/* ── Fin de l'essai gratuit (Stripe) ──
+   Envoyé 2 à 3 jours avant le premier prélèvement. Obligatoire en pratique
+   (règles des réseaux de cartes, confiance) : la date, le montant, et comment
+   résilier, sans détour. Pas envoyé si l'essai est déjà résilié. */
+function emailFinEssai(prenom, finMs, mots) {
+  const salut = prenom ? `As-salāmu ʿalaykum ${prenom},` : 'As-salāmu ʿalaykum,';
+  const url = lien('fin_essai', 'comprendre');
+  const quand = 'le ' + dateFr(finMs);
+  const lignes = [
+    salut,
+    `Ton essai gratuit d’Héritage Pro se termine ${quand}.`,
+    mots > 0 ? `Depuis ton inscription, tu as appris ${mots} mot${mots > 1 ? 's' : ''} du Coran, qu’Allah te les fasse garder.` : 'Il te reste quelques jours pour en profiter : toutes les sourates sont ouvertes.',
+    `Si tu continues, tu n’as rien à faire : ton abonnement annuel démarre ${quand}, 29,99 € pour un an (soit 2,50 € par mois), annulable à tout moment.`,
+    'Si tu ne veux pas continuer, résilie avant cette date depuis ton profil sur le site (Profil › Résilier l’abonnement) : tu ne paieras rien. Tu peux aussi simplement répondre à cet e-mail, je m’en occupe.',
+    url,
+    'Ayoub\nHéritage Musulman',
+  ];
+  const { html, text } = lettre(lignes, { url, texte: 'Continuer mon apprentissage' });
+  return { subject: `Ton essai gratuit se termine ${quand}`, html, text, senderName: 'Ayoub · Héritage Musulman' };
+}
+
 module.exports = {
   TRIAL_DAYS: 2,
+  signer,
+  lienStop,
+  emailSequence,
+  emailFinEssai,
   TRIAL_STOP,
   emailBienvenue,
   emailBienvenueGratuit,

@@ -25,12 +25,20 @@ if (!admin.apps.length) {
 }
 
 const JOUR = 86400000;
-const LIMITE = 230;
+/* 200 (et non 230) depuis le 28/11/2026 : la séquence d'accueil et les rappels
+   partent aussi chaque jour, et Brevo Free plafonne à 300 envois par jour. */
+const LIMITE = 200;
 const SITE = 'https://heritage-musulman.com';
 
-function signature(uid) {
-  return crypto.createHmac('sha256', process.env.CRON_SECRET || '').update('jumua:' + uid).digest('hex').slice(0, 24);
+function signature(uid, k) {
+  return crypto.createHmac('sha256', process.env.CRON_SECRET || '').update((k || 'jumua') + ':' + uid).digest('hex').slice(0, 24);
 }
+/* Listes qu'on peut quitter par ce lien : k absent = vendredi ; k=seq = la
+   séquence d'accueil J+1/J+3/J+6 (api/trial-emails.js). */
+const LISTES = {
+  jumua: { champ: 'jumuaOff', texte: 'Tu ne recevras plus l’e-mail du vendredi.' },
+  seq: { champ: 'seqOff', texte: 'Tu ne recevras plus les e-mails d’accueil.' },
+};
 
 function page(titre, texte) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titre}</title></head>
@@ -46,16 +54,17 @@ module.exports = async (req, res) => {
   if (q.stop) {
     const uid = String(q.stop);
     const t = String(q.t || '');
-    const attendu = signature(uid);
+    const k = LISTES[String(q.k || '')] ? String(q.k) : 'jumua';
+    const attendu = signature(uid, k);
     if (!process.env.CRON_SECRET || t.length !== attendu.length
       || !crypto.timingSafeEqual(Buffer.from(t), Buffer.from(attendu))) {
       res.status(400).setHeader('content-type', 'text/html; charset=utf-8');
       return res.send(page('Lien invalide', 'Ce lien d’arrêt n’est pas valide. Réponds simplement à l’e-mail et je m’en occupe.'));
     }
     await admin.firestore().collection('users').doc(uid)
-      .set({ mails: { jumuaOff: true, jumuaOffAt: Date.now() } }, { merge: true });
+      .set({ mails: { [LISTES[k].champ]: true, [LISTES[k].champ + 'At']: Date.now() } }, { merge: true });
     res.setHeader('content-type', 'text/html; charset=utf-8');
-    return res.send(page('C’est noté', 'Tu ne recevras plus l’e-mail du vendredi. Ton compte et ta progression ne changent pas.'));
+    return res.send(page('C’est noté', LISTES[k].texte + ' Ton compte et ta progression ne changent pas.'));
   }
 
   /* ── Envoi (cron uniquement) ── */
