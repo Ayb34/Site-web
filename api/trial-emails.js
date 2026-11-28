@@ -262,6 +262,10 @@ module.exports = async (req, res) => {
        lendemain. Qui a activé le rappel quotidien reçoit déjà son verset : il
        n'a que l'étape 6. Drapeaux posés AVANT l'envoi (pas de doublon). */
     const SEQ_DEBUT = Date.parse('2026-11-28T00:00:00Z');
+    /* Jours CALENDAIRES (heure de Paris), pas des tranches de 24 h : inscrit
+       samedi 18 h → J+1 dimanche au réveil, pas lundi. */
+    const jourP = function (ms) { return new Date(ms).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }); };
+    const ecart = function (ms) { return Math.round((Date.parse(jourP(maintenant)) - Date.parse(jourP(ms))) / JOUR); };
     bilan.seq = 0;
     const jourSem = new Date().toLocaleDateString('en-US', { timeZone: 'Europe/Paris', weekday: 'short' });
     if (jourSem !== 'Fri') {
@@ -272,7 +276,7 @@ module.exports = async (req, res) => {
         lot.users.forEach(function (u) {
           const cree = Date.parse(u.metadata.creationTime);
           const e = (u.email || '').toLowerCase();
-          if (!(cree >= SEQ_DEBUT) || maintenant - cree < JOUR || maintenant - cree > 9 * JOUR) return;
+          if (!(cree >= SEQ_DEBUT) || ecart(cree) < 1 || ecart(cree) > 9) return;
           if (!e || /id\.gle$|privaterelay\.appleid\.com$|^review@heritage-musulman\.com$/.test(e)) return;
           nouveaux.push({ u, cree });
         });
@@ -284,7 +288,7 @@ module.exports = async (req, res) => {
         const data = doc.exists ? doc.data() : {};
         const m = data.mails || {};
         if (data.isPro || m.seqOff) continue;
-        const jours = Math.floor((maintenant - cree) / JOUR);
+        const jours = ecart(cree);
         const dues = [1, 3, 6].filter(function (k) { return jours >= k && !m['seq' + k]; });
         if (!dues.length) continue;
         const etape = dues[dues.length - 1];
